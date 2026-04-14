@@ -6,23 +6,23 @@ body::-webkit-scrollbar {
 
 html::-webkit-scrollbar-track,
 body::-webkit-scrollbar-track {
-  background: #0e1723;
+  background: var(--bg2);
 }
 
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
-  background: #2a3847;
+  background: var(--border);
   border-radius: 3px;
 }
 
 html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
-  background: #344757;
+  background: var(--b2);
 }
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: #2a3847 #0e1723;
+  scrollbar-color: var(--border) var(--bg2);
 }
 
 /* Body scroll lock when modal is open */
@@ -47,7 +47,7 @@ body.modal-open::-webkit-scrollbar {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(7, 9, 14, 0.72);
+  background: var(--overlay);
   display: flex;
   align-items: flex-start;
   justify-content: center;

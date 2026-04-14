@@ -6,6 +6,7 @@
   --bg2: #0e1723;
   --bg3: #1a2332;
   --bg4: #243040;
+  --bg5: #1d2d4a;
   --border: #2a3847;
   --b2: #344757;
   --G: #02c076;
@@ -14,6 +15,20 @@
   --t1: #ffffff;
   --t2: #b8c2cc;
   --t3: #5a7a90;
+  --overlay: rgb(7 9 14 / 72%);
+  --black-a45: rgb(0 0 0 / 45%);
+  --g-a20: rgb(2 192 118 / 20%);
+  --g-a16: rgb(2 192 118 / 16%);
+  --g-a72: rgb(2 192 118 / 72%);
+  --g-a88: rgb(2 192 118 / 88%);
+  --g-clear: rgb(2 192 118 / 0%);
+  --b2-a40: rgb(52 71 87 / 40%);
+  --b2-clear: rgb(52 71 87 / 0%);
+  --border-a45: rgb(42 56 71 / 45%);
+  --border-clear: rgb(42 56 71 / 0%);
+  --bg-a88: rgb(10 15 22 / 88%);
+  --bg-a92: rgb(10 15 22 / 92%);
+  --bg2-a96: rgb(14 23 35 / 96%);
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'Pretendard', sans-serif;
 }

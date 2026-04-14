@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(circle at 10% 16%, #1d2d4a 0%, var(--bg2) 38%, var(--bg) 100%);
+  background: radial-gradient(circle at 10% 16%, var(--bg5) 0%, var(--bg2) 38%, var(--bg) 100%);
   font-family: var(--sans);
 }
 
@@ -13,10 +13,10 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 28%, rgb(2 192 118 / 20%) 0, rgb(2 192 118 / 0%) 12%),
-    radial-gradient(circle at 74% 22%, rgb(52 71 87 / 40%) 0, rgb(52 71 87 / 0%) 14%),
-    radial-gradient(circle at 24% 84%, rgb(42 56 71 / 45%) 0, rgb(42 56 71 / 0%) 15%),
-    radial-gradient(circle at 80% 74%, rgb(2 192 118 / 16%) 0, rgb(2 192 118 / 0%) 10%);
+    radial-gradient(circle at 18% 28%, var(--g-a20) 0, var(--g-clear) 12%),
+    radial-gradient(circle at 74% 22%, var(--b2-a40) 0, var(--b2-clear) 14%),
+    radial-gradient(circle at 24% 84%, var(--border-a45) 0, var(--border-clear) 15%),
+    radial-gradient(circle at 80% 74%, var(--g-a16) 0, var(--g-clear) 10%);
   filter: blur(6px);
 }
 
@@ -25,14 +25,14 @@
   z-index: 1;
   width: 420px;
   padding: 40px 36px 32px;
-  background: linear-gradient(180deg, rgb(10 15 22 / 92%), rgb(14 23 35 / 96%));
+  background: linear-gradient(180deg, var(--bg-a92), var(--bg2-a96));
   border: 1px solid var(--border);
   border-radius: 4px;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 45%);
+  box-shadow: 0 18px 45px var(--black-a45);
 }
 
 .brand {
-  font-family: 'Pretendard', sans-serif;
+  font-family: var(--sans);
   font-size: 36px;
   font-weight: 700;
   line-height: 1;
@@ -73,7 +73,7 @@
   padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: rgb(10 15 22 / 88%);
+  background: var(--bg-a88);
   color: var(--t1);
   font-size: 15px;
   box-sizing: border-box;
@@ -97,7 +97,7 @@
   font-size: 18px;
   font-weight: 700;
   color: var(--t1);
-  background: linear-gradient(90deg, rgb(2 192 118 / 88%), rgb(2 192 118 / 72%));
+  background: linear-gradient(90deg, var(--g-a88), var(--g-a72));
   cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease;
 }
