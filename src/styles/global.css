@@ -25,6 +25,32 @@ html {
   scrollbar-color: var(--border) var(--bg2);
 }
 
+*:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--color-border-strong) 90%, transparent);
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-border-strong) 55%, transparent);
+  color: var(--color-text-primary);
+}
+
 /* Body scroll lock when modal is open */
 html.modal-open,
 body.modal-open {
