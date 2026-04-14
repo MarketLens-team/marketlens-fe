@@ -35,11 +35,18 @@ export function AlertModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      showCloseButton={false}
       closeOnOverlay={!confirmLoading}
       closeOnEsc={!confirmLoading}
       footer={
         <div className={styles.actions}>
-          <ActionButton type="button" variant="confirm" onClick={onClose} disabled={confirmLoading}>
+          <ActionButton
+            type="button"
+            variant="confirm"
+            onClick={onClose}
+            disabled={confirmLoading}
+            className={styles.cancelButton}
+          >
             {cancelLabel}
           </ActionButton>
           <ActionButton
@@ -48,6 +55,7 @@ export function AlertModal({
             onClick={onConfirm}
             loading={confirmLoading}
             disabled={confirmDisabled}
+            className={styles.confirmButton}
           >
             {confirmLabel}
           </ActionButton>

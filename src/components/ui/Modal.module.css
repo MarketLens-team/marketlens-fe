@@ -8,11 +8,13 @@
   max-height: min(760px, calc(100vh - 48px));
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--b2);
+  border: none;
   border-radius: 12px;
   background: var(--bg3);
   color: var(--t1);
-  box-shadow: 0 24px 80px color-mix(in srgb, var(--color-bg-app) 85%, transparent);
+  box-shadow:
+    0 24px 80px color-mix(in srgb, var(--color-bg-app) 85%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
   box-sizing: border-box;
   overflow-y: auto;
   user-select: none;
