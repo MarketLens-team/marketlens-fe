@@ -1,15 +1,17 @@
 import { useRef, useState } from 'react'
 import { TextField } from '../ui/TextField'
+import { ActionButton } from '../ui/ActionButton'
 import styles from './LoginPanel.module.css'
 
 export interface LoginPanelProps {
-  onSubmit: (email: string, password: string) => void
+  onSubmit: (email: string, password: string) => void | Promise<void>
 }
 
 export default function LoginPanel({ onSubmit }: LoginPanelProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const emailRef = useRef<HTMLInputElement | null>(null)
   const passwordRef = useRef<HTMLInputElement | null>(null)
 
@@ -53,10 +55,16 @@ export default function LoginPanel({ onSubmit }: LoginPanelProps) {
     return true
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (isSubmitting) return
     if (!validate()) return
-    onSubmit(email.trim(), password)
+    setIsSubmitting(true)
+    try {
+      await Promise.resolve(onSubmit(email.trim(), password))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -101,9 +109,9 @@ export default function LoginPanel({ onSubmit }: LoginPanelProps) {
             error={errors.password}
           />
 
-          <button className={styles.submit} type="submit">
+          <ActionButton className={styles.submit} type="submit" variant="confirm" loading={isSubmitting}>
             로그인
-          </button>
+          </ActionButton>
         </form>
 
         <p className={styles.helpText}>비밀번호를 잊으셨나요?</p>
