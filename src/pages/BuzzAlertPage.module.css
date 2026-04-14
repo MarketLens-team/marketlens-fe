@@ -1,0 +1,85 @@
+.page {
+  max-width: 1200px;
+}
+
+.feedCard {
+  overflow: hidden;
+}
+
+.bannerError {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--b2);
+  background: var(--bg2);
+  color: var(--R);
+  font-size: 13px;
+}
+
+.skeletonList {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px 8px;
+}
+
+.item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.topic {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.35;
+  font-family: var(--sans);
+}
+
+.spike {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--Y);
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.stocks {
+  color: var(--t2);
+}
+
+.time {
+  color: var(--t3);
+}

@@ -1,0 +1,169 @@
+.row {
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.hit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 4px;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.hit:hover {
+  background: var(--bg3);
+}
+
+.main {
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--t1);
+}
+
+.summary {
+  margin: 0 0 10px;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--t2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t2);
+}
+
+.time {
+  color: var(--t2);
+}
+
+.dot {
+  color: var(--t3);
+}
+
+.source {
+  color: var(--Y);
+}
+
+.sep {
+  color: var(--t3);
+}
+
+.coverage,
+.buzz {
+  color: var(--t2);
+}
+
+.scorePill {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.scorePos {
+  color: var(--G);
+  border-color: rgba(2, 192, 118, 0.35);
+  background: rgba(2, 192, 118, 0.08);
+}
+
+.scoreNeg {
+  color: var(--R);
+  border-color: rgba(246, 70, 93, 0.35);
+  background: rgba(246, 70, 93, 0.08);
+}
+
+.scoreNeu {
+  color: var(--t2);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.spark {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.sparkCap {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  text-align: right;
+}
+
+.thumb {
+  display: block;
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.thumbPlaceholder {
+  width: 120px;
+  height: 80px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+}
+
+@media (max-width: 640px) {
+  .hit {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .spark {
+    flex: 1;
+    max-width: 160px;
+  }
+}

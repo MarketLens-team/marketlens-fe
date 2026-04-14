@@ -1,0 +1,18 @@
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.padNone {
+  padding: 0;
+}
+
+.padMd {
+  padding: 16px;
+}
+
+.padLg {
+  padding: 20px;
+}

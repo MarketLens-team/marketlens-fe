@@ -1,0 +1,9 @@
+@import './styles/tokens.css';
+@import './styles/global.css';
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--t1);
+  font-family: var(--sans);
+}

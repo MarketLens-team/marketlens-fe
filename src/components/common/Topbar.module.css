@@ -1,0 +1,96 @@
+.topbar {
+  height: 46px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--G);
+  background: rgba(2, 192, 118, 0.12);
+  border: 1px solid var(--border);
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--G);
+  box-shadow: 0 0 6px rgba(2, 192, 118, 0.45);
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.tab {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--t2);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.tab:hover {
+  color: var(--t1);
+  background: var(--bg3);
+}
+
+.tabActive {
+  color: var(--t1);
+  background: var(--bg4);
+}
+
+.time {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--t2);
+  min-width: 7.5em;
+  text-align: right;
+}
