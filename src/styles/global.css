@@ -47,7 +47,7 @@ body.modal-open::-webkit-scrollbar {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: var(--overlay);
+  background: color-mix(in srgb, var(--color-bg-app) 72%, transparent);
   display: flex;
   align-items: flex-start;
   justify-content: center;

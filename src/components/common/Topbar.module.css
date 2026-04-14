@@ -40,7 +40,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--G);
-  background: rgba(2, 192, 118, 0.12);
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
   border: 1px solid var(--border);
 }
 
@@ -49,7 +49,7 @@
   height: 6px;
   border-radius: 50%;
   background: var(--G);
-  box-shadow: 0 0 6px rgba(2, 192, 118, 0.45);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-success) 45%, transparent);
 }
 
 .tabs {

@@ -45,7 +45,7 @@
   border-radius: 4px;
   background: var(--bg3);
   color: var(--t1);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--color-bg-app) 85%, transparent);
   box-sizing: border-box;
 }
 

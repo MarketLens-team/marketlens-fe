@@ -64,7 +64,10 @@ export default function DashboardPage() {
               {data?.sentimentTimeline?.length ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={data.sentimentTimeline} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <CartesianGrid
+                      stroke="color-mix(in srgb, var(--color-text-primary) 6%, transparent)"
+                      vertical={false}
+                    />
                     <XAxis
                       dataKey="at"
                       tickFormatter={formatDayLabel}
@@ -103,7 +106,10 @@ export default function DashboardPage() {
               {data?.sectorHeat?.length ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.sectorHeat} layout="vertical" margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.06)" horizontal={false} />
+                    <CartesianGrid
+                      stroke="color-mix(in srgb, var(--color-text-primary) 6%, transparent)"
+                      horizontal={false}
+                    />
                     <XAxis type="number" stroke="var(--t3)" tick={{ fill: 'var(--t2)', fontSize: 12 }} hide />
                     <YAxis
                       type="category"
@@ -124,8 +130,8 @@ export default function DashboardPage() {
                     />
                     <Bar
                       dataKey="buzzCount"
-                      fill="rgba(2, 192, 118, 0.28)"
-                      stroke="rgba(2, 192, 118, 0.55)"
+                      fill="color-mix(in srgb, var(--color-success) 28%, transparent)"
+                      stroke="color-mix(in srgb, var(--color-success) 55%, transparent)"
                       strokeWidth={1}
                       radius={[0, 2, 2, 0]}
                     />
