@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: 24px;
   background: var(--color-bg-app);
@@ -15,6 +15,7 @@
   border-radius: 12px;
   background: var(--bg2);
   padding: 24px;
+  margin: 24px 0;
 }
 
 .title {
@@ -32,7 +33,7 @@
 .grid {
   margin-top: 22px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
@@ -59,8 +60,20 @@
   color: var(--t3);
 }
 
+.rule {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
 @media (max-width: 760px) {
-  .grid {
-    grid-template-columns: 1fr;
+  .row {
+    flex-direction: column;
   }
 }
