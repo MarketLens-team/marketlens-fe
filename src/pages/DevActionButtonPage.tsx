@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ActionButton } from '../components/ui/ActionButton'
+import { AlertModal } from '../components/ui/AlertModal'
 import styles from './DevActionButtonPage.module.css'
 
 function sleep(ms: number) {
@@ -11,6 +12,9 @@ function sleep(ms: number) {
 export default function DevActionButtonPage() {
   const [clickCount, setClickCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteCount, setDeleteCount] = useState(0)
 
   const handleLoadingClick = async () => {
     if (isLoading) return
@@ -20,6 +24,18 @@ export default function DevActionButtonPage() {
       await sleep(1500)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (isDeleting) return
+    setIsDeleting(true)
+    try {
+      await sleep(1200)
+      setDeleteCount((prev) => prev + 1)
+      setIsDeleteAlertOpen(false)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -52,10 +68,28 @@ export default function DevActionButtonPage() {
 
           <div className={styles.item}>
             <h2 className={styles.label}>Danger</h2>
-            <ActionButton variant="danger">Delete</ActionButton>
+            <ActionButton variant="danger" onClick={() => setIsDeleteAlertOpen(true)}>
+              Delete
+            </ActionButton>
+            <p className={styles.meta}>Completed deletes: {deleteCount}</p>
           </div>
         </div>
       </section>
+
+      <AlertModal
+        isOpen={isDeleteAlertOpen}
+        title="정말 삭제하시겠습니까?"
+        message="삭제 후에는 복구할 수 없습니다. 계속 진행하시겠어요?"
+        onClose={() => {
+          if (isDeleting) return
+          setIsDeleteAlertOpen(false)
+        }}
+        onConfirm={handleDeleteConfirm}
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        confirmLoading={isDeleting}
+        tone="danger"
+      />
     </main>
   )
 }

@@ -1,0 +1,21 @@
+.content {
+  max-width: min(480px, calc(100vw - 32px));
+}
+
+.body {
+  padding-top: 8px;
+}
+
+.message {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--t2);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
