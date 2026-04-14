@@ -94,14 +94,14 @@
 
 .scorePos {
   color: var(--G);
-  border-color: rgba(2, 192, 118, 0.35);
-  background: rgba(2, 192, 118, 0.08);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
 }
 
 .scoreNeg {
   color: var(--R);
-  border-color: rgba(246, 70, 93, 0.35);
-  background: rgba(246, 70, 93, 0.08);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
 .scoreNeu {

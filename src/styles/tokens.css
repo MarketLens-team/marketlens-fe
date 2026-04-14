@@ -2,18 +2,39 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
-  --bg: #0a0f16;
-  --bg2: #0e1723;
-  --bg3: #1a2332;
-  --bg4: #243040;
-  --border: #2a3847;
-  --b2: #344757;
-  --G: #02c076;
-  --R: #f6465d;
-  --Y: #f0b429;
-  --t1: #ffffff;
-  --t2: #b8c2cc;
-  --t3: #5a7a90;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Pretendard', sans-serif;
+  --color-bg-app: #0a0f16;
+  --color-bg-section: #0e1723;
+  --color-bg-card: #1a2332;
+  --color-bg-elevated: #243040;
+
+  --color-border-default: #2a3847;
+  --color-border-strong: #344757;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b8c2cc;
+  --color-text-muted: #7c93a6;
+
+  --color-primary: #3b82f6;
+  --color-success: #02c076;
+  --color-danger: #f6465d;
+  --color-warning: #f0b429;
+
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Pretendard', sans-serif;
+
+  /* Legacy aliases for gradual migration */
+  --bg: var(--color-bg-app);
+  --bg2: var(--color-bg-section);
+  --bg3: var(--color-bg-card);
+  --bg4: var(--color-bg-elevated);
+  --border: var(--color-border-default);
+  --b2: var(--color-border-strong);
+  --G: var(--color-success);
+  --R: var(--color-danger);
+  --Y: var(--color-warning);
+  --t1: var(--color-text-primary);
+  --t2: var(--color-text-secondary);
+  --t3: var(--color-text-muted);
+  --mono: var(--font-mono);
+  --sans: var(--font-sans);
 }

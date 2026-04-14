@@ -5,7 +5,12 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(circle at 10% 16%, #1d2d4a 0%, var(--bg2) 38%, var(--bg) 100%);
+  background: radial-gradient(
+    circle at 10% 16%,
+    color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-section)) 0%,
+    var(--color-bg-section) 38%,
+    var(--color-bg-app) 100%
+  );
   font-family: var(--sans);
 }
 
@@ -13,10 +18,18 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 28%, rgb(2 192 118 / 20%) 0, rgb(2 192 118 / 0%) 12%),
-    radial-gradient(circle at 74% 22%, rgb(52 71 87 / 40%) 0, rgb(52 71 87 / 0%) 14%),
-    radial-gradient(circle at 24% 84%, rgb(42 56 71 / 45%) 0, rgb(42 56 71 / 0%) 15%),
-    radial-gradient(circle at 80% 74%, rgb(2 192 118 / 16%) 0, rgb(2 192 118 / 0%) 10%);
+    radial-gradient(circle at 18% 28%, color-mix(in srgb, var(--color-success) 20%, transparent) 0, transparent 12%),
+    radial-gradient(
+      circle at 74% 22%,
+      color-mix(in srgb, var(--color-border-strong) 40%, transparent) 0,
+      transparent 14%
+    ),
+    radial-gradient(
+      circle at 24% 84%,
+      color-mix(in srgb, var(--color-border-default) 45%, transparent) 0,
+      transparent 15%
+    ),
+    radial-gradient(circle at 80% 74%, color-mix(in srgb, var(--color-success) 16%, transparent) 0, transparent 10%);
   filter: blur(6px);
 }
 
@@ -25,14 +38,18 @@
   z-index: 1;
   width: 420px;
   padding: 40px 36px 32px;
-  background: linear-gradient(180deg, rgb(10 15 22 / 92%), rgb(14 23 35 / 96%));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg-app) 92%, transparent),
+    color-mix(in srgb, var(--color-bg-section) 96%, transparent)
+  );
   border: 1px solid var(--border);
   border-radius: 4px;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 45%);
+  box-shadow: 0 18px 45px color-mix(in srgb, var(--color-bg-app) 70%, transparent);
 }
 
 .brand {
-  font-family: 'Pretendard', sans-serif;
+  font-family: var(--sans);
   font-size: 36px;
   font-weight: 700;
   line-height: 1;
@@ -73,7 +90,7 @@
   padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: rgb(10 15 22 / 88%);
+  background: color-mix(in srgb, var(--color-bg-app) 88%, transparent);
   color: var(--t1);
   font-size: 15px;
   box-sizing: border-box;
@@ -97,7 +114,11 @@
   font-size: 18px;
   font-weight: 700;
   color: var(--t1);
-  background: linear-gradient(90deg, rgb(2 192 118 / 88%), rgb(2 192 118 / 72%));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-success) 88%, transparent),
+    color-mix(in srgb, var(--color-success) 72%, transparent)
+  );
   cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease;
 }

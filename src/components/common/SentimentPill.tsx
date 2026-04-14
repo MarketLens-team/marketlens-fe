@@ -5,12 +5,12 @@ const styles: Record<
   { background: string; color: string; label: string }
 > = {
   POSITIVE: {
-    background: 'rgba(2,192,118,0.12)',
+    background: 'color-mix(in srgb, var(--color-success) 12%, transparent)',
     color: 'var(--G)',
     label: '긍정',
   },
   NEGATIVE: {
-    background: 'rgba(246,70,93,0.12)',
+    background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
     color: 'var(--R)',
     label: '부정',
   },
