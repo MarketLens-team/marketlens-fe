@@ -1,0 +1,78 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+}
+
+.button:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.confirm {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-success) 88%, transparent),
+    color-mix(in srgb, var(--color-success) 72%, transparent)
+  );
+}
+
+.danger {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-danger) 88%, transparent),
+    color-mix(in srgb, var(--color-danger) 72%, transparent)
+  );
+}
+
+.label {
+  line-height: 1;
+}
+
+.button[data-loading='true'] .label {
+  opacity: 0;
+}
+
+.spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid color-mix(in srgb, var(--color-text-primary) 30%, transparent);
+  border-top-color: var(--color-text-primary);
+  border-radius: 50%;
+  animation: action-button-spin 0.7s linear infinite;
+}
+
+@keyframes action-button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

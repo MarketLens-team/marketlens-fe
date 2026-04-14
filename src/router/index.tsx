@@ -5,6 +5,7 @@ import AdminPage from '../pages/AdminPage'
 import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
+import DevActionButtonPage from '../pages/DevActionButtonPage'
 import LoginPage from '../pages/LoginPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import StockDetailPage from '../pages/StockDetailPage'
@@ -13,6 +14,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/dev',
+    element: <DevActionButtonPage />,
   },
   {
     element: <PrivateRoute />,

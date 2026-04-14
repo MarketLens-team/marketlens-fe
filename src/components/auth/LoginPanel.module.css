@@ -78,28 +78,9 @@
 
 .submit {
   width: 100%;
-  height: 56px;
   margin-top: 8px;
-  border: 1px solid transparent;
-  border-radius: 12px;
+  height: 56px;
   font-size: 18px;
-  font-weight: 700;
-  color: var(--t1);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--color-success) 88%, transparent),
-    color-mix(in srgb, var(--color-success) 72%, transparent)
-  );
-  cursor: pointer;
-  transition: transform 0.12s ease, filter 0.12s ease;
-}
-
-.submit:hover {
-  filter: brightness(1.05);
-}
-
-.submit:active {
-  transform: translateY(1px);
 }
 
 .helpText {
