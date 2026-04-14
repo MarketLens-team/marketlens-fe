@@ -9,6 +9,15 @@ interface InlineJobStatusProps {
 }
 
 export function InlineJobStatus({ status, progress, jobId, isRunning }: InlineJobStatusProps) {
+  const progressToneClass =
+    status === 'success'
+      ? styles.fillSuccess
+      : status === 'cancelled'
+        ? styles.fillWarning
+        : status === 'error'
+          ? styles.fillDanger
+          : styles.fillPrimary
+
   return (
     <>
       <p className={styles.meta}>
@@ -22,7 +31,7 @@ export function InlineJobStatus({ status, progress, jobId, isRunning }: InlineJo
         </span>
       </p>
       <div className={styles.progressTrack} aria-hidden>
-        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+        <div className={[styles.progressFill, progressToneClass].join(' ')} style={{ width: `${progress}%` }} />
       </div>
       <p className={styles.meta}>
         {isRunning
