@@ -1,0 +1,148 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  background: #0a0d12;
+  color: #e9edf4;
+  font-family: var(--sans);
+}
+
+.sidebar {
+  background: #111827;
+  border-right: 1px solid #232b36;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brand {
+  padding: 8px 10px 14px;
+  border-bottom: 1px solid #253040;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.brandSub {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #95a2b5;
+  letter-spacing: 0.08em;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupLabel {
+  margin: 0;
+  padding: 0 10px;
+  color: #75859a;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.item {
+  position: relative;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #c8d2e2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  font-size: 14px;
+  transition: all 0.18s ease;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5a6677;
+}
+
+.item:hover {
+  background: #1a1f25;
+  color: #ebfffa;
+}
+
+.item:hover .dot {
+  background: #26e7be;
+}
+
+.active {
+  background: #16212b;
+  color: #e9fffb;
+  font-weight: 600;
+}
+
+.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: #00d4aa;
+  border-radius: 8px;
+}
+
+.active .dot {
+  background: #00d4aa;
+}
+
+.footer {
+  margin-top: auto;
+  border-top: 1px solid #253040;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link {
+  text-decoration: none;
+  color: #84f8de;
+  font-size: 12px;
+}
+
+.preview {
+  padding: 36px;
+}
+
+.preview h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.preview p {
+  margin-top: 10px;
+  color: #9caabf;
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid #232b36;
+  }
+}

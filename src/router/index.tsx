@@ -6,6 +6,10 @@ import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
+import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
+import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
+import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
+import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import StockDetailPage from '../pages/StockDetailPage'
@@ -18,6 +22,22 @@ export const router = createBrowserRouter([
   {
     path: '/dev',
     element: <DevActionButtonPage />,
+  },
+  {
+    path: '/dev/layout-split',
+    element: <DevLayoutSplitPage />,
+  },
+  {
+    path: '/dev/sidebar-minimal',
+    element: <DevSidebarMinimalPage />,
+  },
+  {
+    path: '/dev/sidebar-glass',
+    element: <DevSidebarGlassPage />,
+  },
+  {
+    path: '/dev/sidebar-compact',
+    element: <DevSidebarCompactPage />,
   },
   {
     element: <PrivateRoute />,

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ActionButton } from '../components/ui/ActionButton'
 import { AlertModal } from '../components/ui/AlertModal'
 import { InlineJobStatus } from '../components/ui/InlineJobStatus'
@@ -151,6 +152,25 @@ export default function DevActionButtonPage() {
             <p className={styles.rule}>
               후속 액션이 없고 결과만 알려주면 되는 경우
             </p>
+          </div>
+
+          <div className={styles.item}>
+            <h2 className={styles.label}>Dev Sidebar 디자인 프리뷰</h2>
+            <div className={styles.linkRow}>
+              <Link className={styles.devLink} to="/dev/layout-split">
+                Home/Detail Split
+              </Link>
+              <Link className={styles.devLink} to="/dev/sidebar-minimal">
+                Minimal
+              </Link>
+              <Link className={styles.devLink} to="/dev/sidebar-glass">
+                Glass
+              </Link>
+              <Link className={styles.devLink} to="/dev/sidebar-compact">
+                Compact
+              </Link>
+            </div>
+            <p className={styles.meta}>전역 스타일 변경 없이 /dev 경로에서만 사이드바 시안을 확인합니다.</p>
           </div>
         </div>
       </section>
