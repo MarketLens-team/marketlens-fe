@@ -1,0 +1,36 @@
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.searchTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  background: var(--color-bg-app);
+  padding: 0 10px;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.searchIcon {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.searchPlaceholder {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 920px) {
+  .searchTrigger {
+    min-width: 120px;
+  }
+}

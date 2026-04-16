@@ -1,0 +1,104 @@
+.appTopbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  background: var(--color-bg-section);
+  margin-bottom: 12px;
+}
+
+.brandWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandLogo {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.brand {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.homeNav {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.homeNav button {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.homeNav button:hover {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+.headerActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.searchWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  background: var(--color-bg-app);
+  padding: 0 10px;
+  min-width: 220px;
+  cursor: text;
+}
+
+.searchIcon {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.searchPlaceholder {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .appTopbar {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    border-radius: 12px;
+  }
+
+  .searchWrap {
+    min-width: 180px;
+  }
+}

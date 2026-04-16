@@ -38,3 +38,19 @@
   --mono: var(--font-mono);
   --sans: var(--font-sans);
 }
+
+:root[data-theme='light'] {
+  --color-bg-app: #f4f7fb;
+  --color-bg-section: #ffffff;
+  --color-bg-card: #f7f9fc;
+  --color-bg-elevated: #edf2f8;
+  --color-border-default: #d7e0ea;
+  --color-border-strong: #c5d3e2;
+  --color-text-primary: #101828;
+  --color-text-secondary: #475467;
+  --color-text-muted: #667085;
+  --color-primary: #2563eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #ca8a04;
+}

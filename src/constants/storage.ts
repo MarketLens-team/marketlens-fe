@@ -1,2 +1,7 @@
 export const AUTH_TOKEN_KEY = 'token'
 export const AUTH_ROLE_KEY = 'marketlens_role'
+export const WATCHLIST_KEY = 'marketlens_watchlist'
+export const PREF_THEME_KEY = 'marketlens_pref_theme'
+export const PREF_LANGUAGE_KEY = 'marketlens_pref_language'
+export const PREF_CURRENCY_KEY = 'marketlens_pref_currency'
+export const PREF_AI_ASSISTANT_KEY = 'marketlens_pref_ai_assistant'

@@ -20,3 +20,8 @@ export interface StockDetail {
   stock: StockSummary
   recentNews: StockNewsItem[]
 }
+
+export interface StockSearchItem {
+  code: string
+  name: string
+}

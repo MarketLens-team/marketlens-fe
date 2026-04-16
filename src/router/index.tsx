@@ -6,9 +6,16 @@ import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
+import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
+import DevWatchlistPage from '../pages/DevWatchlistPage'
+import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
+import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
+import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
+import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
+import WatchlistPage from '../pages/WatchlistPage'
 
 export const router = createBrowserRouter([
   {
@@ -20,9 +27,31 @@ export const router = createBrowserRouter([
     element: <DevActionButtonPage />,
   },
   {
+    path: '/dev/layout-split',
+    element: <DevLayoutSplitPage />,
+  },
+  {
+    path: '/dev/watchlist',
+    element: <DevWatchlistPage />,
+  },
+  {
+    path: '/dev/sidebar-minimal',
+    element: <DevSidebarMinimalPage />,
+  },
+  {
+    path: '/dev/sidebar-glass',
+    element: <DevSidebarGlassPage />,
+  },
+  {
+    path: '/dev/sidebar-compact',
+    element: <DevSidebarCompactPage />,
+  },
+  {
     element: <PrivateRoute />,
     children: [
       { path: '/', element: <DashboardPage /> },
+      { path: '/sector', element: <SectorPage /> },
+      { path: '/watchlist', element: <WatchlistPage /> },
       { path: '/stock/:stockCode', element: <StockDetailPage /> },
       { path: '/person', element: <PersonTrackerPage /> },
       { path: '/buzz', element: <BuzzAlertPage /> },
