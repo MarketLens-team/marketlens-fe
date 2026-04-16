@@ -75,6 +75,7 @@
   background: var(--color-bg-app);
   padding: 0 10px;
   min-width: 220px;
+  cursor: text;
 }
 
 .searchIcon {
@@ -82,18 +83,12 @@
   font-size: 12px;
 }
 
-.search {
-  border: none;
-  outline: none;
-  background: transparent;
-  color: var(--color-text-primary);
+.searchPlaceholder {
+  color: var(--color-text-muted);
   font-size: 12px;
   padding: 8px 0;
   width: 100%;
-}
-
-.search::placeholder {
-  color: var(--color-text-muted);
+  text-align: left;
 }
 
 .circleButton {
