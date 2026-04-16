@@ -49,15 +49,21 @@
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 8px 10px;
+  padding: 10px 16px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .homeNav button:hover {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, #283f88 40%, transparent);
+  color: #ecf2ff;
+}
+
+.homeNav .navActive {
+  background: #283f88;
+  color: #ecf2ff;
 }
 
 .headerActions {

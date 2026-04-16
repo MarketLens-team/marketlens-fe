@@ -9,6 +9,7 @@ const TOP_MENUS = ['섹터', '종목', '인물', '뉴스'] as const
 export function DevTopNavigation() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [activeMenu, setActiveMenu] = useState<(typeof TOP_MENUS)[number]>('뉴스')
 
   return (
     <>
@@ -21,7 +22,12 @@ export function DevTopNavigation() {
         </div>
         <nav className={styles.homeNav} aria-label="상단 메뉴">
           {TOP_MENUS.map((menu) => (
-            <button key={menu} type="button">
+            <button
+              key={menu}
+              type="button"
+              className={activeMenu === menu ? styles.navActive : undefined}
+              onClick={() => setActiveMenu(menu)}
+            >
               {menu}
             </button>
           ))}

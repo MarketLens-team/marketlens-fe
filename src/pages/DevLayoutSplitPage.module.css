@@ -187,14 +187,17 @@
   background: var(--color-bg-section);
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 620px;
-  overflow: hidden;
+  align-items: start;
 }
 
 .detailSidebar {
   border-right: 1px solid var(--color-border-default);
   background: var(--color-bg-section);
   padding: 14px 10px;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
 }
 
 .detailGroup {
@@ -214,10 +217,12 @@
   padding: 10px 12px;
   cursor: pointer;
   font-size: 14px;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .detailItem:hover {
-  background: color-mix(in srgb, #3855a8 24%, transparent);
+  background: color-mix(in srgb, #283f88 40%, transparent);
+  color: #ecf2ff;
 }
 
 .detailGroupToggle {
@@ -236,7 +241,7 @@
 }
 
 .detailGroupToggle:hover {
-  background: color-mix(in srgb, var(--color-bg-elevated) 70%, transparent);
+  background: color-mix(in srgb, #283f88 40%, transparent);
 }
 
 .detailChevron {
@@ -247,7 +252,6 @@
 .detailActive {
   background: #283f88;
   color: #ecf2ff;
-  box-shadow: inset 2px 0 0 #3e63d3;
   font-weight: 600;
 }
 
@@ -372,6 +376,44 @@
   margin-top: 4px;
   font-size: 11px;
   color: var(--color-text-muted);
+}
+
+.detailSections {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detailSectionCard {
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  background: var(--color-bg-card);
+  padding: 14px;
+  min-height: 220px;
+  scroll-margin-top: 96px;
+}
+
+.detailSectionGroup {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.detailSectionCard h3 {
+  margin: 8px 0 0;
+}
+
+.detailSectionCard p {
+  margin-top: 10px;
+}
+
+.detailSectionCard ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
 .footerLinks {

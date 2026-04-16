@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DevTopNavigation } from '../components/common/DevTopNavigation'
 import styles from './DevLayoutSplitPage.module.css'
@@ -25,19 +25,38 @@ const detailMenus = [
     key: 'markets',
     section: 'Markets',
     icon: '📈',
-    items: ['시장 개요', '섹터 동향', '테마 랭킹', '시장 캘린더', '거래량 급증', '이슈 브리프'],
+    items: [
+      { id: 'market-overview', label: '시장 개요' },
+      { id: 'sector-trend', label: '섹터 동향' },
+      { id: 'theme-ranking', label: '테마 랭킹' },
+      { id: 'market-calendar', label: '시장 캘린더' },
+      { id: 'volume-spike', label: '거래량 급증' },
+      { id: 'issue-brief', label: '이슈 브리프' },
+    ],
   },
   {
     key: 'indicators',
     section: 'Indicators',
     icon: '🪄',
-    items: ['감성 지수', '버즈 스코어', '리스크 레벨', '연관 인물 지수', '연관 종목 지수', '섹터 온도'],
+    items: [
+      { id: 'sentiment-index', label: '감성 지수' },
+      { id: 'buzz-score', label: '버즈 스코어' },
+      { id: 'risk-level', label: '리스크 레벨' },
+      { id: 'person-index', label: '연관 인물 지수' },
+      { id: 'stock-index', label: '연관 종목 지수' },
+      { id: 'sector-temp', label: '섹터 온도' },
+    ],
   },
   {
     key: 'etf',
     section: 'News',
     icon: '📰',
-    items: ['섹터 뉴스', '종목 뉴스', '인물 뉴스', '속보 알림'],
+    items: [
+      { id: 'sector-news', label: '섹터 뉴스' },
+      { id: 'stock-news', label: '종목 뉴스' },
+      { id: 'person-news', label: '인물 뉴스' },
+      { id: 'breaking-news', label: '속보 알림' },
+    ],
   },
 ] as const
 
@@ -67,6 +86,26 @@ export default function DevLayoutSplitPage() {
     indicators: false,
     etf: true,
   })
+  const allDetailItems = useMemo(
+    () =>
+      detailMenus.flatMap((group) =>
+        group.items.map((item) => ({
+          ...item,
+          groupKey: group.key,
+          groupTitle: group.section,
+        })),
+      ),
+    [],
+  )
+  const itemToGroupKey = useMemo(
+    () =>
+      Object.fromEntries(allDetailItems.map((item) => [item.id, item.groupKey])) as Record<string, SidebarGroupKey>,
+    [allDetailItems],
+  )
+  const [activeItem, setActiveItem] = useState<string>(allDetailItems[0]?.id ?? '')
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
+  const activeLockRef = useRef(false)
+  const lockTimerRef = useRef<number | null>(null)
 
   const toggleGroup = (key: SidebarGroupKey) => {
     setCollapsed((prev) => ({
@@ -74,7 +113,70 @@ export default function DevLayoutSplitPage() {
       [key]: !prev[key],
     }))
   }
-  const activeItem = '감성 지수'
+
+  useEffect(() => {
+    if (mode !== 'detail') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (activeLockRef.current) return
+
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+
+        const nextId = visibleEntries[0]?.target.id
+        if (!nextId) return
+
+        setActiveItem(nextId)
+        const nextGroupKey = itemToGroupKey[nextId]
+        if (!nextGroupKey) return
+        setCollapsed((prev) => {
+          if (!prev[nextGroupKey]) return prev
+          return { ...prev, [nextGroupKey]: false }
+        })
+      },
+      {
+        threshold: [0.35, 0.6, 0.8],
+        rootMargin: '-16% 0px -48% 0px',
+      },
+    )
+
+    allDetailItems.forEach((item) => {
+      const target = sectionRefs.current[item.id]
+      if (target) observer.observe(target)
+    })
+
+    return () => observer.disconnect()
+  }, [allDetailItems, itemToGroupKey, mode])
+
+  useEffect(() => {
+    return () => {
+      if (lockTimerRef.current) {
+        window.clearTimeout(lockTimerRef.current)
+      }
+    }
+  }, [])
+
+  const handleSelectItem = (id: string, groupKey: SidebarGroupKey) => {
+    activeLockRef.current = true
+    if (lockTimerRef.current) {
+      window.clearTimeout(lockTimerRef.current)
+    }
+
+    setActiveItem(id)
+    setCollapsed((prev) => ({ ...prev, [groupKey]: false }))
+    const target = sectionRefs.current[id]
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    // 클릭 이동 중에는 observer active 업데이트를 잠시 중지한다.
+    lockTimerRef.current = window.setTimeout(() => {
+      activeLockRef.current = false
+      lockTimerRef.current = null
+    }, 700)
+  }
 
   return (
     <main className={styles.page}>
@@ -164,11 +266,12 @@ export default function DevLayoutSplitPage() {
                       <div className={styles.detailMenuRail}>
                         {group.items.map((item) => (
                           <button
-                            key={item}
+                            key={item.id}
                             type="button"
-                            className={item === activeItem ? styles.detailActive : styles.detailItem}
+                            className={item.id === activeItem ? styles.detailActive : styles.detailItem}
+                            onClick={() => handleSelectItem(item.id, group.key)}
                           >
-                            {item}
+                            {item.label}
                           </button>
                         ))}
                       </div>
@@ -204,6 +307,30 @@ export default function DevLayoutSplitPage() {
                   </li>
                 ))}
               </ul>
+            </section>
+            <section className={styles.detailSections}>
+              {allDetailItems.map((item) => (
+                <article
+                  key={item.id}
+                  id={item.id}
+                  ref={(element) => {
+                    sectionRefs.current[item.id] = element
+                  }}
+                  className={styles.detailSectionCard}
+                >
+                  <p className={styles.detailSectionGroup}>{item.groupTitle}</p>
+                  <h3>{item.label}</h3>
+                  <p>
+                    {item.label} 섹션 더미 데이터입니다. 실서비스 연동 시 이 영역에 차트/테이블/관련 뉴스/연관
+                    인물 컴포넌트를 연결하면 됩니다.
+                  </p>
+                  <ul>
+                    <li>테스트 포인트 A · 스크롤 진입 시 사이드바 자동 선택</li>
+                    <li>테스트 포인트 B · 메뉴 클릭 시 해당 섹션으로 이동</li>
+                    <li>테스트 포인트 C · 섹션별 API/카드 조합 가능</li>
+                  </ul>
+                </article>
+              ))}
             </section>
           </article>
         </section>
