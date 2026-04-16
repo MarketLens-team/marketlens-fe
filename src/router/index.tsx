@@ -7,6 +7,7 @@ import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
 import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
+import DevWatchlistPage from '../pages/DevWatchlistPage'
 import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
 import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
 import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
   {
     path: '/dev/layout-split',
     element: <DevLayoutSplitPage />,
+  },
+  {
+    path: '/dev/watchlist',
+    element: <DevWatchlistPage />,
   },
   {
     path: '/dev/sidebar-minimal',

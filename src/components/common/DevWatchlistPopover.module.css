@@ -4,14 +4,15 @@
   justify-content: center;
 }
 
+/* 트리거 너비만: 넓은 가상 브릿지는 상단바 옆까지 호버가 퍼짐 */
 .wrap::after {
   content: '';
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 560px;
-  height: 18px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 14px;
 }
 
 .trigger {
@@ -27,10 +28,19 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  text-decoration: none;
 }
 
 .trigger:hover {
   color: var(--color-text-primary);
+  background: var(--color-bg-card);
+}
+
+.trigger:visited {
+  color: var(--color-text-primary);
+}
+
+.triggerActive {
   background: var(--color-bg-card);
 }
 
@@ -163,10 +173,6 @@
 
 @media (max-width: 860px) {
   .panel {
-    width: min(90vw, 520px);
-  }
-
-  .wrap::after {
     width: min(90vw, 520px);
   }
 
