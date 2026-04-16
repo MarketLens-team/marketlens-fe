@@ -4,6 +4,7 @@ import { DevTopNavigation } from '../components/common/DevTopNavigation'
 import styles from './DevLayoutSplitPage.module.css'
 
 type ViewMode = 'home' | 'detail'
+type SidebarGroupKey = 'markets' | 'indicators' | 'etf'
 
 const metricCards = [
   { label: 'Market Sentiment', value: '+62', sub: '+4.1% vs yesterday' },
@@ -20,13 +21,60 @@ const latestNews = [
 ] as const
 
 const detailMenus = [
-  { section: 'OVERVIEW', items: ['개요', '핵심 지표', '감성 스냅샷'] },
-  { section: 'ANALYSIS', items: ['타임라인', '연관 뉴스', '인물/섹터'] },
-  { section: 'RISK', items: ['리스크 플래그', '이상 징후', '알림 설정'] },
+  {
+    key: 'markets',
+    section: 'Markets',
+    icon: '📈',
+    items: ['시장 개요', '섹터 동향', '테마 랭킹', '시장 캘린더', '거래량 급증', '이슈 브리프'],
+  },
+  {
+    key: 'indicators',
+    section: 'Indicators',
+    icon: '🪄',
+    items: ['감성 지수', '버즈 스코어', '리스크 레벨', '연관 인물 지수', '연관 종목 지수', '섹터 온도'],
+  },
+  {
+    key: 'etf',
+    section: 'News',
+    icon: '📰',
+    items: ['섹터 뉴스', '종목 뉴스', '인물 뉴스', '속보 알림'],
+  },
+] as const
+
+const detailStatMocks = [
+  { label: '감성 지수', value: '56', change: '+4.2%' },
+  { label: '버즈 스파이크', value: '128', change: '+18' },
+  { label: '리스크 알림', value: '7', change: '-2' },
+  { label: '연관 인물 수', value: '23', change: '+3' },
+  { label: '연관 종목 수', value: '41', change: '+5' },
+  { label: '핵심 뉴스 건수', value: '89', change: '+12' },
+] as const
+
+const detailNewsMocks = [
+  { title: '반도체 섹터 순매수 전환', tag: '섹터 뉴스', time: '12분 전' },
+  { title: 'A사 가이던스 상향 발표', tag: '종목 뉴스', time: '26분 전' },
+  { title: '정책 브리핑 이후 변동성 확대', tag: '인물 뉴스', time: '41분 전' },
+  { title: '2차전지 테마 거래대금 급증', tag: '섹터 뉴스', time: '55분 전' },
+  { title: 'B사 신규 수주 공시 발표', tag: '종목 뉴스', time: '1시간 전' },
+  { title: '핵심 인사 인터뷰 이후 매수세 유입', tag: '인물 뉴스', time: '1시간 24분 전' },
+  { title: '미국 지표 발표 전 관망세 확대', tag: '속보 알림', time: '1시간 52분 전' },
 ] as const
 
 export default function DevLayoutSplitPage() {
   const [mode, setMode] = useState<ViewMode>('home')
+  const [collapsed, setCollapsed] = useState<Record<SidebarGroupKey, boolean>>({
+    markets: false,
+    indicators: false,
+    etf: true,
+  })
+
+  const toggleGroup = (key: SidebarGroupKey) => {
+    setCollapsed((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }))
+  }
+  const activeItem = '감성 지수'
 
   return (
     <main className={styles.page}>
@@ -95,15 +143,37 @@ export default function DevLayoutSplitPage() {
       ) : (
         <section className={styles.detailView}>
           <aside className={styles.detailSidebar}>
-            <div className={styles.detailTitle}>005930 · 삼성전자</div>
             {detailMenus.map((group) => (
               <div key={group.section} className={styles.detailGroup}>
-                <p>{group.section}</p>
-                {group.items.map((item, idx) => (
-                  <button key={item} type="button" className={idx === 0 ? styles.detailActive : styles.detailItem}>
-                    {item}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  className={styles.detailGroupToggle}
+                  onClick={() => toggleGroup(group.key)}
+                  aria-expanded={!collapsed[group.key]}
+                >
+                  <span className={styles.groupHead}>
+                    <span className={styles.groupIcon} aria-hidden>
+                      {group.icon}
+                    </span>
+                    {group.section}
+                  </span>
+                  <span className={styles.detailChevron}>{collapsed[group.key] ? '▸' : '▾'}</span>
+                </button>
+                {!collapsed[group.key]
+                  ? (
+                      <div className={styles.detailMenuRail}>
+                        {group.items.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className={item === activeItem ? styles.detailActive : styles.detailItem}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  : null}
               </div>
             ))}
           </aside>
@@ -115,10 +185,26 @@ export default function DevLayoutSplitPage() {
               뉴스 타임라인, 리스크 이벤트 카드가 들어오는 자리입니다.
             </p>
             <div className={styles.detailCards}>
-              <div>감성 점수 트렌드</div>
-              <div>연관 뉴스 클러스터</div>
-              <div>리스크 신호 히스토리</div>
+              {detailStatMocks.map((card) => (
+                <div key={card.label} className={styles.detailStatCard}>
+                  <p>{card.label}</p>
+                  <strong>{card.value}</strong>
+                  <small>{card.change}</small>
+                </div>
+              ))}
             </div>
+            <section className={styles.detailFeed}>
+              <h3>테스트 뉴스 피드</h3>
+              <ul className={styles.detailFeedList}>
+                {detailNewsMocks.map((news) => (
+                  <li key={news.title} className={styles.detailFeedItem}>
+                    <span>{news.tag}</span>
+                    <p>{news.title}</p>
+                    <time>{news.time}</time>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </article>
         </section>
       )}
