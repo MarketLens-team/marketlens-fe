@@ -22,6 +22,7 @@ const navGroups = [
         end: true,
         matchStockDetail: true,
       },
+      { label: '관심 목록', to: '/watchlist', end: true },
       { label: '인물 발언', to: '/person', end: true },
     ],
   },

@@ -14,6 +14,7 @@ import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import StockDetailPage from '../pages/StockDetailPage'
+import WatchlistPage from '../pages/WatchlistPage'
 
 export const router = createBrowserRouter([
   {
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
     element: <PrivateRoute />,
     children: [
       { path: '/', element: <DashboardPage /> },
+      { path: '/watchlist', element: <WatchlistPage /> },
       { path: '/stock/:stockCode', element: <StockDetailPage /> },
       { path: '/person', element: <PersonTrackerPage /> },
       { path: '/buzz', element: <BuzzAlertPage /> },

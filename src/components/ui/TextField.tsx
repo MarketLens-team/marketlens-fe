@@ -9,7 +9,7 @@ export interface TextFieldProps {
   type?: 'text' | 'email' | 'password'
   placeholder?: string
   error?: string
-  inputRef?: RefObject<HTMLInputElement | null>
+  inputRef?: RefObject<HTMLInputElement>
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>
 }
 
