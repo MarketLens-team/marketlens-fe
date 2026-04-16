@@ -18,8 +18,8 @@
   border: none;
   background: transparent;
   color: var(--color-text-primary);
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
   font-size: 13px;
   line-height: 1;
   font-weight: 600;
@@ -28,10 +28,12 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .trigger:hover {
-  background: var(--color-bg-card);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .trigger:visited {
@@ -39,7 +41,8 @@
 }
 
 .triggerActive {
-  background: var(--color-bg-card);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .star {
@@ -149,6 +152,7 @@
 }
 
 .remove:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
+  color: var(--color-interactive-active-text);
+  border-color: var(--color-interactive-active);
+  background: var(--color-interactive-hover);
 }

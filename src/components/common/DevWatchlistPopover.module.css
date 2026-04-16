@@ -19,8 +19,8 @@
   border: none;
   background: transparent;
   color: var(--color-text-primary);
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
   font-size: 13px;
   line-height: 1;
   font-weight: 600;
@@ -29,11 +29,12 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .trigger:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
 }
 
 .trigger:visited {
@@ -41,7 +42,8 @@
 }
 
 .triggerActive {
-  background: var(--color-bg-card);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .star {
@@ -138,11 +140,17 @@
   font-size: 13px;
   cursor: pointer;
   font-weight: 600;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .tabActive {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+}
+
+.tab:hover {
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .body {
@@ -175,6 +183,12 @@
   font-weight: 600;
   padding: 7px 11px;
   cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.chips button:hover {
+  background: var(--color-interactive-hover);
+  border-color: var(--color-interactive-active);
 }
 
 @media (max-width: 860px) {

@@ -31,6 +31,7 @@
 .nav {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior-y: none;
   padding: 12px 0 16px;
   min-height: 0;
 }
@@ -49,23 +50,24 @@
 
 .link {
   display: block;
-  padding: 8px 16px;
+  padding: 10px 12px;
+  margin: 0 8px;
   font-size: 13px;
   color: var(--t2);
   text-decoration: none;
-  border-left: 2px solid transparent;
-  transition: background 0.12s ease, color 0.12s ease;
+  border-radius: 10px;
+  border-left: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
 }
 
 .link:hover {
-  background: var(--bg3);
-  color: var(--t1);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .linkActive {
-  background: var(--bg3);
-  color: var(--t1);
-  border-left-color: var(--b2);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .userBlock {

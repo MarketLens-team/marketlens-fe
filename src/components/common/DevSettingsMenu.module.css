@@ -20,13 +20,13 @@
 }
 
 .trigger:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
 }
 
 .triggerOpen {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-active);
 }
 
 .panel {
@@ -110,8 +110,8 @@
 }
 
 .iconGhost:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-elevated);
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
 }
 
 .row {
@@ -145,7 +145,8 @@
 }
 
 .rowValue:hover {
-  background: var(--color-bg-elevated);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .chevron {
@@ -185,12 +186,18 @@
   padding: 7px 6px;
   cursor: pointer;
   font-family: inherit;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.segmentBtn:hover {
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .segmentBtnActive {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-border-default) 90%, transparent);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+  box-shadow: none;
 }
 
 .links {
@@ -213,7 +220,8 @@
 }
 
 .linkBtn:hover {
-  background: var(--color-bg-elevated);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .linkMuted {
@@ -242,6 +250,7 @@
 }
 
 .footerBtn:hover {
-  border-color: var(--color-border-strong);
-  background: color-mix(in srgb, var(--color-bg-elevated) 85%, var(--color-bg-card));
+  border-color: var(--color-interactive-active);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
