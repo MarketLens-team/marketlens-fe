@@ -6,6 +6,7 @@ import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
+import DevLayoutHomePreviewPage from '../pages/DevLayoutHomePreviewPage'
 import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
 import DevWatchlistPage from '../pages/DevWatchlistPage'
 import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
   {
     path: '/dev',
     element: <DevActionButtonPage />,
+  },
+  {
+    path: '/dev/layout-home',
+    element: <DevLayoutHomePreviewPage />,
   },
   {
     path: '/dev/layout-split',

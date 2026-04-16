@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useMemo, useState, type ReactNode } from 'react'
 import {
   DetailAccordionSidebar,
@@ -9,6 +10,27 @@ import styles from './DetailSplitShell.module.css'
 type DetailSplitShellProps<TKey extends string> = {
   groups: DetailAccordionSidebarGroup<TKey>[]
   children: ReactNode
+}
+
+/** 사이드바 `groups`의 큰 그룹 1개에 대응하는 본문 영역. 나란히 두면 두 번째부터 위에 가로 구분선. */
+export function DetailMainGroup({
+  children,
+  className,
+  id,
+}: {
+  children: ReactNode
+  className?: string
+  id?: string
+}) {
+  return (
+    <section className={clsx(styles.mainGroup, className)} id={id}>
+      <div className={styles.mainGroupInner}>{children}</div>
+    </section>
+  )
+}
+
+export function DetailMainGroupPlaceholder({ children }: { children: ReactNode }) {
+  return <p className={styles.mainGroupPlaceholder}>{children}</p>
 }
 
 export function DetailSplitShell<TKey extends string>({ groups, children }: DetailSplitShellProps<TKey>) {
@@ -38,7 +60,6 @@ export function DetailSplitShell<TKey extends string>({ groups, children }: Deta
           onToggleGroup={onToggleGroup}
           onSelectItem={onSelectItem}
         />
-        <div className={styles.columnRule} aria-hidden />
         <div className={styles.content}>{children}</div>
       </section>
     </div>

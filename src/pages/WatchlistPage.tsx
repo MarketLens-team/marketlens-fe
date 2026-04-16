@@ -1,5 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { DetailSplitShell, type DetailAccordionSidebarGroup } from '../components/common/DetailSplitShell'
+import {
+  DetailMainGroup,
+  DetailMainGroupPlaceholder,
+  DetailSplitShell,
+  type DetailAccordionSidebarGroup,
+} from '../components/common/DetailSplitShell'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
 import { useWatchlistStore } from '../store/watchlistStore'
@@ -42,28 +47,35 @@ export default function WatchlistPage() {
   return (
     <Layout hideSidebar>
       <DetailSplitShell groups={watchlistSidebarGroups}>
-        <div className={styles.page}>
+        <DetailMainGroup>
           <PageHeader title="관심 목록" description="상단 검색/관심목록 메뉴에서 추가한 종목을 관리합니다." />
-          {items.length === 0 ? <div className={styles.empty}>관심 목록이 비어 있습니다.</div> : null}
-          <ul className={styles.list}>
-            {items.map((item) => (
-              <li key={item.code} className={styles.item}>
-                <div className={styles.meta}>
-                  <p className={styles.name}>{item.name}</p>
-                  <p className={styles.code}>{item.code}</p>
-                </div>
-                <div className={styles.actions}>
-                  <button type="button" className={styles.btn} onClick={() => navigate(`/stock/${item.code}`)}>
-                    상세 보기
-                  </button>
-                  <button type="button" className={styles.btn} onClick={() => remove(item.code)}>
-                    제거
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <div className={styles.stack}>
+            {items.length === 0 ? <div className={styles.empty}>관심 목록이 비어 있습니다.</div> : null}
+            <ul className={styles.list}>
+              {items.map((item) => (
+                <li key={item.code} className={styles.item}>
+                  <div className={styles.meta}>
+                    <p className={styles.name}>{item.name}</p>
+                    <p className={styles.code}>{item.code}</p>
+                  </div>
+                  <div className={styles.actions}>
+                    <button type="button" className={styles.btn} onClick={() => navigate(`/stock/${item.code}`)}>
+                      상세 보기
+                    </button>
+                    <button type="button" className={styles.btn} onClick={() => remove(item.code)}>
+                      제거
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <DetailMainGroupPlaceholder>연관 뉴스는 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
+        </DetailMainGroup>
       </DetailSplitShell>
     </Layout>
   )

@@ -157,8 +157,11 @@ export default function DevActionButtonPage() {
           <div className={styles.item}>
             <h2 className={styles.label}>Dev Sidebar 디자인 프리뷰</h2>
             <div className={styles.linkRow}>
+              <Link className={styles.devLink} to="/dev/layout-home">
+                Layout 홈 (무사이드바)
+              </Link>
               <Link className={styles.devLink} to="/dev/layout-split">
-                Home/Detail Split
+                Layout 상세 (split)
               </Link>
               <Link className={styles.devLink} to="/dev/sidebar-minimal">
                 Minimal

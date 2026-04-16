@@ -2,7 +2,12 @@ import clsx from 'clsx'
 import { useParams } from 'react-router-dom'
 import { CardSectionHeader } from '../components/common/CardSectionHeader'
 import { Card } from '../components/common/Card'
-import { DetailSplitShell, type DetailAccordionSidebarGroup } from '../components/common/DetailSplitShell'
+import {
+  DetailMainGroup,
+  DetailMainGroupPlaceholder,
+  DetailSplitShell,
+  type DetailAccordionSidebarGroup,
+} from '../components/common/DetailSplitShell'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
@@ -51,36 +56,25 @@ export default function StockDetailPage() {
   return (
     <Layout hideSidebar>
       <DetailSplitShell groups={stockSidebarGroups}>
-        <div className={styles.page}>
-          <PageHeader
-            title={data?.stock.name ?? (stockCode ? `종목 ${stockCode}` : '종목 상세')}
-            description="뉴스 감성·버즈·관련 인물을 종목 단위로 봅니다. 상세 데이터는 stockClient → GET /api/v1/stocks/{code} 에 매핑합니다."
-          />
-          {error ? (
-            <p className={styles.bannerError} role="alert">
-              {error.message}
-            </p>
-          ) : null}
-          {loading && !data ? (
-            <div className={styles.grid} aria-busy="true" aria-label="종목 상세 로딩">
-              <Card padding="none" className={styles.feedCard}>
+        <DetailMainGroup>
+            <PageHeader
+              title={data?.stock.name ?? (stockCode ? `종목 ${stockCode}` : '종목 상세')}
+              description="뉴스 감성·버즈·관련 인물을 종목 단위로 봅니다. 상세 데이터는 stockClient → GET /api/v1/stocks/{code} 에 매핑합니다."
+            />
+            {error ? (
+              <p className={styles.bannerError} role="alert">
+                {error.message}
+              </p>
+            ) : null}
+            {loading && !data ? (
+              <Card padding="none" className={styles.feedCard} aria-busy="true" aria-label="종목 상세 로딩">
                 <CardSectionHeader title="요약" subtitle="코드 · 감성 · 24h 버즈" />
                 <div className={styles.skeletonPad}>
                   <div className={clsx(skeleton.block, skeleton.stat)} />
                 </div>
               </Card>
-              <Card padding="none" className={styles.feedCard}>
-                <CardSectionHeader title="최근 뉴스" subtitle="출처 · 시각 · 감성 극성" />
-                <div className={styles.skeletonList}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className={clsx(skeleton.block, skeleton.rowMd)} />
-                  ))}
-                </div>
-              </Card>
-            </div>
-          ) : null}
-          {data ? (
-            <div className={styles.grid}>
+            ) : null}
+            {data ? (
               <Card padding="none" className={styles.feedCard}>
                 <CardSectionHeader title="요약" subtitle="코드 · 감성 · 24h 버즈" />
                 <div className={styles.cardBody}>
@@ -103,6 +97,25 @@ export default function StockDetailPage() {
                   </dl>
                 </div>
               </Card>
+            ) : null}
+          </DetailMainGroup>
+          <DetailMainGroup>
+            <DetailMainGroupPlaceholder>
+              타임라인·연관 인물/섹터는 다음 단계에서 연결 예정입니다.
+            </DetailMainGroupPlaceholder>
+          </DetailMainGroup>
+          <DetailMainGroup>
+            {loading && !data ? (
+              <Card padding="none" className={styles.feedCard}>
+                <CardSectionHeader title="최근 뉴스" subtitle="출처 · 시각 · 감성 극성" />
+                <div className={styles.skeletonList}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className={clsx(skeleton.block, skeleton.rowMd)} />
+                  ))}
+                </div>
+              </Card>
+            ) : null}
+            {data ? (
               <Card padding="none" className={styles.feedCard}>
                 <CardSectionHeader title="최근 뉴스" subtitle="출처 · 시각 · 감성 극성" />
                 {data.recentNews.length === 0 ? (
@@ -123,9 +136,8 @@ export default function StockDetailPage() {
                   </ul>
                 )}
               </Card>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+        </DetailMainGroup>
       </DetailSplitShell>
     </Layout>
   )

@@ -1,7 +1,12 @@
 import clsx from 'clsx'
 import { CardSectionHeader } from '../components/common/CardSectionHeader'
 import { Card } from '../components/common/Card'
-import { DetailSplitShell, type DetailAccordionSidebarGroup } from '../components/common/DetailSplitShell'
+import {
+  DetailMainGroup,
+  DetailMainGroupPlaceholder,
+  DetailSplitShell,
+  type DetailAccordionSidebarGroup,
+} from '../components/common/DetailSplitShell'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
@@ -49,7 +54,7 @@ export default function PersonTrackerPage() {
   return (
     <Layout hideSidebar>
       <DetailSplitShell groups={personSidebarGroups}>
-        <div className={styles.page}>
+        <DetailMainGroup>
           <PageHeader
             title="인물 발언"
             description="핵심 인물의 언급과 감성을 모읍니다. personClient → GET /api/v1/persons/mentions"
@@ -59,6 +64,8 @@ export default function PersonTrackerPage() {
               {error.message}
             </p>
           ) : null}
+        </DetailMainGroup>
+        <DetailMainGroup>
           <Card padding="none" className={styles.feedCard}>
             <CardSectionHeader title="언급 피드" subtitle="인물 · 역할 · 맥락 · 관련 종목" />
             {loading && !data ? (
@@ -92,7 +99,10 @@ export default function PersonTrackerPage() {
               </ul>
             )}
           </Card>
-        </div>
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <DetailMainGroupPlaceholder>인물 관련 뉴스는 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
+        </DetailMainGroup>
       </DetailSplitShell>
     </Layout>
   )

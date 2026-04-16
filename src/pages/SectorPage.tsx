@@ -1,5 +1,10 @@
+import {
+  DetailMainGroup,
+  DetailMainGroupPlaceholder,
+  DetailSplitShell,
+  type DetailAccordionSidebarGroup,
+} from '../components/common/DetailSplitShell'
 import { Layout } from '../components/common/Layout'
-import { DetailSplitShell, type DetailAccordionSidebarGroup } from '../components/common/DetailSplitShell'
 import { PageHeader } from '../components/common/PageHeader'
 
 type SectorSidebarKey = 'overview' | 'analysis' | 'news'
@@ -35,7 +40,15 @@ export default function SectorPage() {
   return (
     <Layout hideSidebar>
       <DetailSplitShell groups={sectorSidebarGroups}>
-        <PageHeader title="섹터" description="섹터 화면은 다음 단계에서 연결 예정입니다." />
+        <DetailMainGroup>
+          <PageHeader title="섹터" description="섹터 화면은 다음 단계에서 연결 예정입니다." />
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <DetailMainGroupPlaceholder>분석·감성·버즈 영역은 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <DetailMainGroupPlaceholder>섹터 뉴스 영역은 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
+        </DetailMainGroup>
       </DetailSplitShell>
     </Layout>
   )

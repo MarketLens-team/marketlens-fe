@@ -1,7 +1,12 @@
 import clsx from 'clsx'
 import { CardSectionHeader } from '../components/common/CardSectionHeader'
 import { Card } from '../components/common/Card'
-import { DetailSplitShell, type DetailAccordionSidebarGroup } from '../components/common/DetailSplitShell'
+import {
+  DetailMainGroup,
+  DetailMainGroupPlaceholder,
+  DetailSplitShell,
+  type DetailAccordionSidebarGroup,
+} from '../components/common/DetailSplitShell'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
@@ -43,7 +48,7 @@ export default function BuzzAlertPage() {
   return (
     <Layout hideSidebar>
       <DetailSplitShell groups={buzzSidebarGroups}>
-        <div className={styles.page}>
+        <DetailMainGroup>
           <PageHeader
             title="버즈 알림"
             description="급증 언급·이상 감성 구간을 추적합니다. buzzClient → GET /api/v1/buzz/alerts"
@@ -53,6 +58,8 @@ export default function BuzzAlertPage() {
               {error.message}
             </p>
           ) : null}
+        </DetailMainGroup>
+        <DetailMainGroup>
           <Card padding="none" className={styles.feedCard}>
             <CardSectionHeader title="알림 피드" subtitle="토픽 · 스파이크 · 관련 종목" />
             {loading && !data ? (
@@ -84,7 +91,10 @@ export default function BuzzAlertPage() {
               </ul>
             )}
           </Card>
-        </div>
+        </DetailMainGroup>
+        <DetailMainGroup>
+          <DetailMainGroupPlaceholder>버즈 뉴스 피드는 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
+        </DetailMainGroup>
       </DetailSplitShell>
     </Layout>
   )

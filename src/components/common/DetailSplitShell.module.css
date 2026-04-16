@@ -12,12 +12,13 @@
 .split {
   box-sizing: border-box;
   flex: 1 1 auto;
+  position: relative;
   border: none;
   border-radius: 0;
   background: var(--color-bg-section);
   display: grid;
-  /* 사이드바 | 1px 세로선 | 본문 — 세로선 그리드 셀이 행 전체 높이(스크롤 길이)까지 늘어남 */
-  grid-template-columns: 260px 1px 1fr;
+  /* 세로선은 그리드 셀이 아니라 absolute로 split 전체 높이에 그림 (sticky 사이드바와 높이 계산 분리) */
+  grid-template-columns: 260px 1fr;
   align-items: stretch;
   column-gap: 0;
   /* Layout .main 패딩 안쪽이 아니라, 네비 하단 ~ 스크롤 영역 끝까지 세로선이 닿도록 풀블리드 */
@@ -25,19 +26,52 @@
   width: calc(100% + 2 * var(--main-pad-inline, 24px));
 }
 
-.columnRule {
+/* DOM 노드 대신 pseudo — 그리드 자동 배치와 겹치지 않고 split 박스 전체 높이에 선 */
+.split::after {
+  content: '';
+  position: absolute;
+  left: 260px;
+  top: 0;
+  bottom: 0;
   width: 1px;
-  min-width: 1px;
-  margin: 0;
-  padding: 0;
-  align-self: stretch;
   background: var(--color-border-default);
   pointer-events: none;
+  z-index: 1;
 }
 
+/* 가로선은 세로 경계~우측 끝까지 — 좌우 패딩은 그룹 안쪽(mainGroupInner)으로만 */
 .content {
-  padding: 22px;
+  padding: 22px 0;
   min-width: 0;
+}
+
+/* 사이드바 큰 그룹(아코디언 섹션) 1개당 본문 블록 — 연속 시 위쪽 가로 구분선만(섹션 전체 너비) */
+.mainGroup {
+  min-width: 0;
+  width: 100%;
+}
+
+.mainGroupInner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+.mainGroup + .mainGroup {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.mainGroupPlaceholder {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 860px) {
@@ -45,11 +79,16 @@
     grid-template-columns: 1fr;
   }
 
-  .columnRule {
+  .split::after {
     display: none;
   }
 
   .splitRoot {
     flex: 0 1 auto;
+  }
+
+  .mainGroup + .mainGroup {
+    margin-top: 22px;
+    padding-top: 22px;
   }
 }
