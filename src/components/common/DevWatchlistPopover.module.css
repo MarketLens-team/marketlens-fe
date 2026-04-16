@@ -69,6 +69,12 @@
     visibility 0s linear 0.7s;
 }
 
+.panelSuppressed {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .panel::before {
   content: '';
   position: absolute;

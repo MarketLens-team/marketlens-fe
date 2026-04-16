@@ -4,9 +4,19 @@ import styles from './DevWatchlistPopover.module.css'
 
 const WATCHLIST_ITEMS = ['삼성전자', '반도체', '이재용', 'SK하이닉스', '2차전지'] as const
 
-export function DevWatchlistPopover() {
+interface DevWatchlistPopoverProps {
+  suppressPanel?: boolean
+  onRequestOpen?: () => void
+}
+
+export function DevWatchlistPopover({ suppressPanel = false, onRequestOpen }: DevWatchlistPopoverProps) {
   return (
-    <div className={styles.wrap}>
+    <div
+      className={styles.wrap}
+      onMouseEnter={onRequestOpen}
+      onFocusCapture={onRequestOpen}
+      data-suppress-panel={suppressPanel ? 'true' : undefined}
+    >
       <NavLink
         to="/dev/watchlist"
         className={({ isActive }) => clsx(styles.trigger, isActive && styles.triggerActive)}
@@ -18,7 +28,7 @@ export function DevWatchlistPopover() {
         관심 목록
       </NavLink>
 
-      <section className={styles.panel} aria-label="관심 목록 패널">
+      <section className={clsx(styles.panel, suppressPanel && styles.panelSuppressed)} aria-label="관심 목록 패널">
         <header className={styles.header}>
           <h3>My First Watchlist</h3>
           <button type="button">전체 보기</button>
