@@ -3,7 +3,7 @@ import { TopNavActions } from './TopNavActions'
 import styles from './Topbar.module.css'
 
 const TOP_MENUS = [
-  { label: '섹터', to: '/' },
+  { label: '섹터', to: '/sector' },
   { label: '종목', to: '/stock/005930' },
   { label: '인물', to: '/person' },
   { label: '뉴스', to: '/buzz' },
