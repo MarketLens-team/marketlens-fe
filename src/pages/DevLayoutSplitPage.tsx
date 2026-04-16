@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DetailAccordionSidebar, type DetailAccordionSidebarGroup } from '../components/common/DetailAccordionSidebar'
 import { DevTopNavigation } from '../components/common/DevTopNavigation'
 import styles from './DevLayoutSplitPage.module.css'
 
@@ -20,7 +21,7 @@ const latestNews = [
   { time: '1h ago', title: 'AI 인프라 투자 확대 전망', source: 'Tech Macro', tone: '긍정' },
 ] as const
 
-const detailMenus = [
+const detailMenus: DetailAccordionSidebarGroup<SidebarGroupKey>[] = [
   {
     key: 'markets',
     section: 'Markets',
@@ -244,40 +245,13 @@ export default function DevLayoutSplitPage() {
         </section>
       ) : (
         <section className={styles.detailView}>
-          <aside className={styles.detailSidebar}>
-            {detailMenus.map((group) => (
-              <div key={group.section} className={styles.detailGroup}>
-                <button
-                  type="button"
-                  className={styles.detailGroupToggle}
-                  onClick={() => toggleGroup(group.key)}
-                  aria-expanded={!collapsed[group.key]}
-                >
-                  <span className={styles.groupHead}>
-                    <span className={styles.groupIcon} aria-hidden>
-                      {group.icon}
-                    </span>
-                    {group.section}
-                  </span>
-                  <span className={styles.detailChevron}>{collapsed[group.key] ? '▸' : '▾'}</span>
-                </button>
-                {!collapsed[group.key] ? (
-                  <div className={styles.detailMenuRail}>
-                    {group.items.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={item.id === activeItem ? styles.detailActive : styles.detailItem}
-                        onClick={() => handleSelectItem(item.id, group.key)}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </aside>
+          <DetailAccordionSidebar
+            groups={detailMenus}
+            collapsedByGroup={collapsed}
+            activeItemId={activeItem}
+            onToggleGroup={toggleGroup}
+            onSelectItem={handleSelectItem}
+          />
 
           <article className={styles.detailContent}>
             <h2>상세 페이지 레이아웃 프리뷰</h2>

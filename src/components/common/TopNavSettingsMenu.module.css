@@ -21,8 +21,12 @@
 
 .trigger:hover,
 .triggerOpen {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
+}
+
+.triggerOpen {
+  background: var(--color-interactive-active);
 }
 
 .panel {
@@ -93,11 +97,17 @@
   font-weight: 600;
   padding: 7px 6px;
   cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.segmentBtn:hover {
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .segmentBtnActive {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .linkGroup {
@@ -119,5 +129,6 @@
 }
 
 .linkBtn:hover {
-  background: var(--color-bg-elevated);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
