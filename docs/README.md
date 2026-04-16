@@ -27,15 +27,15 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
 문서 맵은 유지하는 것이 좋습니다.  
 폴더만 두면 신규 참여자/미래의 내가 문서 진입점을 찾기 어렵습니다.
 
-- `docs/README.md` (이 문서)
+- [docs/README.md](./README.md) (이 문서)  
   - 전체 목적/운영 규칙/진입 순서
-- `docs/ddr/0001-dev-sidebar-migration.md`
-  - DDR-0001 결정 기록 (Issue #7, PR #6 연계)
-- `docs/dev-sidebar-migration.md`
+- [DDR-0001 기록](./ddr/0001-dev-sidebar-migration.md)  
+  - 결정 기록 (연관 이슈 [#7](https://github.com/MarketLens-team/marketlens-fe/issues/7), PR [#6](https://github.com/MarketLens-team/marketlens-fe/pull/6))
+- [dev-sidebar-migration.md](./dev-sidebar-migration.md)  
   - 사이드바 도입 전/실험/반영 흐름 상세 로그
-- `docs/changelog/2026-04.md`
+- [changelog/2026-04.md](./changelog/2026-04.md)  
   - 날짜별 변경 이력 ("무엇을 바꿨는지" 중심)
-- `docs/snapshots/README.md`
+- [snapshots/README.md](./snapshots/README.md)  
   - 스냅샷 파일 인덱스 + DDR/PR 연결 규칙
 
 ## 기록 기준 (지금의 설계 방향)
@@ -46,13 +46,17 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
 
 ## PR/Issue에 무엇을 남길까
 
-최소 항목만 남기면 충분합니다:
-- Related Issue: `#번호`
-- Refs DDR: `DDR-000X`
-- Evidence: Before/Dev/After 스냅샷 경로
-- PR 링크: 해당 DDR 또는 로그 문서에 역참조
+최소 항목만 남기면 충분합니다.
 
-예시:
-- `Related: #7`
-- `Refs: DDR-0001`
-- `Evidence: docs/snapshots/2026-04-16/01-before-real.png -> docs/snapshots/2026-04-16/03-after-real.png`
+- 연관 이슈: GitHub 이슈 번호 (`#번호`) 또는 [이슈 페이지 전체 URL](https://github.com/MarketLens-team/marketlens-fe/issues)
+- DDR 참조: `Refs: DDR-000X` (PR 검색용 텍스트) + DDR 문서는 아래처럼 링크
+- 근거: 스냅샷은 `![설명](경로)`로 이미지 표시, 또는 파일 링크 `[파일명](경로)`
+- PR 링크: DDR `관련 PR` 항목에 PR URL을 나중에라도 반드시 기록 (PR 생성 직후 붙여도 됨)
+
+예시 (이 저장소 기준 상대 경로):
+
+- 연관 이슈: [#7](https://github.com/MarketLens-team/marketlens-fe/issues/7)
+- DDR 참조: DDR-0001 — [문서 보기](./ddr/0001-dev-sidebar-migration.md)
+- 근거: [01-before-real.png](./snapshots/2026-04-16/01-before-real.png) → [03-after-real.png](./snapshots/2026-04-16/03-after-real.png)
+
+PR 본문에서 이미지로 보이게 하려면 GitHub에는 `![설명](https://github.com/.../blob/브랜치/...png?raw=1)` 형태를 쓰면 됩니다.
