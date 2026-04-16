@@ -2,9 +2,11 @@
   background: var(--color-bg-section);
   padding: 14px 10px;
   position: sticky;
-  top: 12px;
-  max-height: calc(100vh - 24px);
+  top: 0;
+  max-height: calc(100vh - 78px);
+  max-height: calc(100dvh - 78px);
   overflow-y: auto;
+  overscroll-behavior-y: none;
 }
 
 .group {

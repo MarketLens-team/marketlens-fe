@@ -1,18 +1,43 @@
+/* splitRoot는 뷰포트에 맞춰 늘리지 않고(flex:0) 본문 길이만큼만 커짐 → 스크롤 전체 높이에 세로선 */
+.splitRoot {
+  flex: 0 1 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: calc(100% + 2 * var(--main-pad-block, 20px));
+}
+
 .split {
-  border: 1px solid var(--color-border-default);
-  border-radius: 14px;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  border: none;
+  border-radius: 0;
   background: var(--color-bg-section);
   display: grid;
-  grid-template-columns: 260px 1fr;
+  /* 사이드바 | 1px 세로선 | 본문 — 세로선 그리드 셀이 행 전체 높이(스크롤 길이)까지 늘어남 */
+  grid-template-columns: 260px 1px 1fr;
   align-items: stretch;
-  min-height: 100%;
+  column-gap: 0;
+  /* Layout .main 패딩 안쪽이 아니라, 네비 하단 ~ 스크롤 영역 끝까지 세로선이 닿도록 풀블리드 */
+  margin: calc(-1 * var(--main-pad-block, 20px)) calc(-1 * var(--main-pad-inline, 24px));
+  width: calc(100% + 2 * var(--main-pad-inline, 24px));
+}
+
+.columnRule {
+  width: 1px;
+  min-width: 1px;
+  margin: 0;
+  padding: 0;
+  align-self: stretch;
+  background: var(--color-border-default);
+  pointer-events: none;
 }
 
 .content {
   padding: 22px;
-  border-left: 1px solid var(--color-border-default);
   min-width: 0;
-  min-height: 100%;
 }
 
 @media (max-width: 860px) {
@@ -20,7 +45,11 @@
     grid-template-columns: 1fr;
   }
 
-  .content {
-    border-left: none;
+  .columnRule {
+    display: none;
+  }
+
+  .splitRoot {
+    flex: 0 1 auto;
   }
 }

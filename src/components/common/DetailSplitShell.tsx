@@ -29,16 +29,19 @@ export function DetailSplitShell<TKey extends string>({ groups, children }: Deta
   }
 
   return (
-    <section className={styles.split}>
-      <DetailAccordionSidebar
-        groups={groups}
-        collapsedByGroup={collapsedByGroup}
-        activeItemId={activeItemId}
-        onToggleGroup={onToggleGroup}
-        onSelectItem={onSelectItem}
-      />
-      <div className={styles.content}>{children}</div>
-    </section>
+    <div className={styles.splitRoot}>
+      <section className={styles.split}>
+        <DetailAccordionSidebar
+          groups={groups}
+          collapsedByGroup={collapsedByGroup}
+          activeItemId={activeItemId}
+          onToggleGroup={onToggleGroup}
+          onSelectItem={onSelectItem}
+        />
+        <div className={styles.columnRule} aria-hidden />
+        <div className={styles.content}>{children}</div>
+      </section>
+    </div>
   )
 }
 
