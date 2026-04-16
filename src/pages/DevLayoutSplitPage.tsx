@@ -261,22 +261,20 @@ export default function DevLayoutSplitPage() {
                   </span>
                   <span className={styles.detailChevron}>{collapsed[group.key] ? '▸' : '▾'}</span>
                 </button>
-                {!collapsed[group.key]
-                  ? (
-                      <div className={styles.detailMenuRail}>
-                        {group.items.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            className={item.id === activeItem ? styles.detailActive : styles.detailItem}
-                            onClick={() => handleSelectItem(item.id, group.key)}
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    )
-                  : null}
+                {!collapsed[group.key] ? (
+                  <div className={styles.detailMenuRail}>
+                    {group.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={item.id === activeItem ? styles.detailActive : styles.detailItem}
+                        onClick={() => handleSelectItem(item.id, group.key)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ))}
           </aside>
