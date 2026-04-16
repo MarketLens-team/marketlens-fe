@@ -57,13 +57,13 @@
 }
 
 .homeNav button:hover {
-  background: color-mix(in srgb, #283f88 40%, transparent);
-  color: #ecf2ff;
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .homeNav .navActive {
-  background: #283f88;
-  color: #ecf2ff;
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .headerActions {

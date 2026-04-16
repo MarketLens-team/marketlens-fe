@@ -221,8 +221,8 @@
 }
 
 .detailItem:hover {
-  background: color-mix(in srgb, #283f88 40%, transparent);
-  color: #ecf2ff;
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
 }
 
 .detailGroupToggle {
@@ -241,7 +241,7 @@
 }
 
 .detailGroupToggle:hover {
-  background: color-mix(in srgb, #283f88 40%, transparent);
+  background: var(--color-interactive-hover);
 }
 
 .detailChevron {
@@ -250,8 +250,8 @@
 }
 
 .detailActive {
-  background: #283f88;
-  color: #ecf2ff;
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
   font-weight: 600;
 }
 

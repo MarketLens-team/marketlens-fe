@@ -18,6 +18,9 @@
   --color-success: #02c076;
   --color-danger: #f6465d;
   --color-warning: #f0b429;
+  --color-interactive-active: #283f88;
+  --color-interactive-active-text: #ecf2ff;
+  --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
 
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Pretendard', sans-serif;
@@ -53,4 +56,7 @@
   --color-success: #16a34a;
   --color-danger: #dc2626;
   --color-warning: #ca8a04;
+  --color-interactive-active: #2563eb;
+  --color-interactive-active-text: #ffffff;
+  --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
 }
