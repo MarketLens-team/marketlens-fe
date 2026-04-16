@@ -7,7 +7,7 @@
 2026-04-16
 
 ## Related Issue
-- #7
+- [#7](https://github.com/MarketLens-team/marketlens-fe/issues/7)
 
 ## Related PR
 - [#6](https://github.com/MarketLens-team/marketlens-fe/pull/6)
