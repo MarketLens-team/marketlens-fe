@@ -6,9 +6,10 @@ import styles from './Layout.module.css'
 
 interface LayoutProps {
   children: ReactNode
+  hideSidebar?: boolean
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, hideSidebar = false }: LayoutProps) {
   return (
     <div className={styles.layout}>
       <div className={styles.topStrip}>
@@ -20,9 +21,11 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </div>
       <div className={styles.body}>
-        <aside className={styles.sidebar}>
-          <Sidebar />
-        </aside>
+        {!hideSidebar ? (
+          <aside className={styles.sidebar}>
+            <Sidebar />
+          </aside>
+        ) : null}
         <main className={styles.main}>{children}</main>
       </div>
     </div>
