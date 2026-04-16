@@ -23,15 +23,28 @@
 - 변경 근거는 Before -> Dev -> After 스냅샷 체인으로 관리한다.
 
 ## 근거 스냅샷
-- Before: `docs/snapshots/2026-04-16/01-before-real.png`
-- Dev Experiment: `docs/snapshots/2026-04-16/02-dev-page.png`
-- After: `docs/snapshots/2026-04-16/03-after-real.png`
-- Additional:
-  - `docs/snapshots/2026-04-16/04-dev-main.png`
-  - `docs/snapshots/2026-04-16/05-home-top-nav.png`
-  - `docs/snapshots/2026-04-16/06-sidebar-minimal.png`
-  - `docs/snapshots/2026-04-16/07-sidebar-glow.png`
-  - `docs/snapshots/2026-04-16/08-sidebar-compact.png`
+
+### 변경 전 (실페이지)
+사이드바 패턴 적용 전 상태다. 탐색 구조가 페이지 중심으로 구성되어 섹션 단위 이동 근거가 약하다.
+![변경 전](../snapshots/2026-04-16/01-before-real.png)
+원본: [01-before-real.png](../snapshots/2026-04-16/01-before-real.png)
+
+### 개발 실험 (Dev)
+사이드바 그룹/항목 구조와 메뉴 클릭 이동, active 동기화 상호작용을 검증한 화면이다.
+![개발 실험](../snapshots/2026-04-16/02-dev-page.png)
+원본: [02-dev-page.png](../snapshots/2026-04-16/02-dev-page.png)
+
+### 반영 후 (실페이지)
+Dev에서 검증한 사이드바 패턴을 실페이지에 반영한 최종 상태다.
+![반영 후](../snapshots/2026-04-16/03-after-real.png)
+원본: [03-after-real.png](../snapshots/2026-04-16/03-after-real.png)
+
+### 추가 실험 화면
+- [04-dev-main.png](../snapshots/2026-04-16/04-dev-main.png)
+- [05-home-top-nav.png](../snapshots/2026-04-16/05-home-top-nav.png)
+- [06-sidebar-minimal.png](../snapshots/2026-04-16/06-sidebar-minimal.png)
+- [07-sidebar-glow.png](../snapshots/2026-04-16/07-sidebar-glow.png)
+- [08-sidebar-compact.png](../snapshots/2026-04-16/08-sidebar-compact.png)
 
 ## 결과
 - 상세 페이지에 섹션 기반 사이드바 패턴을 반영했다.
@@ -43,6 +56,6 @@
 - 대신 실페이지 회귀 리스크와 재작업 비용을 줄인다.
 
 ## 관련 문서
-- `docs/dev-sidebar-migration.md`
-- `docs/snapshots/README.md`
-- `docs/changelog/2026-04.md`
+- [dev-sidebar-migration.md](../dev-sidebar-migration.md)
+- [snapshots/README.md](../snapshots/README.md)
+- [changelog/2026-04.md](../changelog/2026-04.md)

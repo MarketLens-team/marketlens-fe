@@ -5,7 +5,7 @@
 ## 1) 기준 상태 (Before)
 
 **근거 스냅샷**
-- `docs/snapshots/2026-04-16/01-before-real.png`
+- [01-before-real.png](./snapshots/2026-04-16/01-before-real.png)
 
 ![before real](./snapshots/2026-04-16/01-before-real.png)
 
@@ -18,7 +18,7 @@
 ### 2-1. 사이드바 실험 화면
 
 **근거 스냅샷**
-- `docs/snapshots/2026-04-16/02-dev-page.png`
+- [02-dev-page.png](./snapshots/2026-04-16/02-dev-page.png)
 
 ![dev sidebar page](./snapshots/2026-04-16/02-dev-page.png)
 
@@ -30,8 +30,8 @@
 ### 2-2. Dev 메인 실험 허브
 
 **근거 스냅샷**
-- `docs/snapshots/2026-04-16/04-dev-main.png`
-- `docs/snapshots/2026-04-16/05-home-top-nav.png`
+- [04-dev-main.png](./snapshots/2026-04-16/04-dev-main.png)
+- [05-home-top-nav.png](./snapshots/2026-04-16/05-home-top-nav.png)
 
 ![dev main](./snapshots/2026-04-16/04-dev-main.png)
 ![home top nav](./snapshots/2026-04-16/05-home-top-nav.png)
@@ -43,9 +43,9 @@
 ### 2-3. 사이드바 스타일 변형 실험
 
 **근거 스냅샷**
-- `docs/snapshots/2026-04-16/06-sidebar-minimal.png`
-- `docs/snapshots/2026-04-16/07-sidebar-glow.png`
-- `docs/snapshots/2026-04-16/08-sidebar-compact.png`
+- [06-sidebar-minimal.png](./snapshots/2026-04-16/06-sidebar-minimal.png)
+- [07-sidebar-glow.png](./snapshots/2026-04-16/07-sidebar-glow.png)
+- [08-sidebar-compact.png](./snapshots/2026-04-16/08-sidebar-compact.png)
 
 ![sidebar minimal](./snapshots/2026-04-16/06-sidebar-minimal.png)
 ![sidebar glow](./snapshots/2026-04-16/07-sidebar-glow.png)
@@ -59,7 +59,7 @@
 ## 3) 반영 상태 (After)
 
 **근거 스냅샷**
-- `docs/snapshots/2026-04-16/03-after-real.png`
+- [03-after-real.png](./snapshots/2026-04-16/03-after-real.png)
 
 ![after real](./snapshots/2026-04-16/03-after-real.png)
 
@@ -83,9 +83,9 @@
 
 ```md
 ## Evidence
-- Before: `docs/snapshots/2026-04-16/01-before-real.png`
-- Dev Experiment: `docs/snapshots/2026-04-16/02-dev-page.png`
-- After: `docs/snapshots/2026-04-16/03-after-real.png`
+- Before: [01-before-real.png](./snapshots/2026-04-16/01-before-real.png)
+- Dev Experiment: [02-dev-page.png](./snapshots/2026-04-16/02-dev-page.png)
+- After: [03-after-real.png](./snapshots/2026-04-16/03-after-real.png)
 
 ## Related
 - Refs: DDR-0001
