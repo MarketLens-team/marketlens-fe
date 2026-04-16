@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DevTopNavigation } from '../components/common/DevTopNavigation'
 import styles from './DevLayoutSplitPage.module.css'
 
 type ViewMode = 'home' | 'detail'
-
-const topMenus = ['섹터', '종목', '인물', '뉴스'] as const
 
 const metricCards = [
   { label: 'Market Sentiment', value: '+62', sub: '+4.1% vs yesterday' },
@@ -51,67 +50,7 @@ export default function DevLayoutSplitPage() {
         </div>
       </div>
 
-      <header className={styles.appTopbar}>
-        <div className={styles.brandWrap}>
-          <span className={styles.brandLogo} aria-hidden>
-            M
-          </span>
-          <div className={styles.brand}>MarketLens</div>
-        </div>
-        <nav className={styles.homeNav} aria-label="상단 메뉴">
-          {topMenus.map((menu) => (
-            <button key={menu} type="button">
-              {menu}
-            </button>
-          ))}
-        </nav>
-        <div className={styles.headerActions}>
-          <div className={styles.watchlistWrap}>
-            <button type="button" className={styles.utilityButton} aria-haspopup="dialog">
-              <span className={styles.utilityStar} aria-hidden>
-                ★
-              </span>
-              관심 목록
-            </button>
-            <section className={styles.watchlistPanel} aria-label="관심 목록 패널">
-              <header className={styles.watchlistHeader}>
-                <h3>My First Watchlist</h3>
-                <button type="button">전체 보기</button>
-              </header>
-              <div className={styles.watchlistTabs}>
-                <button type="button" className={styles.watchlistTabActive}>
-                  종목
-                </button>
-                <button type="button" className={styles.watchlistTab}>
-                  섹터
-                </button>
-                <button type="button" className={styles.watchlistTab}>
-                  인물
-                </button>
-              </div>
-              <div className={styles.watchlistBody}>
-                <p className={styles.watchlistLead}>관심 항목 추가하기</p>
-                <div className={styles.watchlistChips}>
-                  <button type="button">삼성전자 +</button>
-                  <button type="button">반도체 +</button>
-                  <button type="button">이재용 +</button>
-                  <button type="button">SK하이닉스 +</button>
-                  <button type="button">2차전지 +</button>
-                </div>
-              </div>
-            </section>
-          </div>
-          <div className={styles.searchWrap}>
-            <span className={styles.searchIcon} aria-hidden>
-              ⌕
-            </span>
-            <input className={styles.search} placeholder="검색" />
-          </div>
-          <button type="button" className={styles.circleButton} aria-label="설정">
-            ⚙
-          </button>
-        </div>
-      </header>
+      <DevTopNavigation />
 
       {mode === 'home' ? (
         <section className={styles.homeView}>
