@@ -23,7 +23,7 @@
 
 .value {
   font-family: var(--font-mono);
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);

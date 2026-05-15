@@ -27,14 +27,15 @@
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Pretendard', sans-serif;
 
-  /* Typography — size (7-step; converge irregular px to nearest step) */
+  /* Typography — size (8-step; converge irregular px to nearest step) */
   --font-size-xs: 0.625rem; /* 10px — badge, caption */
   --font-size-sm: 0.75rem; /* 12px — secondary body */
   --font-size-base: 0.8125rem; /* 13px — default UI */
   --font-size-lg: 0.875rem; /* 14px — emphasized body */
   --font-size-xl: 1rem; /* 16px — list title */
   --font-size-2xl: 1.125rem; /* 18px — section title */
-  --font-size-3xl: 1.375rem; /* 22px — page title */
+  --font-size-3xl: 1.25rem; /* 20px — large emphasis */
+  --font-size-4xl: 1.375rem; /* 22px — page title */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
