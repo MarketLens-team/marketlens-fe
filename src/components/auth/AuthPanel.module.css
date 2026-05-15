@@ -38,7 +38,7 @@
   background: transparent;
   color: var(--color-text-muted);
   font-family: var(--font-sans);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   cursor: pointer;
