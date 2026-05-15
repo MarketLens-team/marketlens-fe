@@ -5,7 +5,7 @@
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--space-3);
   align-items: start;
 }
 
@@ -20,125 +20,125 @@
 }
 
 .bannerError {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border-radius: 4px;
-  border: 1px solid var(--b2);
-  background: var(--bg2);
-  color: var(--R);
-  font-size: 13px;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-section);
+  color: var(--color-danger);
+  font-size: var(--font-size-base);
 }
 
 .cardBody {
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .skeletonPad {
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .skeletonList {
-  padding: 8px 16px 16px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .dl {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  font-size: 13px;
+  gap: var(--space-3);
+  font-size: var(--font-size-base);
 }
 
 .dl dt {
-  margin: 0 0 4px;
-  font-size: 11px;
-  font-family: var(--mono);
-  color: var(--t3);
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .dl dd {
   margin: 0;
-  color: var(--t1);
-  font-family: var(--mono);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
 }
 
 .scoreUp {
-  color: var(--G);
+  color: var(--color-success);
 }
 
 .scoreDown {
-  color: var(--R);
+  color: var(--color-danger);
 }
 
 .newsList {
   list-style: none;
   margin: 0;
-  padding: 8px 16px 16px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
 .newsItem {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .newsItem:first-child {
-  padding-top: 4px;
+  padding-top: var(--space-1);
 }
 
 .newsItem:last-child {
   border-bottom: none;
-  padding-bottom: 4px;
+  padding-bottom: var(--space-1);
 }
 
 .newsTop {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .newsMeta {
-  font-size: 11px;
-  color: var(--t2);
-  font-family: var(--mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
 }
 
 .newsTitle {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--t1);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
 }
 
 .sentPos,
 .sentNeg,
 .sentNeu {
-  font-size: 10px;
-  font-family: var(--mono);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 2px 6px;
-  border-radius: 2px;
-  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
 }
 
 .sentPos {
-  color: var(--G);
+  color: var(--color-success);
 }
 
 .sentNeg {
-  color: var(--R);
+  color: var(--color-danger);
 }
 
 .sentNeu {
-  color: var(--t2);
+  color: var(--color-text-secondary);
 }
