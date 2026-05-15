@@ -1,3 +1,5 @@
+export type { ApiEnvelope, ApiErrorBody } from './api'
+
 export interface LoginRequest {
   email: string
   password: string
@@ -12,15 +14,4 @@ export interface SignupRequest {
 export interface TokenResponse {
   accessToken: string
   refreshToken: string
-}
-
-export interface ApiErrorBody {
-  code?: string
-  message?: string
-}
-
-export interface ApiEnvelope<T> {
-  success: boolean
-  data: T
-  error?: ApiErrorBody
 }

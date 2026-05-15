@@ -1,13 +1,15 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
-import type { ApiEnvelope, LoginRequest, SignupRequest, TokenResponse } from '../types/auth'
+import type { LoginRequest, SignupRequest, TokenResponse } from '../types/auth'
+import type { ApiEnvelope } from '../types/api'
+import { getApiErrorMessage, messageFromApiError } from '../util/apiError'
 import { mockDelay } from '../util/mockDelay'
 
 function assertSuccess<T>(envelope: ApiEnvelope<T>, fallbackMessage: string): T {
-  if (envelope.success && envelope.data) {
-    return envelope.data
+  if (envelope.success) {
+    return envelope.data as T
   }
-  throw new Error(envelope.error?.message ?? fallbackMessage)
+  throw new Error(messageFromApiError(envelope.error, fallbackMessage))
 }
 
 export async function loginWithCredentials(payload: LoginRequest): Promise<TokenResponse> {
@@ -18,8 +20,12 @@ export async function loginWithCredentials(payload: LoginRequest): Promise<Token
       refreshToken: `mock-refresh-${Date.now()}`,
     }
   }
-  const { data } = await api.post<ApiEnvelope<TokenResponse>>('/api/auth/login', payload)
-  return assertSuccess(data, '로그인에 실패했습니다.')
+  try {
+    const { data } = await api.post<ApiEnvelope<TokenResponse>>('/api/auth/login', payload)
+    return assertSuccess(data, '로그인에 실패했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '로그인에 실패했습니다.'))
+  }
 }
 
 export async function signupWithCredentials(payload: SignupRequest): Promise<void> {
@@ -27,8 +33,10 @@ export async function signupWithCredentials(payload: SignupRequest): Promise<voi
     await mockDelay(240)
     return
   }
-  const { data } = await api.post<ApiEnvelope<unknown>>('/api/auth/signup', payload)
-  if (!data.success) {
-    throw new Error(data.error?.message ?? '회원가입에 실패했습니다.')
+  try {
+    const { data } = await api.post<ApiEnvelope<unknown>>('/api/auth/signup', payload)
+    assertSuccess(data, '회원가입에 실패했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '회원가입에 실패했습니다.'))
   }
 }
