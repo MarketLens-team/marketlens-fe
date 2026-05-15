@@ -13,8 +13,8 @@
   mask-image: linear-gradient(
     90deg,
     transparent,
-    black var(--space-3),
-    black calc(100% - var(--space-3)),
+    var(--color-text-primary) var(--space-3),
+    var(--color-text-primary) calc(100% - var(--space-3)),
     transparent
   );
 }
