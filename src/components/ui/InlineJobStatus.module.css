@@ -47,8 +47,8 @@
   height: 100%;
   width: 0;
   transition:
-    width 200ms ease-out,
-    background-color 160ms ease-out;
+    width var(--duration-moderate) ease-out,
+    background-color var(--duration-fast) ease-out;
 }
 
 .fillPrimary {

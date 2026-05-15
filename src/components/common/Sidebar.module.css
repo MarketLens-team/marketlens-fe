@@ -57,7 +57,7 @@
   text-decoration: none;
   border-radius: var(--radius-md);
   border-left: none;
-  transition: background-color 0.16s ease, color 0.16s ease;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .link:hover {

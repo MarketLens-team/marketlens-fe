@@ -60,6 +60,23 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
+
+  /* Layout (shared shell / modal widths) */
+  --layout-page-max: 75rem; /* 1200px */
+  --layout-modal-search: 45rem; /* 720px */
+  --layout-sidebar-accordion: 16.25rem; /* 260px */
+
+  /* Motion */
+  --duration-instant: 120ms;
+  --duration-fast: 160ms;
+  --duration-base: 180ms;
+  --duration-moderate: 200ms;
+
+  /* Layer (global stacking) */
+  --z-popover: 20;
+  --z-dropdown: 40;
+  --z-overlay: 1000;
+  --z-toast: 1250;
 }
 
 :root[data-theme='light'] {

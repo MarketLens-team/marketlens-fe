@@ -1,5 +1,5 @@
 .dialogContent {
-  max-width: min(720px, calc(100vw - var(--space-6)));
+  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-6)));
   border-radius: var(--radius-lg);
   background: var(--color-bg-card);
 }

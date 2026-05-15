@@ -14,7 +14,10 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  transition:
+    transform var(--duration-instant) ease,
+    filter var(--duration-instant) ease,
+    opacity var(--duration-instant) ease;
 }
 
 .button:hover:not(:disabled) {
