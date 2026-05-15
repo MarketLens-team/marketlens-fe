@@ -22,7 +22,7 @@
   border-radius: 12px;
   background: transparent;
   text-align: left;
-  color: #e2ebfb;
+  color: var(--color-text-primary);
   padding: 10px 12px;
   cursor: pointer;
   font-size: 14px;
@@ -38,7 +38,7 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #aebbd4;
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,7 +55,7 @@
 
 .chevron {
   font-size: 12px;
-  color: #8f9cb6;
+  color: var(--color-text-muted);
 }
 
 .itemActive {
@@ -76,7 +76,7 @@
 }
 
 .menuRail {
-  border-left: 1px solid color-mix(in srgb, #a9b4c7 40%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--color-border-strong) 40%, transparent);
   margin-left: 8px;
   padding-left: 10px;
   display: flex;

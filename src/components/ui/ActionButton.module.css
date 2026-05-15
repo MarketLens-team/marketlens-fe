@@ -3,15 +3,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 120px;
   height: 44px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border: 1px solid transparent;
-  border-radius: 10px;
-  font-family: var(--sans);
-  font-size: 15px;
-  font-weight: 700;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
@@ -58,13 +58,13 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 16px;
-  height: 16px;
-  margin-left: -8px;
-  margin-top: -8px;
+  width: var(--space-4);
+  height: var(--space-4);
+  margin-left: calc(var(--space-4) / -2);
+  margin-top: calc(var(--space-4) / -2);
   border: 2px solid color-mix(in srgb, var(--color-text-primary) 30%, transparent);
   border-top-color: var(--color-text-primary);
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   animation: action-button-spin 0.7s linear infinite;
 }
 
