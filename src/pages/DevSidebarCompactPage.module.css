@@ -4,7 +4,7 @@
   grid-template-columns: auto 1fr;
   background: #0c1017;
   color: #edf2f8;
-  font-family: var(--sans);
+  font-family: var(--font-sans);
 }
 
 .sidebar {
@@ -14,7 +14,7 @@
   padding: 14px 12px;
   display: flex;
   flex-direction: column;
-  transition: width 0.22s ease;
+  transition: width var(--duration-moderate) ease;
 }
 
 .collapsed {

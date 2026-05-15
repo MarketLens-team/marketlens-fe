@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--color-bg-app);
 }
 
 .viewport {
@@ -13,8 +13,8 @@
   mask-image: linear-gradient(
     90deg,
     transparent,
-    black 12px,
-    black calc(100% - 12px),
+    var(--color-text-primary) var(--space-3),
+    var(--color-text-primary) calc(100% - var(--space-3)),
     transparent
   );
 }
@@ -23,10 +23,10 @@
   display: flex;
   width: max-content;
   align-items: center;
-  gap: 28px;
-  padding-left: 28px;
-  font-family: var(--mono);
-  font-size: 11px;
+  gap: var(--space-8);
+  padding-left: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
   white-space: nowrap;
   animation: tickerScroll 40s linear infinite;
 }
@@ -47,23 +47,23 @@
 .item {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
-  color: var(--t2);
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
 }
 
 .symbol {
-  color: var(--t1);
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
 }
 
 .price {
-  color: var(--t1);
+  color: var(--color-text-primary);
 }
 
 .up {
-  color: var(--G);
+  color: var(--color-success);
 }
 
 .down {
-  color: var(--R);
+  color: var(--color-danger);
 }

@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: var(--color-bg-app);
   color: var(--color-text-primary);
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   padding: 18px 18px 28px;
 }
 
@@ -147,7 +147,7 @@
   color: var(--color-primary);
   display: grid;
   place-items: center;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 

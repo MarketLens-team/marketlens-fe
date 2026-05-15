@@ -9,7 +9,7 @@
     radial-gradient(circle at 74% 20%, #2a1f47 0%, transparent 40%),
     #070a10;
   color: #edf3ff;
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   overflow: hidden;
 }
 
@@ -68,7 +68,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.2s ease;
+  transition: all var(--duration-moderate) ease;
 }
 
 .pill {

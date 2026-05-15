@@ -28,11 +28,11 @@ function scoreText(score: number): string {
 }
 
 function trendStroke(points: { score: number }[]): string {
-  if (!points.length) return 'var(--t2)'
+  if (!points.length) return 'var(--color-text-secondary)'
   const last = points[points.length - 1].score
-  if (last > 0) return 'var(--G)'
-  if (last < 0) return 'var(--R)'
-  return 'var(--t2)'
+  if (last > 0) return 'var(--color-success)'
+  if (last < 0) return 'var(--color-danger)'
+  return 'var(--color-text-secondary)'
 }
 
 export function NewsDetailModal({ item, onClose }: NewsDetailModalProps) {
@@ -109,22 +109,22 @@ export function NewsDetailModal({ item, onClose }: NewsDetailModalProps) {
                   <XAxis
                     dataKey="at"
                     tickFormatter={formatDayLabel}
-                    stroke="var(--t3)"
-                    tick={{ fill: 'var(--t2)', fontSize: 10, fontFamily: 'var(--mono)' }}
+                    stroke="var(--color-text-muted)"
+                    tick={{ fill: 'var(--color-text-secondary)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
-                    stroke="var(--t3)"
-                    tick={{ fill: 'var(--t2)', fontSize: 10, fontFamily: 'var(--mono)' }}
+                    stroke="var(--color-text-muted)"
+                    tick={{ fill: 'var(--color-text-secondary)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                     tickLine={false}
                     axisLine={false}
                     width={36}
                   />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--bg2)',
-                      border: '1px solid var(--border)',
+                      background: 'var(--color-bg-section)',
+                      border: '1px solid var(--color-border-default)',
                       borderRadius: 4,
                       fontSize: 12,
                     }}

@@ -5,13 +5,13 @@
   max-width: 560px;
   margin: auto;
   flex-shrink: 0;
-  max-height: min(760px, calc(100vh - 48px));
+  max-height: min(760px, calc(100vh - var(--space-12)));
   display: flex;
   flex-direction: column;
   border: none;
-  border-radius: 12px;
-  background: var(--bg3);
-  color: var(--t1);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   box-shadow:
     0 24px 80px color-mix(in srgb, var(--color-bg-app) 85%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
@@ -33,8 +33,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  padding: 18px 20px 10px;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-3);
 }
 
 .headingGroup {
@@ -44,33 +44,36 @@
 
 .title {
   margin: 0;
-  font-family: var(--sans);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--t1);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
 }
 
 .meta {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .closeButton {
-  width: 32px;
-  height: 32px;
+  width: var(--space-8);
+  height: var(--space-8);
   flex-shrink: 0;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: transparent;
-  color: var(--t2);
-  font-size: 20px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-3xl);
   line-height: 1;
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
+  transition:
+    background-color var(--duration-base) ease,
+    color var(--duration-base) ease,
+    transform var(--duration-instant) ease;
 }
 
 .closeButton:hover {
-  color: var(--t1);
+  color: var(--color-text-primary);
   background: color-mix(in srgb, var(--color-text-primary) 10%, transparent);
 }
 
@@ -79,10 +82,10 @@
 }
 
 .body {
-  padding: 10px 20px 20px;
+  padding: var(--space-3) var(--space-5) var(--space-5);
   min-height: auto;
 }
 
 .footer {
-  padding: 12px 20px 18px;
+  padding: var(--space-3) var(--space-5) var(--space-5);
 }

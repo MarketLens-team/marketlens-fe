@@ -6,23 +6,23 @@ body::-webkit-scrollbar {
 
 html::-webkit-scrollbar-track,
 body::-webkit-scrollbar-track {
-  background: var(--bg2);
+  background: var(--color-bg-section);
 }
 
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: var(--color-border-default);
+  border-radius: var(--radius-sm);
 }
 
 html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
-  background: var(--b2);
+  background: var(--color-border-strong);
 }
 
 html {
   scrollbar-width: thin;
-  scrollbar-color: var(--border) var(--bg2);
+  scrollbar-color: var(--color-border-default) var(--color-bg-section);
 }
 
 *:focus-visible {
@@ -72,13 +72,13 @@ body.modal-open::-webkit-scrollbar {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-overlay);
   background: color-mix(in srgb, var(--color-bg-app) 72%, transparent);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   box-sizing: border-box;
-  padding: 24px 16px;
+  padding: var(--space-6) var(--space-4);
   /* 세로 스크롤은 오버레이 한 곳만 — 딤(패딩) 위에서도 휠이 같은 영역을 스크롤 */
   overflow-y: auto;
   overscroll-behavior: contain;

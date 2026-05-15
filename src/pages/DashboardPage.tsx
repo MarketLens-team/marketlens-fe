@@ -71,28 +71,28 @@ export default function DashboardPage() {
                     <XAxis
                       dataKey="at"
                       tickFormatter={formatDayLabel}
-                      stroke="var(--t3)"
-                      tick={{ fill: 'var(--t2)', fontSize: 12, fontFamily: 'var(--mono)' }}
+                      stroke="var(--color-text-muted)"
+                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
                       tickLine={false}
                       axisLine={false}
                     />
                     <YAxis
-                      stroke="var(--t3)"
-                      tick={{ fill: 'var(--t2)', fontSize: 12, fontFamily: 'var(--mono)' }}
+                      stroke="var(--color-text-muted)"
+                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
                       tickLine={false}
                       axisLine={false}
                       width={32}
                     />
                     <Tooltip
                       contentStyle={{
-                        background: 'var(--bg2)',
-                        border: '1px solid var(--border)',
+                        background: 'var(--color-bg-section)',
+                        border: '1px solid var(--color-border-default)',
                         borderRadius: 4,
                         fontSize: 12,
                       }}
                       labelFormatter={(v) => new Date(String(v)).toLocaleString()}
                     />
-                    <Line type="monotone" dataKey="score" stroke="var(--G)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="score" stroke="var(--color-success)" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
@@ -110,20 +110,20 @@ export default function DashboardPage() {
                       stroke="color-mix(in srgb, var(--color-text-primary) 6%, transparent)"
                       horizontal={false}
                     />
-                    <XAxis type="number" stroke="var(--t3)" tick={{ fill: 'var(--t2)', fontSize: 12 }} hide />
+                    <XAxis type="number" stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} hide />
                     <YAxis
                       type="category"
                       dataKey="sectorName"
                       width={88}
-                      stroke="var(--t3)"
-                      tick={{ fill: 'var(--t2)', fontSize: 12, fontFamily: 'var(--sans)' }}
+                      stroke="var(--color-text-muted)"
+                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-sans)' }}
                       tickLine={false}
                       axisLine={false}
                     />
                     <Tooltip
                       contentStyle={{
-                        background: 'var(--bg2)',
-                        border: '1px solid var(--border)',
+                        background: 'var(--color-bg-section)',
+                        border: '1px solid var(--color-border-default)',
                         borderRadius: 4,
                         fontSize: 12,
                       }}

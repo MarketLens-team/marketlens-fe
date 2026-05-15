@@ -6,7 +6,7 @@
 .empty {
   width: 100%;
   min-width: 72px;
-  border-radius: 2px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
 }

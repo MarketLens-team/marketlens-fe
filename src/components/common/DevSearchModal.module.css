@@ -1,6 +1,6 @@
 .dialogContent {
-  max-width: min(720px, calc(100vw - 24px));
-  border-radius: 16px;
+  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-6)));
+  border-radius: var(--radius-lg);
   background: var(--color-bg-card);
 }
 
@@ -17,11 +17,11 @@
   box-sizing: border-box;
   display: block;
   border: 1px solid color-mix(in srgb, var(--color-warning) 68%, var(--color-border-default));
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--color-bg-section);
   color: var(--color-text-primary);
-  font-size: 14px;
-  font-family: var(--sans);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-sans);
   padding: 12px 42px 12px 12px;
 }
 
@@ -35,7 +35,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-lg);
 }
 
 .list {
@@ -61,14 +61,14 @@
 .sectionLabel {
   margin-top: 14px;
   padding-left: 2px;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
 .stockCard {
   margin-top: 10px;
   border: 1px solid var(--color-border-default);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--color-bg-elevated) 70%, var(--color-bg-card));
   padding: 12px;
   display: flex;
@@ -85,7 +85,7 @@
 .stockAvatar {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--color-primary) 80%, var(--color-bg-card));
   color: var(--color-text-primary);
   font-weight: 700;
@@ -96,13 +96,13 @@
 
 .stockName {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 700;
 }
 
 .stockCode {
   margin: 3px 0 0;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
 
@@ -111,7 +111,7 @@
 }
 
 .stockPrice {
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   line-height: 1;
 }
@@ -119,7 +119,7 @@
 .stockDelta {
   margin-top: 4px;
   color: var(--color-danger);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -134,7 +134,7 @@
 
 .newsItem {
   border: 1px solid color-mix(in srgb, var(--color-border-default) 70%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--color-bg-elevated) 55%, var(--color-bg-card));
   padding: 14px;
   display: flex;
@@ -150,7 +150,7 @@
 
 .newsTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   line-height: 1.4;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -160,13 +160,13 @@
 .newsMeta {
   margin: 10px 0 0;
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: var(--font-size-sm);
 }
 
 .newsThumb {
   width: 68px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--color-bg-elevated) 80%, var(--color-bg-card)), var(--color-bg-card));
@@ -180,32 +180,32 @@
   display: flex;
   justify-content: center;
   gap: 18px;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
 
 @media (max-width: 860px) {
   .input {
-    font-size: 16px;
+    font-size: var(--font-size-xl);
     padding: 12px 40px 12px 12px;
   }
 
   .inputIcon {
-    font-size: 16px;
+    font-size: var(--font-size-xl);
     right: 12px;
   }
 
   .name,
   .price {
-    font-size: 15px;
+    font-size: var(--font-size-lg);
   }
 
   .meta {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
   }
 
   .stockPrice {
-    font-size: 18px;
+    font-size: var(--font-size-2xl);
   }
 
   .newsItem {

@@ -1,5 +1,5 @@
 .page {
-  max-width: 1200px;
+  max-width: var(--layout-page-max);
 }
 
 .feedCard {
@@ -7,25 +7,25 @@
 }
 
 .bannerError {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border-radius: 4px;
-  border: 1px solid var(--b2);
-  background: var(--bg2);
-  color: var(--R);
-  font-size: 13px;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-section);
+  color: var(--color-danger);
+  font-size: var(--font-size-base);
 }
 
 .skeletonTable {
-  padding: 8px 16px 16px;
+  padding: var(--space-2) var(--space-4) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
 .skeletonRow {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .skeletonRow:last-child {
@@ -39,50 +39,50 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--font-size-base);
 }
 
 .table th,
 .table td {
-  padding: 10px 16px;
+  padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .table th {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--t3);
-  background: var(--bg2);
+  color: var(--color-text-muted);
+  background: var(--color-bg-section);
 }
 
 .table tbody tr:hover td {
-  background: var(--bg3);
+  background: var(--color-bg-card);
 }
 
 .mono {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--t2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .badgeOn,
 .badgeOff {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 2px 6px;
-  border-radius: 2px;
-  border: 1px solid var(--border);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
 }
 
 .badgeOn {
-  color: var(--G);
+  color: var(--color-success);
 }
 
 .badgeOff {
-  color: var(--t3);
+  color: var(--color-text-muted);
 }

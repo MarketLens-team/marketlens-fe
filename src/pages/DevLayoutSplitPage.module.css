@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: var(--color-bg-app);
   color: var(--color-text-primary);
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   padding: 18px 18px 28px;
 }
 
@@ -24,7 +24,7 @@
   border-radius: 14px;
   background: var(--color-bg-section);
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: var(--layout-sidebar-accordion) 1fr;
   align-items: start;
 }
 
