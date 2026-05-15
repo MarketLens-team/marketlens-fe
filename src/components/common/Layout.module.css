@@ -2,8 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  color: var(--t1);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 .topStrip {
@@ -16,8 +16,8 @@
   height: 26px;
   box-sizing: border-box;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
   overflow: hidden;
 }
 
@@ -25,7 +25,7 @@
   min-height: 52px;
   box-sizing: border-box;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border-default);
 }
 
 .body {
@@ -40,24 +40,21 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
+  background: var(--color-bg-section);
+  border-right: 1px solid var(--color-border-default);
 }
 
 .main {
-  /* DetailSplitShell이 짧은 본문이어도 뷰포트 높이까지 채워 세로 구분선이 끝까지 이어지게 */
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  /* DetailSplitShell 등 풀블리드 본문이 패딩을 상쇄할 때 사용 (자식에서 상속) */
-  --main-pad-block: 20px;
-  --main-pad-inline: 24px;
+  --main-pad-block: var(--space-5);
+  --main-pad-inline: var(--space-6);
   flex: 1;
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  /* 상단에서 더 당길 때 레이아웃 배경이 비치는 고무줄 스크롤(오버스크롤) 억제 */
   overscroll-behavior-y: none;
   padding: var(--main-pad-block) var(--main-pad-inline);
-  background: var(--bg2);
+  background: var(--color-bg-section);
 }

@@ -7,7 +7,7 @@
 .trigger {
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--color-border-default);
   background: var(--color-bg-app);
   color: var(--color-text-secondary);
@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   line-height: 1;
 }
 
@@ -31,14 +31,14 @@
 
 .panel {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + var(--space-2));
   right: 0;
-  width: min(340px, calc(100vw - 24px));
-  border-radius: 14px;
+  width: min(340px, calc(100vw - var(--space-6)));
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--color-border-strong) 80%, transparent);
   background: var(--color-bg-card);
   box-shadow: 0 18px 48px color-mix(in srgb, var(--color-bg-app) 88%, transparent);
-  padding: 14px 14px 12px;
+  padding: var(--space-3) var(--space-3) var(--space-3);
   z-index: 40;
 }
 
@@ -46,14 +46,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 11px 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
   border-bottom: 1px solid color-mix(in srgb, var(--color-border-default) 85%, transparent);
 }
 
 .label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
 }
 
@@ -61,28 +61,28 @@
   border: none;
   background: transparent;
   color: var(--color-text-primary);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   font-family: inherit;
 }
 
 .segmentBlock {
-  padding: 11px 0;
+  padding: var(--space-3) 0;
   border-bottom: 1px solid color-mix(in srgb, var(--color-border-default) 85%, transparent);
 }
 
 .segmentLabel {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .segmented {
   display: flex;
-  padding: 4px;
-  border-radius: 10px;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
   gap: 3px;
 }
@@ -90,12 +90,12 @@
 .segmentBtn {
   flex: 1;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 7px 6px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-2) var(--space-2);
   cursor: pointer;
   transition: background-color 0.16s ease, color 0.16s ease;
 }
@@ -113,18 +113,18 @@
 .linkGroup {
   display: flex;
   flex-direction: column;
-  padding-top: 6px;
+  padding-top: var(--space-2);
 }
 
 .linkBtn {
   border: none;
   background: transparent;
   text-align: left;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  padding: 10px 4px;
-  border-radius: 8px;
+  padding: var(--space-3) var(--space-1);
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 

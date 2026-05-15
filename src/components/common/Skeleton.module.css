@@ -8,8 +8,8 @@
 }
 
 .block {
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-bg-card) 25%, var(--color-bg-elevated) 50%, var(--color-bg-card) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s ease-in-out infinite;
 }
@@ -37,11 +37,11 @@
 
 .empty {
   margin: 0;
-  padding: 48px 16px;
-  font-family: var(--mono);
-  font-size: 11px;
+  padding: var(--space-12) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--t3);
+  color: var(--color-text-muted);
   text-align: center;
 }
