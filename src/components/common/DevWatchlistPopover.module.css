@@ -20,8 +20,8 @@
   background: transparent;
   color: var(--color-text-primary);
   padding: 10px 14px;
-  border-radius: 999px;
-  font-size: 13px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-base);
   line-height: 1;
   font-weight: 600;
   cursor: pointer;
@@ -48,7 +48,7 @@
 
 .star {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: var(--font-size-base);
 }
 
 .panel {
@@ -58,7 +58,7 @@
   transform: translateX(-50%);
   width: 520px;
   border: 1px solid color-mix(in srgb, var(--color-border-strong) 75%, transparent);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-bg-card);
   padding: 16px;
   z-index: 20;
@@ -106,7 +106,7 @@
 
 .header h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -115,7 +115,7 @@
   border: none;
   background: transparent;
   color: var(--color-primary);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
 }
@@ -123,7 +123,7 @@
 .tabs {
   margin-top: 10px;
   padding: 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--color-bg-elevated);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -133,11 +133,11 @@
 .tab,
 .tabActive {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
   padding: 7px 8px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   cursor: pointer;
   font-weight: 600;
   transition: background-color 0.16s ease, color 0.16s ease;
@@ -160,7 +160,7 @@
 .lead {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 19px;
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   letter-spacing: -0.03em;
   text-align: center;
@@ -176,10 +176,10 @@
 
 .chips button {
   border: 1px solid var(--color-border-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-elevated);
   color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   padding: 7px 11px;
   cursor: pointer;
@@ -198,15 +198,15 @@
 
   .tab,
   .tabActive {
-    font-size: 18px;
+    font-size: var(--font-size-2xl);
     padding: 10px 8px;
   }
 
   .lead {
-    font-size: 32px;
+    font-size: 2rem;
   }
 
   .chips button {
-    font-size: 16px;
+    font-size: var(--font-size-xl);
   }
 }

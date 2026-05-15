@@ -1,38 +1,38 @@
 .appTopbar {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 14px;
+  gap: var(--space-3);
   align-items: center;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-section);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .brandWrap {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .brandLogo {
   width: 22px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--color-border-default);
   background: var(--color-bg-app);
   color: var(--color-text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .brand {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.03em;
   color: var(--color-text-primary);
   line-height: 1;
@@ -49,10 +49,10 @@
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   transition: background-color 0.16s ease, color 0.16s ease;
 }
 
@@ -68,31 +68,31 @@
 
 .headerActions {
   display: flex;
-  gap: 6px;
+  gap: var(--space-2);
   align-items: center;
 }
 
 .searchWrap {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   border: 1px solid var(--color-border-default);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-bg-app);
-  padding: 0 10px;
+  padding: 0 var(--space-3);
   min-width: 220px;
   cursor: text;
 }
 
 .searchIcon {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .searchPlaceholder {
   color: var(--color-text-muted);
-  font-size: 12px;
-  padding: 8px 0;
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) 0;
   width: 100%;
   text-align: left;
 }
@@ -101,7 +101,7 @@
   .appTopbar {
     grid-template-columns: 1fr;
     align-items: flex-start;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
   }
 
   .searchWrap {

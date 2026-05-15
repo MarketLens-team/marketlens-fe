@@ -7,7 +7,7 @@
 .trigger {
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--color-border-default);
   background: var(--color-bg-app);
   color: var(--color-text-secondary);
@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   line-height: 1;
 }
 
@@ -33,8 +33,8 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: min(340px, calc(100vw - 24px));
-  border-radius: 14px;
+  width: min(340px, calc(100vw - var(--space-6)));
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--color-border-strong) 80%, transparent);
   background: var(--color-bg-card);
   box-shadow:
@@ -56,10 +56,10 @@
 .avatar {
   width: 40px;
   height: 40px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-primary) 35%, var(--color-bg-elevated));
   color: var(--color-text-primary);
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -74,7 +74,7 @@
 
 .greeting {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
@@ -82,7 +82,7 @@
 
 .email {
   margin: 3px 0 0;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,11 +99,11 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +124,7 @@
 }
 
 .rowLabel {
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -133,7 +133,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-primary);
   border: none;
@@ -151,7 +151,7 @@
 
 .chevron {
   color: var(--color-text-muted);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .segmentBlock {
@@ -161,7 +161,7 @@
 
 .segmentLabel {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: 8px;
@@ -170,7 +170,7 @@
 .segmented {
   display: flex;
   padding: 4px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
   gap: 3px;
 }
@@ -178,10 +178,10 @@
 .segmentBtn {
   flex: 1;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   padding: 7px 6px;
   cursor: pointer;
@@ -210,11 +210,11 @@
   border: none;
   background: transparent;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-primary);
   padding: 10px 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: inherit;
 }
@@ -239,10 +239,10 @@
 
 .footerBtn {
   border: 1px solid var(--color-border-default);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
   color: var(--color-text-primary);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   padding: 9px 8px;
   cursor: pointer;
