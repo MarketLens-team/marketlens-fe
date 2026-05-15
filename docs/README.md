@@ -19,7 +19,7 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
 
 대응 방식:
 - 큰 결정은 DDR로 기록
-- 일일 변경은 Changelog로 기록
+- 일일·브랜치 변경은 Changelog로 기록 (`YYYY-MM.md` 인덱스 + `YYYY-MM-DD-feat-*.md` 상세)
 - 화면 근거는 Snapshots로 고정 경로 관리
 
 ## 문서 맵 (권장 유지)
@@ -33,8 +33,12 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
   - 결정 기록 (연관 이슈 [#7](https://github.com/MarketLens-team/marketlens-fe/issues/7), PR [#6](https://github.com/MarketLens-team/marketlens-fe/pull/6))
 - [dev-sidebar-migration.md](./dev-sidebar-migration.md)  
   - 사이드바 도입 전/실험/반영 흐름 상세 로그
+- [changelog/2026-05.md](./changelog/2026-05.md)  
+  - 5월 인덱스 → 기능별 상세로 연결
+- [changelog/2026-05-15-feat-design-tokens.md](./changelog/2026-05-15-feat-design-tokens.md)  
+  - `feat/design-tokens` 브랜치 작업 (토큰·Stylelint·CSS 마이그레이션)
 - [changelog/2026-04.md](./changelog/2026-04.md)  
-  - 날짜별 변경 이력 ("무엇을 바꿨는지" 중심)
+  - 4월 변경 이력 ("무엇을 바꿨는지" 중심)
 - [snapshots/README.md](./snapshots/README.md)  
   - 스냅샷 파일 인덱스 + DDR/PR 연결 규칙
 
