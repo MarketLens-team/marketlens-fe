@@ -21,7 +21,7 @@
   background: var(--color-bg-section);
   color: var(--color-text-primary);
   font-size: 14px;
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   padding: 12px 42px 12px 12px;
 }
 

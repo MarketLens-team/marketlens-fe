@@ -12,11 +12,11 @@ export interface SentimentMiniSparklineProps {
 }
 
 function strokeFromData(points: SentimentTimelinePoint[]): string {
-  if (!points.length) return 'var(--t3)'
+  if (!points.length) return 'var(--color-text-muted)'
   const last = points[points.length - 1].score
-  if (last > 0) return 'var(--G)'
-  if (last < 0) return 'var(--R)'
-  return 'var(--t2)'
+  if (last > 0) return 'var(--color-success)'
+  if (last < 0) return 'var(--color-danger)'
+  return 'var(--color-text-secondary)'
 }
 
 export function SentimentMiniSparkline({ data, strokeVar, className, heightPx = 36 }: SentimentMiniSparklineProps) {

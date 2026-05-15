@@ -6,17 +6,17 @@ const styles: Record<
 > = {
   POSITIVE: {
     background: 'color-mix(in srgb, var(--color-success) 12%, transparent)',
-    color: 'var(--G)',
+    color: 'var(--color-success)',
     label: '긍정',
   },
   NEGATIVE: {
     background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
-    color: 'var(--R)',
+    color: 'var(--color-danger)',
     label: '부정',
   },
   NEUTRAL: {
-    background: 'var(--bg4)',
-    color: 'var(--t2)',
+    background: 'var(--color-bg-elevated)',
+    color: 'var(--color-text-secondary)',
     label: '중립',
   },
 }
@@ -33,7 +33,7 @@ export function SentimentPill({ sentiment }: SentimentPillProps) {
         display: 'inline-block',
         padding: '2px 7px',
         borderRadius: 2,
-        fontFamily: 'var(--mono)',
+        fontFamily: 'var(--font-mono)',
         fontSize: 11,
         background: s.background,
         color: s.color,

@@ -4,9 +4,9 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--t1);
-  font-family: var(--sans);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
 }

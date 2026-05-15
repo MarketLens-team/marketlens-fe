@@ -60,22 +60,6 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
-
-  /* Legacy aliases for gradual migration */
-  --bg: var(--color-bg-app);
-  --bg2: var(--color-bg-section);
-  --bg3: var(--color-bg-card);
-  --bg4: var(--color-bg-elevated);
-  --border: var(--color-border-default);
-  --b2: var(--color-border-strong);
-  --G: var(--color-success);
-  --R: var(--color-danger);
-  --Y: var(--color-warning);
-  --t1: var(--color-text-primary);
-  --t2: var(--color-text-secondary);
-  --t3: var(--color-text-muted);
-  --mono: var(--font-mono);
-  --sans: var(--font-sans);
 }
 
 :root[data-theme='light'] {

@@ -4,7 +4,7 @@
   grid-template-columns: auto 1fr;
   background: #0c1017;
   color: #edf2f8;
-  font-family: var(--sans);
+  font-family: var(--font-sans);
 }
 
 .sidebar {
