@@ -10,7 +10,7 @@
 | 브랜치 | `feat/design-tokens` |
 | 작업일 | 2026-05-15 |
 | 베이스 | `6343ae6` (merge #9 이후) |
-| 관련 PR | _(merge 후 URL 추가)_ |
+| 관련 PR | [#10](https://github.com/MarketLens-team/marketlens-fe/pull/10) |
 | 스냅샷 | 없음 (인프라/토큰 PR — 화면 픽셀 변경 최소) |
 
 ## 요약
