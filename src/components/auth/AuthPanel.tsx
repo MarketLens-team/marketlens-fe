@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type FormEvent, type KeyboardEventHandler, type RefObject } from 'react'
+import { ButtonSpinner } from '../ui/ButtonSpinner'
 import { AuthPasswordVisibilityToggle } from './AuthPasswordVisibilityToggle'
 import styles from './AuthPanel.module.css'
 
@@ -302,8 +303,15 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
                 비밀번호를 잊으셨나요?
               </button>
             </div>
-            <button type="submit" className={styles.submit} disabled={isSubmitting} aria-busy={isSubmitting}>
-              {isSubmitting ? '처리 중…' : '로그인'}
+            <button
+              type="submit"
+              className={styles.submit}
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              data-loading={isSubmitting ? 'true' : 'false'}
+            >
+              <span className={styles.submitLabel}>로그인</span>
+              {isSubmitting ? <ButtonSpinner /> : null}
             </button>
           </form>
         ) : (
@@ -370,8 +378,15 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
               visible={confirmVisible}
               onToggleVisible={() => setConfirmVisible((v) => !v)}
             />
-            <button type="submit" className={styles.submit} disabled={isSubmitting} aria-busy={isSubmitting}>
-              {isSubmitting ? '처리 중…' : '회원 가입'}
+            <button
+              type="submit"
+              className={styles.submit}
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              data-loading={isSubmitting ? 'true' : 'false'}
+            >
+              <span className={styles.submitLabel}>회원 가입</span>
+              {isSubmitting ? <ButtonSpinner /> : null}
             </button>
           </form>
         )}

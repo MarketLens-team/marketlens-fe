@@ -56,26 +56,3 @@
 .button[data-loading='true'] .label {
   opacity: 0;
 }
-
-.spinner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--space-4);
-  height: var(--space-4);
-  margin-left: calc(var(--space-4) / -2);
-  margin-top: calc(var(--space-4) / -2);
-  border: 2px solid color-mix(in srgb, var(--color-text-primary) 30%, transparent);
-  border-top-color: var(--color-text-primary);
-  border-radius: var(--radius-full);
-  animation: action-button-spin 0.7s linear infinite;
-}
-
-@keyframes action-button-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
