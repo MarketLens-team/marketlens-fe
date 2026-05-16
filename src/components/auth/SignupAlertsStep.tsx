@@ -29,10 +29,11 @@ export function SignupAlertsStep({ settings, onSettingsChange }: SignupAlertsSte
           <label className={styles.option}>
             <input
               type="checkbox"
-              className={styles.checkbox}
+              className={styles.checkboxInput}
               checked={settings[option.key]}
               onChange={() => toggle(option.key)}
             />
+            <span className={styles.checkboxBox} aria-hidden />
             <span className={styles.optionText}>
               <span className={styles.optionLabel}>{option.label}</span>
               <span className={styles.optionDesc}>{option.description}</span>

@@ -110,7 +110,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
   const nicknameRef = useRef<HTMLInputElement>(null)
   const confirmRef = useRef<HTMLInputElement>(null)
 
-  const isSignupExpanded = mode === 'signup' && signupStep > 1
+  const isSignupMultiStep = mode === 'signup' && signupStep > 1
 
   const clearFieldError = (key: keyof FieldErrors) => {
     setErrors((prev) => {
@@ -268,8 +268,14 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     }
   }
 
-  const cardClass = [styles.card, isSignupExpanded ? styles.cardExpanded : ''].filter(Boolean).join(' ')
-  const pageClass = [styles.page, isSignupExpanded ? styles.pageSignup : ''].filter(Boolean).join(' ')
+  const cardClass = [
+    styles.card,
+    signupStep === 2 && styles.cardExpanded,
+    signupStep === 3 && styles.cardAlerts,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const pageClass = [styles.page, isSignupMultiStep ? styles.pageSignup : ''].filter(Boolean).join(' ')
 
   return (
     <div className={pageClass}>
@@ -450,15 +456,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
             {signupStep === 3 ? (
               <div className={styles.signupStep}>
                 <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
-                <div className={styles.signupFooter}>
-                  <button
-                    type="button"
-                    className={styles.btnGhost}
-                    onClick={() => setSignupStep(2)}
-                    disabled={isSubmitting}
-                  >
-                    이전
-                  </button>
+                <div className={`${styles.signupFooter} ${styles.signupFooterSingle}`}>
                   <button
                     type="button"
                     className={styles.submit}
