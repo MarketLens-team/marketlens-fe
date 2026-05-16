@@ -1,8 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.intro {
+  margin: 0;
+}
+
+.introTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+.introDescription {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-secondary);
+}
+
 .summary {
   padding: var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--color-border-default));
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-card));
+  background: var(--color-bg-elevated);
 }
 
 .summaryHead {
@@ -18,21 +43,21 @@
 }
 
 .summaryCount strong {
-  color: var(--color-text-primary);
+  color: var(--color-interactive-active-text);
   font-weight: var(--font-weight-bold);
 }
 
 .progressTrack {
   height: 6px;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-app) 50%, var(--color-bg-elevated));
+  background: var(--color-bg-card);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--color-success);
+  background: var(--color-primary);
   transition: width var(--duration-fast) ease;
 }
 
@@ -50,11 +75,11 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-interactive-active);
   border-radius: var(--radius-full);
-  background: var(--color-bg-elevated);
+  background: var(--color-interactive-active);
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
+  color: var(--color-interactive-active-text);
 }
 
 .chipRemove {
@@ -67,14 +92,14 @@
   border: none;
   border-radius: var(--radius-full);
   background: transparent;
-  color: var(--color-text-muted);
+  color: color-mix(in srgb, var(--color-interactive-active-text) 65%, transparent);
   font-size: var(--font-size-lg);
   line-height: 1;
   cursor: pointer;
 }
 
 .chipRemove:hover {
-  color: var(--color-text-primary);
+  color: var(--color-interactive-active-text);
 }
 
 .summaryEmpty {
@@ -115,20 +140,25 @@
 }
 
 .searchInput:focus {
-  border-color: var(--color-primary);
+  border-color: var(--color-interactive-active);
   outline: none;
 }
 
-.sector {
+.sectorCard {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
 }
 
 .sectorHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .sectorTitle {
@@ -143,6 +173,20 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-muted);
+}
+
+.sectorExpand {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.sectorExpand:hover {
+  color: var(--color-interactive-active-text);
 }
 
 .chipGrid {
@@ -161,31 +205,41 @@
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
-  background: var(--color-bg-card);
+  background: var(--color-bg-elevated);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition:
     background var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
-.stockChip:hover {
-  border-color: var(--color-border-strong);
+.stockChip:not(.stockChipActive):hover {
+  border-color: var(--color-interactive-active);
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
+}
+
+.stockChip:not(.stockChipActive):hover .chipMark {
+  color: var(--color-interactive-active-text);
 }
 
 .stockChipActive {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-card));
+  border-color: var(--color-interactive-active);
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 .chipMark {
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
   color: var(--color-text-muted);
 }
 
 .stockChipActive .chipMark {
-  color: var(--color-primary);
+  color: var(--color-interactive-active-text);
 }
 
 .bannerError {

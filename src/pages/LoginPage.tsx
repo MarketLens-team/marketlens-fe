@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import AuthPanel, { type AuthMode } from '../components/auth/AuthPanel'
-import { loginWithCredentials, signupWithCredentials } from '../data/clients/authClient'
+import { completeRegistration } from '../data/clients/completeRegistration'
+import { loginWithCredentials } from '../data/clients/authClient'
 import { isMockDataSource } from '../config/dataSource'
 import { useAuthStore } from '../store/authStore'
+import { useWatchlistStore } from '../store/watchlistStore'
 
 function resolveRole(email: string): 'USER' | 'ADMIN' {
   if (isMockDataSource() && email.includes('admin')) {
@@ -15,21 +17,35 @@ function resolveRole(email: string): 'USER' | 'ADMIN' {
 export default function LoginPage() {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
+  const role = useAuthStore((state) => state.role)
+  const addToWatchlist = useWatchlistStore((state) => state.add)
   const [mode, setMode] = useState<AuthMode>('login')
+
+  if (isLoggedIn) {
+    return <Navigate to={role === 'ADMIN' ? '/admin' : '/'} replace />
+  }
 
   const handleLogin = async (email: string, password: string) => {
     const tokens = await loginWithCredentials({ email, password })
-    const role = resolveRole(email)
-    login(tokens.accessToken, role)
-    navigate(role === 'ADMIN' ? '/admin' : '/')
+    const resolvedRole = resolveRole(email)
+    login(tokens.accessToken, resolvedRole)
+    navigate(resolvedRole === 'ADMIN' ? '/admin' : '/')
   }
 
-  const handleSignup = async (email: string, password: string, nickname: string) => {
-    await signupWithCredentials({ email, password, nickname })
-    const tokens = await loginWithCredentials({ email, password })
+  const handleCompleteRegistration = async (input: Parameters<typeof completeRegistration>[0]) => {
+    const tokens = await completeRegistration(input)
     login(tokens.accessToken, 'USER')
-    navigate('/onboarding/watchlist', { replace: true })
+    input.watchlist.forEach((item) => addToWatchlist(item))
+    navigate('/')
   }
 
-  return <AuthPanel mode={mode} onModeChange={setMode} onLogin={handleLogin} onSignup={handleSignup} />
+  return (
+    <AuthPanel
+      mode={mode}
+      onModeChange={setMode}
+      onLogin={handleLogin}
+      onCompleteRegistration={handleCompleteRegistration}
+    />
+  )
 }

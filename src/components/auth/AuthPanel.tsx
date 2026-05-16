@@ -1,15 +1,22 @@
 import { useId, useRef, useState, type FormEvent, type KeyboardEventHandler, type RefObject } from 'react'
+import type { CompleteRegistrationInput } from '../../data/clients/completeRegistration'
+import type { AlertSettings } from '../../data/types/member'
+import type { WatchlistItem } from '../../store/watchlistStore'
 import { ButtonSpinner } from '../ui/ButtonSpinner'
 import { AuthPasswordVisibilityToggle } from './AuthPasswordVisibilityToggle'
+import { DEFAULT_ALERT_SETTINGS, SignupAlertsStep } from './SignupAlertsStep'
+import { SignupWatchlistStep } from './SignupWatchlistStep'
 import styles from './AuthPanel.module.css'
 
 export type AuthMode = 'login' | 'signup'
+
+type SignupStep = 1 | 2 | 3
 
 export interface AuthPanelProps {
   mode: AuthMode
   onModeChange: (mode: AuthMode) => void
   onLogin: (email: string, password: string) => void | Promise<void>
-  onSignup: (email: string, password: string, nickname: string) => void | Promise<void>
+  onCompleteRegistration: (input: CompleteRegistrationInput) => void | Promise<void>
 }
 
 type FieldErrors = Partial<Record<'email' | 'password' | 'confirmPassword' | 'nickname', string>>
@@ -48,6 +55,7 @@ function AuthField({
   const messageId = `${id}-error`
   const isPassword = type === 'password'
   const inputType = isPassword && visible ? 'text' : type
+  const hasError = Boolean(error)
 
   return (
     <div className={styles.field}>
@@ -64,28 +72,34 @@ function AuthField({
           placeholder={placeholder}
           type={inputType}
           autoComplete={autoComplete}
-          aria-invalid={Boolean(error)}
-          aria-describedby={messageId}
+          aria-invalid={hasError}
+          aria-describedby={hasError ? messageId : undefined}
           onKeyDown={onKeyDown}
         />
         {showToggle && onToggleVisible ? (
           <AuthPasswordVisibilityToggle visible={Boolean(visible)} onToggle={onToggleVisible} />
         ) : null}
       </div>
-      <p id={messageId} className={styles.fieldMessage} role="alert">
-        {error ?? '\u00A0'}
-      </p>
+      {hasError ? (
+        <p id={messageId} className={styles.fieldMessage} role="alert">
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }
 
-export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: AuthPanelProps) {
+export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegistration }: AuthPanelProps) {
   const formId = useId()
+  const [signupStep, setSignupStep] = useState<SignupStep>(1)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [nickname, setNickname] = useState('')
+  const [watchlistSelection, setWatchlistSelection] = useState<WatchlistItem[]>([])
+  const [alertSettings, setAlertSettings] = useState<AlertSettings>(DEFAULT_ALERT_SETTINGS)
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [stepError, setStepError] = useState<string | null>(null)
   const [formMessage, setFormMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [passwordVisible, setPasswordVisible] = useState(false)
@@ -95,6 +109,8 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
   const passwordRef = useRef<HTMLInputElement>(null)
   const nicknameRef = useRef<HTMLInputElement>(null)
   const confirmRef = useRef<HTMLInputElement>(null)
+
+  const isSignupExpanded = mode === 'signup' && signupStep > 1
 
   const clearFieldError = (key: keyof FieldErrors) => {
     setErrors((prev) => {
@@ -106,7 +122,6 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
   }
 
   const syncPasswordMatch = (nextPassword: string, nextConfirm: string) => {
-    if (mode !== 'signup') return
     setErrors((prev) => {
       const next = { ...prev }
       if (nextConfirm.length > 0 && nextPassword !== nextConfirm) {
@@ -118,12 +133,20 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
     })
   }
 
+  const resetSignupFlow = () => {
+    setSignupStep(1)
+    setWatchlistSelection([])
+    setAlertSettings(DEFAULT_ALERT_SETTINGS)
+    setStepError(null)
+  }
+
   const switchMode = (next: AuthMode) => {
     if (next === mode) return
     setErrors({})
     setFormMessage(null)
     setPasswordVisible(false)
     setConfirmVisible(false)
+    resetSignupFlow()
     onModeChange(next)
   }
 
@@ -151,7 +174,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
     return true
   }
 
-  const validateSignup = () => {
+  const validateSignupAccount = () => {
     const next: FieldErrors = {}
     const emailError = validateEmail(email)
     if (emailError) next.email = emailError
@@ -203,30 +226,58 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
     }
   }
 
-  const handleSignupSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (isSubmitting) return
+  const goToWatchlistStep = () => {
     setFormMessage(null)
-    if (!validateSignup()) return
+    setStepError(null)
+    if (!validateSignupAccount()) return
+    setSignupStep(2)
+  }
+
+  const goToAlertsStep = (allowEmpty: boolean) => {
+    setStepError(null)
+    if (!allowEmpty && watchlistSelection.length === 0) {
+      setStepError('최소 1개 이상 선택해 주세요.')
+      return
+    }
+    setSignupStep(3)
+  }
+
+  const finishRegistration = async () => {
     setIsSubmitting(true)
+    setFormMessage(null)
+    setStepError(null)
     try {
-      await Promise.resolve(onSignup(email.trim(), password, nickname.trim()))
+      await Promise.resolve(
+        onCompleteRegistration({
+          email: email.trim(),
+          password,
+          nickname: nickname.trim(),
+          watchlist: watchlistSelection,
+          alertSettings,
+        }),
+      )
       setPassword('')
       setConfirmPassword('')
       setNickname('')
+      resetSignupFlow()
     } catch (error) {
-      setFormMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : '회원가입에 실패했습니다.',
-      })
+      const message = error instanceof Error ? error.message : '회원가입에 실패했습니다.'
+      if (signupStep === 3) {
+        setFormMessage({ type: 'error', text: message })
+      } else {
+        setStepError(message)
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const cardClass = [styles.card, isSignupExpanded ? styles.cardExpanded : ''].filter(Boolean).join(' ')
+  const pageClass = [styles.page, isSignupExpanded ? styles.pageSignup : ''].filter(Boolean).join(' ')
+
   return (
-    <div className={styles.page}>
-      <main className={styles.card}>
+    <div className={pageClass}>
+      <main className={cardClass}>
         <div className={styles.tabs} role="tablist" aria-label="인증">
           <button
             type="button"
@@ -313,80 +364,131 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
             </button>
           </form>
         ) : (
-          <form id={`${formId}-signup`} className={styles.form} onSubmit={handleSignupSubmit} noValidate>
-            <AuthField
-              id="auth-signup-email"
-              label="이메일 주소"
-              value={email}
-              onChange={(value) => {
-                setEmail(value)
-                clearFieldError('email')
-              }}
-              placeholder="이메일 주소 입력..."
-              type="email"
-              error={errors.email}
-              inputRef={emailRef}
-              autoComplete="email"
-            />
-            <AuthField
-              id="auth-signup-nickname"
-              label="닉네임"
-              value={nickname}
-              onChange={(value) => {
-                setNickname(value)
-                clearFieldError('nickname')
-              }}
-              placeholder="닉네임 입력 (2~20자)"
-              error={errors.nickname}
-              inputRef={nicknameRef}
-              autoComplete="nickname"
-            />
-            <AuthField
-              id="auth-signup-password"
-              label="비밀번호"
-              value={password}
-              onChange={(value) => {
-                setPassword(value)
-                clearFieldError('password')
-                syncPasswordMatch(value, confirmPassword)
-              }}
-              placeholder="8자 이상 입력..."
-              type="password"
-              error={errors.password}
-              inputRef={passwordRef}
-              autoComplete="new-password"
-              showToggle
-              visible={passwordVisible}
-              onToggleVisible={() => setPasswordVisible((v) => !v)}
-            />
-            <AuthField
-              id="auth-signup-confirm"
-              label="비밀번호 확인"
-              value={confirmPassword}
-              onChange={(value) => {
-                setConfirmPassword(value)
-                syncPasswordMatch(password, value)
-              }}
-              placeholder="비밀번호 다시 입력..."
-              type="password"
-              error={errors.confirmPassword}
-              inputRef={confirmRef}
-              autoComplete="new-password"
-              showToggle
-              visible={confirmVisible}
-              onToggleVisible={() => setConfirmVisible((v) => !v)}
-            />
-            <button
-              type="submit"
-              className={styles.submit}
-              disabled={isSubmitting}
-              aria-busy={isSubmitting}
-              data-loading={isSubmitting ? 'true' : 'false'}
-            >
-              <span className={styles.submitLabel}>회원 가입</span>
-              {isSubmitting ? <ButtonSpinner /> : null}
-            </button>
-          </form>
+          <div className={styles.signupFlow}>
+            {signupStep === 1 ? (
+              <form id={`${formId}-signup`} className={styles.form} onSubmit={(e) => e.preventDefault()} noValidate>
+                <AuthField
+                  id="auth-signup-email"
+                  label="이메일 주소"
+                  value={email}
+                  onChange={(value) => {
+                    setEmail(value)
+                    clearFieldError('email')
+                  }}
+                  placeholder="이메일 주소 입력..."
+                  type="email"
+                  error={errors.email}
+                  inputRef={emailRef}
+                  autoComplete="email"
+                />
+                <AuthField
+                  id="auth-signup-nickname"
+                  label="닉네임"
+                  value={nickname}
+                  onChange={(value) => {
+                    setNickname(value)
+                    clearFieldError('nickname')
+                  }}
+                  placeholder="닉네임 입력 (2~20자)"
+                  error={errors.nickname}
+                  inputRef={nicknameRef}
+                  autoComplete="nickname"
+                />
+                <AuthField
+                  id="auth-signup-password"
+                  label="비밀번호"
+                  value={password}
+                  onChange={(value) => {
+                    setPassword(value)
+                    clearFieldError('password')
+                    syncPasswordMatch(value, confirmPassword)
+                  }}
+                  placeholder="8자 이상 입력..."
+                  type="password"
+                  error={errors.password}
+                  inputRef={passwordRef}
+                  autoComplete="new-password"
+                  showToggle
+                  visible={passwordVisible}
+                  onToggleVisible={() => setPasswordVisible((v) => !v)}
+                />
+                <AuthField
+                  id="auth-signup-confirm"
+                  label="비밀번호 확인"
+                  value={confirmPassword}
+                  onChange={(value) => {
+                    setConfirmPassword(value)
+                    syncPasswordMatch(password, value)
+                  }}
+                  placeholder="비밀번호 다시 입력..."
+                  type="password"
+                  error={errors.confirmPassword}
+                  inputRef={confirmRef}
+                  autoComplete="new-password"
+                  showToggle
+                  visible={confirmVisible}
+                  onToggleVisible={() => setConfirmVisible((v) => !v)}
+                />
+                <button type="button" className={styles.submit} onClick={goToWatchlistStep}>
+                  다음
+                </button>
+              </form>
+            ) : null}
+
+            {signupStep === 2 ? (
+              <div className={styles.signupStep}>
+                <SignupWatchlistStep
+                  selected={watchlistSelection}
+                  onSelectedChange={setWatchlistSelection}
+                  error={stepError}
+                  onError={setStepError}
+                />
+                <div className={styles.signupFooter}>
+                  <button type="button" className={styles.btnGhost} onClick={() => setSignupStep(1)}>
+                    이전
+                  </button>
+                  <button type="button" className={styles.btnGhost} onClick={() => goToAlertsStep(true)}>
+                    건너뛰기
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.submit}
+                    onClick={() => goToAlertsStep(false)}
+                    disabled={watchlistSelection.length === 0}
+                  >
+                    다음
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {signupStep === 3 ? (
+              <div className={styles.signupStep}>
+                <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
+                <div className={styles.signupFooter}>
+                  <button
+                    type="button"
+                    className={styles.btnGhost}
+                    onClick={() => setSignupStep(2)}
+                    disabled={isSubmitting}
+                  >
+                    이전
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.submit}
+                    onClick={finishRegistration}
+                    disabled={isSubmitting}
+                    aria-busy={isSubmitting}
+                    data-loading={isSubmitting ? 'true' : 'false'}
+                  >
+                    <span className={styles.submitLabel}>MarketLens 시작하기</span>
+                    {isSubmitting ? <ButtonSpinner /> : null}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         )}
       </main>
     </div>

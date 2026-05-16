@@ -19,14 +19,15 @@
 }
 
 .option:hover {
-  border-color: var(--color-border-strong);
+  border-color: var(--color-interactive-active);
+  background: var(--color-interactive-hover);
 }
 
 .checkbox {
   width: 18px;
   height: 18px;
   margin-top: 2px;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-interactive-active);
 }
 
 .optionText {
