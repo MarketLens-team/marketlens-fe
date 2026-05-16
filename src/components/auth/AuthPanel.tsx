@@ -233,12 +233,8 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     setSignupStep(2)
   }
 
-  const goToAlertsStep = (allowEmpty: boolean) => {
+  const goToAlertsStep = () => {
     setStepError(null)
-    if (!allowEmpty && watchlistSelection.length === 0) {
-      setStepError('최소 1개 이상 선택해 주세요.')
-      return
-    }
     setSignupStep(3)
   }
 
@@ -443,20 +439,9 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
                   error={stepError}
                   onError={setStepError}
                 />
-                <div className={styles.signupFooter}>
-                  <button type="button" className={styles.btnGhost} onClick={() => setSignupStep(1)}>
-                    이전
-                  </button>
-                  <button type="button" className={styles.btnGhost} onClick={() => goToAlertsStep(true)}>
-                    건너뛰기
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.submit}
-                    onClick={() => goToAlertsStep(false)}
-                    disabled={watchlistSelection.length === 0}
-                  >
-                    다음
+                <div className={`${styles.signupFooter} ${styles.signupFooterCompact}`}>
+                  <button type="button" className={styles.submit} onClick={goToAlertsStep}>
+                    {watchlistSelection.length === 0 ? '건너뛰기' : '다음'}
                   </button>
                 </div>
               </div>

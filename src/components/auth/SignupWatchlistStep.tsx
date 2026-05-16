@@ -74,6 +74,11 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
     onSelectedChange(selected.filter((item) => item.code !== code))
   }
 
+  const clearSelection = () => {
+    onError(null)
+    onSelectedChange([])
+  }
+
   const toggleSectorExpanded = (sectorCode: string) => {
     setExpandedSectors((prev) => {
       const next = new Set(prev)
@@ -96,9 +101,16 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
 
       <section className={styles.summary} aria-live="polite">
         <div className={styles.summaryHead}>
-          <span className={styles.summaryCount}>
-            내가 고른 종목 <strong>{selected.length}</strong> / {MAX_SELECTION}
-          </span>
+          <div className={styles.summaryHeadRow}>
+            <span className={styles.summaryCount}>
+              내가 고른 종목 <strong>{selected.length}</strong> / {MAX_SELECTION}
+            </span>
+            {selected.length > 0 ? (
+              <button type="button" className={styles.summaryReset} onClick={clearSelection}>
+                초기화
+              </button>
+            ) : null}
+          </div>
           <div className={styles.progressTrack}>
             <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
           </div>
