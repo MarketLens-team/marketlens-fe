@@ -214,8 +214,6 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onSignup }: Aut
       setPassword('')
       setConfirmPassword('')
       setNickname('')
-      onModeChange('login')
-      setFormMessage({ type: 'success', text: '회원가입이 완료되었습니다. 로그인해 주세요.' })
     } catch (error) {
       setFormMessage({
         type: 'error',

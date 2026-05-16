@@ -26,6 +26,9 @@ export default function LoginPage() {
 
   const handleSignup = async (email: string, password: string, nickname: string) => {
     await signupWithCredentials({ email, password, nickname })
+    const tokens = await loginWithCredentials({ email, password })
+    login(tokens.accessToken, 'USER')
+    navigate('/onboarding/watchlist', { replace: true })
   }
 
   return <AuthPanel mode={mode} onModeChange={setMode} onLogin={handleLogin} onSignup={handleSignup} />

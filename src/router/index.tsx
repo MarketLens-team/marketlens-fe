@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PrivateRoute } from './PrivateRoute'
 import AdminCrawlingPage from '../pages/AdminCrawlingPage'
 import AdminPage from '../pages/AdminPage'
@@ -13,6 +13,8 @@ import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
 import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
 import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
+import OnboardingAlertsPage from '../pages/onboarding/OnboardingAlertsPage'
+import OnboardingWatchlistPage from '../pages/onboarding/OnboardingWatchlistPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
@@ -54,6 +56,9 @@ export const router = createBrowserRouter([
   {
     element: <PrivateRoute />,
     children: [
+      { path: '/onboarding', element: <Navigate to="/onboarding/watchlist" replace /> },
+      { path: '/onboarding/watchlist', element: <OnboardingWatchlistPage /> },
+      { path: '/onboarding/alerts', element: <OnboardingAlertsPage /> },
       { path: '/', element: <DashboardPage /> },
       { path: '/sector', element: <SectorPage /> },
       { path: '/watchlist', element: <WatchlistPage /> },
