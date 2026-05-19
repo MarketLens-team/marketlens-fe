@@ -32,11 +32,7 @@ export default function DashboardPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <PageHeader
-          title="홈"
-          description="포트폴리오 감성·관심 종목·시장 컨텍스트를 한 화면에서 봅니다. (목 데이터)"
-          align="center"
-        />
+        <PageHeader title="홈" description="포트폴리오 감성·관심 종목을 한 화면에서 봅니다. (목 데이터)" align="center" />
         {error ? (
           <p className={styles.bannerError} role="alert">
             {error.message}
@@ -71,8 +67,7 @@ export default function DashboardPage() {
               <DashboardWatchlistTable rows={data.watchlist} className={styles.watchlistMain} />
             </section>
 
-            <section className={styles.marketSection} aria-label="시장 전체 컨텍스트">
-              <h2 className={styles.marketTitle}>시장 전체 컨텍스트</h2>
+            <section className={styles.marketSection} aria-label="KOSPI·섹터 감성">
               <div className={styles.marketGrid}>
                 <SentimentGaugePanel
                   title="KOSPI 종합"

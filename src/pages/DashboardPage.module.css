@@ -49,13 +49,6 @@
   margin-top: var(--space-2);
 }
 
-.marketTitle {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  text-align: center;
-}
-
 .marketGrid {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
