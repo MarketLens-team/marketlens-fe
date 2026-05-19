@@ -42,7 +42,7 @@
 }
 
 .sidebar {
-  width: 196px;
+  width: var(--layout-sidebar-width);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;

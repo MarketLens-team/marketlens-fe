@@ -66,6 +66,7 @@
 
   /* Layout (shared shell / modal widths) */
   --layout-page-max: 83rem; /* 1328px */
+  --layout-sidebar-width: 196px; /* Layout .sidebar */
   --layout-modal-search: 45rem; /* 720px */
   --layout-sidebar-accordion: 16.25rem; /* 260px */
 

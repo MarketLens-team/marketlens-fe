@@ -396,14 +396,6 @@
   top: var(--space-5);
 }
 
-.sidebarBackToTop {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 10rem;
-  flex-shrink: 0;
-}
-
 .rightStack .panelBody {
   padding: var(--space-3);
 }

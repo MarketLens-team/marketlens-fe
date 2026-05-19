@@ -21,12 +21,15 @@ function ChevronUpIcon() {
 }
 
 interface BackToTopButtonProps {
+  /** inline: 부모 안 / fixed: 화면 하단 우측 컬럼 */
+  placement?: 'inline' | 'fixed'
   /** 툴팁 방향 — 좁은 사이드바는 left */
   tooltipSide?: 'left' | 'right'
   className?: string
 }
 
 export function BackToTopButton({
+  placement = 'inline',
   tooltipSide = 'right',
   className,
 }: BackToTopButtonProps) {
@@ -52,7 +55,12 @@ export function BackToTopButton({
   if (!visible) return null
 
   return (
-    <div className={clsx(styles.dock, className)}>
+    <div
+      className={clsx(
+        placement === 'fixed' ? styles.wrapFixed : styles.dock,
+        className,
+      )}
+    >
       <button
         type="button"
         className={styles.btn}

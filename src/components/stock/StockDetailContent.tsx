@@ -319,10 +319,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
             </div>
           </section>
 
-          <div className={styles.sidebarBackToTop}>
-            <BackToTopButton tooltipSide="left" />
-          </div>
-
           <section className={styles.panel} aria-labelledby="stock-people-title">
             <div className={styles.panelBody}>
               <h2 id="stock-people-title" className={styles.panelTitle}>
@@ -355,6 +351,8 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         </span>
         감성 점수는 예측이 아닌 참고 지표입니다. 투자 판단은 본인 책임입니다.
       </p>
+
+      <BackToTopButton placement="fixed" tooltipSide="left" />
     </div>
   )
 }
