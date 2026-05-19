@@ -30,7 +30,7 @@ export const SENTIMENT_BAND_COLORS: Pick<
 }
 
 /** 구간 경계 점선 (CMC Fear & Greed) */
-export const SENTIMENT_ZONE_LINE_COLOR = 'rgba(148, 163, 184, 0.28)'
+export const SENTIMENT_ZONE_LINE_COLOR = 'rgba(148, 163, 184, 0.52)'
 
 /** 언급량 막대 (CMC 거래량 — 회색) */
 export const MENTION_HISTOGRAM_COLOR = 'rgba(148, 163, 184, 0.55)'
@@ -73,9 +73,7 @@ export function withAlpha(color: string, alpha: number): string {
   return color
 }
 
-/** Y축 정수 눈금만 표시 */
-export function formatChartAxisPrice(price: number): string {
-  const rounded = Math.round(price)
-  if (Math.abs(price - rounded) > 0.001) return ''
-  return String(rounded)
+/** Y축 눈금은 HTML 오버레이로 통일 (라이브러리 눈금 비활성) */
+export function formatChartAxisPrice(_price: number): string {
+  return ''
 }

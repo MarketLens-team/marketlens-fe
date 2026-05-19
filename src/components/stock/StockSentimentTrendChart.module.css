@@ -170,6 +170,36 @@
   pointer-events: none;
 }
 
+/* Y축 눈금 — price scale 열과 동일 너비·우측 정렬 */
+.axisTicks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: auto;
+  right: 10px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.axisTick {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  padding-right: 6px;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: #94a3b8;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* CMC — 숫자는 점선 바로 아래 */
+.axisTickBelowLine {
+  transform: translateY(5px);
+}
+
 .currentBadge {
   position: absolute;
   z-index: 3;

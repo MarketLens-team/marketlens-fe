@@ -31,8 +31,9 @@ import {
 } from './stockSentimentInterpretation'
 import { computeTooltipPosition } from './stockSentimentTooltip'
 import {
+  STOCK_SENTIMENT_ALL_BOUNDARIES,
   STOCK_SENTIMENT_EXTREME_NEGATIVE_Y1,
-  STOCK_SENTIMENT_ZONE_BOUNDARIES,
+  STOCK_SENTIMENT_Y_TICKS_DISPLAY_ORDER,
   STOCK_SENTIMENT_ZONES,
 } from './stockSentimentZones'
 import {
@@ -92,7 +93,8 @@ function buildChartOptions(colors: StockChartColors) {
       borderVisible: false,
       textColor: colors.chartText,
       autoScale: false,
-      scaleMargins: { top: 0, bottom: 0 },
+      /* 상·하단 눈금이 점선 중앙에 오도록 최소 여백 */
+      scaleMargins: { top: 0.05, bottom: 0.05 },
       minimumWidth: 32,
       alignLabels: true,
     },
@@ -129,12 +131,12 @@ function lockScorePriceScale(chart: IChartApi) {
 }
 
 function addBoundaryLines(series: ISeriesApi<'Line'>) {
-  for (const price of STOCK_SENTIMENT_ZONE_BOUNDARIES) {
+  for (const price of STOCK_SENTIMENT_ALL_BOUNDARIES) {
     series.createPriceLine({
       price,
       color: SENTIMENT_ZONE_LINE_COLOR,
-      lineWidth: 1,
-      lineStyle: LineStyle.Dashed,
+      lineWidth: 2,
+      lineStyle: LineStyle.Dotted,
       axisLabelVisible: false,
     })
   }
@@ -151,6 +153,8 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   const lineSeriesListRef = useRef<ISeriesApi<'Line'>[]>([])
   const histogramSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null)
   const currentBadgeRef = useRef<HTMLDivElement>(null)
+  const axisTicksLayerRef = useRef<HTMLDivElement>(null)
+  const axisTickRefs = useRef<(HTMLSpanElement | null)[]>([])
   const bandRefs = useRef<(HTMLDivElement | null)[]>([])
   const zoneLabelRefs = useRef<(HTMLSpanElement | null)[]>([])
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
@@ -210,6 +214,20 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
         badge.style.opacity = visibility.score ? '1' : '0'
       }
     }
+
+    const axisInsetRight = 10
+    if (axisTicksLayerRef.current) {
+      axisTicksLayerRef.current.style.width = `${Math.max(rightScaleWidth - axisInsetRight, 24)}px`
+      axisTicksLayerRef.current.style.right = `${axisInsetRight}px`
+    }
+
+    STOCK_SENTIMENT_Y_TICKS_DISPLAY_ORDER.forEach((value, i) => {
+      const el = axisTickRefs.current[i]
+      if (!el) return
+      const y = series.priceToCoordinate(value)
+      if (y == null) return
+      el.style.top = `${y}px`
+    })
   }, [clampedCurrent, visibility.score])
 
   const toggleSeries = (key: SeriesKey) => {
@@ -415,6 +433,20 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
         </div>
 
         <div ref={chartContainerRef} className={styles.chartCanvas} />
+
+        <div ref={axisTicksLayerRef} className={styles.axisTicks} aria-hidden>
+          {STOCK_SENTIMENT_Y_TICKS_DISPLAY_ORDER.map((value, i) => (
+            <span
+              key={value}
+              ref={(el) => {
+                axisTickRefs.current[i] = el
+              }}
+              className={`${styles.axisTick} ${styles.axisTickBelowLine}`}
+            >
+              {value}
+            </span>
+          ))}
+        </div>
 
         <div ref={currentBadgeRef} className={styles.currentBadge} aria-hidden>
           {formatStockScore(clampedCurrent)}
