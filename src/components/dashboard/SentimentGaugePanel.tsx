@@ -1,7 +1,8 @@
 import clsx from 'clsx'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
-import type { SentimentGaugeBlock, SentimentDistribution, StockHighlight } from '../../data/types/dashboard'
+import type { SentimentDistribution, SentimentGaugeBlock, StockHighlight } from '../../data/types/dashboard'
+import { SentimentArcGauge } from './SentimentArcGauge'
 import styles from './SentimentGaugePanel.module.css'
 
 interface SentimentGaugePanelProps {
@@ -9,12 +10,6 @@ interface SentimentGaugePanelProps {
   subtitle?: string
   gauge: SentimentGaugeBlock
   stocksToWatch?: StockHighlight[]
-}
-
-function scoreTone(score: number): 'pos' | 'neg' | 'neu' {
-  if (score > 0) return 'pos'
-  if (score < 0) return 'neg'
-  return 'neu'
 }
 
 function DistributionBar({ distribution }: { distribution: SentimentDistribution }) {
@@ -36,28 +31,11 @@ function DistributionBar({ distribution }: { distribution: SentimentDistribution
 }
 
 export function SentimentGaugePanel({ title, subtitle, gauge, stocksToWatch }: SentimentGaugePanelProps) {
-  const tone = scoreTone(gauge.score)
-  const range = gauge.max - gauge.min
-  const fillPct = range > 0 ? ((gauge.score - gauge.min) / range) * 100 : 50
-
   return (
     <Card padding="md" className={styles.card}>
       <CardSectionHeader title={title} subtitle={subtitle} variant="embedded" showChevron />
-      <div className={styles.body}>
-        <div className={styles.gaugeCol} aria-hidden>
-          <div className={styles.gaugeTrack}>
-            <div className={styles.gaugeFill} style={{ width: `${fillPct}%` }} />
-          </div>
-          <p className={clsx(styles.score, styles[tone])}>
-            {gauge.score > 0 ? '+' : ''}
-            {gauge.score}
-          </p>
-          <p className={styles.range}>
-            {gauge.min} ~ {gauge.max}
-          </p>
-        </div>
-        <DistributionBar distribution={gauge.distribution} />
-      </div>
+      <SentimentArcGauge chartId="kospi-sentiment-gauge" gauge={gauge} ariaLabel={`${title} ${gauge.score}`} />
+      <DistributionBar distribution={gauge.distribution} />
       {stocksToWatch?.length ? (
         <div className={styles.watchBlock}>
           <h3 className={styles.watchTitle}>주목할 종목</h3>
