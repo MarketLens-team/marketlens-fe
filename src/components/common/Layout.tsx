@@ -27,7 +27,9 @@ export function Layout({ children, hideSidebar = true }: LayoutProps) {
             <Sidebar />
           </aside>
         ) : null}
-        <main className={styles.main}>{children}</main>
+        <main className={styles.main} data-scroll-root>
+          {children}
+        </main>
       </div>
     </div>
   )

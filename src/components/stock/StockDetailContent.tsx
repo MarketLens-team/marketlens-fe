@@ -1,8 +1,11 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { BackToTopButton } from '../common/BackToTopButton'
+import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
 import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
   SentimentPolarity,
   StockDetail,
@@ -71,7 +74,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
 
   const filteredNews = useMemo(() => filterNews(newsItems, newsFilter), [newsItems, newsFilter])
 
-  const loadMoreNews = async () => {
+  const loadMoreNews = useCallback(async () => {
     if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
     setLoadingMoreNews(true)
     setLoadMoreError(null)
@@ -95,7 +98,20 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     } finally {
       setLoadingMoreNews(false)
     }
-  }
+  }, [
+    loadingMoreNews,
+    pagination.hasNext,
+    pagination.nextCursor,
+    stock.code,
+    stock.name,
+  ])
+
+  const newsSentinelRef = useInfiniteScroll({
+    enabled: newsItems.length > 0,
+    hasMore: pagination.hasNext,
+    loading: loadingMoreNews,
+    onLoadMore: () => void loadMoreNews(),
+  })
 
   const priceUp = stock.price.change >= 0
 
@@ -263,22 +279,16 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               ))}
             </ul>
           )}
+          {pagination.hasNext ? (
+            <div className={styles.newsScrollFoot}>
+              <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
+              {loadingMoreNews ? <FeedLoadingSpinner /> : null}
+            </div>
+          ) : null}
           {loadMoreError ? (
             <p className={styles.loadMoreError} role="alert">
               {loadMoreError}
             </p>
-          ) : null}
-          {pagination.hasNext ? (
-            <div className={styles.loadMoreWrap}>
-              <button
-                type="button"
-                className={styles.loadMoreBtn}
-                disabled={loadingMoreNews}
-                onClick={() => void loadMoreNews()}
-              >
-                {loadingMoreNews ? '불러오는 중…' : '뉴스 더 보기'}
-              </button>
-            </div>
           ) : null}
         </section>
 
@@ -341,6 +351,8 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         </span>
         감성 점수는 예측이 아닌 참고 지표입니다. 투자 판단은 본인 책임입니다.
       </p>
+
+      <BackToTopButton />
     </div>
   )
 }
