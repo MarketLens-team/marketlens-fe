@@ -1,5 +1,6 @@
 import type {
   NewsFeedItemResponse,
+  RelatedStocksResponse,
   StockDetailResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
@@ -9,6 +10,7 @@ import type {
   SentimentPolarity,
   StockDetail,
   StockNewsItem,
+  StockRelatedStock,
   StockSentimentBreakdown,
   StockSentimentBreakdownRow,
   StockSentimentContext,
@@ -70,6 +72,21 @@ export function mapSentimentBreakdown(
   }
 }
 
+export function mapRelatedStocks(
+  response: RelatedStocksResponse,
+  currentCode?: string,
+): StockRelatedStock[] {
+  const exclude = currentCode?.trim()
+  return response.stocks
+    .filter((item) => !exclude || item.code !== exclude)
+    .map((item) => ({
+      code: item.code,
+      name: item.name,
+      market: item.market,
+      sentimentScore: item.sentimentScore,
+    }))
+}
+
 export function mapNewsFeedItems(
   items: NewsFeedItemResponse[],
   highlightTerms?: string[],
@@ -95,7 +112,7 @@ export function mapStockDetailPage(
   trend: StockSentimentTrendResponse,
   breakdown: StockSentimentBreakdownResponse,
   news: NewsFeedItemResponse[],
-  extras?: Pick<StockDetail, 'relatedStocks' | 'peopleTimeline'>,
+  extras?: Partial<Pick<StockDetail, 'relatedStocks' | 'peopleTimeline'>>,
 ): StockDetail {
   const { stock, watchlist } = detail
   const highlightTerms = [stock.name, stock.code]

@@ -421,10 +421,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.rightStack .stockLinkArrow {
-  font-size: var(--font-size-xs);
-}
-
 .rightStack .personRow {
   gap: var(--space-2);
 }
@@ -565,13 +561,17 @@
 }
 
 .stockLinkName {
+  flex: 1;
+  min-width: 0;
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
-.stockLinkArrow {
-  color: var(--color-text-muted);
+.stockLinkScore {
+  flex-shrink: 0;
+  margin-left: auto;
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .personRow {

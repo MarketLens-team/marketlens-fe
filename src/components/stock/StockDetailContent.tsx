@@ -236,11 +236,14 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                   <li key={related.code} className={styles.simpleListItem}>
                     <Link className={styles.stockLink} to={`/stock/${related.code}`}>
                       <span className={styles.stockLinkName}>{related.name}</span>
-                      <span className={clsx(styles.mono, scoreToneClass(related.sentimentScore))}>
+                      <span
+                        className={clsx(
+                          styles.stockLinkScore,
+                          styles.mono,
+                          scoreToneClass(related.sentimentScore),
+                        )}
+                      >
                         {formatStockScore(related.sentimentScore)}
-                      </span>
-                      <span className={styles.stockLinkArrow} aria-hidden>
-                        →
                       </span>
                     </Link>
                   </li>

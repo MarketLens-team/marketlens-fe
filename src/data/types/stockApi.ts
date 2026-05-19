@@ -51,6 +51,18 @@ export interface StockSentimentBreakdownResponse {
   totalAverageScore: number
 }
 
+export interface RelatedStockItemResponse {
+  code: string
+  name: string
+  market: string
+  sentimentScore: number
+}
+
+export interface RelatedStocksResponse {
+  sectorName: string
+  stocks: RelatedStockItemResponse[]
+}
+
 export interface StockDirectoryResponse {
   sectors: Array<{
     sectorCode: string

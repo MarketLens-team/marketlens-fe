@@ -1,6 +1,6 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
-import { mapStockDetailPage } from '../mappers/stockMapper'
+import { mapRelatedStocks, mapStockDetailPage } from '../mappers/stockMapper'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
@@ -9,6 +9,7 @@ import type {
   StockDetailResponse,
   StockDirectoryResponse,
   StockSentimentBreakdownResponse,
+  RelatedStocksResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
@@ -79,7 +80,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
 
   const dateQuery = recordedAt ? { recordedAt } : undefined
 
-  const [detail, summary, trend, breakdown, newsFeed] = await Promise.all([
+  const [detail, summary, trend, breakdown, newsFeed, related] = await Promise.all([
     getApiData<StockDetailResponse>(stockPath(code), '종목 정보를 불러오지 못했습니다.'),
     getApiData<StockSummaryResponse>(
       stockPath(code, '/summary'),
@@ -97,9 +98,15 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       dateQuery,
     ),
     fetchStockNewsFeed(code, { size: 20 }),
+    getApiData<RelatedStocksResponse>(
+      stockPath(code, '/related'),
+      '연관 종목을 불러오지 못했습니다.',
+    ),
   ])
 
-  return mapStockDetailPage(detail, summary, trend, breakdown, newsFeed.content)
+  return mapStockDetailPage(detail, summary, trend, breakdown, newsFeed.content, {
+    relatedStocks: mapRelatedStocks(related, code),
+  })
 }
 
 /** OpenAPI에 검색 엔드포인트 없음 — 목록에서 클라이언트 필터 */

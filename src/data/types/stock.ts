@@ -71,6 +71,7 @@ export interface StockNewsItem {
 export interface StockRelatedStock {
   code: string
   name: string
+  market?: string
   sentimentScore: number
 }
 
@@ -89,7 +90,6 @@ export interface StockDetail {
   sentimentContext: StockSentimentContext
   sentimentBreakdown: StockSentimentBreakdown
   recentNews: StockNewsItem[]
-  /** API 미제공 — 목업·추후 연동 */
   relatedStocks: StockRelatedStock[]
   /** API 미제공 — 목업·추후 연동 */
   peopleTimeline: StockPersonTimelineItem[]
