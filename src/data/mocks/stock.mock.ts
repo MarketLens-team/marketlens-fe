@@ -82,6 +82,10 @@ const samsungDetail: StockDetail = {
       imageUrl: null,
     },
   ],
+  newsPagination: {
+    nextCursor: '2026-05-19T09:20:00Z|2',
+    hasNext: true,
+  },
   relatedStocks: [
     { code: '000660', name: 'SK하이닉스', sentimentScore: 62 },
     { code: '042700', name: '한미반도체', sentimentScore: 48 },
@@ -187,6 +191,10 @@ function buildFallbackDetail(
         imageUrl: null,
       },
     ],
+    newsPagination: {
+      nextCursor: null,
+      hasNext: false,
+    },
     relatedStocks: [
       { code: '005930', name: '삼성전자', sentimentScore: 73 },
       { code: '000660', name: 'SK하이닉스', sentimentScore: 62 },

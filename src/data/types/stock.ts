@@ -83,6 +83,11 @@ export interface StockPersonTimelineItem {
   sentimentScore: number
 }
 
+export interface StockNewsPagination {
+  nextCursor: string | null
+  hasNext: boolean
+}
+
 export interface StockDetail {
   stock: StockSummary
   /** `GET /api/v1/stocks/{code}` → watchlist.interested */
@@ -90,6 +95,8 @@ export interface StockDetail {
   sentimentContext: StockSentimentContext
   sentimentBreakdown: StockSentimentBreakdown
   recentNews: StockNewsItem[]
+  /** `GET /api/v1/news/feed/{ticker}/cursor` */
+  newsPagination: StockNewsPagination
   relatedStocks: StockRelatedStock[]
   /** API 미제공 — 목업·추후 연동 */
   peopleTimeline: StockPersonTimelineItem[]

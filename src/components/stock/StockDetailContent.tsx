@@ -1,10 +1,13 @@
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
+import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import type {
   SentimentPolarity,
   StockDetail,
   StockNewsItem,
+  StockNewsPagination,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
@@ -50,12 +53,49 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     sentimentContext,
     sentimentBreakdown,
     recentNews,
+    newsPagination,
     relatedStocks,
     peopleTimeline,
   } = data
   const [newsFilter, setNewsFilter] = useState<NewsFilter>('all')
+  const [newsItems, setNewsItems] = useState(recentNews)
+  const [pagination, setPagination] = useState<StockNewsPagination>(newsPagination)
+  const [loadingMoreNews, setLoadingMoreNews] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
 
-  const filteredNews = useMemo(() => filterNews(recentNews, newsFilter), [recentNews, newsFilter])
+  useEffect(() => {
+    setNewsItems(recentNews)
+    setPagination(newsPagination)
+    setLoadMoreError(null)
+  }, [stock.code, recentNews, newsPagination])
+
+  const filteredNews = useMemo(() => filterNews(newsItems, newsFilter), [newsItems, newsFilter])
+
+  const loadMoreNews = async () => {
+    if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
+    setLoadingMoreNews(true)
+    setLoadMoreError(null)
+    try {
+      const page = await fetchStockNewsFeedCursor(stock.code, {
+        limit: 20,
+        cursor: pagination.nextCursor,
+      })
+      const mapped = mapNewsFeedItems(page.items, [stock.name, stock.code])
+      setNewsItems((prev) => {
+        const seen = new Set(prev.map((item) => item.id))
+        const next = mapped.filter((item) => !seen.has(item.id))
+        return [...prev, ...next]
+      })
+      setPagination({
+        nextCursor: page.nextCursor,
+        hasNext: page.hasNext,
+      })
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+    } finally {
+      setLoadingMoreNews(false)
+    }
+  }
 
   const priceUp = stock.price.change >= 0
 
@@ -223,6 +263,23 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               ))}
             </ul>
           )}
+          {loadMoreError ? (
+            <p className={styles.loadMoreError} role="alert">
+              {loadMoreError}
+            </p>
+          ) : null}
+          {pagination.hasNext ? (
+            <div className={styles.loadMoreWrap}>
+              <button
+                type="button"
+                className={styles.loadMoreBtn}
+                disabled={loadingMoreNews}
+                onClick={() => void loadMoreNews()}
+              >
+                {loadingMoreNews ? '불러오는 중…' : '뉴스 더 보기'}
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <div className={styles.rightStack}>

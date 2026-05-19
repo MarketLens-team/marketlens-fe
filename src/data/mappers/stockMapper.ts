@@ -113,6 +113,7 @@ export function mapStockDetailPage(
   trend: StockSentimentTrendResponse,
   breakdown: StockSentimentBreakdownResponse,
   news: NewsFeedItemResponse[],
+  newsPagination: { nextCursor?: string | null; hasNext?: boolean },
   extras?: Partial<Pick<StockDetail, 'relatedStocks' | 'peopleTimeline'>>,
 ): StockDetail {
   const { stock, watchlist } = detail
@@ -144,6 +145,10 @@ export function mapStockDetailPage(
     sentimentContext,
     sentimentBreakdown: mapSentimentBreakdown(breakdown),
     recentNews: mapNewsFeedItems(news, highlightTerms),
+    newsPagination: {
+      nextCursor: newsPagination.nextCursor ?? null,
+      hasNext: newsPagination.hasNext ?? false,
+    },
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
   }

@@ -94,6 +94,13 @@ export interface NewsFeedResponse {
   page: number
 }
 
+/** OpenAPI `NewsFeedCursorResponse` */
+export interface NewsFeedCursorResponse {
+  items: NewsFeedItemResponse[]
+  nextCursor: string | null
+  hasNext: boolean
+}
+
 /** OpenAPI `TopMover` */
 export interface BuzzSurgeTopMoverResponse {
   stockCode: string
