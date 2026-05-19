@@ -22,42 +22,35 @@ type TreemapContentProps = SectorTreemapNode & {
   width: number
   height: number
   depth: number
+  index: number
 }
 
 function sectorFill(score: number): string {
-  if (score > 15) return 'color-mix(in srgb, #02c076 24%, #1a2332)'
-  if (score < -5) return 'color-mix(in srgb, #f6465d 24%, #1a2332)'
-  return '#243040'
+  if (score > 15) return '#1d7a5c'
+  if (score < -5) return '#9a3a4d'
+  return '#3d5268'
 }
 
 function scoreColor(score: number): string {
-  if (score > 0) return '#02c076'
-  if (score < 0) return '#f6465d'
-  return '#b8c2cc'
+  if (score > 0) return '#7dffc4'
+  if (score < 0) return '#ffb3be'
+  return '#e8f0f8'
 }
 
-function SectorTreemapContent(props: Partial<TreemapContentProps>) {
-  const {
-    x = 0,
-    y = 0,
-    width = 0,
-    height = 0,
-    depth = 0,
-    name = '',
-    sentimentScore = 0,
-    mentionCount = 0,
-  } = props
+function TreemapSectorCell(props: Record<string, unknown>) {
+  return <SectorTreemapContent {...(props as unknown as TreemapContentProps)} />
+}
 
-  if (depth === 0 || width < 28 || height < 24) {
+function SectorTreemapContent(props: TreemapContentProps) {
+  const { x, y, width, height, name, sentimentScore = 0, mentionCount = 0 } = props
+
+  if (!name || width < 24 || height < 20) {
     return null
   }
 
   const fill = sectorFill(sentimentScore)
-  const pad = 6
-  const innerW = width - pad * 2
-  const innerH = height - pad * 2
-  const showScore = innerW >= 36 && innerH >= 32
-  const showMentions = innerW >= 36 && innerH >= 48
+  const showDetail = width >= 48 && height >= 40
+  const showMentions = width >= 48 && height >= 56
   const scoreText = `${sentimentScore > 0 ? '+' : ''}${sentimentScore}`
 
   return (
@@ -70,29 +63,29 @@ function SectorTreemapContent(props: Partial<TreemapContentProps>) {
         rx={6}
         ry={6}
         fill={fill}
-        stroke="#2a3847"
-        strokeWidth={1}
+        stroke="#4d6478"
+        strokeWidth={1.5}
       />
-      {showScore ? (
+      {showDetail ? (
         <>
           <text
             x={x + width / 2}
-            y={y + height / 2 - (showMentions ? 6 : 0)}
+            y={y + height / 2 - (showMentions ? 8 : 0)}
             textAnchor="middle"
             dominantBaseline="middle"
             fill="#ffffff"
-            fontSize={innerW < 52 ? 10 : 11}
+            fontSize={width < 64 ? 10 : 11}
             fontWeight={600}
           >
             {name}
           </text>
           <text
             x={x + width / 2}
-            y={y + height / 2 + (showMentions ? 10 : 8)}
+            y={y + height / 2 + (showMentions ? 8 : 12)}
             textAnchor="middle"
             dominantBaseline="middle"
             fill={scoreColor(sentimentScore)}
-            fontSize={innerW < 52 ? 12 : 14}
+            fontSize={width < 64 ? 12 : 14}
             fontWeight={700}
             fontFamily="IBM Plex Mono, monospace"
           >
@@ -101,11 +94,12 @@ function SectorTreemapContent(props: Partial<TreemapContentProps>) {
           {showMentions ? (
             <text
               x={x + width / 2}
-              y={y + height / 2 + 24}
+              y={y + height / 2 + 26}
               textAnchor="middle"
               dominantBaseline="middle"
-              fill="#7c93a6"
+              fill="#d0dae6"
               fontSize={10}
+              fontWeight={500}
             >
               {mentionCount}건
             </text>
@@ -130,17 +124,13 @@ function SectorTreemapContent(props: Partial<TreemapContentProps>) {
 
 export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
   const treeData = useMemo(
-    () => [
-      {
-        name: 'sectors',
-        children: cells.map((cell) => ({
-          name: cell.name,
-          size: cell.mentionCount,
-          sentimentScore: cell.sentimentScore,
-          mentionCount: cell.mentionCount,
-        })),
-      },
-    ],
+    () =>
+      cells.map((cell) => ({
+        name: cell.name,
+        size: cell.mentionCount,
+        sentimentScore: cell.sentimentScore,
+        mentionCount: cell.mentionCount,
+      })),
     [cells],
   )
 
@@ -159,9 +149,9 @@ export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
             dataKey="size"
             nameKey="name"
             aspectRatio={4 / 3}
-            stroke="#2a3847"
+            stroke="#4d6478"
             isAnimationActive={false}
-            content={<SectorTreemapContent />}
+            content={<TreemapSectorCell />}
           />
         </ResponsiveContainer>
       </div>

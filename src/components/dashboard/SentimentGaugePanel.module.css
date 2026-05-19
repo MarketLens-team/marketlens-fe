@@ -2,42 +2,19 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
-.distWrap {
-  width: 100%;
-  margin-top: var(--space-3);
+.card > :first-child {
+  flex-shrink: 0;
 }
 
-.distBar {
+.gaugeBody {
   display: flex;
-  height: 10px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.distPos {
-  background: color-mix(in srgb, var(--color-success) 55%, transparent);
-}
-
-.distNeu {
-  background: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
-}
-
-.distNeg {
-  background: color-mix(in srgb, var(--color-danger) 55%, transparent);
-}
-
-.distLegend {
-  display: flex;
-  flex-wrap: wrap;
+  flex: 1;
+  align-items: center;
   justify-content: center;
-  gap: var(--space-2) var(--space-4);
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  min-height: 0;
 }
 
 .watchBlock {
