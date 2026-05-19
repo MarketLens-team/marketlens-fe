@@ -18,11 +18,9 @@
   margin-top: var(--space-1);
 }
 
-.chartWrap :global(.recharts-responsive-container) {
-  flex: 1;
-  min-height: 0 !important;
-}
-
-.chartWrap :global(.recharts-wrapper) {
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
   font-family: var(--font-sans);
 }

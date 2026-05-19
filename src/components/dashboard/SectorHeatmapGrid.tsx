@@ -1,103 +1,75 @@
-import { useMemo } from 'react'
-import { ResponsiveContainer, Treemap } from 'recharts'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SectorHeatmapCell } from '../../data/types/dashboard'
+import {
+  layoutSectorTreemap,
+  sentimentFill,
+  sentimentScoreColor,
+} from './sectorTreemap'
 import styles from './SectorHeatmapGrid.module.css'
 
 interface SectorHeatmapGridProps {
   cells: SectorHeatmapCell[]
 }
 
-interface SectorTreemapNode {
-  name: string
-  size: number
-  sentimentScore: number
-  mentionCount: number
+interface SectorTreemapCellProps {
+  leaf: ReturnType<typeof layoutSectorTreemap>[number]
 }
 
-type TreemapContentProps = SectorTreemapNode & {
-  x: number
-  y: number
-  width: number
-  height: number
-  depth: number
-  index: number
-}
-
-function sectorFill(score: number): string {
-  if (score > 15) return '#1d7a5c'
-  if (score < -5) return '#9a3a4d'
-  return '#3d5268'
-}
-
-function scoreColor(score: number): string {
-  if (score > 0) return '#7dffc4'
-  if (score < 0) return '#ffb3be'
-  return '#e8f0f8'
-}
-
-function TreemapSectorCell(props: Record<string, unknown>) {
-  return <SectorTreemapContent {...(props as unknown as TreemapContentProps)} />
-}
-
-function SectorTreemapContent(props: TreemapContentProps) {
-  const { x, y, width, height, name, sentimentScore = 0, mentionCount = 0 } = props
-
-  if (!name || width < 24 || height < 20) {
-    return null
-  }
-
-  const fill = sectorFill(sentimentScore)
-  const showDetail = width >= 48 && height >= 40
-  const showMentions = width >= 48 && height >= 56
+function SectorTreemapCell({ leaf }: SectorTreemapCellProps) {
+  const { x, y, width, height, name, sentimentScore, mentionCount } = leaf
   const scoreText = `${sentimentScore > 0 ? '+' : ''}${sentimentScore}`
+  const showDetail = width >= 52 && height >= 44
+  const showMentions = width >= 52 && height >= 60
+  const cx = x + width / 2
+  const nameY = y + height / 2 - (showMentions ? 10 : showDetail ? 4 : 0)
+  const scoreY = y + height / 2 + (showMentions ? 6 : 10)
+  const mentionY = y + height / 2 + 22
 
   return (
     <g aria-label={`${name} 감성 ${scoreText}, 언급 ${mentionCount}건`}>
       <rect
-        x={x + 1}
-        y={y + 1}
-        width={Math.max(0, width - 2)}
-        height={Math.max(0, height - 2)}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
         rx={6}
         ry={6}
-        fill={fill}
-        stroke="#4d6478"
-        strokeWidth={1.5}
+        fill={sentimentFill(sentimentScore)}
       />
       {showDetail ? (
         <>
           <text
-            x={x + width / 2}
-            y={y + height / 2 - (showMentions ? 8 : 0)}
+            x={cx}
+            y={nameY}
             textAnchor="middle"
             dominantBaseline="middle"
             fill="#ffffff"
-            fontSize={width < 64 ? 10 : 11}
+            fontSize={width < 72 ? 10 : 11}
             fontWeight={600}
           >
             {name}
           </text>
           <text
-            x={x + width / 2}
-            y={y + height / 2 + (showMentions ? 8 : 12)}
+            x={cx}
+            y={scoreY}
             textAnchor="middle"
             dominantBaseline="middle"
-            fill={scoreColor(sentimentScore)}
-            fontSize={width < 64 ? 12 : 14}
+            fill={sentimentScoreColor(sentimentScore)}
+            fontSize={width < 72 ? 12 : 14}
             fontWeight={700}
-            fontFamily="IBM Plex Mono, monospace"
+            fontFamily="var(--font-mono)"
           >
             {scoreText}
           </text>
           {showMentions ? (
             <text
-              x={x + width / 2}
-              y={y + height / 2 + 26}
+              x={cx}
+              y={mentionY}
               textAnchor="middle"
               dominantBaseline="middle"
-              fill="#d0dae6"
+              fill="#d8e2ee"
               fontSize={10}
               fontWeight={500}
             >
@@ -107,7 +79,7 @@ function SectorTreemapContent(props: TreemapContentProps) {
         </>
       ) : (
         <text
-          x={x + width / 2}
+          x={cx}
           y={y + height / 2}
           textAnchor="middle"
           dominantBaseline="middle"
@@ -123,15 +95,27 @@ function SectorTreemapContent(props: TreemapContentProps) {
 }
 
 export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
-  const treeData = useMemo(
-    () =>
-      cells.map((cell) => ({
-        name: cell.name,
-        size: cell.mentionCount,
-        sentimentScore: cell.sentimentScore,
-        mentionCount: cell.mentionCount,
-      })),
-    [cells],
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+
+  useLayoutEffect(() => {
+    const el = chartRef.current
+    if (!el) return
+
+    const sync = () => {
+      const { width, height } = el.getBoundingClientRect()
+      setSize({ width: Math.floor(width), height: Math.floor(height) })
+    }
+
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const leaves = useMemo(
+    () => layoutSectorTreemap(cells, size.width, size.height),
+    [cells, size.width, size.height],
   )
 
   return (
@@ -142,18 +126,20 @@ export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
         variant="embedded"
         showChevron
       />
-      <div className={styles.chartWrap} role="img" aria-label="섹터 감성 히트맵">
-        <ResponsiveContainer width="100%" height="100%">
-          <Treemap
-            data={treeData}
-            dataKey="size"
-            nameKey="name"
-            aspectRatio={4 / 3}
-            stroke="#4d6478"
-            isAnimationActive={false}
-            content={<TreemapSectorCell />}
-          />
-        </ResponsiveContainer>
+      <div ref={chartRef} className={styles.chartWrap} role="img" aria-label="섹터 감성 히트맵">
+        {size.width > 0 && size.height > 0 ? (
+          <svg
+            className={styles.svg}
+            width={size.width}
+            height={size.height}
+            viewBox={`0 0 ${size.width} ${size.height}`}
+            aria-hidden
+          >
+            {leaves.map((leaf) => (
+              <SectorTreemapCell key={leaf.name} leaf={leaf} />
+            ))}
+          </svg>
+        ) : null}
       </div>
     </Card>
   )
