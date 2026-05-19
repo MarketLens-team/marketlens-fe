@@ -144,11 +144,11 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--space-4);
 }
 
 .field {
-  margin-bottom: var(--space-3);
+  margin-bottom: 0;
 }
 
 .label {
@@ -284,11 +284,54 @@
   background: transparent;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+  text-decoration: none;
   cursor: pointer;
 }
 
 .forgotLink:hover {
   color: var(--color-text-secondary);
+}
+
+.authBackLink {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.authBackLink:hover {
+  color: var(--color-text-primary);
+}
+
+.authHeader {
+  margin: 0 0 var(--space-5);
+}
+
+.authTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+.authLead {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-secondary);
+}
+
+/* 필드 간: gap + 다음 필드 라벨. 마지막 input→버튼도 같은 리듬으로 맞춤 */
+.form > .submit {
+  margin-top: calc(var(--font-size-base) * var(--line-height-base) + var(--space-2));
 }
 
 .submit {
@@ -298,7 +341,7 @@
   justify-content: center;
   width: 100%;
   height: 48px;
-  margin-top: var(--space-2);
+  margin-top: 0;
   border: none;
   border-radius: var(--radius-md);
   background: var(--color-primary);
@@ -330,6 +373,14 @@
   opacity: 1;
   cursor: not-allowed;
   filter: none;
+}
+
+.submitAsLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-decoration: none;
 }
 
 @media (max-width: 480px) {

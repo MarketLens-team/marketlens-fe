@@ -45,7 +45,7 @@ function isEmailDuplicateError(message: string) {
   return message.includes('이미 사용 중인 이메일')
 }
 
-function AuthField({
+export function AuthField({
   id,
   label,
   value,
@@ -421,18 +421,11 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
               visible={passwordVisible}
               onToggleVisible={() => setPasswordVisible((v) => !v)}
             />
-            <div className={styles.loginPasswordMeta}>
-              {loginAuthError ? (
-                <p className={styles.formAuthError} role="alert">
-                  {loginAuthError}
-                </p>
-              ) : null}
-              <div className={styles.forgotRow}>
-                <button type="button" className={styles.forgotLink}>
-                  비밀번호를 잊으셨나요?
-                </button>
-              </div>
-            </div>
+            {loginAuthError ? (
+              <p className={styles.formAuthError} role="alert">
+                {loginAuthError}
+              </p>
+            ) : null}
             <button
               type="submit"
               className={styles.submit}
