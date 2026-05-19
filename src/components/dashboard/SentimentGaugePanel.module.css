@@ -1,0 +1,149 @@
+.card {
+  height: 100%;
+  text-align: center;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.gaugeCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gaugeTrack {
+  width: 100%;
+  max-width: 140px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  overflow: hidden;
+}
+
+.gaugeFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-interactive-active);
+}
+
+.score {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.pos {
+  color: var(--color-success);
+}
+
+.neg {
+  color: var(--color-danger);
+}
+
+.neu {
+  color: var(--color-text-secondary);
+}
+
+.range {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.distWrap {
+  width: 100%;
+  max-width: 280px;
+}
+
+.distBar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.distPos {
+  background: color-mix(in srgb, var(--color-success) 55%, transparent);
+}
+
+.distNeu {
+  background: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
+}
+
+.distNeg {
+  background: color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+.distLegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.watchBlock {
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  text-align: left;
+}
+
+.watchTitle {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.watchList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.watchItem {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.watchName {
+  font-weight: var(--font-weight-medium);
+}
+
+.watchMetric {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.watch_positive {
+  color: var(--color-success);
+}
+
+.watch_negative {
+  color: var(--color-danger);
+}
+
+.watch_neutral {
+  color: var(--color-text-secondary);
+}
+
