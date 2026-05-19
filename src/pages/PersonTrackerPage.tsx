@@ -26,8 +26,10 @@ export default function PersonTrackerPage() {
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <div className={styles.asideCol}>
+            <div className={styles.sideCol}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            </div>
+            <div className={styles.sideCol}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </div>
           </div>
@@ -47,10 +49,12 @@ export default function PersonTrackerPage() {
                 <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
               ) : null}
             </div>
-            <aside className={styles.asideCol}>
+            <div className={styles.sideCol}>
               <PersonTop5Panel items={data.topPersons} />
+            </div>
+            <div className={styles.sideCol}>
               <PersonFrequentStocksPanel items={data.frequentStocks} />
-            </aside>
+            </div>
           </div>
         ) : null}
       </div>
