@@ -1,4 +1,5 @@
 import type { SentimentTone } from './stockSentimentInterpretation'
+import { SENTIMENT_GAUGE_COLORS } from '../../lib/sentimentPalette'
 
 /** CMC Fear & Greed 스타일 팔레트 */
 export interface StockChartColors {
@@ -12,23 +13,27 @@ export interface StockChartColors {
   chartGrid: string
 }
 
-/** 구간별 라인 — 대비 강화 */
-export const SENTIMENT_LINE_COLORS: Record<SentimentTone, string> = {
-  extremePositive: '#22c55e',
-  positive: '#a3e635',
-  neutral: '#facc15',
-  negative: '#fb923c',
-  extremeNegative: '#ef4444',
+export { SENTIMENT_GAUGE_COLORS }
+
+/** 구간별 라인 — 게이지와 동일 색 */
+export function getLineColorForTone(tone: SentimentTone): string {
+  return SENTIMENT_GAUGE_COLORS[tone]
 }
 
-/** 5구간 배경 — CMC처럼 뚜렷하게 */
-export const SENTIMENT_BAND_COLORS: Record<SentimentTone, string> = {
-  extremePositive: 'rgba(13, 148, 68, 0.42)',
-  positive: 'rgba(34, 197, 94, 0.2)',
-  neutral: 'rgba(234, 179, 8, 0.14)',
-  negative: 'rgba(249, 115, 22, 0.2)',
-  extremeNegative: 'rgba(220, 38, 38, 0.42)',
+/** 구간 배경 — 극단 구간만 (CMC Fear & Greed 상·하단 밴드) */
+export const SENTIMENT_BAND_COLORS: Pick<
+  Record<SentimentTone, string>,
+  'extremeNegative' | 'extremePositive'
+> = {
+  extremeNegative: 'rgba(246, 70, 93, 0.12)',
+  extremePositive: 'rgba(2, 192, 118, 0.12)',
 }
+
+/** 구간 경계 점선 (CMC Fear & Greed) */
+export const SENTIMENT_ZONE_LINE_COLOR = 'rgba(148, 163, 184, 0.28)'
+
+/** 언급량 막대 (CMC 거래량 — 회색) */
+export const MENTION_HISTOGRAM_COLOR = 'rgba(148, 163, 184, 0.55)'
 
 function readVar(name: string, fallback: string): string {
   if (typeof document === 'undefined') return fallback

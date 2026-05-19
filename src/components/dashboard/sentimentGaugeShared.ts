@@ -1,4 +1,6 @@
-export const GAUGE_COLORS = ['#f6465d', '#f18a42', '#f0b429', '#79b852', '#02c076']
+import { SENTIMENT_GAUGE_COLORS_LIST } from '../../lib/sentimentPalette'
+
+export const GAUGE_COLORS = [...SENTIMENT_GAUGE_COLORS_LIST]
 export const GAUGE_ARCS_LENGTH = [0.2, 0.2, 0.2, 0.2, 0.2]
 export const GAUGE_ARC_WIDTH = 0.14
 export const GAUGE_CHART_STYLE = { width: '100%', height: 132 } as const

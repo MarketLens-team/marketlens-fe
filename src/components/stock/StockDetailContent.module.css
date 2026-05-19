@@ -378,10 +378,10 @@
   font-family: var(--font-mono);
 }
 
-/* Bottom grid */
+/* Bottom grid — 뉴스 넓게, 우측 사이드 축소 */
 .bottomGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2.25fr) minmax(0, 16.5rem);
   gap: var(--space-3);
   align-items: start;
 }
@@ -389,7 +389,60 @@
 .rightStack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.rightStack .panelBody {
+  padding: var(--space-3);
+}
+
+.rightStack .panelTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.rightStack .simpleListItem {
+  padding: var(--space-2) 0;
+  gap: var(--space-2);
+}
+
+.rightStack .stockLink {
+  gap: var(--space-2);
+}
+
+.rightStack .stockLinkName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.rightStack .stockLinkArrow {
+  font-size: var(--font-size-xs);
+}
+
+.rightStack .personRow {
+  gap: var(--space-2);
+}
+
+.rightStack .personTime {
+  font-size: var(--font-size-xs);
+}
+
+.rightStack .personName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.rightStack .personRole {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+}
+
+.rightStack .scorePill {
+  padding: 2px var(--space-1);
+  font-size: var(--font-size-xs);
 }
 
 .panelHeadRow {
@@ -438,7 +491,7 @@
 }
 
 .newsItem {
-  padding: var(--space-4) 0;
+  padding: var(--space-5) 0;
   border-bottom: 1px solid var(--color-border-default);
 }
 
@@ -487,8 +540,8 @@
 }
 
 .newsTitle {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-xl);
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   color: var(--color-text-primary);
@@ -506,7 +559,7 @@
 
 .aiReason {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   line-height: var(--line-height-loose);
   color: var(--color-text-secondary);
 }

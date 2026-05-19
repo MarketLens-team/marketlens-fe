@@ -11,13 +11,16 @@ import {
   type MouseEventParams,
   type UTCTimestamp,
 } from 'lightweight-charts'
+import clsx from 'clsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { StockSentimentTrendPoint } from '../../data/types/stock'
 import { formatStockScore } from './stockScore'
 import { bandBackgroundColor, STOCK_SENTIMENT_BANDS } from './stockSentimentBands'
 import {
   formatChartAxisPrice,
+  MENTION_HISTOGRAM_COLOR,
   readStockChartColors,
+  SENTIMENT_ZONE_LINE_COLOR,
   withAlpha,
   type StockChartColors,
 } from './stockSentimentChartColors'
@@ -27,11 +30,15 @@ import {
   getSentimentZoneLabel,
 } from './stockSentimentInterpretation'
 import { computeTooltipPosition } from './stockSentimentTooltip'
-import { STOCK_SENTIMENT_ZONE_BOUNDARIES, STOCK_SENTIMENT_ZONES } from './stockSentimentZones'
+import {
+  STOCK_SENTIMENT_EXTREME_NEGATIVE_Y1,
+  STOCK_SENTIMENT_ZONE_BOUNDARIES,
+  STOCK_SENTIMENT_ZONES,
+} from './stockSentimentZones'
 import {
   maxMentionCount,
   toChartTime,
-  trendToHistogramData,
+  trendToMentionHistogramData,
 } from './stockSentimentTrendChartData'
 import styles from './StockSentimentTrendChart.module.css'
 
@@ -52,8 +59,12 @@ interface TooltipState {
 
 const SCORE_MIN = -100
 const SCORE_MAX = 100
-const MENTION_SCALE_ID = 'mention'
-const CHART_PERIODS = ['7일', '30일', '90일'] as const
+type SeriesKey = 'score' | 'mention'
+
+interface SeriesVisibility {
+  score: boolean
+  mention: boolean
+}
 
 function formatAxisDate(time: UTCTimestamp): string {
   const d = new Date(time * 1000)
@@ -75,16 +86,13 @@ function buildChartOptions(colors: StockChartColors) {
     },
     grid: {
       vertLines: { visible: false },
-      horzLines: {
-        visible: true,
-        color: colors.chartGrid,
-        style: LineStyle.Dotted,
-      },
+      horzLines: { visible: false },
     },
     rightPriceScale: {
       borderVisible: false,
       textColor: colors.chartText,
-      scaleMargins: { top: 0.04, bottom: 0.12 },
+      autoScale: false,
+      scaleMargins: { top: 0, bottom: 0 },
       minimumWidth: 32,
       alignLabels: true,
     },
@@ -109,13 +117,17 @@ function buildChartOptions(colors: StockChartColors) {
   } as const
 }
 
-function addBoundaryLines(series: ISeriesApi<'Line'>, colors: StockChartColors) {
+function lockScorePriceScale(chart: IChartApi) {
+  chart.priceScale('right').setVisibleRange({ from: SCORE_MIN, to: SCORE_MAX })
+}
+
+function addBoundaryLines(series: ISeriesApi<'Line'>) {
   for (const price of STOCK_SENTIMENT_ZONE_BOUNDARIES) {
     series.createPriceLine({
       price,
-      color: withAlpha(colors.chartText, 0.15),
+      color: SENTIMENT_ZONE_LINE_COLOR,
       lineWidth: 1,
-      lineStyle: LineStyle.Dotted,
+      lineStyle: LineStyle.Dashed,
       axisLabelVisible: false,
     })
   }
@@ -129,15 +141,21 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   const zoneLabelsLayerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const mainSeriesRef = useRef<ISeriesApi<'Line'> | null>(null)
+  const lineSeriesListRef = useRef<ISeriesApi<'Line'>[]>([])
+  const histogramSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null)
   const currentBadgeRef = useRef<HTMLDivElement>(null)
   const bandRefs = useRef<(HTMLDivElement | null)[]>([])
   const zoneLabelRefs = useRef<(HTMLSpanElement | null)[]>([])
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+  const [visibility, setVisibility] = useState<SeriesVisibility>({ score: true, mention: true })
 
   const clampedCurrent = Math.min(SCORE_MAX, Math.max(SCORE_MIN, currentScore))
   const lineSegments = useMemo(() => buildSentimentLineSegments(trend), [trend])
-  const histogramData = useMemo(() => trendToHistogramData(trend), [trend])
   const mentionMax = useMemo(() => maxMentionCount(trend), [trend])
+  const histogramData = useMemo(
+    () => trendToMentionHistogramData(trend, mentionMax),
+    [trend, mentionMax],
+  )
 
   const syncOverlays = useCallback(() => {
     const series = mainSeriesRef.current
@@ -182,10 +200,20 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       if (y != null) {
         badge.style.top = `${y}px`
         badge.style.right = `${rightScaleWidth + 4}px`
-        badge.style.opacity = '1'
+        badge.style.opacity = visibility.score ? '1' : '0'
       }
     }
-  }, [clampedCurrent])
+  }, [clampedCurrent, visibility.score])
+
+  const toggleSeries = (key: SeriesKey) => {
+    setVisibility((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  useEffect(() => {
+    lineSeriesListRef.current.forEach((s) => s.applyOptions({ visible: visibility.score }))
+    histogramSeriesRef.current?.applyOptions({ visible: visibility.mention })
+    syncOverlays()
+  }, [visibility, syncOverlays])
 
   useEffect(() => {
     const container = chartContainerRef.current
@@ -198,7 +226,7 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
     })
     chartRef.current = chart
 
-    const lineSeriesList: ISeriesApi<'Line'>[] = []
+    lineSeriesListRef.current = []
 
     lineSegments.forEach((segment, index) => {
       const lineSeries = chart.addSeries(LineSeries, {
@@ -217,30 +245,23 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
         }),
       })
       lineSeries.setData(segment.data)
-      lineSeriesList.push(lineSeries)
+      lineSeries.applyOptions({ visible: visibility.score })
+      lineSeriesListRef.current.push(lineSeries)
     })
 
-    mainSeriesRef.current = lineSeriesList[0] ?? null
+    mainSeriesRef.current = lineSeriesListRef.current[0] ?? null
     if (mainSeriesRef.current) {
-      addBoundaryLines(mainSeriesRef.current, colors)
+      addBoundaryLines(mainSeriesRef.current)
     }
 
-    const mentionAxisMax = mentionMax / 0.15
     const histogramSeries = chart.addSeries(HistogramSeries, {
-      priceScaleId: MENTION_SCALE_ID,
-      color: withAlpha(colors.chartText, 0.5),
+      priceScaleId: 'right',
+      color: MENTION_HISTOGRAM_COLOR,
+      base: STOCK_SENTIMENT_EXTREME_NEGATIVE_Y1,
       priceLineVisible: false,
       lastValueVisible: false,
-      autoscaleInfoProvider: () => ({
-        priceRange: { minValue: 0, maxValue: mentionAxisMax },
-      }),
     })
-
-    chart.priceScale(MENTION_SCALE_ID).applyOptions({
-      scaleMargins: { top: 0.78, bottom: 0.02 },
-      borderVisible: false,
-      visible: false,
-    })
+    histogramSeriesRef.current = histogramSeries
 
     chart.applyOptions({
       localization: {
@@ -251,7 +272,9 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
     })
 
     histogramSeries.setData(histogramData)
+    histogramSeries.applyOptions({ visible: visibility.mention })
     chart.timeScale().fitContent()
+    lockScorePriceScale(chart)
     syncOverlays()
 
     const onCrosshair = (param: MouseEventParams) => {
@@ -292,6 +315,7 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
 
     const observer = new ResizeObserver(() => {
       chart.applyOptions({ width: container.clientWidth, height: container.clientHeight })
+      lockScorePriceScale(chart)
       syncOverlays()
     })
     observer.observe(container)
@@ -303,6 +327,8 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       chart.remove()
       chartRef.current = null
       mainSeriesRef.current = null
+      lineSeriesListRef.current = []
+      histogramSeriesRef.current = null
     }
   }, [trend, colors, lineSegments, histogramData, mentionMax, syncOverlays])
 
@@ -317,29 +343,30 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   return (
     <div className={styles.root}>
       <div className={styles.chartHeader}>
-        <ul className={styles.legend} aria-hidden>
+        <ul className={styles.legend} role="list">
           <li className={styles.legendItem}>
-            <span className={`${styles.legendDot} ${styles.legendDotScore}`} />
-            감성 점수
+            <button
+              type="button"
+              className={clsx(styles.legendToggle, !visibility.score && styles.legendToggleOff)}
+              aria-pressed={visibility.score}
+              onClick={() => toggleSeries('score')}
+            >
+              <span className={`${styles.legendDot} ${styles.legendDotScore}`} />
+              감성 점수
+            </button>
           </li>
           <li className={styles.legendItem}>
-            <span className={`${styles.legendDot} ${styles.legendDotMention}`} />
-            언급량
+            <button
+              type="button"
+              className={clsx(styles.legendToggle, !visibility.mention && styles.legendToggleOff)}
+              aria-pressed={visibility.mention}
+              onClick={() => toggleSeries('mention')}
+            >
+              <span className={`${styles.legendDot} ${styles.legendDotMention}`} />
+              언급량
+            </button>
           </li>
         </ul>
-        <div className={styles.periodGroup} role="group" aria-label="기간 선택">
-          {CHART_PERIODS.map((period) => (
-            <button
-              key={period}
-              type="button"
-              className={period === '30일' ? styles.periodActive : styles.periodBtn}
-              disabled={period !== '30일'}
-              aria-pressed={period === '30일'}
-            >
-              {period}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div
@@ -348,7 +375,12 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
         role="img"
         aria-label="30일 감성 점수 추이 차트"
       >
-        <div ref={bandsLayerRef} className={styles.bands} aria-hidden>
+        <div
+          ref={bandsLayerRef}
+          className={styles.bands}
+          style={{ opacity: visibility.score ? 1 : 0 }}
+          aria-hidden
+        >
           {STOCK_SENTIMENT_BANDS.map((band, i) => (
             <div
               key={band.tone}

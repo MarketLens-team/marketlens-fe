@@ -26,9 +26,33 @@
 .legendItem {
   display: flex;
   align-items: center;
+}
+
+.legendToggle {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  padding: 0;
+  border: none;
   font-size: var(--font-size-sm);
+  font-family: inherit;
   color: var(--color-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: opacity var(--duration-fast);
+}
+
+.legendToggle:hover {
+  color: var(--color-text-primary);
+}
+
+.legendToggleOff {
+  opacity: 0.4;
+}
+
+.legendToggleOff .legendDot {
+  background: var(--color-text-muted) !important;
+  box-shadow: none !important;
 }
 
 .legendDot {
@@ -40,15 +64,17 @@
 
 .legendDotScore {
   background: linear-gradient(
-    180deg,
-    #22c55e 0%,
-    #facc15 50%,
-    #ef4444 100%
+    90deg,
+    #f6465d 0%,
+    #f18a42 22%,
+    #f0b429 50%,
+    #79b852 78%,
+    #02c076 100%
   );
 }
 
 .legendDotMention {
-  background: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
+  background: color-mix(in srgb, #94a3b8 70%, transparent);
 }
 
 .periodGroup {

@@ -1,7 +1,7 @@
 import type { UTCTimestamp } from 'lightweight-charts'
 import type { StockSentimentTrendPoint } from '../../data/types/stock'
 import { getSentimentTone, type SentimentTone } from './stockSentimentInterpretation'
-import { SENTIMENT_LINE_COLORS } from './stockSentimentChartColors'
+import { getLineColorForTone } from './stockSentimentChartColors'
 import { toChartTime } from './stockSentimentTrendChartData'
 
 export interface SentimentLineSegment {
@@ -22,7 +22,7 @@ export function buildSentimentLineSegments(trend: StockSentimentTrendPoint[]): S
     if (buffer.length === 0) return
     segments.push({
       tone: currentTone,
-      color: SENTIMENT_LINE_COLORS[currentTone],
+      color: getLineColorForTone(currentTone),
       data: buffer,
     })
   }
