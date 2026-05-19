@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { DashboardWatchlistRow } from '../../data/types/dashboard'
-import shared from './dashboardShared.module.css'
 import styles from './DashboardWatchlistTable.module.css'
 
 interface DashboardWatchlistTableProps {
   rows: DashboardWatchlistRow[]
+  className?: string
 }
 
 function formatPrice(n: number) {
@@ -20,15 +20,11 @@ function sentimentClass(score: number) {
   return styles.sentNeu
 }
 
-export function DashboardWatchlistTable({ rows }: DashboardWatchlistTableProps) {
+export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistTableProps) {
   return (
-    <Card padding="none" className={styles.card}>
+    <Card padding="none" className={clsx(styles.card, className)}>
       <div className={styles.headPad}>
-        <CardSectionHeader
-          title="내 관심 종목 워치리스트"
-          subtitle="현재가 · 감성 · 언급량 (목 데이터)"
-          className={shared.sectionHeadCenter}
-        />
+        <CardSectionHeader title="내 관심 종목 워치리스트" subtitle="현재가 · 감성 · 언급량 (목 데이터)" />
       </div>
       <div className={styles.tableWrap}>
         <table className={styles.table}>

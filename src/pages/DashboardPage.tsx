@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
 import { DashboardWatchlistTable } from '../components/dashboard/DashboardWatchlistTable'
 import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
+import { PortfolioSentimentGauge } from '../components/dashboard/PortfolioSentimentGauge'
 import { SentimentGaugePanel } from '../components/dashboard/SentimentGaugePanel'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
@@ -39,13 +40,12 @@ export default function DashboardPage() {
 
         {data ? (
           <>
-            <section className={styles.topGrid} aria-label="포트폴리오·관심 종목">
-              <SentimentGaugePanel
-                title="내 포트폴리오 감성"
-                gauge={data.portfolioSentiment}
-                stocksToWatch={data.stocksToWatch}
-              />
-              <DashboardWatchlistTable rows={data.watchlist} />
+            <section className={styles.topGrid} aria-label="포트폴리오·언급량·관심 종목">
+              <div className={styles.leftAside}>
+                <PortfolioSentimentGauge gauge={data.portfolioSentiment} />
+                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
+              </div>
+              <DashboardWatchlistTable rows={data.watchlist} className={styles.watchlistMain} />
             </section>
 
             <section className={styles.marketSection} aria-label="시장 전체 컨텍스트">
@@ -56,7 +56,6 @@ export default function DashboardPage() {
                   subtitle="참고용"
                   gauge={data.kospiSentiment}
                 />
-                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
                 <SectorHeatmapGrid cells={data.sectorHeatmap} />
               </div>
             </section>

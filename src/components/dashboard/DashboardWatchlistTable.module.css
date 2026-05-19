@@ -1,14 +1,20 @@
 .card {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 .headPad {
+  flex-shrink: 0;
   padding: var(--space-4) var(--space-4) 0;
-  text-align: center;
+  text-align: left;
 }
 
 .tableWrap {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   padding: 0 var(--space-4) var(--space-4);
 }
 

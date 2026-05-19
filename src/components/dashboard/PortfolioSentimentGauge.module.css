@@ -1,0 +1,103 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.chevron {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-muted);
+  line-height: 1;
+  font-weight: var(--font-weight-regular);
+}
+
+.gaugeWrap {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  line-height: 0;
+}
+
+.arc {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+.arcSegment {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.segDanger {
+  stroke: var(--color-danger);
+}
+
+.segOrange {
+  stroke: color-mix(in srgb, var(--color-danger) 40%, var(--color-warning));
+}
+
+.segNeutral {
+  stroke: var(--color-warning);
+}
+
+.segGreen {
+  stroke: color-mix(in srgb, var(--color-success) 50%, var(--color-warning));
+}
+
+.segGreenStrong {
+  stroke: var(--color-success);
+}
+
+.indicator {
+  fill: var(--color-text-primary);
+  stroke: var(--color-bg-card);
+  stroke-width: 3;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  pointer-events: none;
+  line-height: var(--line-height-tight);
+}
+
+.score {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
