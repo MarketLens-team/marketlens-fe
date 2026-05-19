@@ -67,6 +67,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
 
   useEffect(() => {
+    setNewsFilter('all')
     setNewsItems(recentNews)
     setPagination(newsPagination)
     setLoadMoreError(null)
