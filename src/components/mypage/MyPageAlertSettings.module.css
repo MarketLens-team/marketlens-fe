@@ -62,7 +62,7 @@
   height: 1.5rem;
   border-radius: 999px;
   border: none;
-  background: color-mix(in srgb, var(--color-border-strong) 72%, var(--color-bg-app));
+  background: var(--color-interactive-active);
   transition: background-color var(--duration-fast) ease;
 }
 
