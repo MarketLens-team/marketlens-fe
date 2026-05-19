@@ -20,7 +20,7 @@ export interface StockSummaryResponse {
   score: number
   mentionCount: number
   mentionChangeRate: number
-  aiSummary: string
+  aiSummary: string | null
 }
 
 export interface DailyPointResponse {
@@ -119,7 +119,7 @@ export interface StockBuzzSurgeItemResponse {
   previousMentionCount: number
   rolling24hChangeRate: number
   sentimentScore: number
-  aiSummary: string
+  aiSummary: string | null
 }
 
 /** OpenAPI `StockBuzzSurgeResponse` — `GET /api/v1/stocks/buzz-surge` */

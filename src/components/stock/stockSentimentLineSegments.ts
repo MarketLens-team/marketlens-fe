@@ -1,4 +1,5 @@
 import type { UTCTimestamp } from 'lightweight-charts'
+import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { StockSentimentTrendPoint } from '../../data/types/stock'
 import { getSentimentTone, type SentimentTone } from './stockSentimentInterpretation'
 import { getLineColorForTone } from './stockSentimentChartColors'
@@ -15,7 +16,7 @@ export function buildSentimentLineSegments(trend: StockSentimentTrendPoint[]): S
   if (trend.length === 0) return []
 
   const segments: SentimentLineSegment[] = []
-  let currentTone = getSentimentTone(trend[0].score)
+  let currentTone = getSentimentTone(toFiniteNumber(trend[0].score))
   let buffer: Array<{ time: UTCTimestamp; value: number }> = []
 
   const pushSegment = () => {
@@ -28,8 +29,8 @@ export function buildSentimentLineSegments(trend: StockSentimentTrendPoint[]): S
   }
 
   for (const point of trend) {
-    const tone = getSentimentTone(point.score)
-    const item = { time: toChartTime(point.recordedAt), value: point.score }
+    const tone = getSentimentTone(toFiniteNumber(point.score))
+    const item = { time: toChartTime(point.recordedAt), value: toFiniteNumber(point.score) }
 
     if (tone !== currentTone && buffer.length > 0) {
       const bridge = buffer[buffer.length - 1]

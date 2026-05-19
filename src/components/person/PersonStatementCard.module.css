@@ -58,28 +58,23 @@
   color: var(--color-text-muted);
 }
 
-.sentiment {
+.sentScore {
   flex-shrink: 0;
-  padding: var(--space-1) var(--space-2);
-  border-radius: 999px;
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
-.sentiment_pos {
-  background: color-mix(in srgb, var(--color-success) 18%, transparent);
+.sentPos {
   color: var(--color-success);
 }
 
-.sentiment_neu {
-  background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+.sentNeu {
   color: var(--color-warning);
 }
 
-.sentiment_neg {
-  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+.sentNeg {
   color: var(--color-danger);
 }
 
@@ -95,42 +90,4 @@
   font-size: var(--font-size-sm);
   line-height: var(--line-height-loose);
   color: var(--color-text-secondary);
-}
-
-.footer {
-  margin-top: var(--space-3);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-.footerLabel {
-  flex-shrink: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  padding-top: 0.35rem;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  justify-content: flex-start;
-}
-
-.tag {
-  padding: var(--space-1) var(--space-2);
-  border-radius: 999px;
-  border: 1px solid var(--color-border-default);
-  background: var(--color-bg-app);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.tag:hover {
-  background: var(--color-interactive-hover);
-  color: var(--color-text-primary);
 }

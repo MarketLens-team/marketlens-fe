@@ -3,13 +3,14 @@ import { splitIntoSentences } from '../../lib/splitIntoSentences'
 import styles from './AiSummaryText.module.css'
 
 export interface AiSummaryTextProps {
-  text: string
+  text: string | null | undefined
   className?: string
   sentenceClassName?: string
 }
 
 export function AiSummaryText({ text, className, sentenceClassName }: AiSummaryTextProps) {
   const sentences = splitIntoSentences(text)
+  if (!sentences.length) return null
 
   return (
     <span className={clsx(styles.root, className)}>

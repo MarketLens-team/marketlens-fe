@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
 import { AiSummaryText } from '../common/AiSummaryText'
 import type { PersonMention } from '../../data/types/person'
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
@@ -12,10 +11,10 @@ import {
 } from './personDisplay'
 import styles from './PersonStatementCard.module.css'
 
-const SENTIMENT_CLASS: Record<PersonSentimentTone, string> = {
-  pos: styles.sentiment_pos,
-  neu: styles.sentiment_neu,
-  neg: styles.sentiment_neg,
+const SENTIMENT_SCORE_CLASS: Record<PersonSentimentTone, string> = {
+  pos: styles.sentPos,
+  neu: styles.sentNeu,
+  neg: styles.sentNeg,
 }
 
 interface PersonStatementCardProps {
@@ -42,7 +41,7 @@ export function PersonStatementCard({ mention }: PersonStatementCardProps) {
             </p>
           </div>
         </div>
-        <span className={clsx(styles.sentiment, SENTIMENT_CLASS[tone])}>
+        <span className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[tone])}>
           {formatPersonSentimentBadge(mention.sentiment, mention.sentimentScore)}
         </span>
       </header>
@@ -50,19 +49,6 @@ export function PersonStatementCard({ mention }: PersonStatementCardProps) {
       <blockquote className={styles.quote}>
         <AiSummaryText text={mention.context} className={styles.quoteText} />
       </blockquote>
-
-      {mention.relatedStocks.length > 0 ? (
-        <footer className={styles.footer}>
-          <span className={styles.footerLabel}>연관 종목</span>
-          <div className={styles.tags}>
-            {mention.relatedStocks.map((stock) => (
-              <Link key={stock.code} className={styles.tag} to={`/stock/${stock.code}`}>
-                #{stock.name}
-              </Link>
-            ))}
-          </div>
-        </footer>
-      ) : null}
     </article>
   )
 }

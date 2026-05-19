@@ -4,7 +4,7 @@ import { AiSummaryText } from '../common/AiSummaryText'
 import styles from './StockHeaderAiSummary.module.css'
 
 export interface StockHeaderAiSummaryProps {
-  summary: string
+  summary: string | null | undefined
 }
 
 export function StockHeaderAiSummary({ summary }: StockHeaderAiSummaryProps) {

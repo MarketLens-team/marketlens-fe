@@ -1,3 +1,4 @@
+import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type {
   NewsFeedItemResponse,
   RelatedStocksResponse,
@@ -33,8 +34,8 @@ function normalizeRecordedAt(recordedAt: string): string {
 export function mapDailyPoints(trend: StockSentimentTrendResponse['trend']): StockSentimentTrendPoint[] {
   return trend.map((point) => ({
     recordedAt: normalizeRecordedAt(point.recordedAt),
-    score: point.score,
-    mentionCount: point.mentionCount,
+    score: toFiniteNumber(point.score),
+    mentionCount: toFiniteNumber(point.mentionCount),
   }))
 }
 
@@ -122,18 +123,18 @@ export function mapStockDetailPage(
     name: stock.name,
     market: stock.market,
     sector: stock.sectorName,
-    sentimentScore: summary.score,
-    mentionChangePercent: summary.mentionChangeRate,
-    buzz24h: summary.mentionCount,
+    sentimentScore: toFiniteNumber(summary.score),
+    mentionChangePercent: toFiniteNumber(summary.mentionChangeRate),
+    buzz24h: toFiniteNumber(summary.mentionCount),
     price: { current: 0, change: 0, changePercent: 0 },
-    aiSummary: summary.aiSummary,
+    aiSummary: summary.aiSummary ?? '',
   }
 
   const sentimentContext: StockSentimentContext = {
-    current: trend.currentScore,
-    avg30d: trend.averageScore30d,
-    high30d: trend.maxScore30d,
-    summaryNote: trend.contextMessage,
+    current: toFiniteNumber(trend.currentScore),
+    avg30d: toFiniteNumber(trend.averageScore30d),
+    high30d: toFiniteNumber(trend.maxScore30d),
+    summaryNote: trend.contextMessage ?? '',
     trend: mapDailyPoints(trend.trend),
   }
 

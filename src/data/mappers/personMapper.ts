@@ -29,7 +29,7 @@ export function mapPersonStatement(dto: PersonStatementResponse): PersonMention 
     personName: dto.personName,
     role: dto.personRole,
     organizationName: dto.organizationName,
-    context: dto.statementSummary,
+    context: dto.statementSummary ?? '',
     sourceName: dto.sourceName,
     publishedAt: dto.publishedAt,
     sentiment: toSentiment(dto.sentiment),

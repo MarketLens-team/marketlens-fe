@@ -9,7 +9,7 @@ function mapItems(items: StockBuzzSurgeResponse['items']): BuzzSurgeRow[] {
     currentMentionCount: item.currentMentionCount,
     surgePercent: item.rolling24hChangeRate,
     sentimentScore: item.sentimentScore,
-    aiSummary: item.aiSummary,
+    aiSummary: item.aiSummary ?? '',
   }))
 }
 

@@ -1,4 +1,5 @@
 import type { UTCTimestamp } from 'lightweight-charts'
+import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { StockSentimentTrendPoint } from '../../data/types/stock'
 import {
   STOCK_SENTIMENT_EXTREME_NEGATIVE_BAND,
@@ -12,7 +13,7 @@ export function toChartTime(recordedAt: string): UTCTimestamp {
 export function trendToAreaData(trend: StockSentimentTrendPoint[]) {
   return trend.map((p) => ({
     time: toChartTime(p.recordedAt),
-    value: p.score,
+    value: toFiniteNumber(p.score),
   }))
 }
 
@@ -26,7 +27,7 @@ export function trendToMentionHistogramData(
     time: toChartTime(p.recordedAt),
     value:
       STOCK_SENTIMENT_EXTREME_NEGATIVE_Y1 +
-      (p.mentionCount / scaleMax) * STOCK_SENTIMENT_EXTREME_NEGATIVE_BAND,
+      (toFiniteNumber(p.mentionCount) / scaleMax) * STOCK_SENTIMENT_EXTREME_NEGATIVE_BAND,
   }))
 }
 
