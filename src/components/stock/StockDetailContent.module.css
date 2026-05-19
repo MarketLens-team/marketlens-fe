@@ -290,17 +290,6 @@
   color: var(--color-text-muted);
 }
 
-.contextNote {
-  margin: 0;
-  padding: var(--space-3);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-section));
-  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
-  border-radius: var(--radius-sm);
-}
-
 /* Breakdown */
 .stackedBar {
   display: flex;
@@ -602,23 +591,6 @@
   margin: var(--space-1) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-}
-
-/* Disclaimer */
-.disclaimer {
-  margin: var(--space-2) 0 0;
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-loose);
-  color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-section));
-  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
-  border-radius: var(--radius-sm);
-}
-
-.disclaimerIcon {
-  margin-right: var(--space-2);
-  color: var(--color-warning);
 }
 
 .newsScrollFoot {

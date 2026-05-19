@@ -184,7 +184,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
             </h2>
             <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
             <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
-            <p className={styles.contextNote}>{sentimentContext.summaryNote}</p>
           </div>
         </section>
 
@@ -345,13 +344,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
           </section>
         </div>
       </div>
-
-      <p className={styles.disclaimer} role="note">
-        <span className={styles.disclaimerIcon} aria-hidden>
-          △
-        </span>
-        감성 점수는 예측이 아닌 참고 지표입니다. 투자 판단은 본인 책임입니다.
-      </p>
 
       <BackToTopButton placement="fixed" tooltipSide="left" />
     </div>
