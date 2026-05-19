@@ -1,0 +1,86 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.legendDotScore {
+  background: var(--color-warning);
+}
+
+.legendDotMention {
+  background: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
+}
+
+.chartArea {
+  position: relative;
+  min-width: 0;
+  height: 20rem;
+  padding: var(--space-2);
+  background: var(--color-bg-app);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-6) var(--space-4);
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.tooltip {
+  padding: var(--space-3);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-bg-app) 40%, transparent);
+}
+
+.tooltipDate {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.tooltipScore {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning);
+}
+
+.tooltipMention {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+}

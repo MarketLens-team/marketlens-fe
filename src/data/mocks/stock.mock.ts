@@ -1,4 +1,5 @@
 import type { StockDetail } from '../types/stock'
+import { buildStockSentimentTrend } from './stockSentimentTrend.mock'
 
 const samsungDetail: StockDetail = {
   stock: {
@@ -17,6 +18,7 @@ const samsungDetail: StockDetail = {
     avg30d: 31,
     high30d: 78,
     summaryNote: '현재 +73 • 30일 평균 +31 • 최근 한 달 최고치 근접',
+    trend: buildStockSentimentTrend(73, 31),
   },
   sentimentBreakdown: {
     rows: [
@@ -102,6 +104,7 @@ function buildFallbackDetail(
       avg30d: Math.round(sentimentScore * 0.45),
       high30d: Math.max(sentimentScore + 5, sentimentScore),
       summaryNote: `현재 ${sentimentScore > 0 ? '+' : ''}${sentimentScore} • 30일 평균 데이터 수집 중`,
+      trend: buildStockSentimentTrend(sentimentScore, Math.round(sentimentScore * 0.45)),
     },
     sentimentBreakdown: {
       rows: [

@@ -162,8 +162,14 @@
 /* Middle grid */
 .middleGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
   gap: var(--space-3);
+  align-items: start;
+}
+
+.panelBreakdown {
+  width: 100%;
+  min-width: 0;
 }
 
 .panel {
@@ -302,55 +308,55 @@
   background: var(--color-danger);
 }
 
-.breakdownTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-base);
-}
-
-.breakdownTable th {
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.breakdownTable td {
-  padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border-default);
-  vertical-align: middle;
-}
-
-.breakdownTable tbody tr:last-child td {
-  border-bottom: none;
-  font-weight: var(--font-weight-semibold);
-}
-
-.breakdownPolarity {
+.breakdownList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-2);
 }
 
-.polarityDot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.breakdownLabel {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.breakdownBadge {
   flex-shrink: 0;
+  min-width: 2.75rem;
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-default);
 }
 
-.dotPos {
-  background: var(--color-success);
+.breakdownBadgePos {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-elevated));
+  border-color: color-mix(in srgb, var(--color-success) 28%, transparent);
 }
 
-.dotNeu {
-  background: var(--color-warning);
+.breakdownBadgeNeu {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-elevated));
+  border-color: color-mix(in srgb, var(--color-warning) 28%, transparent);
 }
 
-.dotNeg {
-  background: var(--color-danger);
+.breakdownBadgeNeg {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-elevated));
+  border-color: color-mix(in srgb, var(--color-danger) 28%, transparent);
 }
 
 .mono {

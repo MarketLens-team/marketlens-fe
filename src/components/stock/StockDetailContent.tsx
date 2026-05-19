@@ -9,6 +9,7 @@ import type {
 } from '../../data/types/stock'
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
+import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
@@ -26,21 +27,10 @@ function pillClass(score: number) {
   return styles.pillNeu
 }
 
-function polarityDotClass(polarity: SentimentPolarity) {
-  if (polarity === 'positive') return styles.dotPos
-  if (polarity === 'negative') return styles.dotNeg
-  return styles.dotNeu
-}
-
 function barSegmentClass(polarity: SentimentPolarity) {
   if (polarity === 'positive') return styles.barPos
   if (polarity === 'negative') return styles.barNeg
   return styles.barNeu
-}
-
-/** -100 ~ +100 스케일을 0~100% 위치로 */
-function gaugePosition(score: number): number {
-  return Math.min(100, Math.max(0, ((score + 100) / 200) * 100))
 }
 
 function filterNews(items: StockNewsItem[], filter: NewsFilter): StockNewsItem[] {
@@ -61,8 +51,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
   const filteredNews = useMemo(() => filterNews(recentNews, newsFilter), [recentNews, newsFilter])
 
   const priceUp = stock.price.change >= 0
-  const avgPos = gaugePosition(sentimentContext.avg30d)
-  const currentPos = gaugePosition(sentimentContext.current)
 
   return (
     <div className={styles.page}>
@@ -151,34 +139,15 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                 </span>
               </div>
             </div>
-            <div className={styles.gaugeWrap}>
-              <div
-                className={styles.gaugeTrack}
-                role="img"
-                aria-label={`감성 게이지: 현재 ${sentimentContext.current}, 30일 평균 ${sentimentContext.avg30d}`}
-              >
-                <span
-                  className={clsx(styles.gaugeMarker, styles.gaugeMarkerAvg)}
-                  style={{ left: `${avgPos}%` }}
-                  title={`30일 평균 ${formatStockScore(sentimentContext.avg30d)}`}
-                />
-                <span
-                  className={clsx(styles.gaugeMarker, styles.gaugeMarkerCurrent)}
-                  style={{ left: `${currentPos}%` }}
-                  title={`현재 ${formatStockScore(sentimentContext.current)}`}
-                />
-              </div>
-              <div className={styles.gaugeLabels}>
-                <span>-100</span>
-                <span>0</span>
-                <span>+100</span>
-              </div>
-            </div>
+            <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
             <p className={styles.contextNote}>{sentimentContext.summaryNote}</p>
           </div>
         </section>
 
-        <section className={styles.panel} aria-labelledby="stock-breakdown-title">
+        <section
+          className={clsx(styles.panel, styles.panelBreakdown)}
+          aria-labelledby="stock-breakdown-title"
+        >
           <div className={styles.panelBody}>
             <h2 id="stock-breakdown-title" className={styles.panelTitle}>
               감성 분류 분포 · 오늘
@@ -192,7 +161,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                 />
               ))}
             </div>
-            <BreakdownTable rows={sentimentBreakdown.rows} finalScore={sentimentBreakdown.finalScore} totalCount={sentimentBreakdown.totalCount} />
+            <BreakdownList rows={sentimentBreakdown.rows} />
           </div>
         </section>
       </div>
@@ -321,46 +290,23 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
   )
 }
 
-function BreakdownTable({
-  rows,
-  totalCount,
-  finalScore,
-}: {
-  rows: StockSentimentBreakdownRow[]
-  totalCount: number
-  finalScore: number
-}) {
+function breakdownBadgeClass(polarity: SentimentPolarity) {
+  if (polarity === 'positive') return styles.breakdownBadgePos
+  if (polarity === 'negative') return styles.breakdownBadgeNeg
+  return styles.breakdownBadgeNeu
+}
+
+function BreakdownList({ rows }: { rows: StockSentimentBreakdownRow[] }) {
   return (
-    <table className={styles.breakdownTable}>
-      <thead>
-        <tr>
-          <th scope="col">분류</th>
-          <th scope="col">건수</th>
-          <th scope="col">평균 점수</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.polarity}>
-            <td>
-              <span className={styles.breakdownPolarity}>
-                <span className={clsx(styles.polarityDot, polarityDotClass(row.polarity))} aria-hidden />
-                {row.label}
-                <span className={styles.mono}> {row.percent}%</span>
-              </span>
-            </td>
-            <td className={styles.mono}>{row.count}건</td>
-            <td className={clsx(styles.mono, scoreToneClass(row.avgScore))}>
-              {formatStockScore(row.avgScore)}
-            </td>
-          </tr>
-        ))}
-        <tr>
-          <td>총합</td>
-          <td className={styles.mono}>{totalCount}건</td>
-          <td className={clsx(styles.mono, scoreToneClass(finalScore))}>{formatStockScore(finalScore)}</td>
-        </tr>
-      </tbody>
-    </table>
+    <ul className={styles.breakdownList}>
+      {rows.map((row) => (
+        <li key={row.polarity} className={styles.breakdownRow}>
+          <span className={styles.breakdownLabel}>{row.label}</span>
+          <span className={clsx(styles.breakdownBadge, breakdownBadgeClass(row.polarity))}>
+            {row.count}건
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }

@@ -20,11 +20,21 @@ export interface StockSummary {
   aiSummary: string
 }
 
+/** 일별 감성 추이 (차트용) */
+export interface StockSentimentTrendPoint {
+  /** ISO 8601 (일 단위) */
+  at: string
+  score: number
+  mentionCount: number
+}
+
 export interface StockSentimentContext {
   current: number
   avg30d: number
   high30d: number
   summaryNote: string
+  /** 최근 30일 일별 감성·언급량 */
+  trend: StockSentimentTrendPoint[]
 }
 
 export interface StockSentimentBreakdownRow {
