@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
+import { AiSummaryText } from '../common/AiSummaryText'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { BuzzSurgeRow } from '../../data/types/buzzSurge'
@@ -11,11 +12,11 @@ import {
 } from './buzzSurgeScore'
 import styles from './BuzzSurgeTop10Table.module.css'
 
-const SENTIMENT_PILL_CLASS: Record<BuzzSentimentTone, string> = {
-  pos: styles.sent_pos,
-  warm: styles.sent_warm,
-  neg: styles.sent_neg,
-  neu: styles.sent_neu,
+const SENTIMENT_SCORE_CLASS: Record<BuzzSentimentTone, string> = {
+  pos: styles.sentPos,
+  warm: styles.sentWarm,
+  neg: styles.sentNeg,
+  neu: styles.sentNeu,
 }
 
 interface BuzzSurgeTop10TableProps {
@@ -44,7 +45,9 @@ export function BuzzSurgeTop10Table({ items }: BuzzSurgeTop10TableProps) {
               <th scope="col" className={styles.colRank}>
                 #
               </th>
-              <th scope="col">종목</th>
+              <th scope="col" className={styles.colStock}>
+                종목
+              </th>
               <th scope="col" className={styles.colNum}>
                 오늘 건수
               </th>
@@ -54,7 +57,9 @@ export function BuzzSurgeTop10Table({ items }: BuzzSurgeTop10TableProps) {
               <th scope="col" className={styles.colSentiment}>
                 감성
               </th>
-              <th scope="col">AI 요약 (왜?)</th>
+              <th scope="col" className={styles.colSummary}>
+                AI 요약 (왜?)
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -76,17 +81,19 @@ export function BuzzSurgeTop10Table({ items }: BuzzSurgeTop10TableProps) {
                   }}
                 >
                   <td className={clsx(styles.mono, styles.rank)}>{row.rank}</td>
-                  <td>
+                  <td className={styles.stockCell}>
                     <span className={styles.stockName}>{row.stockName}</span>
                   </td>
                   <td className={styles.mono}>{row.currentMentionCount}</td>
                   <td className={clsx(styles.mono, styles.surge)}>{formatSurgePercent(row.surgePercent)}</td>
                   <td>
-                    <span className={clsx(styles.sentPill, SENTIMENT_PILL_CLASS[sentKey])}>
+                    <span className={clsx(styles.mono, styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}>
                       {formatStockScore(row.sentimentScore)}
                     </span>
                   </td>
-                  <td className={styles.summary}>{row.aiSummary}</td>
+                  <td className={styles.summary}>
+                    <AiSummaryText text={row.aiSummary} />
+                  </td>
                 </tr>
               )
             })}

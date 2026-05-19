@@ -16,7 +16,7 @@
 }
 
 .table th {
-  text-align: left;
+  text-align: center;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -29,6 +29,7 @@
   padding: var(--space-3);
   border-bottom: 1px solid var(--color-border-default);
   vertical-align: middle;
+  text-align: center;
 }
 
 .table tbody tr:last-child td {
@@ -80,40 +81,35 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.table th.colStock,
+.table td.stockCell,
+.table th.colSummary,
+.table td.summary {
+  text-align: left;
+}
+
 .summary {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
 }
 
-.sentPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.75rem;
-  padding: var(--space-1) var(--space-2);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+.sentScore {
   font-weight: var(--font-weight-semibold);
 }
 
-.sent_pos {
-  background: color-mix(in srgb, var(--color-success) 18%, transparent);
+.sentPos {
   color: var(--color-success);
 }
 
-.sent_warm {
-  background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+.sentWarm {
   color: var(--color-warning);
 }
 
-.sent_neg {
-  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+.sentNeg {
   color: var(--color-danger);
 }
 
-.sent_neu {
-  background: color-mix(in srgb, var(--color-text-muted) 12%, transparent);
+.sentNeu {
   color: var(--color-text-secondary);
 }

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { AiSummaryText } from '../common/AiSummaryText'
 import styles from './StockHeaderAiSummary.module.css'
 
 export interface StockHeaderAiSummaryProps {
@@ -32,7 +33,7 @@ export function StockHeaderAiSummary({ summary }: StockHeaderAiSummaryProps) {
     <div className={styles.root}>
       <p className={styles.label}>오늘 핫 이슈</p>
       <p ref={textRef} className={clsx(styles.text, !expanded && styles.textClamped)}>
-        {summary}
+        <AiSummaryText text={summary} />
       </p>
       {showToggle ? (
         <button
