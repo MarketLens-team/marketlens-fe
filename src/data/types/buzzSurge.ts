@@ -1,8 +1,8 @@
+/** UI 요약 — `StockBuzzSurgeResponse`에서 매핑 */
 export interface BuzzSurgeSummary {
-  /** +180% 이상 급등 감지 종목 수 */
-  detectedCount: number
   topMoverName: string
   topMoverSurgePercent: number
+  /** API 미제공 — TOP N `items` 평균 감성 점수 */
   avgSentiment: number
   newsCount: number
 }

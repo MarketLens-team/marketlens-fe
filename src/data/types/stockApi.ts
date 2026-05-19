@@ -94,6 +94,23 @@ export interface NewsFeedResponse {
   page: number
 }
 
+/** OpenAPI `TopMover` */
+export interface BuzzSurgeTopMoverResponse {
+  stockCode: string
+  stockName: string
+  currentMentionCount: number
+  previousMentionCount: number
+  rolling24hChangeRate: number
+}
+
+/** OpenAPI `TopSentiment` */
+export interface BuzzSurgeTopSentimentResponse {
+  stockCode: string
+  stockName: string
+  sentimentScore: number
+}
+
+/** OpenAPI `Item` */
 export interface StockBuzzSurgeItemResponse {
   rank: number
   stockCode: string
@@ -105,20 +122,11 @@ export interface StockBuzzSurgeItemResponse {
   aiSummary: string
 }
 
+/** OpenAPI `StockBuzzSurgeResponse` — `GET /api/v1/stocks/buzz-surge` */
 export interface StockBuzzSurgeResponse {
   updatedAt: string
   currentNewsCount: number
-  topMover: {
-    stockCode: string
-    stockName: string
-    currentMentionCount: number
-    previousMentionCount: number
-    rolling24hChangeRate: number
-  }
-  topSentiment: {
-    stockCode: string
-    stockName: string
-    sentimentScore: number
-  }
+  topMover: BuzzSurgeTopMoverResponse
+  topSentiment: BuzzSurgeTopSentimentResponse
   items: StockBuzzSurgeItemResponse[]
 }

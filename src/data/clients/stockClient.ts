@@ -10,6 +10,7 @@ import type {
   StockDirectoryResponse,
   StockSentimentBreakdownResponse,
   RelatedStocksResponse,
+  StockBuzzSurgeResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
@@ -107,6 +108,15 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
   return mapStockDetailPage(detail, summary, trend, breakdown, newsFeed.content, {
     relatedStocks: mapRelatedStocks(related, code),
   })
+}
+
+/** OpenAPI `getBuzzSurge` — `GET /api/v1/stocks/buzz-surge` */
+export async function fetchStockBuzzSurge(limit = 10): Promise<StockBuzzSurgeResponse> {
+  return getApiData<StockBuzzSurgeResponse>(
+    `${STOCKS_BASE}/buzz-surge`,
+    '언급량 급등 데이터를 불러오지 못했습니다.',
+    { limit },
+  )
 }
 
 /** OpenAPI에 검색 엔드포인트 없음 — 목록에서 클라이언트 필터 */
