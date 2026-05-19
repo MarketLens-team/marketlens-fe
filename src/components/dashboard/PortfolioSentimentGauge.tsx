@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { Card } from '../common/Card'
+import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SentimentGaugeBlock } from '../../data/types/dashboard'
 import styles from './PortfolioSentimentGauge.module.css'
 
@@ -74,12 +75,7 @@ export function PortfolioSentimentGauge({ gauge, className }: PortfolioSentiment
 
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
-      <header className={styles.header}>
-        <h2 className={styles.title}>내 포트폴리오 감성</h2>
-        <span className={styles.chevron} aria-hidden>
-          ›
-        </span>
-      </header>
+      <CardSectionHeader title="내 포트폴리오 감성" variant="embedded" showChevron />
 
       <div className={styles.gaugeWrap} role="img" aria-label={`포트폴리오 감성 ${displayScore}, ${label}`}>
         <svg className={styles.arc} viewBox="0 0 200 96" aria-hidden>

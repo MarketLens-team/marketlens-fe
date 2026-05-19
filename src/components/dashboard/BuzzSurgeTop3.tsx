@@ -11,8 +11,13 @@ interface BuzzSurgeTop3Props {
 
 export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
   return (
-    <Card padding="lg" className={clsx(styles.card, className)}>
-      <CardSectionHeader title="언급량 급증 TOP 3" subtitle="전일 대비 뉴스 언급 급등" />
+    <Card padding="md" className={clsx(styles.card, className)}>
+      <CardSectionHeader
+        title="언급량 급증 TOP 3"
+        subtitle="전일 대비 뉴스 언급 급등"
+        variant="embedded"
+        showChevron
+      />
       <ol className={styles.list}>
         {items.map((item) => (
           <li key={item.rank} className={styles.item}>

@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SentimentGaugeBlock, SentimentDistribution, StockHighlight } from '../../data/types/dashboard'
-import shared from './dashboardShared.module.css'
 import styles from './SentimentGaugePanel.module.css'
 
 interface SentimentGaugePanelProps {
@@ -42,8 +41,8 @@ export function SentimentGaugePanel({ title, subtitle, gauge, stocksToWatch }: S
   const fillPct = range > 0 ? ((gauge.score - gauge.min) / range) * 100 : 50
 
   return (
-    <Card padding="lg" className={styles.card}>
-      <CardSectionHeader title={title} subtitle={subtitle} className={shared.sectionHeadCenter} />
+    <Card padding="md" className={styles.card}>
+      <CardSectionHeader title={title} subtitle={subtitle} variant="embedded" showChevron />
       <div className={styles.body}>
         <div className={styles.gaugeCol} aria-hidden>
           <div className={styles.gaugeTrack}>

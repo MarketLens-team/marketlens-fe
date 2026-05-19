@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SectorHeatmapCell } from '../../data/types/dashboard'
-import shared from './dashboardShared.module.css'
 import styles from './SectorHeatmapGrid.module.css'
 
 interface SectorHeatmapGridProps {
@@ -17,11 +16,12 @@ function cellTone(score: number): 'pos' | 'neg' | 'neu' {
 
 export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
   return (
-    <Card padding="lg" className={styles.card}>
+    <Card padding="md" className={styles.card}>
       <CardSectionHeader
         title="섹터 감성 히트맵"
         subtitle="섹터별 감성 · 언급 건수"
-        className={shared.sectionHeadCenter}
+        variant="embedded"
+        showChevron
       />
       <ul className={styles.grid}>
         {cells.map((cell) => {

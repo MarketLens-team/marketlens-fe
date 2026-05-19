@@ -22,10 +22,13 @@ function sentimentClass(score: number) {
 
 export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistTableProps) {
   return (
-    <Card padding="none" className={clsx(styles.card, className)}>
-      <div className={styles.headPad}>
-        <CardSectionHeader title="내 관심 종목 워치리스트" subtitle="현재가 · 감성 · 언급량 (목 데이터)" />
-      </div>
+    <Card padding="md" className={clsx(styles.card, className)}>
+      <CardSectionHeader
+        title="내 관심 종목 워치리스트"
+        subtitle="현재가 · 감성 · 언급량 (목 데이터)"
+        variant="embedded"
+        showChevron
+      />
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
