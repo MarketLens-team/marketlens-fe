@@ -61,12 +61,16 @@
   width: 2.75rem;
   height: 1.5rem;
   border-radius: 999px;
-  background: var(--color-border-strong);
-  transition: background-color 0.15s ease;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-app);
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .toggleTrack[data-on='true'] {
-  background: var(--color-interactive-active);
+  border-color: color-mix(in srgb, var(--color-success) 50%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-success) 42%, var(--color-bg-elevated));
 }
 
 .toggleThumb {
@@ -76,20 +80,26 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  background: var(--color-bg-card);
-  transition: transform 0.15s ease;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-text-secondary);
+  transition:
+    transform var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .toggleTrack[data-on='true'] .toggleThumb {
   transform: translateX(1.25rem);
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border-default));
+  background: var(--color-text-primary);
 }
 
 .exampleBox {
   margin-top: var(--space-1);
   padding: var(--space-3);
   border-radius: var(--radius-md);
-  border: 1px solid color-mix(in srgb, #c9a227 40%, var(--color-border-default));
-  background: color-mix(in srgb, #fff8e1 55%, var(--color-bg-card));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 38%, var(--color-border-default));
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-bg-elevated));
 }
 
 .exampleLabel {
