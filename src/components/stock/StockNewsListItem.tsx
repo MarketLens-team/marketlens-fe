@@ -1,7 +1,15 @@
+import clsx from 'clsx'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
+import { formatStockScore } from './stockScore'
 import { renderStockNewsTitle } from './stockNewsTitle'
 import styles from './StockNewsListItem.module.css'
+
+function sentimentScoreClass(score: number) {
+  if (score > 0) return styles.scorePos
+  if (score < 0) return styles.scoreNeg
+  return styles.scoreNeu
+}
 
 export interface StockNewsListItemProps {
   item: StockNewsItem
@@ -15,9 +23,18 @@ export function StockNewsListItem({ item }: StockNewsListItemProps) {
       <div className={styles.body}>
         <div className={styles.meta}>
           <span className={styles.timeBadge}>{timeBadge}</span>
-          <time className={styles.date} dateTime={item.publishedAt}>
-            {dateLabel}
-          </time>
+          <div className={styles.metaLine}>
+            <time className={styles.date} dateTime={item.publishedAt}>
+              {dateLabel}
+            </time>
+            <span className={styles.metaSep} aria-hidden>
+              ·
+            </span>
+            <span className={styles.source}>{item.source}</span>
+            <span className={clsx(styles.score, sentimentScoreClass(item.sentimentScore))}>
+              {formatStockScore(item.sentimentScore)}
+            </span>
+          </div>
         </div>
         <h3 className={styles.title}>{renderStockNewsTitle(item.title, item.highlightTerms)}</h3>
         {item.description ? <p className={styles.description}>{item.description}</p> : null}

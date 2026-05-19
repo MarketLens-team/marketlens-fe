@@ -391,6 +391,10 @@
   flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
+  align-self: start;
+  position: sticky;
+  /* 본문 스크롤 시 뉴스와 함께 내려오며 우측 패널 유지 */
+  top: var(--space-5);
 }
 
 .rightStack .panelBody {

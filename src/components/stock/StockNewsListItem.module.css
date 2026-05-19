@@ -1,14 +1,6 @@
-.item {
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.item:last-child {
-  border-bottom: none;
-}
-
 .link {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7.5rem;
+  grid-template-columns: minmax(0, 1fr) 9rem;
   gap: var(--space-4);
   align-items: start;
   padding: var(--space-5) 0;
@@ -52,10 +44,49 @@
   border-radius: var(--radius-sm);
 }
 
+.metaLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+
 .date {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+}
+
+.metaSep {
+  color: var(--color-text-muted);
+  user-select: none;
+}
+
+.source {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.score {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.scorePos {
+  color: var(--color-success);
+}
+
+.scoreNeg {
+  color: var(--color-danger);
+}
+
+.scoreNeu {
+  color: var(--color-text-secondary);
 }
 
 .title {
@@ -86,16 +117,16 @@
 }
 
 .thumb {
-  width: 7.5rem;
-  height: 5rem;
+  width: 9rem;
+  height: 6rem;
   object-fit: cover;
   border-radius: var(--radius-sm);
   background: var(--color-bg-elevated);
 }
 
 .thumbPlaceholder {
-  width: 7.5rem;
-  height: 5rem;
+  width: 9rem;
+  height: 6rem;
   border-radius: var(--radius-sm);
   background: linear-gradient(
     145deg,
