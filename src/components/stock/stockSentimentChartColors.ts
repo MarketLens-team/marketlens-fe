@@ -1,13 +1,33 @@
-/** ECharts 옵션용 — 런타임 CSS 변수 읽기 */
+import type { SentimentTone } from './stockSentimentInterpretation'
+
+/** CMC Fear & Greed 스타일 팔레트 */
 export interface StockChartColors {
   bg: string
   elevated: string
   border: string
   textMuted: string
   textSecondary: string
-  warning: string
-  success: string
-  danger: string
+  chartBg: string
+  chartText: string
+  chartGrid: string
+}
+
+/** 구간별 라인 — 대비 강화 */
+export const SENTIMENT_LINE_COLORS: Record<SentimentTone, string> = {
+  extremePositive: '#22c55e',
+  positive: '#a3e635',
+  neutral: '#facc15',
+  negative: '#fb923c',
+  extremeNegative: '#ef4444',
+}
+
+/** 5구간 배경 — CMC처럼 뚜렷하게 */
+export const SENTIMENT_BAND_COLORS: Record<SentimentTone, string> = {
+  extremePositive: 'rgba(13, 148, 68, 0.42)',
+  positive: 'rgba(34, 197, 94, 0.2)',
+  neutral: 'rgba(234, 179, 8, 0.14)',
+  negative: 'rgba(249, 115, 22, 0.2)',
+  extremeNegative: 'rgba(220, 38, 38, 0.42)',
 }
 
 function readVar(name: string, fallback: string): string {
@@ -23,13 +43,12 @@ export function readStockChartColors(): StockChartColors {
     border: readVar('--color-border-strong', '#344757'),
     textMuted: readVar('--color-text-muted', '#7c93a6'),
     textSecondary: readVar('--color-text-secondary', '#b8c2cc'),
-    warning: readVar('--color-warning', '#f0b429'),
-    success: readVar('--color-success', '#02c076'),
-    danger: readVar('--color-danger', '#f6465d'),
+    chartBg: '#131722',
+    chartText: '#94a3b8',
+    chartGrid: 'rgba(148, 163, 184, 0.14)',
   }
 }
 
-/** hex/rgb에 alpha 적용 (ECharts markArea용) */
 export function withAlpha(color: string, alpha: number): string {
   const hex = color.trim()
   if (hex.startsWith('#')) {
@@ -47,4 +66,11 @@ export function withAlpha(color: string, alpha: number): string {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
   return color
+}
+
+/** Y축 정수 눈금만 표시 */
+export function formatChartAxisPrice(price: number): string {
+  const rounded = Math.round(price)
+  if (Math.abs(price - rounded) > 0.001) return ''
+  return String(rounded)
 }

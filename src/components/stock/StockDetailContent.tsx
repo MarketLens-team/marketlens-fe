@@ -113,57 +113,72 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       </header>
 
       <div className={styles.middleGrid}>
-        <section className={styles.panel} aria-labelledby="stock-context-title">
+        <section className={styles.panel} aria-labelledby="stock-trend-title">
           <div className={styles.panelBody}>
-            <h2 id="stock-context-title" className={styles.panelTitle}>
-              30일 평균 대비 현재 위치
+            <h2 id="stock-trend-title" className={styles.panelTitle}>
+              30일 감성 추이
             </h2>
-            <p className={styles.panelSub}>최근 한 달 감성점수 맥락</p>
-            <div className={styles.contextStats}>
-              <div className={styles.contextStat}>
-                <span className={styles.contextStatLabel}>현재</span>
-                <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.current))}>
-                  {formatStockScore(sentimentContext.current)}
-                </span>
-              </div>
-              <div className={styles.contextStat}>
-                <span className={styles.contextStatLabel}>30일 평균</span>
-                <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.avg30d))}>
-                  {formatStockScore(sentimentContext.avg30d)}
-                </span>
-              </div>
-              <div className={styles.contextStat}>
-                <span className={styles.contextStatLabel}>30일 최고</span>
-                <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.high30d))}>
-                  {formatStockScore(sentimentContext.high30d)}
-                </span>
-              </div>
-            </div>
+            <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
             <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
             <p className={styles.contextNote}>{sentimentContext.summaryNote}</p>
           </div>
         </section>
 
-        <section
-          className={clsx(styles.panel, styles.panelBreakdown)}
-          aria-labelledby="stock-breakdown-title"
-        >
-          <div className={styles.panelBody}>
-            <h2 id="stock-breakdown-title" className={styles.panelTitle}>
-              감성 분류 분포 · 오늘
-            </h2>
-            <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
-              {sentimentBreakdown.rows.map((row) => (
-                <span
-                  key={row.polarity}
-                  className={barSegmentClass(row.polarity)}
-                  style={{ width: `${row.percent}%` }}
-                />
-              ))}
+        <aside className={styles.middleAside}>
+          <section
+            className={clsx(styles.panel, styles.panelBreakdown)}
+            aria-labelledby="stock-breakdown-title"
+          >
+            <div className={styles.panelBody}>
+              <h2 id="stock-breakdown-title" className={styles.panelTitle}>
+                감성 분류 분포 · 오늘
+              </h2>
+              <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
+                {sentimentBreakdown.rows.map((row) => (
+                  <span
+                    key={row.polarity}
+                    className={barSegmentClass(row.polarity)}
+                    style={{ width: `${row.percent}%` }}
+                  />
+                ))}
+              </div>
+              <BreakdownList rows={sentimentBreakdown.rows} />
             </div>
-            <BreakdownList rows={sentimentBreakdown.rows} />
-          </div>
-        </section>
+          </section>
+
+          <section className={styles.panel} aria-labelledby="stock-context-title">
+            <div className={styles.panelBody}>
+              <h2 id="stock-context-title" className={styles.panelTitle}>
+                30일 평균 대비 현재 위치
+              </h2>
+              <p className={styles.panelSub}>최근 한 달 감성점수 맥락</p>
+              <div className={styles.contextStats}>
+                <div className={styles.contextStat}>
+                  <span className={styles.contextStatLabel}>현재</span>
+                  <span
+                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.current))}
+                  >
+                    {formatStockScore(sentimentContext.current)}
+                  </span>
+                </div>
+                <div className={styles.contextStat}>
+                  <span className={styles.contextStatLabel}>30일 평균</span>
+                  <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.avg30d))}>
+                    {formatStockScore(sentimentContext.avg30d)}
+                  </span>
+                </div>
+                <div className={styles.contextStat}>
+                  <span className={styles.contextStatLabel}>30일 최고</span>
+                  <span
+                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.high30d))}
+                  >
+                    {formatStockScore(sentimentContext.high30d)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </aside>
       </div>
 
       <div className={styles.bottomGrid}>

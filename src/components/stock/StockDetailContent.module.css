@@ -167,6 +167,21 @@
   align-items: start;
 }
 
+.middleAside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.middleAside .contextStats {
+  margin-bottom: 0;
+}
+
+.middleAside .panelSub {
+  margin-bottom: var(--space-3);
+}
+
 .panelBreakdown {
   width: 100%;
   min-width: 0;
@@ -624,6 +639,10 @@
   .middleGrid,
   .bottomGrid {
     grid-template-columns: 1fr;
+  }
+
+  .middleAside .contextStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
