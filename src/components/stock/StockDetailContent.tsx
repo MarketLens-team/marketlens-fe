@@ -7,8 +7,8 @@ import type {
   StockNewsItem,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
-import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
+import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
@@ -212,34 +212,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
           ) : (
             <ul className={styles.newsList}>
               {filteredNews.map((item) => (
-                <li key={item.id} className={styles.newsItem}>
-                  <div className={styles.newsTop}>
-                    <span className={clsx(styles.scorePill, pillClass(item.sentimentScore))}>
-                      {formatStockScore(item.sentimentScore)}
-                    </span>
-                    <span className={styles.newsMeta}>
-                      {item.source} · {formatRelativeTimeKo(item.publishedAt)}
-                    </span>
-                  </div>
-                  {item.url ? (
-                    <h3 className={styles.newsTitle}>
-                      <a
-                        className={styles.newsTitleLink}
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {item.title}
-                      </a>
-                    </h3>
-                  ) : (
-                    <h3 className={styles.newsTitle}>{item.title}</h3>
-                  )}
-                  <p className={styles.aiReason}>
-                    <span className={styles.aiReasonLabel}>AI 분석 근거: </span>
-                    {item.aiReason}
-                  </p>
-                </li>
+                <StockNewsListItem key={item.id} item={item} />
               ))}
             </ul>
           )}

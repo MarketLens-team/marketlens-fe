@@ -54,12 +54,17 @@ export interface StockSentimentBreakdown {
 export interface StockNewsItem {
   id: string
   title: string
+  /** 리드·요약 (추후 API 연동) */
+  description?: string
   source: string
   /** ISO 8601 */
   publishedAt: string
   sentiment: SentimentPolarity
   sentimentScore: number
   aiReason: string
+  /** 제목 강조 키워드 (종목명·티커 등) */
+  highlightTerms?: string[]
+  imageUrl?: string | null
   url?: string
 }
 
