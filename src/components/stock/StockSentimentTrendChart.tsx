@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import {
+  Area,
   Bar,
   CartesianGrid,
   ComposedChart,
-  Line,
   ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
@@ -14,13 +14,14 @@ import {
 import type { StockSentimentTrendPoint } from '../../data/types/stock'
 import { formatStockScore } from './stockScore'
 import {
+  CHART_BACKGROUND_GRADIENT_STOPS,
   STOCK_SENTIMENT_ZONE_BOUNDARIES,
   STOCK_SENTIMENT_ZONES,
 } from './stockSentimentZones'
 import styles from './StockSentimentTrendChart.module.css'
 
-const GRID_STROKE = 'color-mix(in srgb, var(--color-text-primary) 22%, transparent)'
-const BOUNDARY_STROKE = 'color-mix(in srgb, var(--color-text-primary) 35%, transparent)'
+const GRID_STROKE = 'color-mix(in srgb, var(--color-text-primary) 14%, transparent)'
+const BOUNDARY_STROKE = 'color-mix(in srgb, var(--color-text-primary) 28%, transparent)'
 
 export interface StockSentimentTrendChartProps {
   trend: StockSentimentTrendPoint[]
@@ -74,7 +75,33 @@ function TrendTooltip({
   )
 }
 
+function ChartGradientDefs({ bgId, areaId }: { bgId: string; areaId: string }) {
+  return (
+    <defs>
+      <linearGradient id={bgId} x1="0" y1="0" x2="0" y2="1">
+        {CHART_BACKGROUND_GRADIENT_STOPS.map((stop) => (
+          <stop
+            key={stop.offset}
+            offset={stop.offset}
+            stopColor={stop.color}
+            stopOpacity={stop.opacity}
+          />
+        ))}
+      </linearGradient>
+      <linearGradient id={areaId} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="var(--color-warning)" stopOpacity={0.45} />
+        <stop offset="55%" stopColor="var(--color-warning)" stopOpacity={0.12} />
+        <stop offset="100%" stopColor="var(--color-warning)" stopOpacity={0} />
+      </linearGradient>
+    </defs>
+  )
+}
+
 export function StockSentimentTrendChart({ trend, currentScore }: StockSentimentTrendChartProps) {
+  const uid = useId().replace(/:/g, '')
+  const bgGradientId = `stock-chart-bg-${uid}`
+  const areaGradientId = `stock-chart-area-${uid}`
+
   const mentionAxisMax = useMemo(() => {
     const max = Math.max(...trend.map((p) => p.mentionCount), 1)
     return max / 0.2
@@ -104,24 +131,22 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
             data={trend}
             margin={{ top: 8, right: 56, left: 4, bottom: 4 }}
           >
-            {STOCK_SENTIMENT_ZONES.map((zone) => (
-              <ReferenceArea
-                key={zone.label}
-                yAxisId="score"
-                y1={zone.y1}
-                y2={zone.y2}
-                fill={zone.fill}
-                strokeOpacity={0}
-                ifOverflow="extendDomain"
-              />
-            ))}
+            <ChartGradientDefs bgId={bgGradientId} areaId={areaGradientId} />
+            <ReferenceArea
+              yAxisId="score"
+              y1={-100}
+              y2={100}
+              fill={`url(#${bgGradientId})`}
+              strokeOpacity={0}
+              ifOverflow="extendDomain"
+            />
             {STOCK_SENTIMENT_ZONE_BOUNDARIES.map((y) => (
               <ReferenceLine
                 key={y}
                 yAxisId="score"
                 y={y}
                 stroke={BOUNDARY_STROKE}
-                strokeDasharray="4 4"
+                strokeDasharray="6 5"
                 strokeWidth={1}
               />
             ))}
@@ -140,11 +165,7 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
                 }}
               />
             ))}
-            <CartesianGrid
-              stroke={GRID_STROKE}
-              strokeDasharray="4 4"
-              vertical={false}
-            />
+            <CartesianGrid stroke={GRID_STROKE} strokeDasharray="6 5" vertical={false} />
             <XAxis
               dataKey="at"
               tickFormatter={formatDayLabel}
@@ -170,10 +191,11 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
               y={clampedCurrent}
               stroke="var(--color-warning)"
               strokeWidth={1}
+              strokeDasharray="4 3"
               label={{
                 value: formatStockScore(clampedCurrent),
                 position: 'right',
-                fill: 'var(--color-bg-app)',
+                fill: 'var(--color-warning)',
                 fontSize: 12,
                 fontWeight: 600,
                 fontFamily: 'var(--font-mono)',
@@ -182,24 +204,26 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
             <Tooltip
               content={<TrendTooltip />}
               cursor={{
-                stroke: 'color-mix(in srgb, var(--color-text-primary) 40%, transparent)',
+                stroke: 'color-mix(in srgb, var(--color-text-primary) 35%, transparent)',
                 strokeWidth: 1,
               }}
             />
             <Bar
               yAxisId="mention"
               dataKey="mentionCount"
-              fill="color-mix(in srgb, var(--color-text-muted) 65%, transparent)"
-              opacity={0.55}
-              barSize={8}
-              radius={[1, 1, 0, 0]}
+              fill="color-mix(in srgb, var(--color-text-muted) 50%, transparent)"
+              opacity={0.5}
+              barSize={10}
+              radius={[2, 2, 0, 0]}
             />
-            <Line
+            <Area
               yAxisId="score"
               type="monotone"
               dataKey="score"
+              baseLine={-100}
               stroke="var(--color-warning)"
-              strokeWidth={2}
+              strokeWidth={3}
+              fill={`url(#${areaGradientId})`}
               dot={false}
               activeDot={{
                 r: 5,
