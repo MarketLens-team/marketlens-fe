@@ -106,7 +106,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
                 navigate('/watchlist')
               }}
             >
-              관심 목록 페이지
+              마이페이지
             </button>
             <button
               type="button"

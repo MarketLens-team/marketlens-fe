@@ -11,7 +11,7 @@ export default function AdminStocksPage() {
   const { data, loading, error } = useAdminStocks()
 
   return (
-    <Layout>
+    <Layout hideSidebar={false}>
       <div className={styles.page}>
         <PageHeader
           title="종목 관리"

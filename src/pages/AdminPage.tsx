@@ -11,7 +11,7 @@ export default function AdminPage() {
   const { data, loading, error } = useAdminOverview()
 
   return (
-    <Layout>
+    <Layout hideSidebar={false}>
       <div className={styles.page}>
         <PageHeader
           title="관리자"

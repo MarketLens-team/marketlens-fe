@@ -9,7 +9,8 @@ interface LayoutProps {
   hideSidebar?: boolean
 }
 
-export function Layout({ children, hideSidebar = false }: LayoutProps) {
+/** 좌측 Sidebar는 보존. 기본은 상단 네비만 사용(`hideSidebar` 기본 true). Admin 등에서만 `hideSidebar={false}`. */
+export function Layout({ children, hideSidebar = true }: LayoutProps) {
   return (
     <div className={styles.layout}>
       <div className={styles.topStrip}>

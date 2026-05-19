@@ -24,7 +24,7 @@ export default function AdminCrawlingPage() {
   const { data, loading, error } = useAdminCrawlingLogs()
 
   return (
-    <Layout>
+    <Layout hideSidebar={false}>
       <div className={styles.page}>
         <PageHeader
           title="크롤링 로그"

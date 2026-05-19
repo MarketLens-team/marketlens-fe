@@ -56,21 +56,22 @@
   background: transparent;
   color: var(--color-text-secondary);
   text-decoration: none;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
-.menuItem:hover,
-.menuItem[aria-current='page'] {
+.menuItem:hover {
   background: var(--color-interactive-hover);
   color: var(--color-interactive-active-text);
 }
 
+.menuItemActive,
 .menuItem[aria-current='page'] {
   background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
 }
 
 @media (max-width: 980px) {
