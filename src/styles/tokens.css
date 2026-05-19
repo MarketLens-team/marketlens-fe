@@ -18,6 +18,8 @@
   --color-primary: #3b82f6;
   --color-success: #02c076;
   --color-danger: #f6465d;
+  --color-danger-muted: color-mix(in srgb, var(--color-danger) 82%, #0a0f16);
+  --color-danger-surface: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-card));
   --color-warning: #f0b429;
   --color-interactive-active: #283f88;
   --color-interactive-active-text: #ecf2ff;
@@ -27,14 +29,15 @@
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Pretendard', sans-serif;
 
-  /* Typography — size (7-step; converge irregular px to nearest step) */
+  /* Typography — size (8-step; converge irregular px to nearest step) */
   --font-size-xs: 0.625rem; /* 10px — badge, caption */
   --font-size-sm: 0.75rem; /* 12px — secondary body */
   --font-size-base: 0.8125rem; /* 13px — default UI */
   --font-size-lg: 0.875rem; /* 14px — emphasized body */
   --font-size-xl: 1rem; /* 16px — list title */
   --font-size-2xl: 1.125rem; /* 18px — section title */
-  --font-size-3xl: 1.375rem; /* 22px — page title */
+  --font-size-3xl: 1.25rem; /* 20px — large emphasis */
+  --font-size-4xl: 1.375rem; /* 22px — page title */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -92,6 +95,8 @@
   --color-primary: #2563eb;
   --color-success: #16a34a;
   --color-danger: #dc2626;
+  --color-danger-muted: color-mix(in srgb, var(--color-danger) 88%, #ffffff);
+  --color-danger-surface: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-card));
   --color-warning: #ca8a04;
   --color-interactive-active: #2563eb;
   --color-interactive-active-text: #ffffff;

@@ -45,7 +45,7 @@
 
 .text-display {
   font-family: var(--font-sans);
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }

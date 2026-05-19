@@ -70,6 +70,9 @@ web_modules/
 .env.*
 !.env.example
 
+# OpenAPI export from local backend (curl /v3/api-docs) — reference only, do not commit
+openapi.json
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
