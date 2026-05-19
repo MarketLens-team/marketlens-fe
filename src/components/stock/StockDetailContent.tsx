@@ -290,6 +290,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               {loadMoreError}
             </p>
           ) : null}
+          <BackToTopButton />
         </section>
 
         <div className={styles.rightStack}>
@@ -351,8 +352,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         </span>
         감성 점수는 예측이 아닌 참고 지표입니다. 투자 판단은 본인 책임입니다.
       </p>
-
-      <BackToTopButton />
     </div>
   )
 }
