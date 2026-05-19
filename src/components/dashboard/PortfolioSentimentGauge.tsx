@@ -1,4 +1,6 @@
 import clsx from 'clsx'
+import { useMemo } from 'react'
+import GaugeChart from 'react-gauge-chart'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SentimentGaugeBlock } from '../../data/types/dashboard'
@@ -9,14 +11,11 @@ interface PortfolioSentimentGaugeProps {
   className?: string
 }
 
-const ARC_CX = 100
-const ARC_CY = 88
-const ARC_R = 74
-const SEGMENT_COUNT = 5
-/** 세그먼트 사이 여백(라운드 캡이 겹치지 않도록 충분히 큼) */
-const GAP_RAD = 0.18
-
-const SEGMENT_TONES = ['segDanger', 'segOrange', 'segNeutral', 'segGreen', 'segGreenStrong'] as const
+const GAUGE_ID = 'portfolio-sentiment-gauge'
+const GAUGE_COLORS = ['#f6465d', '#f18a42', '#f0b429', '#79b852', '#02c076']
+const ARCS_LENGTH = [0.2, 0.2, 0.2, 0.2, 0.2]
+const ARC_WIDTH = 0.14
+const GAUGE_CHART_STYLE = { width: '100%', height: 132 } as const
 
 function scorePercent(score: number, min: number, max: number) {
   const range = max - min
@@ -25,69 +24,75 @@ function scorePercent(score: number, min: number, max: number) {
 }
 
 function sentimentLabel(score: number): string {
-  if (score <= -30) return '강한 부정'
-  if (score <= -10) return '부정'
-  if (score <= 10) return '중립'
-  if (score <= 30) return '긍정'
+  if (score <= -60) return '강한 부정'
+  if (score <= -20) return '부정'
+  if (score <= 20) return '중립'
+  if (score <= 60) return '긍정'
   return '강한 긍정'
 }
 
-function polarToXY(angle: number) {
-  return {
-    x: ARC_CX + ARC_R * Math.cos(angle),
-    y: ARC_CY - ARC_R * Math.sin(angle),
-  }
+/** react-gauge-chart customNeedleComponent — percent에 맞춰 회전하는 아크 위 점 */
+function GaugeArcDot({ percent }: { percent: number }) {
+  const rotation = -90 + percent * 180
+
+  return (
+    <div className={styles.needlePivot} aria-hidden>
+      <div className={styles.needleArm} style={{ transform: `rotate(${rotation}deg)` }}>
+        <span className={styles.arcDot} />
+      </div>
+    </div>
+  )
 }
-
-function arcPath(startAngle: number, endAngle: number) {
-  const start = polarToXY(startAngle)
-  const end = polarToXY(endAngle)
-  const largeArc = startAngle - endAngle > Math.PI ? 1 : 0
-  return `M ${start.x} ${start.y} A ${ARC_R} ${ARC_R} 0 ${largeArc} 1 ${end.x} ${end.y}`
-}
-
-function buildSegments() {
-  const span = (Math.PI - (SEGMENT_COUNT - 1) * GAP_RAD) / SEGMENT_COUNT
-  const segments: { d: string; tone: (typeof SEGMENT_TONES)[number] }[] = []
-  let cursor = Math.PI
-
-  for (let i = 0; i < SEGMENT_COUNT; i += 1) {
-    const end = cursor - span
-    segments.push({ d: arcPath(cursor, end), tone: SEGMENT_TONES[i] })
-    cursor = end - GAP_RAD
-  }
-
-  return segments
-}
-
-function indicatorPosition(percent: number) {
-  const theta = Math.PI * (1 - percent)
-  return polarToXY(theta)
-}
-
-const GAUGE_SEGMENTS = buildSegments()
 
 export function PortfolioSentimentGauge({ gauge, className }: PortfolioSentimentGaugeProps) {
-  const percent = scorePercent(gauge.score, gauge.min, gauge.max)
-  const { x, y } = indicatorPosition(percent)
-  const displayScore = gauge.score > 0 ? String(gauge.score) : String(gauge.score)
+  const percent = useMemo(
+    () => scorePercent(gauge.score, gauge.min, gauge.max),
+    [gauge.score, gauge.min, gauge.max],
+  )
+  const displayScore = String(gauge.score)
   const label = sentimentLabel(gauge.score)
+
+  const centerText = useMemo(
+    () => (
+      <div className={styles.centerText}>
+        <span className={styles.score}>{displayScore}</span>
+        <span className={styles.label}>{label}</span>
+      </div>
+    ),
+    [displayScore, label],
+  )
 
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
       <CardSectionHeader title="내 포트폴리오 감성" variant="embedded" showChevron />
 
-      <div className={styles.gaugeWrap} role="img" aria-label={`포트폴리오 감성 ${displayScore}, ${label}`}>
-        <svg className={styles.arc} viewBox="0 0 200 96" aria-hidden>
-          {GAUGE_SEGMENTS.map((seg, i) => (
-            <path key={i} className={clsx(styles.arcSegment, styles[seg.tone])} d={seg.d} />
-          ))}
-          <circle className={styles.indicator} cx={x} cy={y} r="6" />
-        </svg>
-        <div className={styles.center}>
-          <span className={styles.score}>{displayScore}</span>
-          <span className={styles.label}>{label}</span>
-        </div>
+      <div
+        className={styles.gaugeWrap}
+        role="img"
+        aria-label={`포트폴리오 감성 ${displayScore}, ${label}`}
+      >
+        <GaugeChart
+          id={GAUGE_ID}
+          className={styles.gaugeChart}
+          style={GAUGE_CHART_STYLE}
+          arcsLength={ARCS_LENGTH}
+          colors={GAUGE_COLORS}
+          percent={percent}
+          arcPadding={0.06}
+          arcWidth={ARC_WIDTH}
+          cornerRadius={6}
+          marginInPercent={0.05}
+          needleScale={0.55}
+          hideText
+          animate
+          animDelay={0}
+          animateDuration={1200}
+          customNeedleComponent={<GaugeArcDot percent={percent} />}
+          customNeedleComponentClassName={styles.needleLayer}
+          customNeedleStyle={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+          textComponent={centerText}
+          textComponentContainerClassName={styles.textLayer}
+        />
       </div>
     </Card>
   )

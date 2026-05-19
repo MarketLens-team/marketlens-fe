@@ -8,60 +8,72 @@
 .gaugeWrap {
   position: relative;
   width: 100%;
-  padding: 0;
-  line-height: 0;
+  container-type: inline-size;
 }
 
-.arc {
-  width: 100%;
-  height: auto;
+.gaugeChart {
+  position: relative;
+  z-index: 1;
   display: block;
-  vertical-align: top;
 }
 
-.arcSegment {
-  fill: none;
-  stroke-width: 14;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
+.gaugeChart :global(svg) {
+  display: block;
+  overflow: visible;
 }
 
-.segDanger {
-  stroke: var(--color-danger);
+/* react-gauge-chart customNeedleComponent 컨테이너 */
+.needleLayer {
+  z-index: 2;
 }
 
-.segOrange {
-  stroke: color-mix(in srgb, var(--color-danger) 40%, var(--color-warning));
-}
-
-.segNeutral {
-  stroke: var(--color-warning);
-}
-
-.segGreen {
-  stroke: color-mix(in srgb, var(--color-success) 50%, var(--color-warning));
-}
-
-.segGreenStrong {
-  stroke: var(--color-success);
-}
-
-.indicator {
-  fill: var(--color-text-primary);
-  stroke: var(--color-bg-card);
-  stroke-width: 3;
-}
-
-.center {
+.needlePivot {
   position: absolute;
+  bottom: 9%;
   left: 50%;
-  top: 62%;
+  width: 0;
+  height: 0;
+}
+
+.needleArm {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  /* 라이브러리 아크 반경(~outerRadius·0.86)에 맞춤 */
+  height: clamp(4.75rem, 36.5cqw, 7.25rem);
+  transform-origin: bottom center;
+  transition: transform 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.arcDot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--color-bg-card);
+  border-radius: 50%;
+  background: var(--color-text-primary);
   transform: translate(-50%, -50%);
+}
+
+/* react-gauge-chart textComponent 컨테이너 */
+.textLayer {
+  position: absolute !important;
+  z-index: 3;
+  top: 48% !important;
+  left: 50% !important;
+  width: auto !important;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.centerText {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  pointer-events: none;
   line-height: var(--line-height-tight);
 }
 
@@ -77,5 +89,5 @@
 .label {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
+  color: var(--color-text-primary);
 }

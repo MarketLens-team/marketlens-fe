@@ -3,8 +3,8 @@ import type { DashboardOverview } from '../types/dashboard'
 export const mockDashboardOverview: DashboardOverview = {
   portfolioSentiment: {
     score: 23,
-    min: -50,
-    max: 50,
+    min: -100,
+    max: 100,
     distribution: { positive: 50, neutral: 17, negative: 33 },
   },
   stocksToWatch: [
@@ -76,8 +76,8 @@ export const mockDashboardOverview: DashboardOverview = {
   ],
   kospiSentiment: {
     score: 38,
-    min: -50,
-    max: 50,
+    min: -100,
+    max: 100,
     distribution: { positive: 61, neutral: 15, negative: 24 },
   },
   buzzSurgeTop3: [
