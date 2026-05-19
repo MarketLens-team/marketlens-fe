@@ -8,6 +8,7 @@ import type {
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
+import { StockHeaderAiSummary } from './StockHeaderAiSummary'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
@@ -66,66 +67,62 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.headerMain}>
+        <div className={styles.headerTop}>
           <h1 className={styles.stockTitle}>{stock.name}</h1>
-          <div className={styles.stockMeta}>
-            <span>{stock.code}</span>
-            <span className={styles.stockMetaSep} aria-hidden>
-              ·
-            </span>
-            <span>{stock.market}</span>
-            <span className={styles.stockMetaSep} aria-hidden>
-              ·
-            </span>
-            <span>{stock.sector}</span>
+          <button type="button" className={styles.watchlistBtn}>
+            ★ 관심종목 추가
+          </button>
+        </div>
+        <div className={styles.headerBody}>
+          <div className={styles.headerLeft}>
+            <div className={styles.stockMeta}>
+              <span>{stock.code}</span>
+              <span className={styles.stockMetaSep} aria-hidden>
+                ·
+              </span>
+              <span>{stock.market}</span>
+              <span className={styles.stockMetaSep} aria-hidden>
+                ·
+              </span>
+              <span>{stock.sector}</span>
+            </div>
+            <div className={styles.priceBlock}>
+              {stock.price.current > 0 ? (
+                <>
+                  <span className={styles.priceCurrent}>{formatPrice(stock.price.current)}</span>
+                  <span className={clsx(styles.priceChange, priceUp ? styles.priceUp : styles.priceDown)}>
+                    {priceUp ? '+' : ''}
+                    {formatPrice(stock.price.change)} ({priceUp ? '+' : ''}
+                    {stock.price.changePercent}%)
+                  </span>
+                </>
+              ) : (
+                <span className={styles.priceCurrent}>—</span>
+              )}
+            </div>
           </div>
-          <div className={styles.priceBlock}>
-            {stock.price.current > 0 ? (
-              <>
-                <span className={styles.priceCurrent}>{formatPrice(stock.price.current)}</span>
-                <span className={clsx(styles.priceChange, priceUp ? styles.priceUp : styles.priceDown)}>
-                  {priceUp ? '+' : ''}
-                  {formatPrice(stock.price.change)} ({priceUp ? '+' : ''}
-                  {stock.price.changePercent}%)
-                </span>
-              </>
-            ) : (
-              <span className={styles.priceCurrent}>—</span>
-            )}
+          <div className={styles.headerMetrics}>
+            <div className={styles.headerStat}>
+              <p className={styles.headerStatLabel}>감성 점수</p>
+              <p className={clsx(styles.headerStatValue, scoreToneClass(stock.sentimentScore))}>
+                {formatStockScore(stock.sentimentScore)}
+              </p>
+            </div>
+            <div className={styles.headerStat}>
+              <p className={styles.headerStatLabel}>언급량 변화율</p>
+              <p
+                className={clsx(
+                  styles.headerStatValue,
+                  stock.mentionChangePercent >= 0 ? styles.scoreUp : styles.scoreDown,
+                )}
+              >
+                {formatPercent(stock.mentionChangePercent)}
+              </p>
+            </div>
+            <StockHeaderAiSummary summary={stock.aiSummary} />
           </div>
         </div>
-        <button type="button" className={styles.watchlistBtn}>
-          ★ 관심종목 추가
-        </button>
       </header>
-
-      <div className={styles.summaryRow}>
-        <div className={styles.summaryCard}>
-          <p className={styles.summaryLabel}>감성 점수</p>
-          <p className={clsx(styles.summaryValue, scoreToneClass(stock.sentimentScore))}>
-            {formatStockScore(stock.sentimentScore)}
-          </p>
-        </div>
-        <div className={styles.summaryCard}>
-          <p className={styles.summaryLabel}>언급량 변화율</p>
-          <p
-            className={clsx(
-              styles.summaryValue,
-              stock.mentionChangePercent >= 0 ? styles.scoreUp : styles.scoreDown,
-            )}
-          >
-            {formatPercent(stock.mentionChangePercent)}
-          </p>
-        </div>
-        <div className={clsx(styles.summaryCard, styles.summaryWide)}>
-          <p className={styles.summaryLabel}>AI 감성점수 요약 (오늘 뉴스 종합)</p>
-          <p className={styles.aiSummaryText}>
-            <span className={styles.aiSummaryScore}>{formatStockScore(stock.sentimentScore)}</span>
-            {' | '}
-            {stock.aiSummary}
-          </p>
-        </div>
-      </div>
 
       <div className={styles.middleGrid}>
         <section className={styles.panel} aria-labelledby="stock-context-title">

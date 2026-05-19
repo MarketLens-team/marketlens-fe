@@ -22,18 +22,7 @@
 }
 
 .skeletonHeader {
-  height: 120px;
-  border-radius: var(--radius-sm);
-}
-
-.skeletonSummary {
-  display: grid;
-  grid-template-columns: 1fr 1fr 2fr;
-  gap: var(--space-3);
-}
-
-.skeletonCard {
-  height: 88px;
+  height: 140px;
   border-radius: var(--radius-sm);
 }
 
@@ -49,7 +38,6 @@
 }
 
 @media (max-width: 960px) {
-  .skeletonSummary,
   .skeletonGrid {
     grid-template-columns: 1fr;
   }

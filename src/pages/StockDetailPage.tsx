@@ -22,11 +22,6 @@ export default function StockDetailPage() {
         {loading && !data ? (
           <div className={styles.skeleton} aria-busy="true" aria-label="종목 상세 로딩">
             <div className={clsx(skeleton.block, styles.skeletonHeader)} />
-            <div className={styles.skeletonSummary}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
-              ))}
-            </div>
             <div className={styles.skeletonGrid}>
               <div className={clsx(skeleton.block, styles.skeletonPanel)} />
               <div className={clsx(skeleton.block, styles.skeletonPanel)} />
