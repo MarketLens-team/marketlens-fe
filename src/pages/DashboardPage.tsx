@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
 import { DashboardWatchlistTable } from '../components/dashboard/DashboardWatchlistTable'
 import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
@@ -13,6 +14,20 @@ import styles from './DashboardPage.module.css'
 
 export default function DashboardPage() {
   const { data, loading, error } = useDashboardOverview()
+  const leftAsideRef = useRef<HTMLDivElement>(null)
+  const [leftAsideHeight, setLeftAsideHeight] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const el = leftAsideRef.current
+    if (!el) return
+
+    const syncHeight = () => setLeftAsideHeight(el.offsetHeight)
+    const observer = new ResizeObserver(syncHeight)
+    observer.observe(el)
+    syncHeight()
+
+    return () => observer.disconnect()
+  }, [data])
 
   return (
     <Layout>
@@ -40,8 +55,16 @@ export default function DashboardPage() {
 
         {data ? (
           <>
-            <section className={styles.topGrid} aria-label="포트폴리오·언급량·관심 종목">
-              <div className={styles.leftAside}>
+            <section
+              className={styles.topGrid}
+              aria-label="포트폴리오·언급량·관심 종목"
+              style={
+                leftAsideHeight != null
+                  ? ({ '--top-row-h': `${leftAsideHeight}px` } as CSSProperties)
+                  : undefined
+              }
+            >
+              <div ref={leftAsideRef} className={styles.leftAside}>
                 <PortfolioSentimentGauge gauge={data.portfolioSentiment} />
                 <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
               </div>

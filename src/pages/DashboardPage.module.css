@@ -38,8 +38,11 @@
 }
 
 .watchlistMain {
-  align-self: stretch;
-  min-height: 380px;
+  align-self: start;
+  height: var(--top-row-h);
+  max-height: var(--top-row-h);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .marketSection {
@@ -63,6 +66,12 @@
 @media (max-width: 1100px) {
   .topGrid {
     grid-template-columns: 1fr;
+  }
+
+  .watchlistMain {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .marketGrid {
