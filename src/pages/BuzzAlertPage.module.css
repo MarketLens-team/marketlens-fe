@@ -1,14 +1,15 @@
 .page {
   max-width: var(--layout-page-max);
-}
-
-.feedCard {
-  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-6);
 }
 
 .bannerError {
-  margin: 0 0 var(--space-3);
-  padding: var(--space-3) var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-strong);
   background: var(--color-bg-section);
@@ -16,70 +17,33 @@
   font-size: var(--font-size-base);
 }
 
-.skeletonList {
-  padding: var(--space-2) var(--space-4) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.mainGrid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
 }
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--space-4) var(--space-2);
+.summaryCol {
+  min-width: 0;
 }
 
-.item {
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-default);
+.tableCol {
+  min-width: 0;
 }
 
-.item:last-child {
-  border-bottom: none;
+.skeletonCard {
+  height: 7.5rem;
+  border-radius: var(--radius-md);
 }
 
-.top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
+.skeletonTable {
+  height: 24rem;
+  border-radius: var(--radius-md);
 }
 
-.topic {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  line-height: var(--line-height-tight);
-  font-family: var(--font-sans);
-}
-
-.spike {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--color-warning);
-  letter-spacing: 0.04em;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-default);
-  background: var(--color-bg-card);
-}
-
-.bottom {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-mono);
-}
-
-.stocks {
-  color: var(--color-text-secondary);
-}
-
-.time {
-  color: var(--color-text-muted);
+@media (max-width: 900px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
 }

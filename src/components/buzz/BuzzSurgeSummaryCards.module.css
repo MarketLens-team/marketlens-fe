@@ -1,0 +1,59 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.card {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  padding: var(--space-4);
+  min-height: 6.5rem;
+}
+
+.label {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.value {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+.valueSurge {
+  margin-left: var(--space-2);
+  font-size: var(--font-size-lg);
+  color: var(--color-danger);
+}
+
+.valueUnit {
+  margin-left: var(--space-1);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.valuePos {
+  color: var(--color-success);
+}
+
+.valueNeg {
+  color: var(--color-danger);
+}
+
+.valueNeutral {
+  color: var(--color-text-secondary);
+}
+
+.sub {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
