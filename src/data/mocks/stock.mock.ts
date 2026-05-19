@@ -1,57 +1,178 @@
 import type { StockDetail } from '../types/stock'
 
-const baseNews = (stockName: string) => [
-  {
-    id: 'n1',
-    title: `${stockName} 실적 컨센서스 상회 전망 — 외인 순매수 지속`,
-    source: '연합인포맥스',
-    publishedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    sentiment: 'positive' as const,
+const samsungDetail: StockDetail = {
+  stock: {
+    code: '005930',
+    name: '삼성전자',
+    market: 'KOSPI',
+    sector: '반도체',
+    sentimentScore: 73,
+    mentionChangePercent: 189,
+    buzz24h: 94,
+    price: { current: 87400, change: 1050, changePercent: 1.21 },
+    aiSummary: 'HBM 수요 급증 긍정 기사 집중, 수출규제 우려 일부 상쇄',
   },
-  {
-    id: 'n2',
-    title: `규제 이슈 재부각… ${stockName} 단기 변동성 확대`,
-    source: '한국경제',
-    publishedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-    sentiment: 'negative' as const,
+  sentimentContext: {
+    current: 73,
+    avg30d: 31,
+    high30d: 78,
+    summaryNote: '현재 +73 • 30일 평균 +31 • 최근 한 달 최고치 근접',
   },
-  {
-    id: 'n3',
-    title: `${stockName}, 차세대 라인 투자 계획 발표`,
-    source: '매일경제',
-    publishedAt: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
-    sentiment: 'neutral' as const,
+  sentimentBreakdown: {
+    rows: [
+      { polarity: 'positive', label: '긍정', count: 14, avgScore: 68, percent: 56 },
+      { polarity: 'neutral', label: '중립', count: 7, avgScore: 5, percent: 28 },
+      { polarity: 'negative', label: '부정', count: 4, avgScore: -54, percent: 16 },
+    ],
+    totalCount: 25,
+    finalScore: 73,
   },
-]
+  recentNews: [
+    {
+      id: 'n1',
+      title: '삼성전자, HBM3E 양산 본격화… 엔비디아 공급망 편입 기대',
+      source: '연합뉴스',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+      sentiment: 'positive',
+      sentimentScore: 89,
+      aiReason: 'HBM 수요·양산 확대 등 실적·기술 우위를 강조하는 표현이 다수',
+    },
+    {
+      id: 'n2',
+      title: '미국 반도체 수출규제 강화 검토… 국내 메모리 업체 영향 주시',
+      source: '한국경제',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+      sentiment: 'negative',
+      sentimentScore: -67,
+      aiReason: '규제·제재·리스크 키워드가 헤드라인·리드에 반복',
+    },
+    {
+      id: 'n3',
+      title: '삼성전자, 파운드리 투자 확대… 2030년까지 500조 원 규모',
+      source: '매일경제',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+      sentiment: 'positive',
+      sentimentScore: 54,
+      aiReason: '장기 투자·성장 전략을 긍정적으로 서술',
+    },
+    {
+      id: 'n4',
+      title: '반도체 업황 회복세 지속… 메모리 가격 상승 전망',
+      source: '이데일리',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+      sentiment: 'neutral',
+      sentimentScore: 12,
+      aiReason: '업황·가격 전망을 중립적으로 기술',
+    },
+  ],
+  relatedStocks: [
+    { code: '000660', name: 'SK하이닉스', sentimentScore: 62 },
+    { code: '042700', name: '한미반도체', sentimentScore: 48 },
+    { code: '403870', name: 'HPSP', sentimentScore: 21 },
+    { code: '240810', name: '원익IPS', sentimentScore: -8 },
+  ],
+  peopleTimeline: [
+    { id: 'p1', personName: '젠슨 황', role: '엔비디아 CEO', relativeLabel: '2h', sentimentScore: 81 },
+    { id: 'p2', personName: '이재용', role: '삼성전자 회장', relativeLabel: '어제', sentimentScore: 12 },
+    { id: 'p3', personName: '한종희', role: '삼성전자 부회장', relativeLabel: '3일 전', sentimentScore: 45 },
+  ],
+}
+
+function buildFallbackDetail(
+  code: string,
+  name: string,
+  sentimentScore: number,
+  buzz24h: number,
+): StockDetail {
+  const pos = sentimentScore >= 0
+  return {
+    stock: {
+      code,
+      name,
+      market: 'KOSPI',
+      sector: '—',
+      sentimentScore,
+      mentionChangePercent: Math.round(buzz24h * 1.2),
+      buzz24h,
+      price: { current: 0, change: 0, changePercent: 0 },
+      aiSummary: `${name} 관련 뉴스 감성을 종합한 참고 지표입니다.`,
+    },
+    sentimentContext: {
+      current: sentimentScore,
+      avg30d: Math.round(sentimentScore * 0.45),
+      high30d: Math.max(sentimentScore + 5, sentimentScore),
+      summaryNote: `현재 ${sentimentScore > 0 ? '+' : ''}${sentimentScore} • 30일 평균 데이터 수집 중`,
+    },
+    sentimentBreakdown: {
+      rows: [
+        {
+          polarity: 'positive',
+          label: '긍정',
+          count: pos ? 8 : 3,
+          avgScore: pos ? 52 : 18,
+          percent: pos ? 50 : 25,
+        },
+        {
+          polarity: 'neutral',
+          label: '중립',
+          count: 5,
+          avgScore: 3,
+          percent: 30,
+        },
+        {
+          polarity: 'negative',
+          label: '부정',
+          count: pos ? 3 : 8,
+          avgScore: -42,
+          percent: pos ? 20 : 45,
+        },
+      ],
+      totalCount: 16,
+      finalScore: sentimentScore,
+    },
+    recentNews: [
+      {
+        id: 'n1',
+        title: `${name} 실적 컨센서스 상회 전망 — 외인 순매수 지속`,
+        source: '연합인포맥스',
+        publishedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+        sentiment: 'positive',
+        sentimentScore: Math.min(sentimentScore + 15, 95),
+        aiReason: '실적·순매수 등 긍정 키워드 비중이 높음',
+      },
+      {
+        id: 'n2',
+        title: `규제 이슈 재부각… ${name} 단기 변동성 확대`,
+        source: '한국경제',
+        publishedAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+        sentiment: 'negative',
+        sentimentScore: -48,
+        aiReason: '규제·변동성·리스크 표현이 두드러짐',
+      },
+      {
+        id: 'n3',
+        title: `${name}, 차세대 라인 투자 계획 발표`,
+        source: '매일경제',
+        publishedAt: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
+        sentiment: 'neutral',
+        sentimentScore: 8,
+        aiReason: '투자 계획을 사실 위주로 전달',
+      },
+    ],
+    relatedStocks: [
+      { code: '005930', name: '삼성전자', sentimentScore: 73 },
+      { code: '000660', name: 'SK하이닉스', sentimentScore: 62 },
+    ].filter((s) => s.code !== code),
+    peopleTimeline: [
+      { id: 'p1', personName: '—', role: '관련 인물', relativeLabel: '1일 전', sentimentScore: sentimentScore },
+    ],
+  }
+}
 
 export const mockStockDetails: Record<string, StockDetail> = {
-  '005930': {
-    stock: {
-      code: '005930',
-      name: '삼성전자',
-      sentimentScore: 58,
-      buzz24h: 94,
-    },
-    recentNews: baseNews('삼성전자'),
-  },
-  '000660': {
-    stock: {
-      code: '000660',
-      name: 'SK하이닉스',
-      sentimentScore: 44,
-      buzz24h: 71,
-    },
-    recentNews: baseNews('SK하이닉스'),
-  },
-  '035420': {
-    stock: {
-      code: '035420',
-      name: 'NAVER',
-      sentimentScore: 12,
-      buzz24h: 33,
-    },
-    recentNews: baseNews('NAVER'),
-  },
+  '005930': samsungDetail,
+  '000660': buildFallbackDetail('000660', 'SK하이닉스', 62, 71),
+  '035420': buildFallbackDetail('035420', 'NAVER', 12, 33),
 }
 
 export const mockDefaultStockCode = '005930'
