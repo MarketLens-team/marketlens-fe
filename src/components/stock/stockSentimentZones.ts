@@ -1,4 +1,4 @@
-/** 감성 점수 -100 ~ +100 구간 라벨·경계 */
+/** 감성 점수 -100 ~ +100 구간 */
 export interface StockSentimentZone {
   y1: number
   y2: number
@@ -15,18 +15,3 @@ export const STOCK_SENTIMENT_ZONES: StockSentimentZone[] = [
 ]
 
 export const STOCK_SENTIMENT_ZONE_BOUNDARIES = [-60, -20, 20, 60] as const
-
-/** 차트 배경 세로 그라데이션 (CMC Fear & Greed 스타일) */
-export const CHART_BACKGROUND_GRADIENT_STOPS: ReadonlyArray<{
-  offset: string
-  color: string
-  opacity: number
-}> = [
-  { offset: '0%', color: 'var(--color-success)', opacity: 0.38 },
-  { offset: '18%', color: 'var(--color-success)', opacity: 0.14 },
-  { offset: '38%', color: 'var(--color-success)', opacity: 0.04 },
-  { offset: '50%', color: 'var(--color-text-muted)', opacity: 0.08 },
-  { offset: '62%', color: 'var(--color-danger)', opacity: 0.04 },
-  { offset: '82%', color: 'var(--color-danger)', opacity: 0.14 },
-  { offset: '100%', color: 'var(--color-danger)', opacity: 0.38 },
-]

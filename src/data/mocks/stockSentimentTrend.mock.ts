@@ -26,7 +26,7 @@ export function buildStockSentimentTrend(
     const mentionCount = Math.max(8, mentionBase + mentionBoost)
 
     points.push({
-      at: d.toISOString(),
+      recordedAt: d.toISOString(),
       score,
       mentionCount,
     })

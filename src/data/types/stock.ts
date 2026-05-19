@@ -22,8 +22,8 @@ export interface StockSummary {
 
 /** 일별 감성 추이 (차트용) */
 export interface StockSentimentTrendPoint {
-  /** ISO 8601 (일 단위) */
-  at: string
+  /** ISO 8601 */
+  recordedAt: string
   score: number
   mentionCount: number
 }
