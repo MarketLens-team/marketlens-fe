@@ -319,11 +319,9 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
             </div>
           </section>
 
-          <BackToTopButton
-            reserveSpace
-            tooltipSide="left"
-            className={styles.sidebarBackToTop}
-          />
+          <div className={styles.sidebarBackToTop}>
+            <BackToTopButton tooltipSide="left" />
+          </div>
 
           <section className={styles.panel} aria-labelledby="stock-people-title">
             <div className={styles.panelBody}>

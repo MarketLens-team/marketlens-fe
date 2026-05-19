@@ -2,8 +2,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 9rem;
-  padding: var(--space-4) 0;
   width: 100%;
   box-sizing: border-box;
 }
