@@ -24,6 +24,10 @@
   width: calc(100% + 2 * var(--main-pad-inline, var(--space-6)));
 }
 
+.splitNoSidebar {
+  grid-template-columns: 1fr;
+}
+
 .split::after {
   content: '';
   position: absolute;
@@ -34,6 +38,10 @@
   background: var(--color-border-default);
   pointer-events: none;
   z-index: 1;
+}
+
+.splitNoSidebar::after {
+  display: none;
 }
 
 .content {

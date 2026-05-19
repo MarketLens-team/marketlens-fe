@@ -46,7 +46,7 @@ export default function BuzzAlertPage() {
   const { data, loading, error } = useBuzzAlerts()
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <DetailSplitShell groups={buzzSidebarGroups}>
         <DetailMainGroup>
           <PageHeader

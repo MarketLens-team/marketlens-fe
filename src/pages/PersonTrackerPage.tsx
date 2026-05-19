@@ -52,7 +52,7 @@ export default function PersonTrackerPage() {
   const { data, loading, error } = usePersonMentions()
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <DetailSplitShell groups={personSidebarGroups}>
         <DetailMainGroup>
           <PageHeader

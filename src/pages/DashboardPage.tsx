@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const { data, loading, error } = useDashboardOverview()
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <div className={styles.page}>
         <PageHeader
           title="대시보드"

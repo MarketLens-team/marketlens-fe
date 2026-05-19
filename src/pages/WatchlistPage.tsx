@@ -45,7 +45,7 @@ export default function WatchlistPage() {
   const navigate = useNavigate()
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <DetailSplitShell groups={watchlistSidebarGroups}>
         <DetailMainGroup>
           <PageHeader title="관심 목록" description="상단 검색/관심목록 메뉴에서 추가한 종목을 관리합니다." />

@@ -54,7 +54,7 @@ export default function StockDetailPage() {
   const { data, loading, error } = useStockDetail(stockCode)
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <DetailSplitShell groups={stockSidebarGroups}>
         <DetailMainGroup>
             <PageHeader
