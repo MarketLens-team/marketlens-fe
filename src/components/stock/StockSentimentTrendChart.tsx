@@ -96,10 +96,17 @@ function buildChartOptions(colors: StockChartColors) {
       minimumWidth: 32,
       alignLabels: true,
     },
+    handleScroll: false,
+    handleScale: false,
+    kineticScroll: {
+      touch: false,
+      mouse: false,
+    },
     timeScale: {
       borderVisible: false,
       fixLeftEdge: true,
       fixRightEdge: true,
+      lockVisibleTimeRangeOnResize: true,
       timeVisible: false,
       secondsVisible: false,
     },
