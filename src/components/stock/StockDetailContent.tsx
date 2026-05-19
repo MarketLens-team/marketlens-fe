@@ -44,8 +44,15 @@ export interface StockDetailContentProps {
 }
 
 export function StockDetailContent({ data }: StockDetailContentProps) {
-  const { stock, sentimentContext, sentimentBreakdown, recentNews, relatedStocks, peopleTimeline } =
-    data
+  const {
+    stock,
+    watchlistInterested,
+    sentimentContext,
+    sentimentBreakdown,
+    recentNews,
+    relatedStocks,
+    peopleTimeline,
+  } = data
   const [newsFilter, setNewsFilter] = useState<NewsFilter>('all')
 
   const filteredNews = useMemo(() => filterNews(recentNews, newsFilter), [recentNews, newsFilter])
@@ -58,7 +65,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         <div className={styles.headerTop}>
           <h1 className={styles.stockTitle}>{stock.name}</h1>
           <button type="button" className={styles.watchlistBtn}>
-            ★ 관심종목 추가
+            {watchlistInterested ? '★ 관심종목' : '☆ 관심종목 추가'}
           </button>
         </div>
         <div className={styles.headerBody}>

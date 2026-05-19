@@ -2,6 +2,7 @@ import type { StockDetail } from '../types/stock'
 import { buildStockSentimentTrend } from './stockSentimentTrend.mock'
 
 const samsungDetail: StockDetail = {
+  watchlistInterested: false,
   stock: {
     code: '005930',
     name: '삼성전자',
@@ -102,6 +103,7 @@ function buildFallbackDetail(
 ): StockDetail {
   const pos = sentimentScore >= 0
   return {
+    watchlistInterested: false,
     stock: {
       code,
       name,

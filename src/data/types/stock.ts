@@ -84,10 +84,14 @@ export interface StockPersonTimelineItem {
 
 export interface StockDetail {
   stock: StockSummary
+  /** `GET /api/v1/stocks/{code}` → watchlist.interested */
+  watchlistInterested: boolean
   sentimentContext: StockSentimentContext
   sentimentBreakdown: StockSentimentBreakdown
   recentNews: StockNewsItem[]
+  /** API 미제공 — 목업·추후 연동 */
   relatedStocks: StockRelatedStock[]
+  /** API 미제공 — 목업·추후 연동 */
   peopleTimeline: StockPersonTimelineItem[]
 }
 
