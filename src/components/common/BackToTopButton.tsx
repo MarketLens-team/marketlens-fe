@@ -1,8 +1,9 @@
+import clsx from 'clsx'
 import { useCallback, useEffect, useState } from 'react'
 import { getLayoutScrollRoot } from '../../hooks/useInfiniteScroll'
 import styles from './BackToTopButton.module.css'
 
-const SHOW_AFTER_PX = 320
+const SHOW_AFTER_PX = 200
 
 function ChevronUpIcon() {
   return (
@@ -19,7 +20,19 @@ function ChevronUpIcon() {
   )
 }
 
-export function BackToTopButton() {
+interface BackToTopButtonProps {
+  /** 슬롯 높이 유지(우측 사이드 빈 영역) */
+  reserveSpace?: boolean
+  /** 툴팁 방향 — 좁은 사이드바는 left */
+  tooltipSide?: 'left' | 'right'
+  className?: string
+}
+
+export function BackToTopButton({
+  reserveSpace = false,
+  tooltipSide = 'right',
+  className,
+}: BackToTopButtonProps) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -39,21 +52,26 @@ export function BackToTopButton() {
     getLayoutScrollRoot()?.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
-  if (!visible) return null
+  if (!visible && !reserveSpace) return null
 
   return (
-    <div className={styles.dock}>
-      <button
-        type="button"
-        className={styles.btn}
-        onClick={scrollToTop}
-        aria-label="맨 위로"
-      >
-        <ChevronUpIcon />
-        <span className={styles.tooltip} role="tooltip">
-          맨 위로
-        </span>
-      </button>
+    <div className={clsx(styles.dock, className)}>
+      {visible ? (
+        <button
+          type="button"
+          className={styles.btn}
+          onClick={scrollToTop}
+          aria-label="맨 위로"
+        >
+          <ChevronUpIcon />
+          <span
+            className={clsx(styles.tooltip, tooltipSide === 'left' && styles.tooltipLeft)}
+            role="tooltip"
+          >
+            맨 위로
+          </span>
+        </button>
+      ) : null}
     </div>
   )
 }

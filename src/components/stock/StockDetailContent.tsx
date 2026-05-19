@@ -290,7 +290,6 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               {loadMoreError}
             </p>
           ) : null}
-          <BackToTopButton />
         </section>
 
         <div className={styles.rightStack}>
@@ -319,6 +318,12 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               </ul>
             </div>
           </section>
+
+          <BackToTopButton
+            reserveSpace
+            tooltipSide="left"
+            className={styles.sidebarBackToTop}
+          />
 
           <section className={styles.panel} aria-labelledby="stock-people-title">
             <div className={styles.panelBody}>
