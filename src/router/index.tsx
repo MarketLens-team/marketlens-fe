@@ -13,6 +13,7 @@ import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
 import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
 import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
+import MyPage from '../pages/MyPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
@@ -57,6 +58,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <DashboardPage /> },
       { path: '/sector', element: <SectorPage /> },
       { path: '/watchlist', element: <WatchlistPage /> },
+      { path: '/mypage', element: <MyPage /> },
       { path: '/stock/:stockCode', element: <StockDetailPage /> },
       { path: '/person', element: <PersonTrackerPage /> },
       { path: '/buzz', element: <BuzzAlertPage /> },

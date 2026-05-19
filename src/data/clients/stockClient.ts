@@ -67,6 +67,20 @@ export async function fetchStockNewsFeed(
   })
 }
 
+/** OpenAPI `GET /api/v1/stocks/{code}/summary` */
+export async function fetchStockSummary(
+  stockCode: string,
+  recordedAt?: string,
+): Promise<StockSummaryResponse> {
+  const code = stockCode.trim()
+  const dateQuery = recordedAt ? { recordedAt } : undefined
+  return getApiData<StockSummaryResponse>(
+    stockPath(code, '/summary'),
+    '종목 요약을 불러오지 못했습니다.',
+    dateQuery,
+  )
+}
+
 export async function fetchStockDetail(stockCode: string, recordedAt?: string): Promise<StockDetail> {
   const code = stockCode.trim()
   if (!code) {

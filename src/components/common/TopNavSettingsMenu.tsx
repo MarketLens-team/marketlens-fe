@@ -103,7 +103,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
               className={styles.linkBtn}
               onClick={() => {
                 close()
-                navigate('/watchlist')
+                navigate('/mypage')
               }}
             >
               마이페이지
