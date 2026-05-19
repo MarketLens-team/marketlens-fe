@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { Link } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { BuzzSurgeItem } from '../../data/types/dashboard'
@@ -20,10 +21,12 @@ export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
       />
       <ol className={styles.list}>
         {items.map((item) => (
-          <li key={item.rank} className={styles.item}>
-            <span className={styles.rank}>{item.rank}</span>
-            <span className={styles.name}>{item.name}</span>
-            <span className={styles.surge}>+{item.surgePercent}%</span>
+          <li key={item.rank}>
+            <Link to={`/stock/${item.code}`} className={styles.item}>
+              <span className={styles.rank}>{item.rank}</span>
+              <span className={styles.name}>{item.name}</span>
+              <span className={styles.surge}>+{item.surgePercent}%</span>
+            </Link>
           </li>
         ))}
       </ol>

@@ -31,6 +31,7 @@ export interface DashboardWatchlistRow {
 
 export interface BuzzSurgeItem {
   rank: number
+  code: string
   name: string
   surgePercent: number
 }

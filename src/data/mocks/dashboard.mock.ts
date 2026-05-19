@@ -81,9 +81,9 @@ export const mockDashboardOverview: DashboardOverview = {
     distribution: { positive: 61, neutral: 15, negative: 24 },
   },
   buzzSurgeTop3: [
-    { rank: 1, name: '한화오션', surgePercent: 347 },
-    { rank: 2, name: '삼성전자', surgePercent: 289 },
-    { rank: 3, name: 'SK하이닉스', surgePercent: 189 },
+    { rank: 1, code: '042660', name: '한화오션', surgePercent: 347 },
+    { rank: 2, code: '005930', name: '삼성전자', surgePercent: 289 },
+    { rank: 3, code: '000660', name: 'SK하이닉스', surgePercent: 189 },
   ],
   sectorHeatmap: [
     { name: '반도체', sentimentScore: 62, mentionCount: 184 },

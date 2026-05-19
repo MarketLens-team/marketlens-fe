@@ -39,13 +39,18 @@
   border-bottom: none;
 }
 
-.stockLink {
-  text-decoration: none;
-  color: inherit;
+.rowClickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-.stockLink:hover .stockName {
-  color: var(--color-interactive-active-text);
+.rowClickable:hover {
+  background: var(--color-interactive-hover);
+}
+
+.rowClickable:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
 }
 
 .stockName {

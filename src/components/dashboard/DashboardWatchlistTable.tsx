@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { DashboardWatchlistRow } from '../../data/types/dashboard'
@@ -21,6 +21,12 @@ function sentimentClass(score: number) {
 }
 
 export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistTableProps) {
+  const navigate = useNavigate()
+
+  const goToStock = (code: string) => {
+    navigate(`/stock/${code}`)
+  }
+
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
       <CardSectionHeader
@@ -46,11 +52,22 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.code}>
+              <tr
+                key={row.code}
+                className={styles.rowClickable}
+                tabIndex={0}
+                role="link"
+                aria-label={`${row.name} 종목 상세 보기`}
+                onClick={() => goToStock(row.code)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    goToStock(row.code)
+                  }
+                }}
+              >
                 <td>
-                  <Link to={`/stock/${row.code}`} className={styles.stockLink}>
-                    <span className={styles.stockName}>{row.name}</span>
-                  </Link>
+                  <span className={styles.stockName}>{row.name}</span>
                 </td>
                 <td className={styles.mono}>{formatPrice(row.price)}</td>
                 <td className={clsx(styles.mono, row.changePercent >= 0 ? styles.up : styles.down)}>
