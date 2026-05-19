@@ -1,4 +1,12 @@
-import { useId, useRef, useState, type FormEvent, type KeyboardEventHandler, type RefObject } from 'react'
+import {
+  useId,
+  useRef,
+  useState,
+  type FocusEventHandler,
+  type FormEvent,
+  type KeyboardEventHandler,
+  type RefObject,
+} from 'react'
 import type { CompleteRegistrationInput } from '../../data/clients/completeRegistration'
 import type { AlertSettings } from '../../data/types/member'
 import type { WatchlistItem } from '../../store/watchlistStore'
@@ -23,6 +31,20 @@ type FieldErrors = Partial<Record<'email' | 'password' | 'confirmPassword' | 'ni
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const LOGIN_AUTH_ERROR_MESSAGE = '이메일 및 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.'
+
+function isLoginCredentialError(message: string) {
+  return (
+    message.includes('이메일 또는 비밀번호') ||
+    message.includes('올바르지 않습니다') ||
+    message.includes('User not found')
+  )
+}
+
+function isEmailDuplicateError(message: string) {
+  return message.includes('이미 사용 중인 이메일')
+}
+
 function AuthField({
   id,
   label,
@@ -31,7 +53,9 @@ function AuthField({
   placeholder,
   type = 'text',
   error,
+  invalid,
   inputRef,
+  onBlur,
   onKeyDown,
   showToggle,
   visible,
@@ -45,7 +69,9 @@ function AuthField({
   placeholder?: string
   type?: 'text' | 'email' | 'password'
   error?: string
+  invalid?: boolean
   inputRef?: RefObject<HTMLInputElement>
+  onBlur?: FocusEventHandler<HTMLInputElement>
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>
   showToggle?: boolean
   visible?: boolean
@@ -55,7 +81,8 @@ function AuthField({
   const messageId = `${id}-error`
   const isPassword = type === 'password'
   const inputType = isPassword && visible ? 'text' : type
-  const hasError = Boolean(error)
+  const hasInputError = invalid || Boolean(error)
+  const showMessage = Boolean(error)
 
   return (
     <div className={styles.field}>
@@ -66,21 +93,22 @@ function AuthField({
         <input
           ref={inputRef}
           id={id}
-          className={`${styles.input} ${showToggle ? styles.inputWithToggle : ''} ${error ? styles.inputError : ''}`.trim()}
+          className={`${styles.input} ${showToggle ? styles.inputWithToggle : ''} ${hasInputError ? styles.inputError : ''}`.trim()}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           type={inputType}
           autoComplete={autoComplete}
-          aria-invalid={hasError}
-          aria-describedby={hasError ? messageId : undefined}
+          aria-invalid={hasInputError}
+          aria-describedby={showMessage ? messageId : undefined}
+          onBlur={onBlur}
           onKeyDown={onKeyDown}
         />
         {showToggle && onToggleVisible ? (
           <AuthPasswordVisibilityToggle visible={Boolean(visible)} onToggle={onToggleVisible} />
         ) : null}
       </div>
-      {hasError ? (
+      {showMessage ? (
         <p id={messageId} className={styles.fieldMessage} role="alert">
           {error}
         </p>
@@ -100,7 +128,9 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
   const [alertSettings, setAlertSettings] = useState<AlertSettings>(DEFAULT_ALERT_SETTINGS)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [stepError, setStepError] = useState<string | null>(null)
-  const [formMessage, setFormMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
+  const [loginAuthError, setLoginAuthError] = useState<string | null>(null)
+  const [signupSubmitError, setSignupSubmitError] = useState<string | null>(null)
+  const [formMessage, setFormMessage] = useState<{ type: 'success'; text: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [confirmVisible, setConfirmVisible] = useState(false)
@@ -138,11 +168,14 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     setWatchlistSelection([])
     setAlertSettings(DEFAULT_ALERT_SETTINGS)
     setStepError(null)
+    setSignupSubmitError(null)
   }
 
   const switchMode = (next: AuthMode) => {
     if (next === mode) return
     setErrors({})
+    setLoginAuthError(null)
+    setSignupSubmitError(null)
     setFormMessage(null)
     setPasswordVisible(false)
     setConfirmVisible(false)
@@ -156,6 +189,29 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     if (!EMAIL_PATTERN.test(trimmed)) return '올바른 이메일 형식을 입력해주세요.'
     return undefined
   }
+
+  const handleEmailBlur = () => {
+    const trimmed = email.trim()
+    if (!trimmed) {
+      clearFieldError('email')
+      return
+    }
+    const emailError = validateEmail(email)
+    if (emailError) {
+      setErrors((prev) => ({ ...prev, email: emailError }))
+    } else {
+      clearFieldError('email')
+    }
+  }
+
+  const isLoginSubmitEnabled = !validateEmail(email) && password.trim().length > 0
+
+  const isSignupAccountReady =
+    !validateEmail(email) &&
+    nickname.trim().length >= 2 &&
+    nickname.trim().length <= 20 &&
+    password.length >= 8 &&
+    password === confirmPassword
 
   const validateLogin = () => {
     const next: FieldErrors = {}
@@ -211,16 +267,19 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
   const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (isSubmitting) return
-    setFormMessage(null)
+    setLoginAuthError(null)
     if (!validateLogin()) return
     setIsSubmitting(true)
     try {
       await Promise.resolve(onLogin(email.trim(), password))
     } catch (error) {
-      setFormMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : '로그인에 실패했습니다.',
-      })
+      const message = error instanceof Error ? error.message : '로그인에 실패했습니다.'
+      if (isLoginCredentialError(message)) {
+        setLoginAuthError(LOGIN_AUTH_ERROR_MESSAGE)
+        passwordRef.current?.focus()
+      } else {
+        setLoginAuthError(message)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -240,7 +299,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
 
   const finishRegistration = async () => {
     setIsSubmitting(true)
-    setFormMessage(null)
+    setSignupSubmitError(null)
     setStepError(null)
     try {
       await Promise.resolve(
@@ -258,8 +317,14 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
       resetSignupFlow()
     } catch (error) {
       const message = error instanceof Error ? error.message : '회원가입에 실패했습니다.'
+      if (isEmailDuplicateError(message)) {
+        setSignupStep(1)
+        setErrors({ email: message })
+        emailRef.current?.focus()
+        return
+      }
       if (signupStep === 3) {
-        setFormMessage({ type: 'error', text: message })
+        setSignupSubmitError(message)
       } else {
         setStepError(message)
       }
@@ -302,10 +367,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
         </div>
 
         {formMessage ? (
-          <p
-            className={formMessage.type === 'success' ? styles.formSuccess : styles.formBanner}
-            role={formMessage.type === 'error' ? 'alert' : 'status'}
-          >
+          <p className={styles.formSuccess} role="status">
             {formMessage.text}
           </p>
         ) : null}
@@ -319,16 +381,24 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
               onChange={(value) => {
                 setEmail(value)
                 clearFieldError('email')
+                setLoginAuthError(null)
               }}
               placeholder="이메일 주소 입력..."
               type="email"
               error={errors.email}
+              invalid={Boolean(loginAuthError)}
               inputRef={emailRef}
               autoComplete="email"
+              onBlur={handleEmailBlur}
               onKeyDown={(event) => {
                 if (event.key !== 'Enter') return
                 event.preventDefault()
-                if (validateEmail(email)) return
+                const emailError = validateEmail(email)
+                if (emailError) {
+                  setErrors((prev) => ({ ...prev, email: emailError }))
+                  return
+                }
+                clearFieldError('email')
                 passwordRef.current?.focus()
               }}
             />
@@ -339,25 +409,34 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
               onChange={(value) => {
                 setPassword(value)
                 clearFieldError('password')
+                setLoginAuthError(null)
               }}
               placeholder="비밀번호 입력..."
               type="password"
               error={errors.password}
+              invalid={Boolean(loginAuthError)}
               inputRef={passwordRef}
               autoComplete="current-password"
               showToggle
               visible={passwordVisible}
               onToggleVisible={() => setPasswordVisible((v) => !v)}
             />
-            <div className={styles.forgotRow}>
-              <button type="button" className={styles.forgotLink}>
-                비밀번호를 잊으셨나요?
-              </button>
+            <div className={styles.loginPasswordMeta}>
+              {loginAuthError ? (
+                <p className={styles.formAuthError} role="alert">
+                  {loginAuthError}
+                </p>
+              ) : null}
+              <div className={styles.forgotRow}>
+                <button type="button" className={styles.forgotLink}>
+                  비밀번호를 잊으셨나요?
+                </button>
+              </div>
             </div>
             <button
               type="submit"
               className={styles.submit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isLoginSubmitEnabled}
               aria-busy={isSubmitting}
               data-loading={isSubmitting ? 'true' : 'false'}
             >
@@ -382,6 +461,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
                   error={errors.email}
                   inputRef={emailRef}
                   autoComplete="email"
+                  onBlur={handleEmailBlur}
                 />
                 <AuthField
                   id="auth-signup-nickname"
@@ -431,7 +511,12 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
                   visible={confirmVisible}
                   onToggleVisible={() => setConfirmVisible((v) => !v)}
                 />
-                <button type="button" className={styles.submit} onClick={goToWatchlistStep}>
+                <button
+                  type="button"
+                  className={styles.submit}
+                  onClick={goToWatchlistStep}
+                  disabled={!isSignupAccountReady}
+                >
                   다음
                 </button>
               </form>
@@ -455,7 +540,18 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
 
             {signupStep === 3 ? (
               <div className={styles.signupStep}>
-                <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
+                <SignupAlertsStep
+                  settings={alertSettings}
+                  onSettingsChange={(next) => {
+                    setAlertSettings(next)
+                    setSignupSubmitError(null)
+                  }}
+                />
+                {signupSubmitError ? (
+                  <p className={styles.formAuthError} role="alert">
+                    {signupSubmitError}
+                  </p>
+                ) : null}
                 <div className={`${styles.signupFooter} ${styles.signupFooterSingle}`}>
                   <button
                     type="button"
