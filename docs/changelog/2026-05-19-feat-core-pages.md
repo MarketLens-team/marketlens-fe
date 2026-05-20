@@ -10,7 +10,7 @@
 | 브랜치 | `feat/core-pages` |
 | 작업일 | 2026-05-19 |
 | 베이스 | `develop` (auth-login-signup #11 머지 이후) |
-| 관련 PR | _(미작성)_ |
+| 관련 PR | [#12](https://github.com/MarketLens-team/marketlens-fe/pull/12) |
 
 ## 요약
 

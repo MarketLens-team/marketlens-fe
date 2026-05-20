@@ -9,7 +9,7 @@
 |------|------|
 | 브랜치 | `feat/core-pages` |
 | 작업일 | 2026-05-20 |
-| 관련 PR | _(미작성)_ |
+| 관련 PR | [#12](https://github.com/MarketLens-team/marketlens-fe/pull/12) |
 
 ## 요약
 
