@@ -1,5 +1,8 @@
 import type { SentimentPolarity } from './stock'
 
+/** 인물 트래커 피드·우측 패널 기간 — API `range` 쿼리 매핑은 `personClient` 참고 */
+export type PersonMentionsRange = 'today' | '7d'
+
 export interface PersonRelatedStock {
   code: string
   name: string

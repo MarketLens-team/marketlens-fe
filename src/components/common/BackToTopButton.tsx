@@ -26,17 +26,26 @@ interface BackToTopButtonProps {
   /** 툴팁 방향 — 좁은 사이드바는 left */
   tooltipSide?: 'left' | 'right'
   className?: string
+  /** 지정 시 해당 요소의 scrollTop 기준으로 표시·스크롤 (예: `#person-tracker-aside-scroll`) */
+  scrollRootSelector?: string
+}
+
+function resolveScrollRoot(scrollRootSelector?: string): HTMLElement | null {
+  const q = scrollRootSelector?.trim()
+  if (q) return document.querySelector<HTMLElement>(q)
+  return getLayoutScrollRoot()
 }
 
 export function BackToTopButton({
   placement = 'inline',
   tooltipSide = 'right',
   className,
+  scrollRootSelector,
 }: BackToTopButtonProps) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const root = getLayoutScrollRoot()
+    const root = resolveScrollRoot(scrollRootSelector)
     if (!root) return
 
     const onScroll = () => {
@@ -46,11 +55,11 @@ export function BackToTopButton({
     onScroll()
     root.addEventListener('scroll', onScroll, { passive: true })
     return () => root.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [scrollRootSelector])
 
   const scrollToTop = useCallback(() => {
-    getLayoutScrollRoot()?.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+    resolveScrollRoot(scrollRootSelector)?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [scrollRootSelector])
 
   if (!visible) return null
 

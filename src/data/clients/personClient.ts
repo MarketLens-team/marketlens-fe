@@ -2,11 +2,14 @@ import { isMockDataSource } from '../../config/dataSource'
 import { appendNewsCursorParam } from '../../lib/encodeNewsCursor'
 import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { api } from '../../services/api'
-import { mapPersonTrackerPage } from '../mappers/personMapper'
+import {
+  mapPersonTopItem,
+  mapPersonTrackerFromCursorResponse,
+} from '../mappers/personMapper'
 import { personStatementRelatesToStock } from '../mappers/stockMapper'
-import { mockPersonStatementsResponse, mockPersonTrackerPage } from '../mocks/person.mock'
+import { mockFrequentStockItems, mockPersonStatementsResponse, mockPersonTopResponse } from '../mocks/person.mock'
 import type { ApiEnvelope } from '../types/api'
-import type { PersonTrackerPageData } from '../types/person'
+import type { PersonMentionsRange, PersonTrackerPageData } from '../types/person'
 import type {
   PersonMentionCursorResponse,
   PersonStatementResponse,
@@ -18,10 +21,17 @@ import { mockDelay } from '../util/mockDelay'
 
 const PERSONS_BASE = '/api/v1/persons'
 
+/** 백엔드 검증: `today` | `weekly` (OpenAPI 스키마에 enum 없음) */
+const PERSON_MENTIONS_RANGE_QUERY: Record<PersonMentionsRange, string> = {
+  today: 'today',
+  '7d': 'weekly',
+}
+
 export interface FetchPersonMentionsParams {
   personId?: number
   /** 백엔드가 허용하면 커서 쿼리에 함께 전달 */
   stockCode?: string
+  range?: PersonMentionsRange
 }
 
 export interface FetchPersonMentionsCursorParams extends FetchPersonMentionsParams {
@@ -74,6 +84,7 @@ export async function fetchPersonStatementsCursor(
   params?: FetchPersonMentionsCursorParams,
 ): Promise<PersonMentionCursorResponse> {
   const limit = params?.limit ?? PERSON_CURSOR_DEFAULT_LIMIT
+  const rangeQuery = params?.range != null ? PERSON_MENTIONS_RANGE_QUERY[params.range] : undefined
 
   if (isMockDataSource()) {
     await mockDelay(80)
@@ -83,6 +94,8 @@ export async function fetchPersonStatementsCursor(
     const end = start + slice.length
     return {
       items: slice,
+      topPersons: mockPersonTopResponse,
+      frequentStocks: mockFrequentStockItems,
       nextCursor: mockPersonCursorNext(all.length, end),
       hasNext: end < all.length,
     }
@@ -91,6 +104,7 @@ export async function fetchPersonStatementsCursor(
   const searchParams = new URLSearchParams()
   if (params?.personId != null) searchParams.set('personId', String(params.personId))
   if (params?.stockCode) searchParams.set('stockCode', params.stockCode)
+  if (rangeQuery) searchParams.set('range', rangeQuery)
   searchParams.set('limit', String(limit))
   if (params?.cursor) appendNewsCursorParam(searchParams, params.cursor)
 
@@ -143,18 +157,18 @@ export async function fetchPersonTop(): Promise<PersonTopResponse[]> {
 export async function fetchPersonTrackerPage(params?: FetchPersonMentionsParams): Promise<PersonTrackerPageData> {
   if (isMockDataSource()) {
     await mockDelay(140)
-    return structuredClone(mockPersonTrackerPage)
+    const page = await fetchPersonStatementsCursor({ ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT })
+    return mapPersonTrackerFromCursorResponse(page)
   }
 
-  const [cursorPage, topPersons] = await Promise.all([
-    fetchPersonStatementsCursor({ ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT }),
-    fetchPersonTop(),
-  ])
+  const cursorPage = await fetchPersonStatementsCursor({ ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT })
+  const mapped = mapPersonTrackerFromCursorResponse(cursorPage)
+  if (mapped.topPersons.length > 0) {
+    return mapped
+  }
 
-  return mapPersonTrackerPage(cursorPage.items, topPersons, {
-    nextCursor: cursorPage.nextCursor,
-    hasNext: cursorPage.hasNext,
-  })
+  const topPersons = await fetchPersonTop().catch(() => [] as PersonTopResponse[])
+  return { ...mapped, topPersons: topPersons.map(mapPersonTopItem) }
 }
 
 /** @deprecated fetchPersonTrackerPage 사용 */

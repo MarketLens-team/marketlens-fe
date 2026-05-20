@@ -21,6 +21,7 @@ export function useAsyncData<T>(
       return
     }
     let cancelled = false
+    setData(null)
     setLoading(true)
     setError(null)
     factory()

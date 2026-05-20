@@ -30,9 +30,18 @@ export interface PersonTopResponse {
   mentionCount: number
 }
 
+/** OpenAPI `FrequentStockItem` */
+export interface FrequentStockItemResponse {
+  stockCode?: string
+  stockName?: string
+  mentionCount?: number
+}
+
 /** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
 export interface PersonMentionCursorResponse {
   items: PersonStatementResponse[]
-  nextCursor: string | null
-  hasNext: boolean
+  topPersons?: PersonTopResponse[]
+  frequentStocks?: FrequentStockItemResponse[]
+  nextCursor?: string | null
+  hasNext?: boolean
 }

@@ -5,7 +5,12 @@ import type {
   PersonTopItem,
   PersonTrackerPageData,
 } from '../types/person'
-import type { PersonStatementResponse, PersonTopResponse } from '../types/personApi'
+import type {
+  FrequentStockItemResponse,
+  PersonMentionCursorResponse,
+  PersonStatementResponse,
+  PersonTopResponse,
+} from '../types/personApi'
 import type { SentimentPolarity } from '../types/stock'
 
 function toSentiment(raw: string): SentimentPolarity {
@@ -49,6 +54,16 @@ export function mapPersonTopItem(dto: PersonTopResponse): PersonTopItem {
   }
 }
 
+export function mapFrequentStockItem(dto: FrequentStockItemResponse): PersonFrequentStock | null {
+  const code = dto.stockCode?.trim() ?? ''
+  if (!code) return null
+  return {
+    code,
+    name: dto.stockName?.trim() || code,
+    mentionCount: Number(dto.mentionCount) || 0,
+  }
+}
+
 export function aggregateFrequentStocks(mentions: PersonMention[], limit = 12): PersonFrequentStock[] {
   const counts = new Map<string, PersonFrequentStock>()
 
@@ -78,7 +93,23 @@ export function mapPersonTrackerPage(
   }
 }
 
-/** 인물 트래커 — 다음 커서 페이지를 기존 데이터에 합침 */
+/** 커서 API 한 번에 피드 + 우측 패널까지 오는 응답을 페이지 모델로 변환 */
+export function mapPersonTrackerFromCursorResponse(page: PersonMentionCursorResponse): PersonTrackerPageData {
+  const mappedMentions = page.items.map(mapPersonStatement)
+  const frequentFromApi = (page.frequentStocks ?? [])
+    .map(mapFrequentStockItem)
+    .filter((x): x is PersonFrequentStock => x != null)
+
+  return {
+    mentions: mappedMentions,
+    topPersons: (page.topPersons ?? []).map(mapPersonTopItem),
+    frequentStocks: frequentFromApi.length ? frequentFromApi : aggregateFrequentStocks(mappedMentions),
+    mentionsNextCursor: page.nextCursor ?? null,
+    mentionsHasNext: page.hasNext ?? false,
+  }
+}
+
+/** 인물 트래커 — 다음 커서 페이지를 기존 데이터에 합침 (우측 top/자주 언급은 첫 응답 유지) */
 export function mergePersonTrackerMentionsPage(
   prev: PersonTrackerPageData,
   newStatements: PersonStatementResponse[],
@@ -89,7 +120,6 @@ export function mergePersonTrackerMentionsPage(
   return {
     ...prev,
     mentions: mergedMentions,
-    frequentStocks: aggregateFrequentStocks(mergedMentions),
     mentionsNextCursor: cursorMeta.nextCursor,
     mentionsHasNext: cursorMeta.hasNext,
   }

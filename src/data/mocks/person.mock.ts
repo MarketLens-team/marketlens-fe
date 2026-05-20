@@ -1,7 +1,6 @@
-import type { PersonTrackerPageData } from '../types/person'
-import type { PersonStatementResponse, PersonTopResponse } from '../types/personApi'
+import type { FrequentStockItemResponse, PersonStatementResponse, PersonTopResponse } from '../types/personApi'
 
-const mockStatements: PersonStatementResponse[] = [
+const mockStatementsSeed: PersonStatementResponse[] = [
   {
     statementId: 1,
     personId: 101,
@@ -75,7 +74,22 @@ const mockStatements: PersonStatementResponse[] = [
   },
 ]
 
-const mockTopPersons: PersonTopResponse[] = [
+function expandMockStatements(seed: PersonStatementResponse[], total: number): PersonStatementResponse[] {
+  const out: PersonStatementResponse[] = []
+  for (let i = 0; i < total; i++) {
+    const base = seed[i % seed.length]
+    out.push({
+      ...base,
+      statementId: 10_000 + i,
+      publishedAt: new Date(Date.now() - i * 60_000).toISOString(),
+    })
+  }
+  return out
+}
+
+export const mockPersonStatementsResponse = expandMockStatements(mockStatementsSeed, 72)
+
+export const mockPersonTopResponse: PersonTopResponse[] = [
   {
     personId: 101,
     personName: '젠슨 황',
@@ -113,41 +127,10 @@ const mockTopPersons: PersonTopResponse[] = [
   },
 ]
 
-export const mockPersonTrackerPage: PersonTrackerPageData = {
-  mentions: mockStatements.map((row) => ({
-    id: String(row.statementId),
-    personId: String(row.personId),
-    personName: row.personName,
-    role: row.personRole,
-    organizationName: row.organizationName,
-    context: row.statementSummary,
-    sourceName: row.sourceName,
-    publishedAt: row.publishedAt,
-    sentiment:
-      row.sentiment === 'positive' ? 'positive' : row.sentiment === 'negative' ? 'negative' : 'neutral',
-    sentimentScore: row.score,
-    relatedStocks: row.relatedStocks.map((s) => ({
-      code: s.stockCode ?? s.code ?? '',
-      name: s.stockName ?? s.stockCode ?? s.code ?? '',
-    })),
-  })),
-  topPersons: mockTopPersons.map((row) => ({
-    personId: String(row.personId),
-    personName: row.personName,
-    role: row.personRole,
-    organizationName: row.organizationName,
-    mentionCount: row.mentionCount,
-  })),
-  frequentStocks: [
-    { code: '000660', name: 'SK하이닉스', mentionCount: 12 },
-    { code: '005930', name: '삼성전자', mentionCount: 9 },
-    { code: '005380', name: '현대차', mentionCount: 6 },
-    { code: '068270', name: '셀트리온', mentionCount: 5 },
-    { code: '006400', name: '삼성SDI', mentionCount: 4 },
-  ],
-  mentionsNextCursor: null,
-  mentionsHasNext: false,
-}
-
-export const mockPersonStatementsResponse = mockStatements
-export const mockPersonTopResponse = mockTopPersons
+export const mockFrequentStockItems: FrequentStockItemResponse[] = [
+  { stockCode: '000660', stockName: 'SK하이닉스', mentionCount: 12 },
+  { stockCode: '005930', stockName: '삼성전자', mentionCount: 9 },
+  { stockCode: '005380', stockName: '현대차', mentionCount: 6 },
+  { stockCode: '068270', stockName: '셀트리온', mentionCount: 5 },
+  { stockCode: '006400', stockName: '삼성SDI', mentionCount: 4 },
+]
