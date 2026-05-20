@@ -3,12 +3,13 @@ import { useState } from 'react'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
+import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
-import { appErrorPresetFromMessage } from '../data/errorPagePresets'
 import type { PersonMentionsRange } from '../data/types/person'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonTracker } from '../hooks/usePersonTracker'
 import styles from './PersonTrackerPage.module.css'
@@ -27,18 +28,16 @@ export default function PersonTrackerPage() {
     onLoadMore: () => void loadMoreMentions(),
   })
 
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
+
   return (
     <Layout>
       <div className={styles.page}>
         {error ? (
-          <AppErrorPage
-            layout="embedded"
-            preset={appErrorPresetFromMessage(error.message, {
-              title: '인물 발언을 불러오지 못했어요',
-              omitHint: true,
-            })}
-            homeHref="/"
-          />
+          <PageFetchError title="인물 발언을 불러오지 못했어요" message={error.message} />
         ) : null}
 
         {loading && !data && !error ? (

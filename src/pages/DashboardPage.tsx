@@ -5,9 +5,12 @@ import { DashboardWatchlistTable } from '../components/dashboard/DashboardWatchl
 import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
 import { PortfolioSentimentGauge } from '../components/dashboard/PortfolioSentimentGauge'
 import { SentimentGaugePanel } from '../components/dashboard/SentimentGaugePanel'
+import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
+import { PageFetchError } from '../components/common/PageFetchError'
 import { PageHeader } from '../components/common/PageHeader'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useDashboardOverview } from '../hooks/useDashboardOverview'
 import skeleton from '../components/common/Skeleton.module.css'
 import styles from './DashboardPage.module.css'
@@ -29,17 +32,20 @@ export default function DashboardPage() {
     return () => observer.disconnect()
   }, [data])
 
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
+
   return (
     <Layout>
       <div className={styles.page}>
         <PageHeader title="홈" description="포트폴리오 감성·관심 종목을 한 화면에서 봅니다." align="center" />
         {error ? (
-          <p className={styles.bannerError} role="alert">
-            {error.message}
-          </p>
+          <PageFetchError title="홈을 불러오지 못했어요" message={error.message} />
         ) : null}
 
-        {loading && !data ? (
+        {loading && !data && !error ? (
           <div className={styles.skeletonGrid} aria-busy="true" aria-label="대시보드 로딩">
             {Array.from({ length: 3 }).map((_, i) => (
               <Card key={i} padding="lg">

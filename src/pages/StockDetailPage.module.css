@@ -5,16 +5,6 @@
   padding-bottom: var(--space-8);
 }
 
-.bannerError {
-  margin: 0 0 var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-bg-section);
-  color: var(--color-danger);
-  font-size: var(--font-size-base);
-}
-
 .skeleton {
   display: flex;
   flex-direction: column;

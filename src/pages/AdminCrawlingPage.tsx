@@ -1,10 +1,13 @@
 import clsx from 'clsx'
+import { AppErrorPage } from '../components/common/AppErrorPage'
 import { CardSectionHeader } from '../components/common/CardSectionHeader'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
+import { PageFetchError } from '../components/common/PageFetchError'
 import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
 import { useAdminCrawlingLogs } from '../hooks/useAdminCrawlingLogs'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import type { CrawlingLogStatus } from '../data/types/admin'
 import styles from './AdminCrawlingPage.module.css'
 
@@ -23,6 +26,11 @@ function statusLabel(status: CrawlingLogStatus, endedAt: string | null) {
 export default function AdminCrawlingPage() {
   const { data, loading, error } = useAdminCrawlingLogs()
 
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
+
   return (
     <Layout hideSidebar={false}>
       <div className={styles.page}>
@@ -31,16 +39,14 @@ export default function AdminCrawlingPage() {
           description="`crawling_log` 실행 이력. GET /api/v1/admin/crawling/logs"
         />
         {error ? (
-          <p className={styles.bannerError} role="alert">
-            {error.message}
-          </p>
+          <PageFetchError title="크롤링 로그를 불러오지 못했어요" message={error.message} />
         ) : null}
         <Card padding="none" className={styles.feedCard}>
           <CardSectionHeader
             title="실행 이력"
             subtitle="상태 · 시도/성공/실패 · 시작 · 종료"
           />
-          {loading && !data ? (
+          {loading && !data && !error ? (
             <div className={styles.skeletonList} aria-busy="true" aria-label="크롤링 로그 로딩">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, skeleton.rowLg)} />

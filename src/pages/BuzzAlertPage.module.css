@@ -7,16 +7,6 @@
   padding-bottom: var(--space-6);
 }
 
-.bannerError {
-  margin: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-bg-section);
-  color: var(--color-danger);
-  font-size: var(--font-size-base);
-}
-
 .mainGrid {
   display: grid;
   grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
