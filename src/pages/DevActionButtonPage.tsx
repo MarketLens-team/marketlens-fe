@@ -155,13 +155,21 @@ export default function DevActionButtonPage() {
           </div>
 
           <div className={styles.item}>
-            <h2 className={styles.label}>에러 페이지 시안</h2>
+            <h2 className={styles.label}>UI 시안</h2>
             <div className={styles.linkRow}>
+              <Link className={styles.devLink} to="/dev/refined">
+                Refined patterns (CTA · Empty · Card …)
+              </Link>
+              <Link className={styles.devLink} to="/dev/refined/mock">
+                Refined mock dashboard (더미)
+              </Link>
               <Link className={styles.devLink} to="/dev/errors">
                 Error pages (404 · 401 · 500 …)
               </Link>
             </div>
-            <p className={styles.meta}>백엔드 ErrorCode 메시지와 맞춘 공통 AppErrorPage 프리뷰</p>
+            <p className={styles.meta}>
+              세련된 톤(여백·계층·흰 pill)과 풀스크린 에러 페이지를 각각 확인합니다.
+            </p>
           </div>
 
           <div className={styles.item}>

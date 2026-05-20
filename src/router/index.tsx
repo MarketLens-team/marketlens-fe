@@ -8,6 +8,8 @@ import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
 import DevErrorPagePreview from '../pages/DevErrorPagePreview'
 import DevErrorPagesPage from '../pages/DevErrorPagesPage'
+import DevRefinedMockPage from '../pages/DevRefinedMockPage'
+import DevRefinedStylePage from '../pages/DevRefinedStylePage'
 import DevLayoutHomePreviewPage from '../pages/DevLayoutHomePreviewPage'
 import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
 import DevWatchlistPage from '../pages/DevWatchlistPage'
@@ -29,6 +31,14 @@ export const router = createBrowserRouter([
   {
     path: '/dev',
     element: <DevActionButtonPage />,
+  },
+  {
+    path: '/dev/refined',
+    element: <DevRefinedStylePage />,
+  },
+  {
+    path: '/dev/refined/mock',
+    element: <DevRefinedMockPage />,
   },
   {
     path: '/dev/errors',
