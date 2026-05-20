@@ -1,9 +1,9 @@
-/* Minimal exchange-style empty state — blurred glow code + star field */
+/* Full-screen error — white pill CTA + variant glow (4xx subtle diff, 5xx red) */
 
 .page {
-  --error-glow: #8b5cf6;
-  --error-glow-soft: color-mix(in srgb, #8b5cf6 55%, #6366f1);
-  --error-glow-fade: color-mix(in srgb, #8b5cf6 12%, transparent);
+  --error-glow: var(--color-primary);
+  --error-glow-soft: color-mix(in srgb, var(--color-primary) 60%, #6366f1);
+  --error-glow-blur: 24px;
 
   position: relative;
   min-height: 100vh;
@@ -18,22 +18,25 @@
   font-family: var(--font-sans);
 }
 
-.page[data-tone='auth'] {
-  --error-glow: #f59e0b;
-  --error-glow-soft: color-mix(in srgb, #f59e0b 55%, #f97316);
-  --error-glow-fade: color-mix(in srgb, #f59e0b 12%, transparent);
+/* 4xx — 미묘한 glow 차별 */
+.page[data-variant='403'] {
+  --error-glow: #6366f1;
+  --error-glow-soft: color-mix(in srgb, #8b5cf6 45%, #6366f1);
 }
 
-.page[data-tone='danger'] {
-  --error-glow: #ef4444;
-  --error-glow-soft: color-mix(in srgb, #ef4444 55%, #f43f5e);
-  --error-glow-fade: color-mix(in srgb, #ef4444 12%, transparent);
+.page[data-variant='401'] {
+  --error-glow-blur: 20px;
 }
 
-.page[data-tone='offline'] {
+/* 5xx — 서버 오류 */
+.page[data-variant='500'] {
+  --error-glow: var(--color-danger);
+  --error-glow-soft: color-mix(in srgb, var(--color-danger) 55%, #f43f5e);
+}
+
+.page[data-variant='network'] {
   --error-glow: #22d3ee;
-  --error-glow-soft: color-mix(in srgb, #22d3ee 50%, #34d399);
-  --error-glow-fade: color-mix(in srgb, #22d3ee 12%, transparent);
+  --error-glow-soft: color-mix(in srgb, #22d3ee 45%, var(--color-success));
 }
 
 .stars {
@@ -71,8 +74,8 @@
   background: linear-gradient(180deg, var(--error-glow) 0%, var(--error-glow-soft) 100%);
   background-clip: text;
   -webkit-background-clip: text;
-  filter: blur(28px);
-  opacity: 0.92;
+  filter: blur(var(--error-glow-blur));
+  opacity: 0.96;
   user-select: none;
   pointer-events: none;
 }
@@ -85,6 +88,24 @@
   align-items: center;
   max-width: 28rem;
   text-align: center;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in srgb, var(--error-glow) 40%, rgb(255 255 255 / 0.12));
+  background: color-mix(in srgb, var(--error-glow) 12%, transparent);
+  color: color-mix(in srgb, var(--error-glow) 85%, #ffffff);
+}
+
+.authIcon {
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 .headline {
@@ -116,16 +137,18 @@
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-6);
+  width: 100%;
+  max-width: 16rem;
 }
 
-.homeBtn {
-  min-width: 11.5rem;
+.primaryBtn {
+  width: 100%;
   min-height: 2.75rem;
   padding: 0 var(--space-6);
   border: none;
   border-radius: var(--radius-full);
   background: #ffffff;
-  color: #0a0a0f;
+  color: #0f172a;
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
@@ -137,22 +160,48 @@
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
 }
 
-.homeBtn:hover {
-  background: #f1f5f9;
-  box-shadow: 0 10px 28px rgb(0 0 0 / 0.4);
+.primaryBtn:hover {
+  background: #f8fafc;
+  transform: scale(1.02);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.38);
 }
 
-.homeBtn:active {
-  transform: scale(0.98);
+.primaryBtn:active {
+  transform: scale(1);
+}
+
+.secondaryBtn {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  border: 1px solid rgb(248 250 252 / 0.18);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: rgb(248 250 252 / 0.78);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+.secondaryBtn:hover {
+  border-color: rgb(248 250 252 / 0.32);
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.04);
 }
 
 .backBtn {
+  margin-top: var(--space-1);
   padding: var(--space-1) var(--space-2);
   border: none;
   background: transparent;
-  color: rgb(248 250 252 / 0.45);
+  color: rgb(248 250 252 / 0.38);
   font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   text-decoration: underline;
@@ -161,7 +210,7 @@
 }
 
 .backBtn:hover {
-  color: rgb(248 250 252 / 0.85);
+  color: rgb(248 250 252 / 0.7);
 }
 
 .errorCode {

@@ -5,6 +5,8 @@ export type ErrorPageVariant = '404' | '401' | '403' | '500' | 'network' | 'unkn
 /** UI accent — fintech empty-state 톤 */
 export type ErrorPageTone = 'neutral' | 'auth' | 'danger' | 'offline'
 
+export type ErrorPagePrimaryCta = 'home' | 'login'
+
 export interface ErrorPagePreset {
   variant: ErrorPageVariant
   tone: ErrorPageTone
@@ -13,6 +15,9 @@ export interface ErrorPagePreset {
   message: string
   hint?: string
   errorCode?: string
+  /** 메인 pill CTA — 401은 로그인 유도 */
+  primaryCta?: ErrorPagePrimaryCta
+  loginHref?: string
 }
 
 export const ERROR_PAGE_PRESETS: Record<ErrorPageVariant, ErrorPagePreset> = {
@@ -30,9 +35,11 @@ export const ERROR_PAGE_PRESETS: Record<ErrorPageVariant, ErrorPagePreset> = {
     tone: 'auth',
     statusCode: 401,
     title: '로그인이 필요합니다',
-    message: ERROR_CODE_MESSAGES.C004,
-    hint: '계정으로 로그인하면 이어서 이용할 수 있어요.',
+    message: '이 페이지를 보려면 로그인이 필요해요.',
+    hint: '로그인 페이지로 이동하시겠어요?',
     errorCode: 'C004',
+    primaryCta: 'login',
+    loginHref: '/login',
   },
   '403': {
     variant: '403',
