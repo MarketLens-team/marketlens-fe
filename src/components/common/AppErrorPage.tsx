@@ -1,9 +1,14 @@
+import clsx from 'clsx'
 import { Link, useNavigate } from 'react-router-dom'
 import type { ErrorPagePreset } from '../../data/errorPagePresets'
 import styles from './AppErrorPage.module.css'
 
+export type AppErrorPageLayout = 'fullscreen' | 'embedded'
+
 export interface AppErrorPageProps {
   preset: ErrorPagePreset
+  /** fullscreen: 단독 라우트용(별도 main). embedded: Layout의 main 안 카드 블록 */
+  layout?: AppErrorPageLayout
   showDevBackLink?: boolean
   homeHref?: string
 }
@@ -31,22 +36,38 @@ function AuthLockIcon() {
 
 export function AppErrorPage({
   preset,
+  layout = 'fullscreen',
   showDevBackLink = false,
   homeHref = '/',
 }: AppErrorPageProps) {
   const navigate = useNavigate()
   const status = statusDisplay(preset)
-  const headline = `${status} | ${preset.title}`
+  const headline =
+    layout === 'embedded' ? preset.title : `${status} | ${preset.title}`
   const showAuthIcon = preset.tone === 'auth'
   const primaryIsLogin = preset.primaryCta === 'login'
   const loginHref = preset.loginHref ?? '/login'
 
+  const isFullscreen = layout === 'fullscreen'
+  const Root: 'main' | 'div' = isFullscreen ? 'main' : 'div'
+
   return (
-    <main className={styles.page} data-tone={preset.tone} data-variant={preset.variant}>
-      <div className={styles.stars} aria-hidden />
-      <p className={styles.bgCode} aria-hidden>
-        {status}
-      </p>
+    <Root
+      className={clsx(
+        styles.page,
+        isFullscreen ? styles.pageFullscreen : styles.pageEmbedded,
+      )}
+      data-tone={preset.tone}
+      data-variant={preset.variant}
+    >
+      {isFullscreen ? (
+        <>
+          <div className={styles.stars} aria-hidden />
+          <p className={styles.bgCode} aria-hidden>
+            {status}
+          </p>
+        </>
+      ) : null}
 
       <section className={styles.content} role="alert">
         {showAuthIcon ? (
@@ -92,11 +113,11 @@ export function AppErrorPage({
         ) : null}
       </section>
 
-      {showDevBackLink ? (
+      {showDevBackLink && isFullscreen ? (
         <Link className={styles.devLink} to="/dev/errors">
           에러 페이지 갤러리
         </Link>
       ) : null}
-    </main>
+    </Root>
   )
 }

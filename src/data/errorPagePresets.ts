@@ -82,3 +82,18 @@ export const ERROR_PAGE_VARIANTS = Object.keys(ERROR_PAGE_PRESETS) as ErrorPageV
 export function isErrorPageVariant(value: string): value is ErrorPageVariant {
   return value in ERROR_PAGE_PRESETS
 }
+
+/** fetch/API 실패 등 — 기존 프리셋 톤을 유지한 채 메시지(및 제목)만 덮어씀 */
+export function appErrorPresetFromMessage(
+  message: string,
+  options?: { title?: string; variant?: ErrorPageVariant; hint?: string; omitHint?: boolean },
+): ErrorPagePreset {
+  const variant = options?.variant ?? 'unknown'
+  const base = ERROR_PAGE_PRESETS[variant]
+  return {
+    ...base,
+    title: options?.title ?? base.title,
+    message,
+    ...(options?.omitHint ? { hint: undefined } : options?.hint !== undefined ? { hint: options.hint } : {}),
+  }
+}

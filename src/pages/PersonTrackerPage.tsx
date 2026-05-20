@@ -1,11 +1,13 @@
 import clsx from 'clsx'
 import { useState } from 'react'
+import { AppErrorPage } from '../components/common/AppErrorPage'
 import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
 import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
+import { appErrorPresetFromMessage } from '../data/errorPagePresets'
 import type { PersonMentionsRange } from '../data/types/person'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonTracker } from '../hooks/usePersonTracker'
@@ -29,10 +31,14 @@ export default function PersonTrackerPage() {
     <Layout>
       <div className={styles.page}>
         {error ? (
-          <section className={styles.errorPanel} role="alert">
-            <h2 className={styles.errorTitle}>인물 발언을 불러오지 못했어요</h2>
-            <p className={styles.errorMessage}>{error.message}</p>
-          </section>
+          <AppErrorPage
+            layout="embedded"
+            preset={appErrorPresetFromMessage(error.message, {
+              title: '인물 발언을 불러오지 못했어요',
+              omitHint: true,
+            })}
+            homeHref="/"
+          />
         ) : null}
 
         {loading && !data && !error ? (

@@ -9,5 +9,5 @@ export default function DevErrorPagePreview() {
     return <Navigate to="/dev/errors" replace />
   }
 
-  return <AppErrorPage preset={ERROR_PAGE_PRESETS[variant]} showDevBackLink />
+  return <AppErrorPage preset={ERROR_PAGE_PRESETS[variant]} layout="fullscreen" showDevBackLink />
 }

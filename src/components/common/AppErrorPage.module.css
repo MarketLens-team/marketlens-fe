@@ -1,10 +1,33 @@
-/* Full-screen error — white pill CTA + variant glow (4xx subtle diff, 5xx red) */
+/* 풀스크린: 앱 배경 + 글로우 변주 / embedded: 레이아웃 main 안 카드 — 색·간격은 tokens.css */
 
 .page {
   --error-glow: var(--color-primary);
-  --error-glow-soft: color-mix(in srgb, var(--color-primary) 60%, #6366f1);
+  --error-glow-soft: color-mix(in srgb, var(--color-primary) 55%, var(--color-bg-app));
   --error-glow-blur: 24px;
 
+  font-family: var(--font-sans);
+}
+
+.page[data-variant='403'] {
+  --error-glow: var(--color-interactive-active);
+  --error-glow-soft: color-mix(in srgb, var(--color-primary) 50%, var(--color-interactive-active));
+}
+
+.page[data-variant='401'] {
+  --error-glow-blur: 20px;
+}
+
+.page[data-variant='500'] {
+  --error-glow: var(--color-danger);
+  --error-glow-soft: color-mix(in srgb, var(--color-danger) 50%, var(--color-bg-app));
+}
+
+.page[data-variant='network'] {
+  --error-glow: var(--color-success);
+  --error-glow-soft: color-mix(in srgb, var(--color-success) 45%, var(--color-primary));
+}
+
+.pageFullscreen {
   position: relative;
   min-height: 100vh;
   display: flex;
@@ -13,47 +36,40 @@
   justify-content: center;
   padding: var(--space-6) var(--space-4);
   overflow: hidden;
-  background: #030308;
-  color: #f8fafc;
-  font-family: var(--font-sans);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
-/* 4xx — 미묘한 glow 차별 */
-.page[data-variant='403'] {
-  --error-glow: #6366f1;
-  --error-glow-soft: color-mix(in srgb, #8b5cf6 45%, #6366f1);
-}
-
-.page[data-variant='401'] {
-  --error-glow-blur: 20px;
-}
-
-/* 5xx — 서버 오류 */
-.page[data-variant='500'] {
-  --error-glow: var(--color-danger);
-  --error-glow-soft: color-mix(in srgb, var(--color-danger) 55%, #f43f5e);
-}
-
-.page[data-variant='network'] {
-  --error-glow: #22d3ee;
-  --error-glow-soft: color-mix(in srgb, #22d3ee 45%, var(--color-success));
+.pageEmbedded {
+  margin: var(--space-6) auto;
+  max-width: 28rem;
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-section);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .stars {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  --star-dot: color-mix(in srgb, var(--color-text-primary) 24%, transparent);
   background-image:
-    radial-gradient(1px 1px at 12% 18%, rgb(255 255 255 / 0.35), transparent),
-    radial-gradient(1px 1px at 28% 72%, rgb(255 255 255 / 0.2), transparent),
-    radial-gradient(1px 1px at 44% 32%, rgb(255 255 255 / 0.28), transparent),
-    radial-gradient(1px 1px at 58% 84%, rgb(255 255 255 / 0.18), transparent),
-    radial-gradient(1px 1px at 72% 22%, rgb(255 255 255 / 0.32), transparent),
-    radial-gradient(1px 1px at 86% 58%, rgb(255 255 255 / 0.22), transparent),
-    radial-gradient(1px 1px at 6% 52%, rgb(255 255 255 / 0.16), transparent),
-    radial-gradient(1px 1px at 92% 12%, rgb(255 255 255 / 0.24), transparent),
-    radial-gradient(1px 1px at 36% 8%, rgb(255 255 255 / 0.14), transparent),
-    radial-gradient(1px 1px at 64% 48%, rgb(255 255 255 / 0.2), transparent);
+    radial-gradient(1px 1px at 12% 18%, var(--star-dot), transparent),
+    radial-gradient(1px 1px at 28% 72%, color-mix(in srgb, var(--color-text-primary) 14%, transparent), transparent),
+    radial-gradient(1px 1px at 44% 32%, var(--star-dot), transparent),
+    radial-gradient(1px 1px at 58% 84%, color-mix(in srgb, var(--color-text-primary) 12%, transparent), transparent),
+    radial-gradient(1px 1px at 72% 22%, var(--star-dot), transparent),
+    radial-gradient(1px 1px at 86% 58%, color-mix(in srgb, var(--color-text-primary) 16%, transparent), transparent),
+    radial-gradient(1px 1px at 6% 52%, color-mix(in srgb, var(--color-text-primary) 10%, transparent), transparent),
+    radial-gradient(1px 1px at 92% 12%, color-mix(in srgb, var(--color-text-primary) 18%, transparent), transparent),
+    radial-gradient(1px 1px at 36% 8%, color-mix(in srgb, var(--color-text-primary) 10%, transparent), transparent),
+    radial-gradient(1px 1px at 64% 48%, color-mix(in srgb, var(--color-text-primary) 14%, transparent), transparent);
   opacity: 0.9;
 }
 
@@ -66,7 +82,7 @@
   transform: translate(-50%, -54%);
   font-family: var(--font-sans);
   font-size: clamp(10rem, 38vw, 18rem);
-  font-weight: 800;
+  font-weight: var(--font-weight-bold);
   line-height: 0.85;
   letter-spacing: -0.06em;
   white-space: nowrap;
@@ -87,7 +103,12 @@
   flex-direction: column;
   align-items: center;
   max-width: 28rem;
+  width: 100%;
   text-align: center;
+}
+
+.pageEmbedded .content {
+  max-width: 100%;
 }
 
 .iconWrap {
@@ -98,9 +119,9 @@
   height: 3rem;
   margin-bottom: var(--space-4);
   border-radius: var(--radius-full);
-  border: 1px solid color-mix(in srgb, var(--error-glow) 40%, rgb(255 255 255 / 0.12));
-  background: color-mix(in srgb, var(--error-glow) 12%, transparent);
-  color: color-mix(in srgb, var(--error-glow) 85%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--error-glow) 35%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--error-glow) 12%, var(--color-bg-section));
+  color: color-mix(in srgb, var(--error-glow) 72%, var(--color-text-primary));
 }
 
 .authIcon {
@@ -110,25 +131,25 @@
 
 .headline {
   margin: 0;
-  font-size: clamp(1.125rem, 3.5vw, 1.375rem);
+  font-size: clamp(var(--font-size-xl), 3.5vw, var(--font-size-4xl));
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   letter-spacing: -0.01em;
-  color: #ffffff;
+  color: var(--color-text-primary);
 }
 
 .message {
   margin: var(--space-3) 0 0;
   font-size: var(--font-size-base);
   line-height: var(--line-height-loose);
-  color: rgb(248 250 252 / 0.62);
+  color: var(--color-text-secondary);
 }
 
 .hint {
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
-  color: rgb(248 250 252 / 0.4);
+  color: var(--color-text-muted);
 }
 
 .actions {
@@ -147,8 +168,8 @@
   padding: 0 var(--space-6);
   border: none;
   border-radius: var(--radius-full);
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--color-primary);
+  color: var(--color-interactive-active-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
@@ -157,13 +178,13 @@
     transform var(--duration-fast) ease,
     box-shadow var(--duration-fast) ease,
     background-color var(--duration-fast) ease;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-bg-app) 55%, transparent);
 }
 
 .primaryBtn:hover {
-  background: #f8fafc;
+  background: color-mix(in srgb, var(--color-primary) 88%, var(--color-text-primary));
   transform: scale(1.02);
-  box-shadow: 0 10px 28px rgb(0 0 0 / 0.38);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-bg-app) 60%, transparent);
 }
 
 .primaryBtn:active {
@@ -174,10 +195,10 @@
   width: 100%;
   min-height: 2.5rem;
   padding: 0 var(--space-4);
-  border: 1px solid rgb(248 250 252 / 0.18);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-full);
   background: transparent;
-  color: rgb(248 250 252 / 0.78);
+  color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -189,9 +210,9 @@
 }
 
 .secondaryBtn:hover {
-  border-color: rgb(248 250 252 / 0.32);
-  color: #ffffff;
-  background: rgb(255 255 255 / 0.04);
+  border-color: var(--color-border-default);
+  color: var(--color-text-primary);
+  background: var(--color-bg-card);
 }
 
 .backBtn {
@@ -199,7 +220,7 @@
   padding: var(--space-1) var(--space-2);
   border: none;
   background: transparent;
-  color: rgb(248 250 252 / 0.38);
+  color: var(--color-text-muted);
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -210,7 +231,7 @@
 }
 
 .backBtn:hover {
-  color: rgb(248 250 252 / 0.7);
+  color: var(--color-text-secondary);
 }
 
 .errorCode {
@@ -218,7 +239,7 @@
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
-  color: color-mix(in srgb, var(--error-glow) 75%, rgb(248 250 252 / 0.35));
+  color: color-mix(in srgb, var(--error-glow) 55%, var(--color-text-muted));
 }
 
 .devLink {
@@ -226,10 +247,10 @@
   z-index: 1;
   margin-top: var(--space-8);
   font-size: var(--font-size-sm);
-  color: rgb(248 250 252 / 0.35);
+  color: var(--color-text-muted);
   text-decoration: none;
 }
 
 .devLink:hover {
-  color: var(--error-glow);
+  color: var(--color-primary);
 }

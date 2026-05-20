@@ -94,30 +94,6 @@
   justify-content: center;
 }
 
-.errorPanel {
-  margin: var(--space-6) auto;
-  max-width: 28rem;
-  padding: var(--space-5);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-bg-section);
-  text-align: center;
-}
-
-.errorTitle {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.errorMessage {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-  color: var(--color-text-muted);
-}
-
 .empty {
   margin: var(--space-4) 0 0;
   text-align: center;
