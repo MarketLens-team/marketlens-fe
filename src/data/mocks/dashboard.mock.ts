@@ -1,49 +1,98 @@
 import type { DashboardOverview } from '../types/dashboard'
 
-const dayPoints = (base: Date, scores: number[]) =>
-  scores.map((score, i) => {
-    const d = new Date(base)
-    d.setDate(d.getDate() - (scores.length - 1 - i))
-    return { at: d.toISOString(), score }
-  })
-
 export const mockDashboardOverview: DashboardOverview = {
-  stats: [
+  portfolioSentiment: {
+    score: 23,
+    min: -100,
+    max: 100,
+    distribution: { positive: 50, neutral: 17, negative: 33 },
+  },
+  stocksToWatch: [
+    { name: 'SK하이닉스', metricLabel: '언급량', metricValue: '+189%', tone: 'positive' },
+    { name: '셀트리온', metricLabel: '감성', metricValue: '-34', tone: 'negative' },
+    { name: '카카오', metricLabel: '언급량', metricValue: '+84%', tone: 'positive' },
+  ],
+  watchlist: [
     {
-      id: 'sentiment',
-      label: 'Market sentiment',
-      value: '+62',
-      changePercent: 1.8,
-      hint: '전일 대비 종합 스코어',
+      name: '셀트리온',
+      code: '068270',
+      price: 168500,
+      changePercent: -0.8,
+      sentimentScore: -34,
+      newsCount: 12,
+      mentionSurgePercent: 45,
+      hasAlert: true,
     },
     {
-      id: 'buzz',
-      label: 'Active buzz',
-      value: '128',
-      changePercent: -3.2,
-      hint: '감지된 버즈 토픽 수',
+      name: '카카오',
+      code: '035720',
+      price: 45200,
+      changePercent: 1.4,
+      sentimentScore: 28,
+      newsCount: 18,
+      mentionSurgePercent: 84,
+      hasAlert: true,
     },
     {
-      id: 'news',
-      label: 'News flow',
-      value: '2.4k',
-      changePercent: null,
-      hint: '24h 뉴스 처리량',
+      name: '현대차',
+      code: '005380',
+      price: 248500,
+      changePercent: 0.6,
+      sentimentScore: 41,
+      newsCount: 9,
+      mentionSurgePercent: 22,
+      hasAlert: false,
     },
     {
-      id: 'risk',
-      label: 'Risk flags',
-      value: '7',
-      changePercent: 0,
-      hint: '리스크 태그 뉴스',
+      name: 'LG에너지솔루션',
+      code: '373220',
+      price: 412000,
+      changePercent: -1.2,
+      sentimentScore: 15,
+      newsCount: 14,
+      mentionSurgePercent: 31,
+      hasAlert: false,
+    },
+    {
+      name: 'SK하이닉스',
+      code: '000660',
+      price: 198500,
+      changePercent: 2.8,
+      sentimentScore: 62,
+      newsCount: 32,
+      mentionSurgePercent: 189,
+      hasAlert: true,
+    },
+    {
+      name: '삼성전자',
+      code: '005930',
+      price: 87400,
+      changePercent: 1.2,
+      sentimentScore: 73,
+      newsCount: 25,
+      mentionSurgePercent: 89,
+      hasAlert: true,
     },
   ],
-  sentimentTimeline: dayPoints(new Date(), [48, 52, 55, 51, 58, 60, 62]),
-  sectorHeat: [
-    { sectorCode: 'IT', sectorName: 'IT·반도체', buzzCount: 412, sentimentAvg: 18 },
-    { sectorCode: 'FIN', sectorName: '금융', buzzCount: 301, sentimentAvg: -6 },
-    { sectorCode: 'BIO', sectorName: '바이오', buzzCount: 267, sentimentAvg: 42 },
-    { sectorCode: 'AUTO', sectorName: '자동차', buzzCount: 198, sentimentAvg: 9 },
-    { sectorCode: 'RET', sectorName: '유통', buzzCount: 144, sentimentAvg: -12 },
+  kospiSentiment: {
+    score: 38,
+    min: -100,
+    max: 100,
+    distribution: { positive: 61, neutral: 15, negative: 24 },
+  },
+  buzzSurgeTop3: [
+    { rank: 1, code: '042660', name: '한화오션', surgePercent: 347 },
+    { rank: 2, code: '005930', name: '삼성전자', surgePercent: 289 },
+    { rank: 3, code: '000660', name: 'SK하이닉스', surgePercent: 189 },
+  ],
+  sectorHeatmap: [
+    { name: '반도체', sentimentScore: 62, mentionCount: 184 },
+    { name: '바이오', sentimentScore: -18, mentionCount: 92 },
+    { name: '자동차', sentimentScore: 24, mentionCount: 76 },
+    { name: '2차전지', sentimentScore: 11, mentionCount: 118 },
+    { name: '조선', sentimentScore: 55, mentionCount: 143 },
+    { name: '금융', sentimentScore: -8, mentionCount: 64 },
+    { name: '플랫폼', sentimentScore: 19, mentionCount: 88 },
+    { name: '화학', sentimentScore: -22, mentionCount: 51 },
   ],
 }

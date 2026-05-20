@@ -8,7 +8,10 @@ import {
 import styles from './DetailSplitShell.module.css'
 
 type DetailSplitShellProps<TKey extends string> = {
-  groups: DetailAccordionSidebarGroup<TKey>[]
+  /** 아코디언 사이드바 그룹 정의 — `hideDetailSidebar`가 false일 때만 렌더 */
+  groups?: DetailAccordionSidebarGroup<TKey>[]
+  /** 기본 true. 좌측 DetailAccordionSidebar 숨김(컴포넌트·groups 데이터는 보존) */
+  hideDetailSidebar?: boolean
   children: ReactNode
 }
 
@@ -33,7 +36,11 @@ export function DetailMainGroupPlaceholder({ children }: { children: ReactNode }
   return <p className={styles.mainGroupPlaceholder}>{children}</p>
 }
 
-export function DetailSplitShell<TKey extends string>({ groups, children }: DetailSplitShellProps<TKey>) {
+export function DetailSplitShell<TKey extends string>({
+  groups = [],
+  hideDetailSidebar = true,
+  children,
+}: DetailSplitShellProps<TKey>) {
   const [collapsedByGroup, setCollapsedByGroup] = useState<Record<TKey, boolean>>(() =>
     Object.fromEntries(groups.map((group, idx) => [group.key, idx !== 0])) as Record<TKey, boolean>,
   )
@@ -50,16 +57,20 @@ export function DetailSplitShell<TKey extends string>({ groups, children }: Deta
     setCollapsedByGroup((prev) => ({ ...prev, [groupKey]: false }))
   }
 
+  const showDetailSidebar = !hideDetailSidebar && groups.length > 0
+
   return (
     <div className={styles.splitRoot}>
-      <section className={styles.split}>
-        <DetailAccordionSidebar
-          groups={groups}
-          collapsedByGroup={collapsedByGroup}
-          activeItemId={activeItemId}
-          onToggleGroup={onToggleGroup}
-          onSelectItem={onSelectItem}
-        />
+      <section className={clsx(styles.split, !showDetailSidebar && styles.splitNoSidebar)}>
+        {showDetailSidebar ? (
+          <DetailAccordionSidebar
+            groups={groups}
+            collapsedByGroup={collapsedByGroup}
+            activeItemId={activeItemId}
+            onToggleGroup={onToggleGroup}
+            onSelectItem={onSelectItem}
+          />
+        ) : null}
         <div className={styles.content}>{children}</div>
       </section>
     </div>
@@ -67,4 +78,3 @@ export function DetailSplitShell<TKey extends string>({ groups, children }: Deta
 }
 
 export type { DetailAccordionSidebarGroup, DetailAccordionSidebarItem }
-

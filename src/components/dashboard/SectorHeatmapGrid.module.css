@@ -1,0 +1,26 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.card > :first-child {
+  flex-shrink: 0;
+}
+
+.chartWrap {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 200px;
+  margin-top: var(--space-1);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+}

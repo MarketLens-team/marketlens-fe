@@ -1,149 +1,90 @@
 import clsx from 'clsx'
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
+import { DashboardWatchlistTable } from '../components/dashboard/DashboardWatchlistTable'
+import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
+import { PortfolioSentimentGauge } from '../components/dashboard/PortfolioSentimentGauge'
+import { SentimentGaugePanel } from '../components/dashboard/SentimentGaugePanel'
+import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
+import { PageFetchError } from '../components/common/PageFetchError'
 import { PageHeader } from '../components/common/PageHeader'
-import { StatTile } from '../components/common/StatTile'
-import { NewsFeedSection } from '../components/dashboard/NewsFeedSection'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useDashboardOverview } from '../hooks/useDashboardOverview'
 import skeleton from '../components/common/Skeleton.module.css'
 import styles from './DashboardPage.module.css'
 
-function formatDayLabel(iso: string) {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}/${d.getDate()}`
-}
-
 export default function DashboardPage() {
   const { data, loading, error } = useDashboardOverview()
+  const leftAsideRef = useRef<HTMLDivElement>(null)
+  const [leftAsideHeight, setLeftAsideHeight] = useState<number | null>(null)
+
+  useLayoutEffect(() => {
+    const el = leftAsideRef.current
+    if (!el) return
+
+    const syncHeight = () => setLeftAsideHeight(el.offsetHeight)
+    const observer = new ResizeObserver(syncHeight)
+    observer.observe(el)
+    syncHeight()
+
+    return () => observer.disconnect()
+  }, [data])
+
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
 
   return (
-    <Layout hideSidebar>
+    <Layout>
       <div className={styles.page}>
-        <PageHeader
-          title="대시보드"
-          description="뉴스 기반 시장 감성과 버즈를 한 화면에서 요약합니다. 목·실API 전환은 환경 변수 VITE_USE_MOCK_DATA 로 제어합니다."
-        />
+        <PageHeader title="홈" description="포트폴리오 감성·관심 종목을 한 화면에서 봅니다." align="center" />
         {error ? (
-          <p className={styles.bannerError} role="alert">
-            {error.message}
-          </p>
+          <PageFetchError title="홈을 불러오지 못했어요" message={error.message} />
         ) : null}
-        <section className={styles.stats} aria-label="핵심 지표">
-          {loading && !data
-            ? Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i} padding="md">
-                  <div className={clsx(skeleton.block, skeleton.stat)} aria-hidden />
-                </Card>
-              ))
-            : (data?.stats ?? []).map((s) => (
-                <Card key={s.id} padding="md">
-                  <StatTile
-                    label={s.label}
-                    value={s.value}
-                    changePercent={s.changePercent}
-                    hint={s.hint}
-                  />
-                </Card>
-              ))}
-        </section>
-        <section className={styles.charts} aria-label="차트 영역">
-          <Card padding="lg">
-            <div className={styles.chartTitle}>Sentiment timeline</div>
-            <div className={styles.chartBody}>
-              {data?.sentimentTimeline?.length ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={data.sentimentTimeline} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid
-                      stroke="color-mix(in srgb, var(--color-text-primary) 6%, transparent)"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="at"
-                      tickFormatter={formatDayLabel}
-                      stroke="var(--color-text-muted)"
-                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke="var(--color-text-muted)"
-                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
-                      tickLine={false}
-                      axisLine={false}
-                      width={32}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--color-bg-section)',
-                        border: '1px solid var(--color-border-default)',
-                        borderRadius: 4,
-                        fontSize: 12,
-                      }}
-                      labelFormatter={(v) => new Date(String(v)).toLocaleString()}
-                    />
-                    <Line type="monotone" dataKey="score" stroke="var(--color-success)" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className={styles.chartPlaceholder}>데이터 로딩 중…</div>
-              )}
-            </div>
-          </Card>
-          <Card padding="lg">
-            <div className={styles.chartTitle}>Sector heat</div>
-            <div className={styles.chartBody}>
-              {data?.sectorHeat?.length ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.sectorHeat} layout="vertical" margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                    <CartesianGrid
-                      stroke="color-mix(in srgb, var(--color-text-primary) 6%, transparent)"
-                      horizontal={false}
-                    />
-                    <XAxis type="number" stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-secondary)', fontSize: 12 }} hide />
-                    <YAxis
-                      type="category"
-                      dataKey="sectorName"
-                      width={88}
-                      stroke="var(--color-text-muted)"
-                      tick={{ fill: 'var(--color-text-secondary)', fontSize: 12, fontFamily: 'var(--font-sans)' }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--color-bg-section)',
-                        border: '1px solid var(--color-border-default)',
-                        borderRadius: 4,
-                        fontSize: 12,
-                      }}
-                    />
-                    <Bar
-                      dataKey="buzzCount"
-                      fill="color-mix(in srgb, var(--color-success) 28%, transparent)"
-                      stroke="color-mix(in srgb, var(--color-success) 55%, transparent)"
-                      strokeWidth={1}
-                      radius={[0, 2, 2, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className={styles.chartPlaceholder}>데이터 로딩 중…</div>
-              )}
-            </div>
-          </Card>
-        </section>
-        <NewsFeedSection />
+
+        {loading && !data && !error ? (
+          <div className={styles.skeletonGrid} aria-busy="true" aria-label="대시보드 로딩">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} padding="lg">
+                <div className={clsx(skeleton.block, skeleton.stat)} />
+              </Card>
+            ))}
+          </div>
+        ) : null}
+
+        {data ? (
+          <>
+            <section
+              className={styles.topGrid}
+              aria-label="포트폴리오·언급량·관심 종목"
+              style={
+                leftAsideHeight != null
+                  ? ({ '--top-row-h': `${leftAsideHeight}px` } as CSSProperties)
+                  : undefined
+              }
+            >
+              <div ref={leftAsideRef} className={styles.leftAside}>
+                <PortfolioSentimentGauge gauge={data.portfolioSentiment} />
+                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
+              </div>
+              <DashboardWatchlistTable rows={data.watchlist} className={styles.watchlistMain} />
+            </section>
+
+            <section className={styles.marketSection} aria-label="KOSPI·섹터 감성">
+              <div className={styles.marketGrid}>
+                <SentimentGaugePanel
+                  title="KOSPI 종합"
+                  subtitle="참고용"
+                  gauge={data.kospiSentiment}
+                />
+                <SectorHeatmapGrid cells={data.sectorHeatmap} />
+              </div>
+            </section>
+          </>
+        ) : null}
       </div>
     </Layout>
   )

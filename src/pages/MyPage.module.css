@@ -1,0 +1,57 @@
+.page {
+  max-width: var(--layout-page-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-6);
+}
+
+.summarySkeleton {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.skeletonSummaryCard {
+  height: 6.5rem;
+  border-radius: var(--radius-md);
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.mainCol {
+  min-width: 0;
+}
+
+.asideCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.skeletonTable {
+  height: 22rem;
+  border-radius: var(--radius-md);
+}
+
+.skeletonAside {
+  height: 12rem;
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 960px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summarySkeleton {
+    grid-template-columns: 1fr;
+  }
+}

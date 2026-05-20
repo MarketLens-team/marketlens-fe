@@ -1,109 +1,111 @@
 import clsx from 'clsx'
-import { CardSectionHeader } from '../components/common/CardSectionHeader'
-import { Card } from '../components/common/Card'
-import {
-  DetailMainGroup,
-  DetailMainGroupPlaceholder,
-  DetailSplitShell,
-  type DetailAccordionSidebarGroup,
-} from '../components/common/DetailSplitShell'
+import { useState } from 'react'
+import { AppErrorPage } from '../components/common/AppErrorPage'
+import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
-import { PageHeader } from '../components/common/PageHeader'
+import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
-import { usePersonMentions } from '../hooks/usePersonMentions'
+import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
+import { PersonStatementCard } from '../components/person/PersonStatementCard'
+import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
+import type { PersonMentionsRange } from '../data/types/person'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { usePersonTracker } from '../hooks/usePersonTracker'
 import styles from './PersonTrackerPage.module.css'
 
-function sentimentClass(s: 'positive' | 'negative' | 'neutral') {
-  if (s === 'positive') return styles.sentPos
-  if (s === 'negative') return styles.sentNeg
-  return styles.sentNeu
-}
-
-type PersonSidebarKey = 'overview' | 'mentions' | 'news'
-
-const personSidebarGroups: DetailAccordionSidebarGroup<PersonSidebarKey>[] = [
-  {
-    key: 'overview',
-    section: '개요',
-    icon: '👤',
-    items: [
-      { id: 'person-overview', label: '인물 개요' },
-      { id: 'person-sentiment', label: '감성 요약' },
-    ],
-  },
-  {
-    key: 'mentions',
-    section: '언급',
-    icon: '💬',
-    items: [
-      { id: 'person-mentions', label: '최신 언급' },
-      { id: 'person-stocks', label: '연관 종목' },
-    ],
-  },
-  {
-    key: 'news',
-    section: '뉴스',
-    icon: '📰',
-    items: [{ id: 'person-news', label: '인물 뉴스' }],
-  },
-]
+const ASIDE_SCROLL_ROOT = '#person-tracker-aside-scroll'
 
 export default function PersonTrackerPage() {
-  const { data, loading, error } = usePersonMentions()
+  const [range, setRange] = useState<PersonMentionsRange>('today')
+  const { data, loading, error, loadMoreMentions, loadingMoreMentions } = usePersonTracker(range)
+
+  const infiniteEnabled = Boolean(data?.mentionsHasNext)
+  const sentinelRef = useInfiniteScroll({
+    enabled: infiniteEnabled,
+    hasMore: Boolean(data?.mentionsHasNext),
+    loading: loadingMoreMentions,
+    onLoadMore: () => void loadMoreMentions(),
+  })
+
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
 
   return (
-    <Layout hideSidebar>
-      <DetailSplitShell groups={personSidebarGroups}>
-        <DetailMainGroup>
-          <PageHeader
-            title="인물 발언"
-            description="핵심 인물의 언급과 감성을 모읍니다. personClient → GET /api/v1/persons/mentions"
-          />
-          {error ? (
-            <p className={styles.bannerError} role="alert">
-              {error.message}
-            </p>
-          ) : null}
-        </DetailMainGroup>
-        <DetailMainGroup>
-          <Card padding="none" className={styles.feedCard}>
-            <CardSectionHeader title="언급 피드" subtitle="인물 · 역할 · 맥락 · 관련 종목" />
-            {loading && !data ? (
-              <div className={styles.skeletonList} aria-busy="true" aria-label="인물 언급 로딩">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className={clsx(skeleton.block, skeleton.rowLg)} />
-                ))}
-              </div>
-            ) : (data ?? []).length === 0 ? (
-              <p className={skeleton.empty}>표시할 언급이 없습니다</p>
-            ) : (
-              <ul className={styles.list}>
-                {(data ?? []).map((m) => (
-                  <li key={m.id} className={styles.item}>
-                    <div className={styles.row}>
-                      <span className={styles.name}>{m.personName}</span>
-                      <span className={styles.role}>{m.role}</span>
-                      <span className={sentimentClass(m.sentiment)}>{m.sentiment}</span>
-                    </div>
-                    <p className={styles.context}>{m.context}</p>
-                    <div className={styles.footer}>
-                      <span className={styles.codes}>
-                        {m.stockCodes.length ? m.stockCodes.join(', ') : '—'}
-                      </span>
-                      <time className={styles.time} dateTime={m.publishedAt}>
-                        {new Date(m.publishedAt).toLocaleString()}
-                      </time>
-                    </div>
+    <Layout>
+      <div className={styles.page}>
+        {error ? (
+          <PageFetchError title="인물 발언을 불러오지 못했어요" message={error.message} />
+        ) : null}
+
+        {loading && !data && !error ? (
+          <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <div className={styles.feedCol}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
+              ))}
+            </div>
+            <aside className={styles.asideCol}>
+              <div className={clsx(skeleton.block, styles.skeletonRange)} />
+              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            </aside>
+          </div>
+        ) : null}
+
+        {data ? (
+          <div className={styles.mainGrid}>
+            <div className={styles.feedCol}>
+              <ul className={styles.feedList}>
+                {data.mentions.map((mention) => (
+                  <li key={mention.id}>
+                    <PersonStatementCard mention={mention} />
                   </li>
                 ))}
               </ul>
-            )}
-          </Card>
-        </DetailMainGroup>
-        <DetailMainGroup>
-          <DetailMainGroupPlaceholder>인물 관련 뉴스는 다음 단계에서 연결 예정입니다.</DetailMainGroupPlaceholder>
-        </DetailMainGroup>
-      </DetailSplitShell>
+              {data.mentions.length === 0 ? (
+                <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
+              ) : null}
+              {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
+            </div>
+            <aside className={styles.asideCol}>
+              <div className={styles.rangeRow} role="group" aria-label="기간">
+                <div className={styles.segmented}>
+                  <button
+                    type="button"
+                    className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
+                    aria-pressed={range === 'today'}
+                    onClick={() => setRange('today')}
+                  >
+                    오늘
+                  </button>
+                  <button
+                    type="button"
+                    className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
+                    aria-pressed={range === '7d'}
+                    onClick={() => setRange('7d')}
+                  >
+                    7일
+                  </button>
+                </div>
+              </div>
+              <div id="person-tracker-aside-scroll" className={styles.asideScroll}>
+                <PersonTop5Panel items={data.topPersons} />
+                <PersonFrequentStocksPanel items={data.frequentStocks} />
+              </div>
+              <div className={styles.asideFooter}>
+                <BackToTopButton
+                  placement="inline"
+                  tooltipSide="left"
+                  scrollRootSelector={ASIDE_SCROLL_ROOT}
+                />
+              </div>
+            </aside>
+          </div>
+        ) : null}
+      </div>
     </Layout>
   )
 }

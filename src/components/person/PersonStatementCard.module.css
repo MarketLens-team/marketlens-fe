@@ -1,0 +1,94 @@
+.card {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  padding: var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.profile {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 999px;
+  background: var(--color-bg-section);
+  border: 1px solid var(--color-border-default);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.identity {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.role {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+
+.meta {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}
+
+.sentScore {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.sentPos {
+  color: var(--color-success);
+}
+
+.sentNeu {
+  color: var(--color-warning);
+}
+
+.sentNeg {
+  color: var(--color-danger);
+}
+
+.quote {
+  margin: 0;
+  padding: var(--space-5);
+  min-height: 4.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-section);
+  border: 1px solid var(--color-border-default);
+}
+
+.quoteText {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-secondary);
+}

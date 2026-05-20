@@ -1,0 +1,83 @@
+.gaugeWrap {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+}
+
+.gaugeChart {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.gaugeChart :global(svg) {
+  display: block;
+  overflow: visible;
+}
+
+.needleLayer {
+  z-index: 2;
+}
+
+.needlePivot {
+  position: absolute;
+  bottom: 9%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.needleArm {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: clamp(4.75rem, 36.5cqw, 7.25rem);
+  transform-origin: bottom center;
+  transition: transform 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.arcDot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--color-bg-card);
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  transform: translate(-50%, -50%);
+}
+
+.textLayer {
+  position: absolute !important;
+  z-index: 3;
+  top: 48% !important;
+  left: 50% !important;
+  width: auto !important;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.centerText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  line-height: var(--line-height-tight);
+}
+
+.score {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}

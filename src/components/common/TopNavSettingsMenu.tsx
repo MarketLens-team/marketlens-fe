@@ -103,10 +103,10 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
               className={styles.linkBtn}
               onClick={() => {
                 close()
-                navigate('/watchlist')
+                navigate('/mypage')
               }}
             >
-              관심 목록 페이지
+              마이페이지
             </button>
             <button
               type="button"

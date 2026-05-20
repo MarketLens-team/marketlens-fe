@@ -1,107 +1,135 @@
 .page {
   max-width: var(--layout-page-max);
+  margin: 0 auto;
+  padding-bottom: var(--space-6);
 }
 
-.feedCard {
-  overflow: hidden;
+.mainGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+  gap: var(--space-4);
+  align-items: stretch;
 }
 
-.bannerError {
-  margin: 0 0 var(--space-3);
-  padding: var(--space-3) var(--space-3);
-  border-radius: var(--radius-sm);
+.feedCol {
+  min-width: 0;
+}
+
+.feedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.infiniteSentinel {
+  height: 1px;
+  margin-top: var(--space-4);
+}
+
+.asideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  min-height: 0;
+  position: sticky;
+  top: var(--space-4);
+  max-height: calc(100vh - 4.5rem);
+}
+
+.rangeRow {
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+}
+
+.segmented {
+  display: inline-flex;
+  border-radius: var(--radius-full);
   border: 1px solid var(--color-border-strong);
+  overflow: hidden;
   background: var(--color-bg-section);
-  color: var(--color-danger);
-  font-size: var(--font-size-base);
 }
 
-.skeletonList {
-  padding: var(--space-2) var(--space-4) var(--space-4);
+.segmentBtn {
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.segmentBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.segmentBtnActive {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-card));
+  color: var(--color-text-primary);
+}
+
+.asideScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  padding-right: 2px;
 }
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--space-4) var(--space-2);
-}
-
-.item {
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.item:last-child {
-  border-bottom: none;
-}
-
-.row {
+.asideFooter {
+  flex-shrink: 0;
+  padding-top: var(--space-3);
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-2);
+  justify-content: center;
 }
 
-.name {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
-}
-
-.role {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.context {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-lg);
-  line-height: var(--line-height-loose);
-  color: var(--color-text-primary);
-}
-
-.footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-mono);
-  color: var(--color-text-secondary);
-}
-
-.codes {
-  color: var(--color-text-secondary);
-}
-
-.time {
+.empty {
+  margin: var(--space-4) 0 0;
+  text-align: center;
   color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
-.sentPos,
-.sentNeg,
-.sentNeu {
-  font-size: var(--font-size-xs);
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-default);
+.skeletonCard {
+  height: 14rem;
+  border-radius: var(--radius-md);
 }
 
-.sentPos {
-  color: var(--color-success);
+.skeletonRange {
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  max-width: 11rem;
 }
 
-.sentNeg {
-  color: var(--color-danger);
+.skeletonAside {
+  height: 12rem;
+  border-radius: var(--radius-md);
 }
 
-.sentNeu {
-  color: var(--color-text-secondary);
+@media (max-width: 900px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .asideCol {
+    position: static;
+    max-height: none;
+    align-self: stretch;
+  }
+
+  .asideScroll {
+    overflow: visible;
+    min-height: 0;
+  }
 }

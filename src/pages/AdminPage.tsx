@@ -1,29 +1,35 @@
 import clsx from 'clsx'
+import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
+import { PageFetchError } from '../components/common/PageFetchError'
 import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
 import { StatTile } from '../components/common/StatTile'
 import { useAdminOverview } from '../hooks/useAdminOverview'
+import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import styles from './AdminPage.module.css'
 
 export default function AdminPage() {
   const { data, loading, error } = useAdminOverview()
 
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
+
   return (
-    <Layout>
+    <Layout hideSidebar={false}>
       <div className={styles.page}>
         <PageHeader
           title="관리자"
           description="`stock`·`crawling_log` 기준 집계 요약. GET /api/v1/admin/overview"
         />
         {error ? (
-          <p className={styles.bannerError} role="alert">
-            {error.message}
-          </p>
+          <PageFetchError title="관리자 요약을 불러오지 못했어요" message={error.message} />
         ) : null}
         <section className={styles.stats} aria-label="운영 지표">
-          {loading && !data
+          {loading && !data && !error
             ? Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} padding="md">
                   <div className={clsx(skeleton.block, skeleton.stat)} aria-hidden />
