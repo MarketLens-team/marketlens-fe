@@ -6,7 +6,7 @@ import {
   mapStockDetailPage,
   mapStockPeopleTimeline,
 } from '../mappers/stockMapper'
-import { fetchPersonStatements } from './personClient'
+import { fetchPersonStatementsForStockDetail } from './personClient'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
@@ -15,11 +15,11 @@ import type {
   NewsFeedCursorResponse,
   NewsFeedItemResponse,
   NewsFeedResponse,
+  RelatedStocksResponse,
+  StockBuzzSurgeResponse,
   StockDetailResponse,
   StockDirectoryResponse,
   StockSentimentBreakdownResponse,
-  RelatedStocksResponse,
-  StockBuzzSurgeResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
@@ -212,7 +212,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       stockPath(code, '/related'),
       '연관 종목을 불러오지 못했습니다.',
     ),
-    fetchPersonStatements().catch(() => []),
+    fetchPersonStatementsForStockDetail(code),
   ])
 
   return mapStockDetailPage(

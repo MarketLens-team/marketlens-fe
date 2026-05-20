@@ -16,10 +16,11 @@ function toSentiment(raw: string): SentimentPolarity {
 }
 
 function mapRelatedStocks(stocks: PersonStatementResponse['relatedStocks']): PersonRelatedStock[] {
-  return (stocks ?? []).map((stock) => ({
-    code: stock.stockCode,
-    name: stock.stockName || stock.stockCode,
-  }))
+  return (stocks ?? []).flatMap((stock) => {
+    const code = stock.stockCode ?? stock.code ?? ''
+    if (!code) return []
+    return [{ code, name: stock.stockName || code }]
+  })
 }
 
 export function mapPersonStatement(dto: PersonStatementResponse): PersonMention {
@@ -65,11 +66,31 @@ export function aggregateFrequentStocks(mentions: PersonMention[], limit = 12): 
 export function mapPersonTrackerPage(
   mentions: PersonStatementResponse[],
   topPersons: PersonTopResponse[],
+  cursorMeta?: { nextCursor: string | null; hasNext: boolean },
 ): PersonTrackerPageData {
   const mappedMentions = mentions.map(mapPersonStatement)
   return {
     mentions: mappedMentions,
     topPersons: topPersons.map(mapPersonTopItem),
     frequentStocks: aggregateFrequentStocks(mappedMentions),
+    mentionsNextCursor: cursorMeta?.nextCursor ?? null,
+    mentionsHasNext: cursorMeta?.hasNext ?? false,
+  }
+}
+
+/** 인물 트래커 — 다음 커서 페이지를 기존 데이터에 합침 */
+export function mergePersonTrackerMentionsPage(
+  prev: PersonTrackerPageData,
+  newStatements: PersonStatementResponse[],
+  cursorMeta: { nextCursor: string | null; hasNext: boolean },
+): PersonTrackerPageData {
+  const more = newStatements.map(mapPersonStatement)
+  const mergedMentions = [...prev.mentions, ...more]
+  return {
+    ...prev,
+    mentions: mergedMentions,
+    frequentStocks: aggregateFrequentStocks(mergedMentions),
+    mentionsNextCursor: cursorMeta.nextCursor,
+    mentionsHasNext: cursorMeta.hasNext,
   }
 }

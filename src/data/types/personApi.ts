@@ -1,7 +1,8 @@
-/** OpenAPI `StockTag` */
+/** OpenAPI `StockTag` — 일부 응답은 `code` 키만 올 수 있어 둘 다 허용 */
 export interface PersonStockTagResponse {
-  stockCode: string
-  stockName: string
+  stockCode?: string
+  code?: string
+  stockName?: string
   relevance?: string
 }
 
@@ -27,4 +28,11 @@ export interface PersonTopResponse {
   personRole: string
   organizationName: string
   mentionCount: number
+}
+
+/** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
+export interface PersonMentionCursorResponse {
+  items: PersonStatementResponse[]
+  nextCursor: string | null
+  hasNext: boolean
 }

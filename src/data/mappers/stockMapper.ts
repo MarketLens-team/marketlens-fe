@@ -1,4 +1,5 @@
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
+import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { PersonStatementResponse } from '../types/personApi'
 import type {
@@ -110,15 +111,29 @@ export function mapNewsFeedItems(
   }))
 }
 
-/** OpenAPI `GET /api/v1/persons/mentions` — 종목 연관 발언만 추림 */
+/** `PersonStatementResponse[]` — 종목 연관 발언만 추림 (커서 API 수집 결과) */
+function mentionRelatesToStock(row: PersonStatementResponse, targetNormalized: string): boolean {
+  const tags = row.relatedStocks ?? []
+  if (tags.length === 0) return false
+  return tags.some((stock) => {
+    const raw = stock.stockCode ?? stock.code ?? ''
+    return normalizeStockCodeForMatch(raw) === targetNormalized
+  })
+}
+
+/** 종목 상세 등 — 발언이 해당 종목과 연관되는지 */
+export function personStatementRelatesToStock(row: PersonStatementResponse, stockCode: string): boolean {
+  return mentionRelatesToStock(row, normalizeStockCodeForMatch(stockCode))
+}
+
 export function mapStockPeopleTimeline(
   mentions: PersonStatementResponse[],
   stockCode: string,
   limit = 8,
 ): StockPersonTimelineItem[] {
-  const normalized = stockCode.trim()
+  const target = normalizeStockCodeForMatch(stockCode)
   return mentions
-    .filter((row) => row.relatedStocks?.some((stock) => stock.stockCode === normalized))
+    .filter((row) => mentionRelatesToStock(row, target))
     .slice(0, limit)
     .map((row) => ({
       id: String(row.statementId),

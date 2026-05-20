@@ -37,4 +37,7 @@ export interface PersonTrackerPageData {
   mentions: PersonMention[]
   topPersons: PersonTopItem[]
   frequentStocks: PersonFrequentStock[]
+  /** 인물 발언 커서 — 다음 페이지 있을 때만 사용 */
+  mentionsNextCursor: string | null
+  mentionsHasNext: boolean
 }

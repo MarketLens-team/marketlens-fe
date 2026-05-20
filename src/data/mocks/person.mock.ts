@@ -127,8 +127,8 @@ export const mockPersonTrackerPage: PersonTrackerPageData = {
       row.sentiment === 'positive' ? 'positive' : row.sentiment === 'negative' ? 'negative' : 'neutral',
     sentimentScore: row.score,
     relatedStocks: row.relatedStocks.map((s) => ({
-      code: s.stockCode,
-      name: s.stockName,
+      code: s.stockCode ?? s.code ?? '',
+      name: s.stockName ?? s.stockCode ?? s.code ?? '',
     })),
   })),
   topPersons: mockTopPersons.map((row) => ({
@@ -145,6 +145,8 @@ export const mockPersonTrackerPage: PersonTrackerPageData = {
     { code: '068270', name: '셀트리온', mentionCount: 5 },
     { code: '006400', name: '삼성SDI', mentionCount: 4 },
   ],
+  mentionsNextCursor: null,
+  mentionsHasNext: false,
 }
 
 export const mockPersonStatementsResponse = mockStatements

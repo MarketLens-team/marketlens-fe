@@ -8,7 +8,7 @@ import { usePersonTracker } from '../hooks/usePersonTracker'
 import styles from './PersonTrackerPage.module.css'
 
 export default function PersonTrackerPage() {
-  const { data, loading, error } = usePersonTracker()
+  const { data, loading, error, loadMoreMentions, loadingMoreMentions } = usePersonTracker()
 
   return (
     <Layout>
@@ -45,6 +45,18 @@ export default function PersonTrackerPage() {
               </ul>
               {data.mentions.length === 0 ? (
                 <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
+              ) : null}
+              {data.mentionsHasNext ? (
+                <div className={styles.loadMoreWrap}>
+                  <button
+                    type="button"
+                    className={styles.loadMoreBtn}
+                    onClick={() => void loadMoreMentions()}
+                    disabled={loadingMoreMentions}
+                  >
+                    {loadingMoreMentions ? '불러오는 중…' : '더 불러오기'}
+                  </button>
+                </div>
               ) : null}
             </div>
             <aside className={styles.asideCol}>

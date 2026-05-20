@@ -415,20 +415,26 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                 인물 발언 타임라인
               </h2>
               <ul className={styles.simpleList}>
-                {peopleTimeline.map((person) => (
-                  <li key={person.id} className={styles.simpleListItem}>
-                    <div className={styles.personRow}>
-                      <span className={styles.personTime}>{person.relativeLabel}</span>
-                      <div className={styles.personInfo}>
-                        <p className={styles.personName}>{person.personName}</p>
-                        <p className={styles.personRole}>{person.role}</p>
-                      </div>
-                      <span className={clsx(styles.scorePill, pillClass(person.sentimentScore))}>
-                        {formatStockScore(person.sentimentScore)}
-                      </span>
-                    </div>
+                {peopleTimeline.length === 0 ? (
+                  <li className={styles.simpleListItem}>
+                    <p className={styles.emptyPeople}>연관된 인물 발언이 없습니다.</p>
                   </li>
-                ))}
+                ) : (
+                  peopleTimeline.map((person) => (
+                    <li key={person.id} className={styles.simpleListItem}>
+                      <div className={styles.personRow}>
+                        <span className={styles.personTime}>{person.relativeLabel}</span>
+                        <div className={styles.personInfo}>
+                          <p className={styles.personName}>{person.personName}</p>
+                          <p className={styles.personRole}>{person.role}</p>
+                        </div>
+                        <span className={clsx(styles.scorePill, pillClass(person.sentimentScore))}>
+                          {formatStockScore(person.sentimentScore)}
+                        </span>
+                      </div>
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           </section>
