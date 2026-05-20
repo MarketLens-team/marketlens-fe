@@ -1,6 +1,12 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
-import { mapNewsFeedItems, mapRelatedStocks, mapStockDetailPage } from '../mappers/stockMapper'
+import {
+  mapNewsFeedItems,
+  mapRelatedStocks,
+  mapStockDetailPage,
+  mapStockPeopleTimeline,
+} from '../mappers/stockMapper'
+import { fetchPersonStatements } from './personClient'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
@@ -184,7 +190,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
 
   const dateQuery = recordedAt ? { recordedAt } : undefined
 
-  const [detail, summary, trend, breakdown, newsFeed, related] = await Promise.all([
+  const [detail, summary, trend, breakdown, newsFeed, related, mentions] = await Promise.all([
     getApiData<StockDetailResponse>(stockPath(code), '종목 정보를 불러오지 못했습니다.'),
     getApiData<StockSummaryResponse>(
       stockPath(code, '/summary'),
@@ -206,6 +212,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       stockPath(code, '/related'),
       '연관 종목을 불러오지 못했습니다.',
     ),
+    fetchPersonStatements().catch(() => []),
   ])
 
   return mapStockDetailPage(
@@ -217,6 +224,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
     { nextCursor: newsFeed.nextCursor, hasNext: newsFeed.hasNext },
     {
       relatedStocks: mapRelatedStocks(related, code),
+      peopleTimeline: mapStockPeopleTimeline(mentions, code),
     },
   )
 }

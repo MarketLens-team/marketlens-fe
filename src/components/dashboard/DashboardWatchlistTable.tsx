@@ -31,7 +31,7 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
     <Card padding="md" className={clsx(styles.card, className)}>
       <CardSectionHeader
         title="내 관심 종목 워치리스트"
-        subtitle="현재가 · 감성 · 언급량 (목 데이터)"
+        subtitle="현재가 · 감성 · 언급량"
         variant="embedded"
         showChevron
       />
@@ -51,6 +51,13 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
             </tr>
           </thead>
           <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className={styles.empty}>
+                  관심종목이 없습니다. 종목 상세에서 추가해 보세요.
+                </td>
+              </tr>
+            ) : null}
             {rows.map((row) => (
               <tr
                 key={row.code}

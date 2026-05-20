@@ -1,4 +1,6 @@
+import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
+import type { PersonStatementResponse } from '../types/personApi'
 import type {
   NewsFeedItemResponse,
   RelatedStocksResponse,
@@ -15,6 +17,7 @@ import type {
   StockSentimentBreakdown,
   StockSentimentBreakdownRow,
   StockSentimentContext,
+  StockPersonTimelineItem,
   StockSentimentTrendPoint,
   StockSummary,
 } from '../types/stock'
@@ -105,6 +108,25 @@ export function mapNewsFeedItems(
     imageUrl: item.imageUrl || null,
     url: item.originalLink || undefined,
   }))
+}
+
+/** OpenAPI `GET /api/v1/persons/mentions` — 종목 연관 발언만 추림 */
+export function mapStockPeopleTimeline(
+  mentions: PersonStatementResponse[],
+  stockCode: string,
+  limit = 8,
+): StockPersonTimelineItem[] {
+  const normalized = stockCode.trim()
+  return mentions
+    .filter((row) => row.relatedStocks?.some((stock) => stock.stockCode === normalized))
+    .slice(0, limit)
+    .map((row) => ({
+      id: String(row.statementId),
+      personName: row.personName,
+      role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
+      relativeLabel: formatRelativeTimeKo(row.publishedAt),
+      sentimentScore: toFiniteNumber(row.score),
+    }))
 }
 
 export function mapStockDetailPage(

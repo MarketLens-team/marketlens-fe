@@ -1,6 +1,8 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { isMockDataSource } from '../../config/dataSource'
+import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
 import { BackToTopButton } from '../common/BackToTopButton'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
 import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
@@ -64,16 +66,68 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
   const [newsItems, setNewsItems] = useState(recentNews)
   const [pagination, setPagination] = useState<StockNewsPagination>(newsPagination)
   const [loadingMoreNews, setLoadingMoreNews] = useState(false)
+  const [loadingNewsFilter, setLoadingNewsFilter] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
+  const [interested, setInterested] = useState(watchlistInterested)
+  const [watchlistPending, setWatchlistPending] = useState(false)
+  const skipNewsFilterFetchRef = useRef(true)
+  const useApiNewsFilter = !isMockDataSource()
 
   useEffect(() => {
     setNewsFilter('all')
     setNewsItems(recentNews)
     setPagination(newsPagination)
     setLoadMoreError(null)
+    skipNewsFilterFetchRef.current = true
   }, [stock.code, recentNews, newsPagination])
 
-  const filteredNews = useMemo(() => filterNews(newsItems, newsFilter), [newsItems, newsFilter])
+  useEffect(() => {
+    setInterested(watchlistInterested)
+  }, [watchlistInterested, stock.code])
+
+  useEffect(() => {
+    if (!useApiNewsFilter) return
+    if (skipNewsFilterFetchRef.current) {
+      skipNewsFilterFetchRef.current = false
+      return
+    }
+
+    let cancelled = false
+    const run = async () => {
+      setLoadingNewsFilter(true)
+      setLoadMoreError(null)
+      try {
+        const page = await fetchStockNewsFeedCursor(stock.code, {
+          limit: 20,
+          sentiment: newsFilter === 'all' ? undefined : newsFilter,
+        })
+        if (cancelled) return
+        setNewsItems(mapNewsFeedItems(page.items, [stock.name, stock.code]))
+        setPagination({
+          nextCursor: page.nextCursor,
+          hasNext: page.hasNext,
+        })
+      } catch (e) {
+        if (!cancelled) {
+          setLoadMoreError(e instanceof Error ? e.message : '뉴스를 불러오지 못했습니다.')
+        }
+      } finally {
+        if (!cancelled) setLoadingNewsFilter(false)
+      }
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [newsFilter, stock.code, stock.name, useApiNewsFilter])
+
+  const displayNews = useMemo(
+    () => (useApiNewsFilter ? newsItems : filterNews(newsItems, newsFilter)),
+    [newsItems, newsFilter, useApiNewsFilter],
+  )
+
+  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
 
   const loadMoreNews = useCallback(async () => {
     if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
@@ -83,6 +137,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       const page = await fetchStockNewsFeedCursor(stock.code, {
         limit: 20,
         cursor: pagination.nextCursor,
+        sentiment: newsSentimentParam,
       })
       const mapped = mapNewsFeedItems(page.items, [stock.name, stock.code])
       setNewsItems((prev) => {
@@ -103,12 +158,35 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     loadingMoreNews,
     pagination.hasNext,
     pagination.nextCursor,
+    newsSentimentParam,
     stock.code,
     stock.name,
   ])
 
+  const toggleWatchlist = useCallback(async () => {
+    if (watchlistPending) return
+    setWatchlistPending(true)
+    try {
+      if (isMockDataSource()) {
+        setInterested((prev) => !prev)
+        return
+      }
+      if (interested) {
+        await removeWatchlistItem(stock.code)
+        setInterested(false)
+      } else {
+        await addWatchlistItem(stock.code)
+        setInterested(true)
+      }
+    } catch {
+      /* 상태 유지 */
+    } finally {
+      setWatchlistPending(false)
+    }
+  }, [interested, stock.code, watchlistPending])
+
   const newsSentinelRef = useInfiniteScroll({
-    enabled: newsItems.length > 0,
+    enabled: displayNews.length > 0,
     hasMore: pagination.hasNext,
     loading: loadingMoreNews,
     onLoadMore: () => void loadMoreNews(),
@@ -121,8 +199,14 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.stockTitle}>{stock.name}</h1>
-          <button type="button" className={styles.watchlistBtn}>
-            {watchlistInterested ? '★ 관심종목' : '☆ 관심종목 추가'}
+          <button
+            type="button"
+            className={styles.watchlistBtn}
+            onClick={() => void toggleWatchlist()}
+            disabled={watchlistPending}
+            aria-pressed={interested}
+          >
+            {interested ? '★ 관심종목' : '☆ 관심종목 추가'}
           </button>
         </div>
         <div className={styles.headerBody}>
@@ -270,16 +354,22 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               ))}
             </div>
           </div>
-          {filteredNews.length === 0 ? (
+          {loadingNewsFilter ? (
+            <div className={styles.newsFilterLoading} aria-busy="true">
+              <FeedLoadingSpinner />
+            </div>
+          ) : null}
+          {!loadingNewsFilter && displayNews.length === 0 ? (
             <p className={styles.emptyNews}>해당 필터에 맞는 뉴스가 없습니다.</p>
-          ) : (
+          ) : null}
+          {!loadingNewsFilter && displayNews.length > 0 ? (
             <ul className={styles.newsList}>
-              {filteredNews.map((item) => (
+              {displayNews.map((item) => (
                 <StockNewsListItem key={item.id} item={item} />
               ))}
             </ul>
-          )}
-          {pagination.hasNext ? (
+          ) : null}
+          {pagination.hasNext && !loadingNewsFilter ? (
             <div className={styles.newsScrollFoot}>
               <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
               {loadingMoreNews ? <FeedLoadingSpinner /> : null}

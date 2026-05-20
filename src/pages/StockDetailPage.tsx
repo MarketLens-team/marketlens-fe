@@ -17,8 +17,7 @@ export default function StockDetailPage() {
     getLayoutScrollRoot()?.scrollTo({ top: 0, left: 0 })
   }, [normalizedCode])
 
-  const contentMatchesRoute =
-    Boolean(data) && data.stock.code === normalizedCode
+  const contentMatchesRoute = data?.stock.code === normalizedCode
 
   return (
     <Layout>

@@ -32,7 +32,7 @@ export default function DashboardPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <PageHeader title="홈" description="포트폴리오 감성·관심 종목을 한 화면에서 봅니다. (목 데이터)" align="center" />
+        <PageHeader title="홈" description="포트폴리오 감성·관심 종목을 한 화면에서 봅니다." align="center" />
         {error ? (
           <p className={styles.bannerError} role="alert">
             {error.message}

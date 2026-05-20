@@ -98,7 +98,7 @@ export interface StockDetail {
   /** `GET /api/v1/news/feed/{ticker}/cursor` */
   newsPagination: StockNewsPagination
   relatedStocks: StockRelatedStock[]
-  /** API 미제공 — 목업·추후 연동 */
+  /** `GET /api/v1/persons/mentions` — 연관 종목 필터 */
   peopleTimeline: StockPersonTimelineItem[]
 }
 
