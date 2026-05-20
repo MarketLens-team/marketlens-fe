@@ -67,6 +67,10 @@
 
 - 홈 대시보드 API가 **403**을 반환하는 경우는 **서버 인가·토큰·Security 설정** 이슈이며, 위 변경은 그에 맞는 **표시 방식**만 조정한 것입니다.
 
+## 전체 UI 개요 (제품 화면)
+
+- 화면별 톤·레이아웃 서술: [design/ui-product-overview.md](../design/ui-product-overview.md)
+
 ## 커밋 (시간순, 관련만)
 
 1. `d892c05` — feat(person): 트래커 기간·무한스크롤·우측 스크롤과 range 수정  
