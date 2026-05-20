@@ -155,6 +155,16 @@ export default function DevActionButtonPage() {
           </div>
 
           <div className={styles.item}>
+            <h2 className={styles.label}>에러 페이지 시안</h2>
+            <div className={styles.linkRow}>
+              <Link className={styles.devLink} to="/dev/errors">
+                Error pages (404 · 401 · 500 …)
+              </Link>
+            </div>
+            <p className={styles.meta}>백엔드 ErrorCode 메시지와 맞춘 공통 AppErrorPage 프리뷰</p>
+          </div>
+
+          <div className={styles.item}>
             <h2 className={styles.label}>Dev Sidebar 디자인 프리뷰</h2>
             <div className={styles.linkRow}>
               <Link className={styles.devLink} to="/dev/layout-home">

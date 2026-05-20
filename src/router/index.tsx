@@ -6,6 +6,8 @@ import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
+import DevErrorPagePreview from '../pages/DevErrorPagePreview'
+import DevErrorPagesPage from '../pages/DevErrorPagesPage'
 import DevLayoutHomePreviewPage from '../pages/DevLayoutHomePreviewPage'
 import DevLayoutSplitPage from '../pages/DevLayoutSplitPage'
 import DevWatchlistPage from '../pages/DevWatchlistPage'
@@ -27,6 +29,14 @@ export const router = createBrowserRouter([
   {
     path: '/dev',
     element: <DevActionButtonPage />,
+  },
+  {
+    path: '/dev/errors',
+    element: <DevErrorPagesPage />,
+  },
+  {
+    path: '/dev/errors/:variant',
+    element: <DevErrorPagePreview />,
   },
   {
     path: '/dev/layout-home',
