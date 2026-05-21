@@ -79,6 +79,18 @@
   --layout-search-modal-top: 2.5625rem; /* 41px */
   --layout-search-modal-bottom: var(--layout-top-strip-height); /* 82px */
   --layout-sidebar-accordion: 16.25rem; /* 260px */
+  /* 종목 상세 fixed 맨 위로 — BackToTopButton.module.css 와 동일 */
+  --layout-back-to-top-size: 2.75rem;
+  --layout-back-to-top-bottom: var(--space-6);
+  --layout-back-to-top-reserve: calc(
+    var(--layout-back-to-top-size) + var(--layout-back-to-top-bottom) + var(--space-2)
+  );
+
+  /* FAB 맨 위로 — 다크 UI에서는 밝은 버튼 */
+  --color-fab-surface: #f2f6fb;
+  --color-fab-on-surface: #0f151e;
+  --color-fab-border: color-mix(in srgb, var(--color-fab-on-surface) 18%, transparent);
+  --color-fab-surface-hover: #ffffff;
 
   /* Motion */
   --duration-instant: 120ms;
@@ -114,4 +126,10 @@
   --color-interactive-active: #2563eb;
   --color-interactive-active-text: #ffffff;
   --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
+
+  /* FAB 맨 위로 — 라이트 UI에서는 어두운 버튼 */
+  --color-fab-surface: #1a2433;
+  --color-fab-on-surface: #ffffff;
+  --color-fab-border: color-mix(in srgb, var(--color-fab-on-surface) 22%, transparent);
+  --color-fab-surface-hover: #101828;
 }

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getLayoutScrollRoot } from '../../hooks/useInfiniteScroll'
 import styles from './BackToTopButton.module.css'
 
@@ -28,6 +29,8 @@ interface BackToTopButtonProps {
   className?: string
   /** 지정 시 해당 요소의 scrollTop 기준으로 표시·스크롤 (예: `#person-tracker-aside-scroll`) */
   scrollRootSelector?: string
+  /** 종목 상세 타임라인 겹침 측정용 마커 */
+  stockDetailMarker?: boolean
 }
 
 function resolveScrollRoot(scrollRootSelector?: string): HTMLElement | null {
@@ -41,6 +44,7 @@ export function BackToTopButton({
   tooltipSide = 'right',
   className,
   scrollRootSelector,
+  stockDetailMarker = false,
 }: BackToTopButtonProps) {
   const [visible, setVisible] = useState(false)
 
@@ -63,12 +67,13 @@ export function BackToTopButton({
 
   if (!visible) return null
 
-  return (
+  const node = (
     <div
       className={clsx(
         placement === 'fixed' ? styles.wrapFixed : styles.dock,
         className,
       )}
+      {...(stockDetailMarker ? { 'data-stock-back-to-top': '' } : {})}
     >
       <button
         type="button"
@@ -86,4 +91,10 @@ export function BackToTopButton({
       </button>
     </div>
   )
+
+  if (placement === 'fixed') {
+    return createPortal(node, document.body)
+  }
+
+  return node
 }

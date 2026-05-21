@@ -16,8 +16,8 @@
     100vw - var(--layout-sidebar-width) - 2 * var(--main-pad-inline, var(--space-6))
   );
   position: fixed;
-  bottom: var(--space-6);
-  z-index: var(--z-popover);
+  bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-dropdown);
   left: calc(
     var(--layout-sidebar-width) + var(--main-pad-inline, var(--space-6)) +
       max(0px, (var(--main-inner) - var(--page-w)) / 2) + var(--page-w) - 8.25rem +
@@ -36,26 +36,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--layout-back-to-top-size);
+  height: var(--layout-back-to-top-size);
   padding: 0;
   margin: 0;
-  border: 1px solid color-mix(in srgb, var(--color-border-strong) 85%, transparent);
+  border: 1px solid var(--color-fab-border);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-elevated) 92%, var(--color-bg-card));
-  color: var(--color-text-secondary);
+  background: var(--color-fab-surface);
+  color: var(--color-fab-on-surface);
   cursor: pointer;
   flex-shrink: 0;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-fab-on-surface) 28%, transparent);
   transition:
     background-color var(--duration-fast) ease,
     color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
 .btn:hover {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-default);
+  background: var(--color-fab-surface-hover);
+  border-color: color-mix(in srgb, var(--color-fab-border) 80%, var(--color-fab-on-surface));
 }
 
 .btn:focus-visible {

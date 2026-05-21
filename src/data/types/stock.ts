@@ -79,7 +79,13 @@ export interface StockPersonTimelineItem {
   id: string
   personName: string
   role: string
+  /** OpenAPI `statementSummary` */
+  summary: string
+  sourceName: string
+  publishedAt: string
   relativeLabel: string
+  /** 발표 후 1시간 이내 — 시각 라벨 강조(빨간색) */
+  isFresh: boolean
   sentimentScore: number
 }
 

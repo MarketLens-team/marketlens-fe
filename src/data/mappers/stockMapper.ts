@@ -1,4 +1,5 @@
-import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
+import { formatPersonTimelineTime } from '../../lib/formatRelativeTime'
+import { truncateText } from '../../lib/truncateText'
 import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { PersonStatementResponse } from '../types/personApi'
@@ -142,6 +143,9 @@ export function mapStockPriceInfo(
   return { current, change, changePercent }
 }
 
+/** 종목 상세 사이드 타임라인 — 한 줄에 너무 길지 않게 */
+const STOCK_PERSON_SUMMARY_MAX_LEN = 140
+
 export function mapStockPeopleTimeline(
   mentions: PersonStatementResponse[],
   stockCode: string,
@@ -151,13 +155,20 @@ export function mapStockPeopleTimeline(
   return mentions
     .filter((row) => mentionRelatesToStock(row, target))
     .slice(0, limit)
-    .map((row) => ({
-      id: String(row.statementId),
-      personName: row.personName,
-      role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
-      relativeLabel: formatRelativeTimeKo(row.publishedAt),
-      sentimentScore: toFiniteNumber(row.score),
-    }))
+    .map((row) => {
+      const { label, isFresh } = formatPersonTimelineTime(row.publishedAt)
+      return {
+        id: String(row.statementId),
+        personName: row.personName,
+        role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
+        summary: truncateText(row.statementSummary?.trim() || '—', STOCK_PERSON_SUMMARY_MAX_LEN),
+        sourceName: row.sourceName?.trim() || '—',
+        publishedAt: row.publishedAt,
+        relativeLabel: label,
+        isFresh,
+        sentimentScore: toFiniteNumber(row.score),
+      }
+    })
 }
 
 export function mapStockDetailPage(

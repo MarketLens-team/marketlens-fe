@@ -350,10 +350,10 @@
   font-family: var(--font-mono);
 }
 
-/* Bottom grid — 뉴스 넓게, 우측 사이드 축소 */
+/* Bottom grid — 상단 차트 그리드와 동일 비율(뉴스 | 사이드) */
 .bottomGrid {
   display: grid;
-  grid-template-columns: minmax(0, 2.25fr) minmax(0, 16.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
   gap: var(--space-4);
   align-items: start;
 }
@@ -361,11 +361,13 @@
 .rightStack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
   min-width: 0;
   align-self: start;
   position: sticky;
   top: var(--space-5);
+  max-height: calc(100vh - var(--space-5) - var(--space-4));
+  padding-bottom: var(--layout-back-to-top-reserve);
 }
 
 .rightStack .panelBody {
@@ -414,6 +416,117 @@
 .rightStack .scorePill {
   padding: 2px var(--space-1);
   font-size: var(--font-size-xs);
+}
+
+/* 최신 인물 발언 타임라인 — Bloomberg Latest 스타일 */
+.peoplePanel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.peoplePanelBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-5) var(--space-5);
+}
+
+.peoplePanelTitle {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+  color: var(--color-danger);
+}
+
+.peopleTimelineList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: var(--people-timeline-max-height, 20rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-bottom: var(--space-3);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-border-strong) 70%, transparent) transparent;
+}
+
+.peopleTimelineItem {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.peopleTimelineItem:first-child {
+  padding-top: 0;
+}
+
+.peopleTimelineItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.personTimelineRow {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.personTimelineTime {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+}
+
+.personTimelineTimeFresh {
+  color: var(--color-danger);
+}
+
+.personTimelineTimeMuted {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.personTimelineContent {
+  min-width: 0;
+}
+
+.personTimelineHeadline {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.personTimelineMeta {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-secondary);
+}
+
+.personTimelineName {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.personTimelineScore {
+  margin-left: var(--space-1);
+  font-weight: var(--font-weight-semibold);
 }
 
 .panelHeadRow {

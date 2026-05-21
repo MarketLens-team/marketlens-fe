@@ -10,6 +10,7 @@ import { PillButton } from '../ui/PillButton'
 import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
+import { useStockPeopleTimelineScrollMax } from '../../hooks/useStockPeopleTimelineScrollMax'
 import type {
   SentimentPolarity,
   StockDetail,
@@ -80,7 +81,10 @@ export function StockDetailContent({
   const [interested, setInterested] = useState(watchlistInterested)
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
+  const rightStackRef = useRef<HTMLDivElement>(null)
+  const peopleTimelineListRef = useRef<HTMLUListElement>(null)
   const useApiNewsFilter = !isMockDataSource()
+  useStockPeopleTimelineScrollMax(peopleTimelineListRef, rightStackRef)
 
   useEffect(() => {
     setNewsFilter('all')
@@ -437,7 +441,7 @@ export function StockDetailContent({
           ) : null}
         </section>
 
-        <div className={styles.rightStack}>
+        <div ref={rightStackRef} className={styles.rightStack}>
           <section className={styles.panel} aria-labelledby="stock-related-title">
             <div className={styles.panelBody}>
               <h2 id="stock-related-title" className={styles.panelTitle}>
@@ -464,14 +468,17 @@ export function StockDetailContent({
             </div>
           </section>
 
-          <section className={styles.panel} aria-labelledby="stock-people-title">
-            <div className={styles.panelBody}>
-              <h2 id="stock-people-title" className={styles.panelTitle}>
-                인물 발언 타임라인
+          <section
+            className={clsx(styles.panel, styles.peoplePanel)}
+            aria-labelledby="stock-people-title"
+          >
+            <div className={styles.peoplePanelBody}>
+              <h2 id="stock-people-title" className={styles.peoplePanelTitle}>
+                최신 인물 발언 타임라인
               </h2>
-              <ul className={styles.simpleList}>
+              <ul ref={peopleTimelineListRef} className={styles.peopleTimelineList}>
                 {peopleTimeline.length === 0 ? (
-                  <li className={styles.simpleListItem}>
+                  <li className={styles.peopleTimelineItem}>
                     <EmptyState
                       className={styles.emptyPeople}
                       title="발언이 없어요"
@@ -480,16 +487,35 @@ export function StockDetailContent({
                   </li>
                 ) : (
                   peopleTimeline.map((person) => (
-                    <li key={person.id} className={styles.simpleListItem}>
-                      <div className={styles.personRow}>
-                        <span className={styles.personTime}>{person.relativeLabel}</span>
-                        <div className={styles.personInfo}>
-                          <p className={styles.personName}>{person.personName}</p>
-                          <p className={styles.personRole}>{person.role}</p>
-                        </div>
-                        <span className={clsx(styles.scorePill, pillClass(person.sentimentScore))}>
-                          {formatStockScore(person.sentimentScore)}
+                    <li key={person.id} className={styles.peopleTimelineItem}>
+                      <div className={styles.personTimelineRow}>
+                        <span
+                          className={clsx(
+                            styles.personTimelineTime,
+                            person.isFresh ? styles.personTimelineTimeFresh : styles.personTimelineTimeMuted,
+                          )}
+                        >
+                          {person.relativeLabel}
                         </span>
+                        <div className={styles.personTimelineContent}>
+                          <p className={styles.personTimelineHeadline}>{person.summary}</p>
+                          <p className={styles.personTimelineMeta}>
+                            <span className={styles.personTimelineName}>{person.personName}</span>
+                            <span aria-hidden> · </span>
+                            <span>{person.role}</span>
+                            <span aria-hidden> · </span>
+                            <span>{person.sourceName}</span>
+                            <span
+                              className={clsx(
+                                styles.personTimelineScore,
+                                styles.mono,
+                                pillClass(person.sentimentScore),
+                              )}
+                            >
+                              {formatStockScore(person.sentimentScore)}
+                            </span>
+                          </p>
+                        </div>
                       </div>
                     </li>
                   ))
@@ -500,7 +526,7 @@ export function StockDetailContent({
         </div>
       </div>
 
-      <BackToTopButton placement="fixed" tooltipSide="left" />
+      <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />
     </div>
   )
 }

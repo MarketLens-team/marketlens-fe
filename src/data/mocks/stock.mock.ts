@@ -93,9 +93,39 @@ const samsungDetail: StockDetail = {
     { code: '240810', name: '원익IPS', sentimentScore: -8 },
   ],
   peopleTimeline: [
-    { id: 'p1', personName: '젠슨 황', role: '엔비디아 CEO', relativeLabel: '2h', sentimentScore: 81 },
-    { id: 'p2', personName: '이재용', role: '삼성전자 회장', relativeLabel: '어제', sentimentScore: 12 },
-    { id: 'p3', personName: '한종희', role: '삼성전자 부회장', relativeLabel: '3일 전', sentimentScore: 45 },
+    {
+      id: 'p1',
+      personName: '젠슨 황',
+      role: 'CEO · 엔비디아',
+      summary: 'HBM 수요 급증, 한국 파트너사와 협력 강화 예정',
+      sourceName: '연합뉴스',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+      relativeLabel: '35분 전',
+      isFresh: true,
+      sentimentScore: 81,
+    },
+    {
+      id: 'p2',
+      personName: '이재용',
+      role: '회장 · 삼성전자',
+      summary: '메모리 반도체 투자 확대, AI 인프라 수요에 대응',
+      sourceName: '한국경제',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+      relativeLabel: '5시간 전',
+      isFresh: false,
+      sentimentScore: 12,
+    },
+    {
+      id: 'p3',
+      personName: '한종희',
+      role: '부회장 · 삼성전자',
+      summary: '파운드리 경쟁력 강화와 AI 반도체 라인업 확대 필요',
+      sourceName: '매일경제',
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+      relativeLabel: '3일 전',
+      isFresh: false,
+      sentimentScore: 45,
+    },
   ],
 }
 
@@ -200,7 +230,17 @@ function buildFallbackDetail(
       { code: '000660', name: 'SK하이닉스', sentimentScore: 62 },
     ].filter((s) => s.code !== code),
     peopleTimeline: [
-      { id: 'p1', personName: '—', role: '관련 인물', relativeLabel: '1일 전', sentimentScore: sentimentScore },
+      {
+        id: 'p1',
+        personName: '—',
+        role: '관련 인물',
+        summary: '이 종목과 연결된 인물 발언 요약이 표시됩니다.',
+        sourceName: '—',
+        publishedAt: new Date(Date.now() - 86400000).toISOString(),
+        relativeLabel: '1일 전',
+        isFresh: false,
+        sentimentScore,
+      },
     ],
   }
 }
