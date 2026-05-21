@@ -14,6 +14,7 @@ import type {
   SentimentPolarity,
   StockDetail,
   StockNewsItem,
+  StockPriceInfo,
   StockRelatedStock,
   StockSentimentBreakdown,
   StockSentimentBreakdownRow,
@@ -126,6 +127,21 @@ export function personStatementRelatesToStock(row: PersonStatementResponse, stoc
   return mentionRelatesToStock(row, normalizeStockCodeForMatch(stockCode))
 }
 
+/** OpenAPI `StockInfo.currentPrice` / `changeRate` → UI `StockPriceInfo` */
+export function mapStockPriceInfo(
+  currentPrice: number | undefined,
+  changeRate: number | undefined,
+): StockPriceInfo {
+  const current = toFiniteNumber(currentPrice)
+  const changePercent = toFiniteNumber(changeRate)
+  if (current <= 0) {
+    return { current: 0, change: 0, changePercent: 0 }
+  }
+  const change =
+    changePercent === 0 ? 0 : Math.round((current * changePercent) / (100 + changePercent))
+  return { current, change, changePercent }
+}
+
 export function mapStockPeopleTimeline(
   mentions: PersonStatementResponse[],
   stockCode: string,
@@ -164,7 +180,7 @@ export function mapStockDetailPage(
     sentimentScore: toFiniteNumber(summary.score),
     mentionChangePercent: toFiniteNumber(summary.mentionChangeRate),
     buzz24h: toFiniteNumber(summary.mentionCount),
-    price: { current: 0, change: 0, changePercent: 0 },
+    price: mapStockPriceInfo(stock.currentPrice, stock.changeRate),
     aiSummary: summary.aiSummary ?? '',
   }
 

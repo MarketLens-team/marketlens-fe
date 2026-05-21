@@ -5,6 +5,8 @@ export interface StockInfoResponse {
   name: string
   market: string
   sectorName: string
+  currentPrice?: number
+  changeRate?: number
 }
 
 export interface WatchlistInfoResponse {
