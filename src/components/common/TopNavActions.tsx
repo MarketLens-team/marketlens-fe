@@ -78,12 +78,13 @@ export function TopNavActions() {
           className={styles.searchTrigger}
           disabled={isSearchOpening}
           aria-busy={isSearchOpening}
+          aria-keyshortcuts="/"
           onClick={() => void openSearch()}
         >
-          <span className={styles.searchIcon} aria-hidden>
-            ⌕
-          </span>
           <span className={styles.searchPlaceholder}>검색</span>
+          <kbd className={styles.searchShortcut} aria-hidden>
+            /
+          </kbd>
         </button>
         <TopNavSettingsMenu
           isOpen={isSettingsOpen}
