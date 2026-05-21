@@ -1120,8 +1120,6 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
 
         <div className={styles.footerHints}>
           <span>p 검색</span>
-          <span>↑↓ 항목 · ←→ 탭</span>
-          <span>Enter 이동</span>
           <span>ESC 모달 닫기</span>
         </div>
       </section>
