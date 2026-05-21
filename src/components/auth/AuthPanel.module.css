@@ -45,22 +45,6 @@
   margin-bottom: var(--space-5);
 }
 
-/* 검색 모달(TopNavSearchModal)과 동일한 모달·입력 색 */
-.cardInModal .input {
-  background: var(--color-bg-modal-inset);
-  border-color: var(--color-border-default);
-}
-
-.cardInModal .input:focus {
-  border-color: var(--color-border-strong);
-  outline: none;
-}
-
-.cardInModal .inputDisabled,
-.cardInModal .input:disabled {
-  background: color-mix(in srgb, var(--color-bg-modal-inset) 65%, var(--color-bg-modal));
-}
-
 .pageInModal {
   width: 100%;
 }
@@ -472,6 +456,52 @@
   justify-content: center;
   box-sizing: border-box;
   text-decoration: none;
+}
+
+/* 로그인 모달 — TopNavSearchModal 입력과 동일 팔레트 (기본 .input 규칙보다 뒤에 둠) */
+.cardInModal .input {
+  background: var(--color-bg-modal-inset);
+  border-color: var(--color-border-default);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.cardInModal .input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.cardInModal .input:focus {
+  border-color: var(--color-border-strong);
+  outline: none;
+  box-shadow: none;
+}
+
+.cardInModal .input.inputDisabled,
+.cardInModal .input:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-bg-modal) 82%, var(--color-bg-modal-inset));
+  border-color: color-mix(in srgb, var(--color-border-default) 45%, var(--color-bg-modal));
+  box-shadow: none;
+}
+
+.cardInModal .input.inputDisabled::placeholder,
+.cardInModal .input:disabled::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 72%, var(--color-bg-modal));
+}
+
+.cardInModal .input.inputDisabled:focus,
+.cardInModal .input:disabled:focus {
+  border-color: color-mix(in srgb, var(--color-border-default) 45%, var(--color-bg-modal));
+}
+
+.cardInModal .input.inputError {
+  border-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-modal-inset));
+}
+
+.cardInModal .input.inputError:focus {
+  border-color: var(--color-danger);
 }
 
 @media (max-width: 480px) {
