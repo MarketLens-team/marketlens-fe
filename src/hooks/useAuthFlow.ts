@@ -9,6 +9,7 @@ import { useAuthStore, type UserRole } from '../store/authStore'
 import { useWatchlistStore } from '../store/watchlistStore'
 
 const AUTH_ENTRY_PATHS = new Set(['/login', '/onboarding'])
+const PRIVATE_PATH_PREFIXES = ['/watchlist', '/mypage', '/admin'] as const
 
 function resolveRole(email: string): UserRole {
   if (isMockDataSource() && email.includes('admin')) {
@@ -23,6 +24,12 @@ function readRedirectFrom(locationState: unknown): string | undefined {
   }
   const from = (locationState as { from?: unknown }).from
   return typeof from === 'string' && from.length > 0 ? from : undefined
+}
+
+function pathRequiresAuth(pathname: string): boolean {
+  return PRIVATE_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
 }
 
 function isRedirectablePath(path: string): boolean {
@@ -71,8 +78,12 @@ export function useAuthFlow() {
   const handleLogout = useCallback(() => {
     logout()
     useAuthModalStore.getState().close()
-    navigate('/', { replace: true, state: undefined })
-  }, [logout, navigate])
+
+    // 로그인 필요 페이지는 홈으로. 공개 페이지는 유지하며 useAsyncData가 토큰 변경으로 재요청.
+    if (pathRequiresAuth(location.pathname)) {
+      navigate('/', { replace: true, state: undefined })
+    }
+  }, [location.pathname, logout, navigate])
 
   const handleCompleteRegistration = useCallback(
     async (input: CompleteRegistrationInput) => {

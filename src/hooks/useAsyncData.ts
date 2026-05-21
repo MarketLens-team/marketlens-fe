@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MIN_LOADING_MS, withMinDuration } from '../lib/withMinDuration'
+import { useAuthStore } from '../store/authStore'
 
 export interface AsyncState<T> {
   data: T | null
@@ -19,6 +20,7 @@ export function useAsyncData<T>(
 ): AsyncState<T> {
   const enabled = options?.enabled !== false
   const minLoadingMs = options?.minLoadingMs ?? MIN_LOADING_MS
+  const authToken = useAuthStore((state) => state.token)
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(enabled)
   const [error, setError] = useState<Error | null>(null)
@@ -50,7 +52,7 @@ export function useAsyncData<T>(
     return () => {
       cancelled = true
     }
-  }, [enabled, factory, minLoadingMs])
+  }, [authToken, enabled, factory, minLoadingMs])
 
   return { data, loading, error }
 }
