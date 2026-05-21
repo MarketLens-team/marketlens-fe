@@ -5,8 +5,9 @@
 }
 
 .trigger {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border-default);
   background: var(--color-bg-app);
@@ -15,8 +16,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: var(--font-size-lg);
   line-height: 1;
+}
+
+.triggerIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
 }
 
 .trigger:hover,

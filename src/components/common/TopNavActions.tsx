@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { fetchUnifiedSearch } from '../../data/clients/searchClient'
 import { withMinDuration } from '../../lib/withMinDuration'
 import type { UnifiedSearchResult } from '../../data/types/search'
+import { useAuthStore } from '../../store/authStore'
+import { PillButton } from '../ui/PillButton'
 import { TopNavSearchModal } from './TopNavSearchModal'
 import { TopNavSettingsMenu } from './TopNavSettingsMenu'
 import { TopNavWatchlistMenu } from './TopNavWatchlistMenu'
@@ -19,6 +22,8 @@ type SearchSeed =
   | { kind: 'error'; message: string }
 
 export function TopNavActions() {
+  const navigate = useNavigate()
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchSeed, setSearchSeed] = useState<SearchSeed | null>(null)
   const [isSearchOpening, setIsSearchOpening] = useState(false)
@@ -87,13 +92,24 @@ export function TopNavActions() {
             /
           </kbd>
         </button>
-        <TopNavSettingsMenu
-          isOpen={isSettingsOpen}
-          onOpenChange={setIsSettingsOpen}
-          onRequestOpen={() => {
-            setIsSettingsOpen(true)
-          }}
-        />
+        {isLoggedIn ? (
+          <TopNavSettingsMenu
+            isOpen={isSettingsOpen}
+            onOpenChange={setIsSettingsOpen}
+            onRequestOpen={() => {
+              setIsSettingsOpen(true)
+            }}
+          />
+        ) : (
+          <PillButton
+            variant="secondary"
+            compact
+            className={styles.loginBtn}
+            onClick={() => navigate('/login')}
+          >
+            로그인
+          </PillButton>
+        )}
       </div>
       {isSearchOpen && searchSeed ? (
         <TopNavSearchModal

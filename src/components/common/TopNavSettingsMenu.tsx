@@ -4,6 +4,20 @@ import { useAuthStore } from '../../store/authStore'
 import { useUserPreferencesStore } from '../../store/userPreferencesStore'
 import styles from './TopNavSettingsMenu.module.css'
 
+function UserIcon() {
+  return (
+    <svg className={styles.triggerIcon} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M6 19.5c.665-2.866 3.134-5 6-5s5.335 2.134 6 5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 interface TopNavSettingsMenuProps {
   isOpen: boolean
   onOpenChange: (nextOpen: boolean) => void
@@ -14,6 +28,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
   const wrapRef = useRef<HTMLDivElement>(null)
   const panelId = useId()
   const navigate = useNavigate()
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const logout = useAuthStore((s) => s.logout)
   const { theme, language, currency, aiAssistant, setTheme, setAiAssistant } = useUserPreferencesStore()
 
@@ -36,12 +51,14 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
     }
   }, [close, isOpen])
 
+  if (!isLoggedIn) return null
+
   return (
     <div className={styles.wrap} ref={wrapRef}>
       <button
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ''}`}
-        aria-label="설정 메뉴"
+        aria-label="계정 메뉴"
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={isOpen ? panelId : undefined}
@@ -50,7 +67,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
           onOpenChange(!isOpen)
         }}
       >
-        ⚙
+        <UserIcon />
       </button>
 
       {isOpen ? (
