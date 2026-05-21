@@ -8,13 +8,28 @@
   height: 100%;
 }
 
-.indicator {
+/* 현재 페이지 — 항상 고정 */
+.menuItemActive::after,
+.menuItem[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-text-primary);
+  pointer-events: none;
+}
+
+/* 다른 메뉴 호버 — 커서 따라 이동 */
+.indicatorHover {
   position: absolute;
   left: 0;
   bottom: 0;
   height: 2px;
   border-radius: var(--radius-full);
-  background: var(--color-text-primary);
+  background: var(--color-primary);
   pointer-events: none;
   opacity: 0;
   transition:
@@ -23,7 +38,7 @@
     opacity var(--duration-fast) ease;
 }
 
-.indicatorVisible {
+.indicatorHoverVisible {
   opacity: 1;
 }
 

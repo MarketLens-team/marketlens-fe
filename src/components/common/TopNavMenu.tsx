@@ -4,24 +4,24 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { TOP_MENUS, isTopNavActive } from './topNavMenus'
 import styles from './TopNavMenu.module.css'
 
-interface IndicatorState {
+interface IndicatorPos {
   left: number
   width: number
-  visible: boolean
 }
 
-const HIDDEN_INDICATOR: IndicatorState = { left: 0, width: 0, visible: false }
+const HIDDEN_POS: IndicatorPos = { left: 0, width: 0 }
 
 export function TopNavMenu() {
   const { pathname } = useLocation()
   const navRef = useRef<HTMLElement>(null)
   const itemRefs = useRef(new Map<string, HTMLAnchorElement>())
-  const [indicator, setIndicator] = useState<IndicatorState>(HIDDEN_INDICATOR)
   const [hoverLabel, setHoverLabel] = useState<string | null>(null)
+  const [hoverIndicator, setHoverIndicator] = useState<IndicatorPos>(HIDDEN_POS)
+  const [hoverVisible, setHoverVisible] = useState(false)
 
   const activeLabel = TOP_MENUS.find((item) => isTopNavActive(pathname, item))?.label ?? null
 
-  const measureItem = useCallback((el: HTMLElement | null): Pick<IndicatorState, 'left' | 'width'> | null => {
+  const measureItem = useCallback((el: HTMLElement | null): IndicatorPos | null => {
     const nav = navRef.current
     if (!el || !nav) return null
     const navRect = nav.getBoundingClientRect()
@@ -32,52 +32,56 @@ export function TopNavMenu() {
     }
   }, [])
 
-  const moveIndicatorTo = useCallback(
-    (label: string | null) => {
-      if (!label) {
-        setIndicator(HIDDEN_INDICATOR)
-        return
-      }
-      const el = itemRefs.current.get(label)
-      const pos = measureItem(el ?? null)
-      if (!pos) return
-      setIndicator({ ...pos, visible: true })
-    },
-    [measureItem],
-  )
-
-  const syncIndicator = useCallback(() => {
-    moveIndicatorTo(hoverLabel ?? activeLabel)
-  }, [hoverLabel, activeLabel, moveIndicatorTo])
+  const syncHoverIndicator = useCallback(() => {
+    if (!hoverLabel || hoverLabel === activeLabel) {
+      setHoverVisible(false)
+      return
+    }
+    const pos = measureItem(itemRefs.current.get(hoverLabel) ?? null)
+    if (!pos) {
+      setHoverVisible(false)
+      return
+    }
+    setHoverIndicator(pos)
+    setHoverVisible(true)
+  }, [hoverLabel, activeLabel, measureItem])
 
   useLayoutEffect(() => {
-    syncIndicator()
-  }, [pathname, syncIndicator])
+    syncHoverIndicator()
+  }, [syncHoverIndicator, pathname])
 
   useEffect(() => {
     const nav = navRef.current
     if (!nav) return
 
-    const ro = new ResizeObserver(() => syncIndicator())
+    const ro = new ResizeObserver(() => syncHoverIndicator())
     ro.observe(nav)
 
-    const onResize = () => syncIndicator()
+    const onResize = () => syncHoverIndicator()
     window.addEventListener('resize', onResize)
 
     return () => {
       ro.disconnect()
       window.removeEventListener('resize', onResize)
     }
-  }, [syncIndicator])
+  }, [syncHoverIndicator])
 
   const handleNavMouseLeave = () => {
     setHoverLabel(null)
-    moveIndicatorTo(activeLabel)
+    setHoverVisible(false)
   }
 
   const handleItemMouseEnter = (label: string) => {
     setHoverLabel(label)
-    moveIndicatorTo(label)
+    if (label === activeLabel) {
+      setHoverVisible(false)
+      return
+    }
+    const pos = measureItem(itemRefs.current.get(label) ?? null)
+    if (pos) {
+      setHoverIndicator(pos)
+      setHoverVisible(true)
+    }
   }
 
   return (
@@ -88,10 +92,10 @@ export function TopNavMenu() {
       onMouseLeave={handleNavMouseLeave}
     >
       <span
-        className={clsx(styles.indicator, indicator.visible && styles.indicatorVisible)}
+        className={clsx(styles.indicatorHover, hoverVisible && styles.indicatorHoverVisible)}
         style={{
-          transform: `translateX(${indicator.left}px)`,
-          width: indicator.width,
+          transform: `translateX(${hoverIndicator.left}px)`,
+          width: hoverIndicator.width,
         }}
         aria-hidden
       />
