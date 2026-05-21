@@ -6,6 +6,7 @@
   /* 배경: 레퍼런스처럼 바탕과 거의 같고 한 단계만 밝게 (Coinness/거래소 톤) */
   --color-bg-app: #0a0f16;
   --color-bg-section: #0c121a;
+  --color-bg-modal: #0b1018;
   --color-bg-card: #0f151e;
   --color-bg-elevated: #141c27;
 
@@ -87,6 +88,7 @@
 :root[data-theme='light'] {
   --color-bg-app: #f4f7fb;
   --color-bg-section: #ffffff;
+  --color-bg-modal: #eef2f7;
   --color-bg-card: #f7f9fc;
   --color-bg-elevated: #edf2f8;
   --color-border-default: #d7e0ea;

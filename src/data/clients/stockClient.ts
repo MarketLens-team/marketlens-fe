@@ -7,6 +7,7 @@ import {
   mapStockPeopleTimeline,
 } from '../mappers/stockMapper'
 import { fetchPersonStatementsForStockDetail } from './personClient'
+import { fetchUnifiedSearch } from './searchClient'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
@@ -238,21 +239,8 @@ export async function fetchStockBuzzSurge(limit = 10): Promise<StockBuzzSurgeRes
   )
 }
 
-/** OpenAPI에 검색 엔드포인트 없음 — 목록에서 클라이언트 필터 */
+/** @deprecated 통합 검색의 종목 목록만 — `fetchUnifiedSearch` 사용 권장 */
 export async function fetchStockSearch(query: string): Promise<StockSearchItem[]> {
-  const normalized = query.trim().toLowerCase()
-  if (!normalized) return []
-
-  const directory = isMockDataSource()
-    ? mockStockDirectory
-    : await fetchStockDirectory()
-
-  return directory.sectors
-    .flatMap((sector) => sector.stocks)
-    .filter(
-      (item) =>
-        item.code.toLowerCase().includes(normalized) || item.name.toLowerCase().includes(normalized),
-    )
-    .slice(0, 12)
-    .map((item) => ({ code: item.code, name: item.name }))
+  const result = await fetchUnifiedSearch(query)
+  return result.stocks.map((item) => ({ code: item.code, name: item.name }))
 }
