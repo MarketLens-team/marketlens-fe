@@ -238,8 +238,11 @@
   cursor: not-allowed;
 }
 
-.fieldActionDone {
+.fieldActionDone,
+.fieldActionDone:disabled {
   color: var(--color-success);
+  opacity: 1;
+  cursor: default;
 }
 
 .input::placeholder {
