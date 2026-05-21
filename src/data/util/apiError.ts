@@ -10,10 +10,26 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
   return Boolean(value && typeof value === 'object' && ('code' in value || 'message' in value))
 }
 
+const VALIDATION_FIELD_MESSAGES: Record<string, string> = {
+  password: '비밀번호는 8자 이상이어야 합니다.',
+  email: '올바른 이메일 형식을 입력해주세요.',
+  nickname: '닉네임은 2~20자로 입력해주세요.',
+  code: '인증 코드 6자리를 입력해주세요.',
+}
+
+function normalizeValidationMessage(message: string): string {
+  const match = message.match(/^(\w+):\s*(.+)$/)
+  if (!match) return message
+  const [, field, detail] = match
+  if (VALIDATION_FIELD_MESSAGES[field]) return VALIDATION_FIELD_MESSAGES[field]
+  if (detail.includes('8') && field === 'password') return VALIDATION_FIELD_MESSAGES.password
+  return message
+}
+
 /** `error.message` 우선, 없으면 `error.code` → ERROR_CODE_MESSAGES */
 export function messageFromApiError(error: ApiErrorBody | undefined, fallback: string): string {
   const trimmed = error?.message?.trim()
-  if (trimmed) return trimmed
+  if (trimmed) return normalizeValidationMessage(trimmed)
   if (error?.code && ERROR_CODE_MESSAGES[error.code]) {
     return ERROR_CODE_MESSAGES[error.code]
   }

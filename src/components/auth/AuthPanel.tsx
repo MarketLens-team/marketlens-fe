@@ -7,12 +7,19 @@ import {
   type KeyboardEventHandler,
   type RefObject,
 } from 'react'
+import {
+  checkEmailAvailability,
+  checkNicknameAvailability,
+  createPendingSignup,
+  sendSignupEmailVerification,
+} from '../../data/clients/authClient'
 import type { CompleteRegistrationInput } from '../../data/clients/completeRegistration'
 import type { AlertSettings } from '../../data/types/member'
 import type { WatchlistItem } from '../../store/watchlistStore'
 import { ButtonSpinner } from '../ui/ButtonSpinner'
 import { AuthPasswordVisibilityToggle } from './AuthPasswordVisibilityToggle'
 import { DEFAULT_ALERT_SETTINGS, SignupAlertsStep } from './SignupAlertsStep'
+import { AuthEmailVerifyModal } from './AuthEmailVerifyModal'
 import { SignupWatchlistStep } from './SignupWatchlistStep'
 import styles from './AuthPanel.module.css'
 
@@ -24,6 +31,7 @@ export interface SignupAccountDraft {
   email: string
   password: string
   nickname: string
+  pendingSignupToken: string
 }
 
 export interface AuthPanelProps {
@@ -56,6 +64,12 @@ function isEmailDuplicateError(message: string) {
   return message.includes('이미 사용 중인 이메일')
 }
 
+function isNicknameDuplicateError(message: string) {
+  return message.includes('이미 사용 중인 닉네임')
+}
+
+type AvailabilityStatus = 'idle' | 'checking' | 'available' | 'unavailable'
+
 export function AuthField({
   id,
   label,
@@ -72,6 +86,7 @@ export function AuthField({
   visible,
   onToggleVisible,
   autoComplete,
+  trailingAction,
 }: {
   id: string
   label: string
@@ -88,12 +103,20 @@ export function AuthField({
   visible?: boolean
   onToggleVisible?: () => void
   autoComplete?: string
+  trailingAction?: {
+    label: string
+    onClick: () => void
+    disabled?: boolean
+    busy?: boolean
+    done?: boolean
+  }
 }) {
   const messageId = `${id}-error`
   const isPassword = type === 'password'
   const inputType = isPassword && visible ? 'text' : type
   const hasInputError = invalid || Boolean(error)
   const showMessage = Boolean(error)
+  const hasTrailingAction = Boolean(trailingAction)
 
   return (
     <div className={styles.field}>
@@ -104,7 +127,14 @@ export function AuthField({
         <input
           ref={inputRef}
           id={id}
-          className={`${styles.input} ${showToggle ? styles.inputWithToggle : ''} ${hasInputError ? styles.inputError : ''}`.trim()}
+          className={[
+            styles.input,
+            showToggle ? styles.inputWithToggle : '',
+            hasTrailingAction ? styles.inputWithAction : '',
+            hasInputError ? styles.inputError : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
@@ -115,6 +145,17 @@ export function AuthField({
           onBlur={onBlur}
           onKeyDown={onKeyDown}
         />
+        {trailingAction ? (
+          <button
+            type="button"
+            className={`${styles.fieldAction} ${trailingAction.done ? styles.fieldActionDone : ''}`.trim()}
+            onClick={trailingAction.onClick}
+            disabled={trailingAction.disabled || trailingAction.busy}
+            aria-busy={trailingAction.busy}
+          >
+            {trailingAction.busy ? <ButtonSpinner /> : trailingAction.label}
+          </button>
+        ) : null}
         {showToggle && onToggleVisible ? (
           <AuthPasswordVisibilityToggle visible={Boolean(visible)} onToggle={onToggleVisible} />
         ) : null}
@@ -138,6 +179,11 @@ export default function AuthPanel({
   onSignupAccountNext,
 }: AuthPanelProps) {
   const formId = useId()
+  const [emailCheckStatus, setEmailCheckStatus] = useState<AvailabilityStatus>('idle')
+  const [nicknameCheckStatus, setNicknameCheckStatus] = useState<AvailabilityStatus>('idle')
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [emailVerifyModalOpen, setEmailVerifyModalOpen] = useState(false)
+  const [pendingSignupToken, setPendingSignupToken] = useState<string | null>(null)
   const [signupStep, setSignupStep] = useState<SignupStep>(1)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -184,6 +230,11 @@ export default function AuthPanel({
   }
 
   const resetSignupFlow = () => {
+    setEmailCheckStatus('idle')
+    setNicknameCheckStatus('idle')
+    setEmailVerified(false)
+    setEmailVerifyModalOpen(false)
+    setPendingSignupToken(null)
     setSignupStep(1)
     setWatchlistSelection([])
     setAlertSettings(DEFAULT_ALERT_SETTINGS)
@@ -305,19 +356,212 @@ export default function AuthPanel({
     }
   }
 
-  const goToWatchlistStep = () => {
+  const resetEmailCheckState = () => {
+    setEmailCheckStatus('idle')
+    setEmailVerified(false)
+    setPendingSignupToken(null)
+    setEmailVerifyModalOpen(false)
+  }
+
+  const resetNicknameCheckState = () => {
+    setNicknameCheckStatus('idle')
+  }
+
+  const handleCheckEmailDuplicate = async () => {
+    const emailError = validateEmail(email)
+    if (emailError) {
+      setErrors((prev) => ({ ...prev, email: emailError }))
+      emailRef.current?.focus()
+      return
+    }
+    clearFieldError('email')
+    setSignupSubmitError(null)
+    setEmailCheckStatus('checking')
+    try {
+      const available = await checkEmailAvailability(email.trim())
+      setEmailCheckStatus(available ? 'available' : 'unavailable')
+      if (!available) {
+        setErrors({ email: '이미 사용 중인 이메일입니다.' })
+        emailRef.current?.focus()
+        return
+      }
+      setEmailVerified(false)
+      setPendingSignupToken(null)
+      setEmailCheckStatus('available')
+    } catch (error) {
+      setEmailCheckStatus('idle')
+      const message = error instanceof Error ? error.message : '이메일 확인에 실패했습니다.'
+      if (isEmailDuplicateError(message)) {
+        setErrors({ email: message })
+        setEmailCheckStatus('unavailable')
+      } else {
+        setSignupSubmitError(message)
+      }
+    }
+  }
+
+  const handleCheckNicknameDuplicate = async () => {
+    const nick = nickname.trim()
+    if (nick.length < 2 || nick.length > 20) {
+      setErrors({ nickname: '닉네임은 2~20자로 입력해주세요.' })
+      nicknameRef.current?.focus()
+      return
+    }
+    clearFieldError('nickname')
+    setSignupSubmitError(null)
+    setNicknameCheckStatus('checking')
+    try {
+      const available = await checkNicknameAvailability(nick)
+      setNicknameCheckStatus(available ? 'available' : 'unavailable')
+      if (!available) {
+        setErrors({ nickname: '이미 사용 중인 닉네임입니다.' })
+        nicknameRef.current?.focus()
+      }
+    } catch (error) {
+      setNicknameCheckStatus('idle')
+      const message = error instanceof Error ? error.message : '닉네임 확인에 실패했습니다.'
+      if (isNicknameDuplicateError(message)) {
+        setErrors({ nickname: message })
+        setNicknameCheckStatus('unavailable')
+      } else {
+        setSignupSubmitError(message)
+      }
+    }
+  }
+
+  const handleOpenEmailVerification = async () => {
+    if (emailCheckStatus !== 'available' || emailVerified) return
+    const emailError = validateEmail(email)
+    if (emailError) {
+      setErrors((prev) => ({ ...prev, email: emailError }))
+      return
+    }
+    const nick = nickname.trim()
+    if (nick.length < 2 || nick.length > 20) {
+      setErrors({ nickname: '닉네임은 2~20자로 입력해주세요.' })
+      nicknameRef.current?.focus()
+      return
+    }
+    if (nicknameCheckStatus !== 'available') {
+      setErrors({ nickname: '닉네임 중복 확인을 먼저 해주세요.' })
+      nicknameRef.current?.focus()
+      return
+    }
+
+    setSignupSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      const nicknameStillAvailable = await checkNicknameAvailability(nick)
+      if (!nicknameStillAvailable) {
+        setNicknameCheckStatus('unavailable')
+        setErrors({ nickname: '이미 사용 중인 닉네임입니다.' })
+        nicknameRef.current?.focus()
+        return
+      }
+
+      await sendSignupEmailVerification(email.trim())
+      setEmailVerifyModalOpen(true)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '인증 메일 발송에 실패했습니다.'
+      if (isNicknameDuplicateError(message)) {
+        setErrors({ nickname: message })
+        setNicknameCheckStatus('unavailable')
+        return
+      }
+      if (isEmailDuplicateError(message)) {
+        setErrors({ email: message })
+        setEmailCheckStatus('unavailable')
+        return
+      }
+      setSignupSubmitError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEmailVerified = () => {
+    setEmailVerified(true)
+    setEmailVerifyModalOpen(false)
+  }
+
+  const goToSignupNextStep = async () => {
     setFormMessage(null)
     setStepError(null)
+    setSignupSubmitError(null)
     if (!validateSignupAccount()) return
-    if (isAccountOnly) {
-      onSignupAccountNext?.({
+    if (!emailVerified) {
+      setSignupSubmitError('이메일 인증을 완료해주세요.')
+      return
+    }
+    if (nicknameCheckStatus !== 'available') {
+      setErrors({ nickname: '닉네임 중복 확인을 해주세요.' })
+      nicknameRef.current?.focus()
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { pendingSignupToken: token } = await createPendingSignup({
         email: email.trim(),
         password,
         nickname: nickname.trim(),
       })
-      return
+      setPendingSignupToken(token)
+
+      const draft: SignupAccountDraft = {
+        email: email.trim(),
+        password,
+        nickname: nickname.trim(),
+        pendingSignupToken: token,
+      }
+
+      if (isAccountOnly) {
+        onSignupAccountNext?.(draft)
+        return
+      }
+      setSignupStep(2)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '회원가입 준비에 실패했습니다.'
+      if (message.includes('이메일 인증이 완료되지 않았습니다')) {
+        setEmailVerified(false)
+        setSignupSubmitError(message)
+        return
+      }
+      if (message.includes('password') || message.includes('비밀번호')) {
+        setErrors({ password: '비밀번호는 8자 이상이어야 합니다.' })
+        passwordRef.current?.focus()
+        return
+      }
+      setSignupSubmitError(message)
+    } finally {
+      setIsSubmitting(false)
     }
-    setSignupStep(2)
+  }
+
+  const emailTrailingLabel =
+    emailVerified ? '인증 완료' : emailCheckStatus === 'available' ? '인증' : '중복 확인'
+
+  const emailTrailingAction = {
+    label: emailTrailingLabel,
+    onClick: () => {
+      if (emailVerified) return
+      if (emailCheckStatus === 'available') {
+        void handleOpenEmailVerification()
+        return
+      }
+      void handleCheckEmailDuplicate()
+    },
+    disabled: emailVerified || emailCheckStatus === 'checking' || isSubmitting || !email.trim(),
+    busy: emailCheckStatus === 'checking' || isSubmitting,
+    done: emailVerified,
+  }
+
+  const nicknameTrailingAction = {
+    label: nicknameCheckStatus === 'available' ? '사용 가능' : '중복 확인',
+    onClick: () => void handleCheckNicknameDuplicate(),
+    disabled: nicknameCheckStatus === 'available' || nicknameCheckStatus === 'checking' || !nickname.trim(),
+    busy: nicknameCheckStatus === 'checking',
+    done: nicknameCheckStatus === 'available',
   }
 
   const goToAlertsStep = () => {
@@ -326,15 +570,18 @@ export default function AuthPanel({
   }
 
   const finishRegistration = async () => {
+    if (!pendingSignupToken) {
+      setSignupSubmitError('이메일 인증을 먼저 완료해주세요.')
+      setSignupStep(1)
+      return
+    }
     setIsSubmitting(true)
     setSignupSubmitError(null)
     setStepError(null)
     try {
       await Promise.resolve(
         onCompleteRegistration({
-          email: email.trim(),
-          password,
-          nickname: nickname.trim(),
+          pendingSignupToken,
           watchlist: watchlistSelection,
           alertSettings,
         }),
@@ -483,6 +730,7 @@ export default function AuthPanel({
                   onChange={(value) => {
                     setEmail(value)
                     clearFieldError('email')
+                    resetEmailCheckState()
                   }}
                   placeholder="이메일 주소 입력..."
                   type="email"
@@ -490,6 +738,7 @@ export default function AuthPanel({
                   inputRef={emailRef}
                   autoComplete="email"
                   onBlur={handleEmailBlur}
+                  trailingAction={emailTrailingAction}
                 />
                 <AuthField
                   id="auth-signup-nickname"
@@ -498,11 +747,13 @@ export default function AuthPanel({
                   onChange={(value) => {
                     setNickname(value)
                     clearFieldError('nickname')
+                    resetNicknameCheckState()
                   }}
                   placeholder="닉네임 입력 (2~20자)"
                   error={errors.nickname}
                   inputRef={nicknameRef}
                   autoComplete="nickname"
+                  trailingAction={nicknameTrailingAction}
                 />
                 <AuthField
                   id="auth-signup-password"
@@ -539,13 +790,21 @@ export default function AuthPanel({
                   visible={confirmVisible}
                   onToggleVisible={() => setConfirmVisible((v) => !v)}
                 />
+                {signupSubmitError ? (
+                  <p className={styles.formAuthError} role="alert">
+                    {signupSubmitError}
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   className={styles.submit}
-                  onClick={goToWatchlistStep}
-                  disabled={!isSignupAccountReady}
+                  onClick={() => void goToSignupNextStep()}
+                  disabled={!isSignupAccountReady || isSubmitting || !emailVerified}
+                  aria-busy={isSubmitting}
+                  data-loading={isSubmitting ? 'true' : 'false'}
                 >
-                  다음
+                  <span className={styles.submitLabel}>다음</span>
+                  {isSubmitting ? <ButtonSpinner /> : null}
                 </button>
               </form>
             ) : null}
@@ -600,7 +859,19 @@ export default function AuthPanel({
     </main>
   )
 
-  if (isModal) return panel
+  const content = (
+    <>
+      {panel}
+      <AuthEmailVerifyModal
+        isOpen={emailVerifyModalOpen}
+        email={email.trim()}
+        onClose={() => setEmailVerifyModalOpen(false)}
+        onVerified={handleEmailVerified}
+      />
+    </>
+  )
 
-  return <div className={pageClass}>{panel}</div>
+  if (isModal) return content
+
+  return <div className={pageClass}>{content}</div>
 }

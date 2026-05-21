@@ -23,7 +23,8 @@ function readAccountDraft(state: unknown): SignupAccountDraft | null {
     draft === null ||
     typeof (draft as SignupAccountDraft).email !== 'string' ||
     typeof (draft as SignupAccountDraft).password !== 'string' ||
-    typeof (draft as SignupAccountDraft).nickname !== 'string'
+    typeof (draft as SignupAccountDraft).nickname !== 'string' ||
+    typeof (draft as SignupAccountDraft).pendingSignupToken !== 'string'
   ) {
     return null
   }
@@ -74,9 +75,7 @@ export default function OnboardingPage() {
     setSubmitError(null)
     try {
       await handleCompleteRegistration({
-        email: accountDraft.email,
-        password: accountDraft.password,
-        nickname: accountDraft.nickname,
+        pendingSignupToken: accountDraft.pendingSignupToken,
         watchlist: watchlistSelection,
         alertSettings,
       })
