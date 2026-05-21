@@ -87,6 +87,7 @@ export function AuthField({
   onToggleVisible,
   autoComplete,
   trailingAction,
+  disabled,
 }: {
   id: string
   label: string
@@ -110,6 +111,7 @@ export function AuthField({
     busy?: boolean
     done?: boolean
   }
+  disabled?: boolean
 }) {
   const messageId = `${id}-error`
   const isPassword = type === 'password'
@@ -132,6 +134,7 @@ export function AuthField({
             showToggle ? styles.inputWithToggle : '',
             hasTrailingAction ? styles.inputWithAction : '',
             hasInputError ? styles.inputError : '',
+            disabled ? styles.inputDisabled : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -140,6 +143,7 @@ export function AuthField({
           placeholder={placeholder}
           type={inputType}
           autoComplete={autoComplete}
+          disabled={disabled}
           aria-invalid={hasInputError}
           aria-describedby={showMessage ? messageId : undefined}
           onBlur={onBlur}
@@ -150,13 +154,13 @@ export function AuthField({
             type="button"
             className={`${styles.fieldAction} ${trailingAction.done ? styles.fieldActionDone : ''}`.trim()}
             onClick={trailingAction.onClick}
-            disabled={trailingAction.disabled || trailingAction.busy}
+            disabled={disabled || trailingAction.disabled || trailingAction.busy}
             aria-busy={trailingAction.busy}
           >
             {trailingAction.busy ? <ButtonSpinner /> : trailingAction.label}
           </button>
         ) : null}
-        {showToggle && onToggleVisible ? (
+        {showToggle && onToggleVisible && !disabled ? (
           <AuthPasswordVisibilityToggle visible={Boolean(visible)} onToggle={onToggleVisible} />
         ) : null}
       </div>
@@ -361,43 +365,17 @@ export default function AuthPanel({
     setEmailVerified(false)
     setPendingSignupToken(null)
     setEmailVerifyModalOpen(false)
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.nickname
+      delete next.password
+      delete next.confirmPassword
+      return next
+    })
   }
 
   const resetNicknameCheckState = () => {
     setNicknameCheckStatus('idle')
-  }
-
-  const handleCheckEmailDuplicate = async () => {
-    const emailError = validateEmail(email)
-    if (emailError) {
-      setErrors((prev) => ({ ...prev, email: emailError }))
-      emailRef.current?.focus()
-      return
-    }
-    clearFieldError('email')
-    setSignupSubmitError(null)
-    setEmailCheckStatus('checking')
-    try {
-      const available = await checkEmailAvailability(email.trim())
-      setEmailCheckStatus(available ? 'available' : 'unavailable')
-      if (!available) {
-        setErrors({ email: '이미 사용 중인 이메일입니다.' })
-        emailRef.current?.focus()
-        return
-      }
-      setEmailVerified(false)
-      setPendingSignupToken(null)
-      setEmailCheckStatus('available')
-    } catch (error) {
-      setEmailCheckStatus('idle')
-      const message = error instanceof Error ? error.message : '이메일 확인에 실패했습니다.'
-      if (isEmailDuplicateError(message)) {
-        setErrors({ email: message })
-        setEmailCheckStatus('unavailable')
-      } else {
-        setSignupSubmitError(message)
-      }
-    }
   }
 
   const handleCheckNicknameDuplicate = async () => {
@@ -430,44 +408,34 @@ export default function AuthPanel({
   }
 
   const handleOpenEmailVerification = async () => {
-    if (emailCheckStatus !== 'available' || emailVerified) return
+    if (emailVerified) return
     const emailError = validateEmail(email)
     if (emailError) {
       setErrors((prev) => ({ ...prev, email: emailError }))
-      return
-    }
-    const nick = nickname.trim()
-    if (nick.length < 2 || nick.length > 20) {
-      setErrors({ nickname: '닉네임은 2~20자로 입력해주세요.' })
-      nicknameRef.current?.focus()
-      return
-    }
-    if (nicknameCheckStatus !== 'available') {
-      setErrors({ nickname: '닉네임 중복 확인을 먼저 해주세요.' })
-      nicknameRef.current?.focus()
+      emailRef.current?.focus()
       return
     }
 
     setSignupSubmitError(null)
     setIsSubmitting(true)
     try {
-      const nicknameStillAvailable = await checkNicknameAvailability(nick)
-      if (!nicknameStillAvailable) {
-        setNicknameCheckStatus('unavailable')
-        setErrors({ nickname: '이미 사용 중인 닉네임입니다.' })
-        nicknameRef.current?.focus()
-        return
+      if (emailCheckStatus !== 'available') {
+        const available = await checkEmailAvailability(email.trim())
+        if (!available) {
+          setEmailCheckStatus('unavailable')
+          setErrors({ email: '이미 사용 중인 이메일입니다.' })
+          emailRef.current?.focus()
+          return
+        }
+        setEmailVerified(false)
+        setPendingSignupToken(null)
+        setEmailCheckStatus('available')
       }
 
       await sendSignupEmailVerification(email.trim())
       setEmailVerifyModalOpen(true)
     } catch (error) {
       const message = error instanceof Error ? error.message : '인증 메일 발송에 실패했습니다.'
-      if (isNicknameDuplicateError(message)) {
-        setErrors({ nickname: message })
-        setNicknameCheckStatus('unavailable')
-        return
-      }
       if (isEmailDuplicateError(message)) {
         setErrors({ email: message })
         setEmailCheckStatus('unavailable')
@@ -482,6 +450,7 @@ export default function AuthPanel({
   const handleEmailVerified = () => {
     setEmailVerified(true)
     setEmailVerifyModalOpen(false)
+    window.requestAnimationFrame(() => nicknameRef.current?.focus())
   }
 
   const goToSignupNextStep = async () => {
@@ -538,28 +507,26 @@ export default function AuthPanel({
     }
   }
 
-  const emailTrailingLabel =
-    emailVerified ? '인증 완료' : emailCheckStatus === 'available' ? '인증' : '중복 확인'
+  const emailTrailingLabel = emailVerified ? '인증 완료' : '인증'
 
   const emailTrailingAction = {
     label: emailTrailingLabel,
-    onClick: () => {
-      if (emailVerified) return
-      if (emailCheckStatus === 'available') {
-        void handleOpenEmailVerification()
-        return
-      }
-      void handleCheckEmailDuplicate()
-    },
-    disabled: emailVerified || emailCheckStatus === 'checking' || isSubmitting || !email.trim(),
-    busy: emailCheckStatus === 'checking' || isSubmitting,
+    onClick: () => void handleOpenEmailVerification(),
+    disabled: emailVerified || isSubmitting || !email.trim(),
+    busy: isSubmitting,
     done: emailVerified,
   }
+
+  const signupFieldsLocked = !emailVerified
 
   const nicknameTrailingAction = {
     label: nicknameCheckStatus === 'available' ? '사용 가능' : '중복 확인',
     onClick: () => void handleCheckNicknameDuplicate(),
-    disabled: nicknameCheckStatus === 'available' || nicknameCheckStatus === 'checking' || !nickname.trim(),
+    disabled:
+      signupFieldsLocked ||
+      nicknameCheckStatus === 'available' ||
+      nicknameCheckStatus === 'checking' ||
+      !nickname.trim(),
     busy: nicknameCheckStatus === 'checking',
     done: nicknameCheckStatus === 'available',
   }
@@ -739,6 +706,7 @@ export default function AuthPanel({
                   autoComplete="email"
                   onBlur={handleEmailBlur}
                   trailingAction={emailTrailingAction}
+                  disabled={emailVerified}
                 />
                 <AuthField
                   id="auth-signup-nickname"
@@ -749,11 +717,12 @@ export default function AuthPanel({
                     clearFieldError('nickname')
                     resetNicknameCheckState()
                   }}
-                  placeholder="닉네임 입력 (2~20자)"
-                  error={errors.nickname}
+                  placeholder={signupFieldsLocked ? '이메일 인증 후 입력' : '닉네임 입력 (2~20자)'}
+                  error={signupFieldsLocked ? undefined : errors.nickname}
                   inputRef={nicknameRef}
                   autoComplete="nickname"
                   trailingAction={nicknameTrailingAction}
+                  disabled={signupFieldsLocked}
                 />
                 <AuthField
                   id="auth-signup-password"
@@ -764,14 +733,15 @@ export default function AuthPanel({
                     clearFieldError('password')
                     syncPasswordMatch(value, confirmPassword)
                   }}
-                  placeholder="8자 이상 입력..."
+                  placeholder={signupFieldsLocked ? '이메일 인증 후 입력' : '8자 이상 입력...'}
                   type="password"
-                  error={errors.password}
+                  error={signupFieldsLocked ? undefined : errors.password}
                   inputRef={passwordRef}
                   autoComplete="new-password"
                   showToggle
                   visible={passwordVisible}
                   onToggleVisible={() => setPasswordVisible((v) => !v)}
+                  disabled={signupFieldsLocked}
                 />
                 <AuthField
                   id="auth-signup-confirm"
@@ -781,14 +751,15 @@ export default function AuthPanel({
                     setConfirmPassword(value)
                     syncPasswordMatch(password, value)
                   }}
-                  placeholder="비밀번호 다시 입력..."
+                  placeholder={signupFieldsLocked ? '이메일 인증 후 입력' : '비밀번호 다시 입력...'}
                   type="password"
-                  error={errors.confirmPassword}
+                  error={signupFieldsLocked ? undefined : errors.confirmPassword}
                   inputRef={confirmRef}
                   autoComplete="new-password"
                   showToggle
                   visible={confirmVisible}
                   onToggleVisible={() => setConfirmVisible((v) => !v)}
+                  disabled={signupFieldsLocked}
                 />
                 {signupSubmitError ? (
                   <p className={styles.formAuthError} role="alert">

@@ -245,6 +245,18 @@
   outline: none;
 }
 
+.inputDisabled,
+.input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--color-bg-app) 55%, var(--color-bg-card));
+}
+
+.inputDisabled:focus,
+.input:disabled:focus {
+  border-color: var(--color-border-default);
+}
+
 .inputError {
   border-color: var(--color-danger);
   background: var(--color-danger-surface);
