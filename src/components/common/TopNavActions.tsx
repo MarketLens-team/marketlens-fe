@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchUnifiedSearch } from '../../data/clients/searchClient'
+import { withMinDuration } from '../../lib/withMinDuration'
 import type { UnifiedSearchResult } from '../../data/types/search'
 import { TopNavSearchModal } from './TopNavSearchModal'
 import { TopNavSettingsMenu } from './TopNavSettingsMenu'
@@ -37,7 +38,7 @@ export function TopNavActions() {
     setIsSettingsOpen(false)
 
     try {
-      const data = await fetchUnifiedSearch('')
+      const data = await withMinDuration(() => fetchUnifiedSearch(''))
       setSearchSeed({ kind: 'success', results: data })
       setIsSearchOpen(true)
     } catch (e) {

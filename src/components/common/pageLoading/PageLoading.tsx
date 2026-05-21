@@ -1,12 +1,14 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import skeleton from '../Skeleton.module.css'
+import { BrandSplashLoading } from './BrandSplashLoading'
 import { PageLoadingShell } from './PageLoadingShell'
 import styles from './pageLoading.module.css'
 
-export type PageLoadingVariant = 'stockDetail' | 'dashboard' | 'buzz' | 'list'
+export type PageLoadingVariant = 'splash' | 'stockDetail' | 'dashboard' | 'buzz' | 'list'
 
 const LABELS: Record<PageLoadingVariant, string> = {
+  splash: 'MarketLens 로딩',
   stockDetail: '종목 상세 로딩',
   dashboard: '홈 대시보드 로딩',
   buzz: '언급량 급등 로딩',
@@ -80,7 +82,7 @@ function ListLoading() {
   )
 }
 
-const VARIANTS: Record<PageLoadingVariant, () => ReactNode> = {
+const VARIANTS: Record<Exclude<PageLoadingVariant, 'splash'>, () => ReactNode> = {
   stockDetail: StockDetailLoading,
   dashboard: DashboardLoading,
   buzz: BuzzLoading,
@@ -88,6 +90,10 @@ const VARIANTS: Record<PageLoadingVariant, () => ReactNode> = {
 }
 
 export function PageLoading({ variant }: PageLoadingProps) {
+  if (variant === 'splash') {
+    return <BrandSplashLoading layout="fixed" label={LABELS.splash} />
+  }
+
   const Body = VARIANTS[variant]
   return (
     <PageLoadingShell label={LABELS[variant]}>

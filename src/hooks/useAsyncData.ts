@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { MIN_LOADING_MS, withMinDuration } from '../lib/withMinDuration'
 
 export interface AsyncState<T> {
   data: T | null
@@ -6,11 +7,18 @@ export interface AsyncState<T> {
   error: Error | null
 }
 
+export interface UseAsyncDataOptions {
+  enabled?: boolean
+  /** 로딩 UI 최소 노출 시간(ms). 기본 500 */
+  minLoadingMs?: number
+}
+
 export function useAsyncData<T>(
   factory: () => Promise<T>,
-  options?: { enabled?: boolean },
+  options?: UseAsyncDataOptions,
 ): AsyncState<T> {
   const enabled = options?.enabled !== false
+  const minLoadingMs = options?.minLoadingMs ?? MIN_LOADING_MS
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(enabled)
   const [error, setError] = useState<Error | null>(null)
@@ -24,7 +32,8 @@ export function useAsyncData<T>(
     setData(null)
     setLoading(true)
     setError(null)
-    factory()
+
+    void withMinDuration(factory, minLoadingMs)
       .then((value) => {
         if (!cancelled) {
           setData(value)
@@ -37,10 +46,11 @@ export function useAsyncData<T>(
           setLoading(false)
         }
       })
+
     return () => {
       cancelled = true
     }
-  }, [enabled, factory])
+  }, [enabled, factory, minLoadingMs])
 
   return { data, loading, error }
 }

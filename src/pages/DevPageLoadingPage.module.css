@@ -46,6 +46,16 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
+.subControls {
+  margin-top: var(--space-2);
+}
+
+.splashNote {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

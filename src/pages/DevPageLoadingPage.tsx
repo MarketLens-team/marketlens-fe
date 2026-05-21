@@ -9,7 +9,14 @@ import {
 import { UnderlineTabNav } from '../components/common/UnderlineTabNav'
 import styles from './DevPageLoadingPage.module.css'
 
-const VARIANT_OPTIONS: { key: PageLoadingVariant; label: string }[] = [
+type LoadingMode = 'splash' | 'skeleton'
+
+const MODE_OPTIONS: { key: LoadingMode; label: string }[] = [
+  { key: 'splash', label: '스플래시 (BitMEX형)' },
+  { key: 'skeleton', label: '스켈레톤' },
+]
+
+const SKELETON_VARIANTS: { key: PageLoadingVariant; label: string }[] = [
   { key: 'stockDetail', label: '종목 상세' },
   { key: 'dashboard', label: '홈' },
   { key: 'buzz', label: '언급량 급등' },
@@ -17,6 +24,7 @@ const VARIANT_OPTIONS: { key: PageLoadingVariant; label: string }[] = [
 ]
 
 export default function DevPageLoadingPage() {
+  const [mode, setMode] = useState<LoadingMode>('skeleton')
   const [variant, setVariant] = useState<PageLoadingVariant>('stockDetail')
   const [replayKey, setReplayKey] = useState(0)
   const [simulating, setSimulating] = useState(false)
@@ -26,12 +34,17 @@ export default function DevPageLoadingPage() {
     if (!showLoading) {
       return (
         <p className={styles.doneHint}>
-          로딩이 끝난 뒤 실제 페이지 콘텐츠가 이 영역에 들어갑니다.
+          로딩이 끝난 뒤 실제 페이지 콘텐츠가 표시됩니다.
         </p>
       )
     }
+
+    if (mode === 'splash') {
+      return <PageLoading key={`splash-${replayKey}`} variant="splash" />
+    }
+
     return <PageLoading key={`${variant}-${replayKey}`} variant={variant} />
-  }, [showLoading, variant, replayKey])
+  }, [showLoading, mode, variant, replayKey])
 
   const replay = () => {
     setShowLoading(false)
@@ -57,7 +70,7 @@ export default function DevPageLoadingPage() {
       <div className={styles.page}>
         <PageHeader
           title="페이지 로딩 시안"
-          description="실제 레이아웃(상단 네비·티커) 안에서 전체 페이지 스켈레톤을 확인합니다."
+          description="실서비스는 스켈레톤(레이아웃 유지). 스플래시는 BitMEX형 참고용으로만 dev에서 비교합니다."
           align="center"
         />
 
@@ -65,21 +78,32 @@ export default function DevPageLoadingPage() {
           <span className={styles.devTag}>DEV</span>
           <nav className={styles.devLinks} aria-label="개발 시안">
             <Link to="/dev">Dev hub</Link>
-            <Link to="/dev/refined">Refined</Link>
-            <Link to="/stock/005930">종목 상세 (실제)</Link>
+            <Link to="/stock/005930">종목 상세 (실제 적용)</Link>
           </nav>
         </div>
 
         <div className={styles.controls}>
           <UnderlineTabNav
-            ariaLabel="로딩 시안 종류"
-            options={VARIANT_OPTIONS}
-            value={variant}
-            onChange={setVariant}
+            ariaLabel="로딩 방식"
+            options={MODE_OPTIONS}
+            value={mode}
+            onChange={setMode}
           />
+
+          {mode === 'skeleton' ? (
+            <div className={styles.subControls}>
+              <UnderlineTabNav
+                ariaLabel="스켈레톤 레이아웃"
+                options={SKELETON_VARIANTS}
+                value={variant}
+                onChange={(key) => setVariant(key as PageLoadingVariant)}
+              />
+            </div>
+          ) : null}
+
           <div className={styles.actions}>
             <button type="button" className={styles.btn} onClick={replay} disabled={simulating}>
-              스켈레톤 다시 보기
+              다시 보기
             </button>
             <button
               type="button"
@@ -92,9 +116,17 @@ export default function DevPageLoadingPage() {
           </div>
         </div>
 
-        <section className={styles.preview} aria-live="polite">
-          {preview}
-        </section>
+        {mode === 'splash' ? (
+          <p className={styles.splashNote}>
+            스플래시 모드는 아래 버튼 대신 화면 전체에 표시됩니다. (종목 상세와 동일)
+          </p>
+        ) : (
+          <section className={styles.preview} aria-live="polite">
+            {preview}
+          </section>
+        )}
+
+        {mode === 'splash' && showLoading ? preview : null}
       </div>
     </Layout>
   )
