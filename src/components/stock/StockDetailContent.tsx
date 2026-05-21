@@ -10,7 +10,6 @@ import { PillButton } from '../ui/PillButton'
 import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
-import { useStockPeopleTimelineScrollMax } from '../../hooks/useStockPeopleTimelineScrollMax'
 import type {
   SentimentPolarity,
   StockDetail,
@@ -81,10 +80,7 @@ export function StockDetailContent({
   const [interested, setInterested] = useState(watchlistInterested)
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
-  const rightStackRef = useRef<HTMLDivElement>(null)
-  const peopleTimelineListRef = useRef<HTMLUListElement>(null)
   const useApiNewsFilter = !isMockDataSource()
-  useStockPeopleTimelineScrollMax(peopleTimelineListRef, rightStackRef)
 
   useEffect(() => {
     setNewsFilter('all')
@@ -441,8 +437,8 @@ export function StockDetailContent({
           ) : null}
         </section>
 
-        <div ref={rightStackRef} className={styles.rightStack}>
-          <section className={styles.panel} aria-labelledby="stock-related-title">
+        <div className={styles.rightStack}>
+          <section className={clsx(styles.panel, styles.relatedPanel)} aria-labelledby="stock-related-title">
             <div className={styles.panelBody}>
               <h2 id="stock-related-title" className={styles.panelTitle}>
                 연관 종목
@@ -476,7 +472,7 @@ export function StockDetailContent({
               <h2 id="stock-people-title" className={styles.peoplePanelTitle}>
                 최신 인물 발언 타임라인
               </h2>
-              <ul ref={peopleTimelineListRef} className={styles.peopleTimelineList}>
+              <ul className={styles.peopleTimelineList}>
                 {peopleTimeline.length === 0 ? (
                   <li className={styles.peopleTimelineItem}>
                     <EmptyState

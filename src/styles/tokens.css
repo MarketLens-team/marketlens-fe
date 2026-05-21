@@ -85,6 +85,8 @@
   --layout-back-to-top-reserve: calc(
     var(--layout-back-to-top-size) + var(--layout-back-to-top-bottom) + var(--space-2)
   );
+  /* 종목 상세 — 최신 인물 발언 타임라인 카드 높이 */
+  --layout-stock-people-panel-height: 28rem;
 
   /* FAB 맨 위로 — CMC 톤(다크 UI: 차분한 회색 면 + 밝은 아이콘) */
   --color-fab-surface: #323946;
