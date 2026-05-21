@@ -14,9 +14,6 @@ const SEARCH_PATH = '/api/v1/search'
 /** OpenAPI `GET /api/v1/search?q=` — 공개 조회, 종목·인물 + 관련 뉴스·발언 */
 export async function fetchUnifiedSearch(query: string): Promise<UnifiedSearchResult> {
   const q = query.trim()
-  if (!q) {
-    return { stocks: [], persons: [] }
-  }
 
   if (isMockDataSource()) {
     await mockDelay(180)

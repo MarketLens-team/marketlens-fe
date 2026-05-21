@@ -1,11 +1,17 @@
 import { mapNewsFeedItems } from './stockMapper'
 import type {
+  FallbackPersonItemResponse,
+  FallbackSectionsResponse,
+  FallbackStockItemResponse,
   PersonSearchItemResponse,
   PersonStatementItemResponse,
   SearchResponse,
   StockSearchItemResponse,
 } from '../types/searchApi'
 import type {
+  SearchFallbackPerson,
+  SearchFallbackSections,
+  SearchFallbackStock,
   SearchNewsPreview,
   SearchPersonResult,
   SearchStatementPreview,
@@ -62,9 +68,44 @@ function mapPersonResult(dto: PersonSearchItemResponse, query: string): SearchPe
   }
 }
 
+function mapFallbackStock(dto: FallbackStockItemResponse): SearchFallbackStock {
+  return {
+    code: dto.stockCode,
+    name: dto.stockName,
+    mentionCount: dto.mentionCount,
+  }
+}
+
+function mapFallbackPerson(dto: FallbackPersonItemResponse): SearchFallbackPerson {
+  return {
+    personId: String(dto.personId),
+    personName: dto.personName,
+    role: dto.personRole,
+    organizationName: dto.organizationName,
+    mentionCount: dto.mentionCount,
+  }
+}
+
+function mapFallbackSections(
+  dto: FallbackSectionsResponse | null | undefined,
+): SearchFallbackSections | null {
+  if (!dto) return null
+
+  const hotStocks = (dto.hotStocks ?? []).map(mapFallbackStock)
+  const topPersons = (dto.topPersons ?? []).map(mapFallbackPerson)
+  const latestNews = mapNewsPreviews(dto.latestNews ?? [])
+
+  if (hotStocks.length === 0 && topPersons.length === 0 && latestNews.length === 0) {
+    return null
+  }
+
+  return { hotStocks, topPersons, latestNews }
+}
+
 export function mapSearchResponse(dto: SearchResponse, query: string): UnifiedSearchResult {
   return {
     stocks: (dto.stocks ?? []).map((item) => mapStockResult(item, query)),
     persons: (dto.persons ?? []).map((item) => mapPersonResult(item, query)),
+    fallback: mapFallbackSections(dto.fallbackSections),
   }
 }

@@ -1,8 +1,19 @@
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchUnifiedSearch } from '../../data/clients/searchClient'
 import type {
+  SearchFallbackPerson,
+  SearchFallbackSections,
+  SearchFallbackStock,
   SearchNewsPreview,
   SearchPersonResult,
   SearchStatementPreview,
@@ -12,16 +23,45 @@ import type {
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { Modal } from '../ui/Modal'
+import { UnderlineTabNav } from './UnderlineTabNav'
 import styles from './TopNavSearchModal.module.css'
+
+type SearchModalSeed =
+  | { kind: 'success'; results: UnifiedSearchResult }
+  | { kind: 'error'; message: string }
 
 interface TopNavSearchModalProps {
   isOpen: boolean
+  seed: SearchModalSeed
   onClose: () => void
+}
+
+function syncDomainFromResults(
+  data: UnifiedSearchResult,
+  setDomain: Dispatch<SetStateAction<SearchDomain>>,
+) {
+  const hasStocks = data.stocks.length > 0
+  const hasPersons = data.persons.length > 0
+  if (hasStocks && hasPersons) {
+    setDomain((prev) => (prev === 'person' ? 'person' : 'stock'))
+  } else if (hasPersons) {
+    setDomain('person')
+  } else {
+    setDomain('stock')
+  }
 }
 
 type SearchDomain = 'stock' | 'person'
 type StockFilter = 'all' | 'stock' | 'news'
 type PersonFilter = 'all' | 'person' | 'statement' | 'news'
+type FallbackFilter = 'all' | 'stock' | 'person' | 'news'
+
+const FALLBACK_FILTERS: { key: FallbackFilter; label: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'stock', label: '종목' },
+  { key: 'person', label: '인물' },
+  { key: 'news', label: '뉴스' },
+]
 
 const STOCK_FILTERS: { key: StockFilter; label: string }[] = [
   { key: 'all', label: '전체' },
@@ -38,6 +78,10 @@ const PERSON_FILTERS: { key: PersonFilter; label: string }[] = [
 
 function formatNewsMeta(iso: string) {
   return `${formatNewsDateLong(iso)} · ${formatNewsTimeBadge(iso)}`
+}
+
+function formatMentionCount(count: number) {
+  return `언급 ${count.toLocaleString('ko-KR')}`
 }
 
 type NewsWithContext = SearchNewsPreview & { contextLabel?: string; rowKey: string }
@@ -84,33 +128,6 @@ function flattenPersonStatements(persons: SearchPersonResult[]): StatementWithCo
     }
   }
   return rows
-}
-
-function FilterChips<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { key: T; label: string }[]
-  value: T
-  onChange: (key: T) => void
-}) {
-  return (
-    <div className={styles.filterRow} role="tablist">
-      {options.map((opt) => (
-        <button
-          key={opt.key}
-          type="button"
-          role="tab"
-          aria-selected={value === opt.key}
-          className={clsx(styles.filterChip, value === opt.key && styles.filterChipActive)}
-          onClick={() => onChange(opt.key)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
 }
 
 function ResultSection({ label, children }: { label: string; children: ReactNode }) {
@@ -326,6 +343,171 @@ function StockSearchResults({
   )
 }
 
+function FallbackStockList({
+  stocks,
+  onClose,
+}: {
+  stocks: SearchFallbackStock[]
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+  const { add, remove, has } = useWatchlistStore()
+
+  return (
+    <ul className={styles.stockList}>
+      {stocks.map((stock) => {
+        const inWatchlist = has(stock.code)
+        return (
+          <li key={stock.code} className={styles.stockRow}>
+            <div className={styles.stockIdentity}>
+              <p className={styles.stockName}>{stock.name}</p>
+              <p className={styles.stockMeta}>
+                {stock.code} · {formatMentionCount(stock.mentionCount)}
+              </p>
+            </div>
+            <div className={styles.stockActions}>
+              <button
+                type="button"
+                className={styles.actionBtn}
+                onClick={() => {
+                  if (inWatchlist) remove(stock.code)
+                  else add({ code: stock.code, name: stock.name })
+                }}
+              >
+                {inWatchlist ? '관심해제' : '관심추가'}
+              </button>
+              <button
+                type="button"
+                className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
+                onClick={() => {
+                  navigate(`/stock/${stock.code}`)
+                  onClose()
+                }}
+              >
+                상세보기
+              </button>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function FallbackPersonList({
+  persons,
+  onClose,
+}: {
+  persons: SearchFallbackPerson[]
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+
+  return (
+    <ul className={styles.personList}>
+      {persons.map((person) => (
+        <li key={person.personId} className={styles.personRow}>
+          <div className={styles.stockIdentity}>
+            <p className={styles.personName}>{person.personName}</p>
+            <p className={styles.personMeta}>
+              {person.organizationName}
+              {person.role ? ` · ${person.role}` : ''} · {formatMentionCount(person.mentionCount)}
+            </p>
+          </div>
+          <div className={styles.stockActions}>
+            <button
+              type="button"
+              className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
+              onClick={() => {
+                navigate('/person')
+                onClose()
+              }}
+            >
+              인물 보기
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function SearchFallbackResults({
+  fallback,
+  filter,
+  onClose,
+}: {
+  fallback: SearchFallbackSections
+  filter: FallbackFilter
+  onClose: () => void
+}) {
+  const latestNewsRows: NewsWithContext[] = fallback.latestNews.map((item) => ({
+    ...item,
+    rowKey: `fallback-news-${item.id}`,
+  }))
+
+  if (filter === 'stock') {
+    if (fallback.hotStocks.length === 0) {
+      return <p className={styles.empty}>추천 종목이 없습니다.</p>
+    }
+    return (
+      <ResultSection label="오늘 언급량 상위 종목">
+        <FallbackStockList stocks={fallback.hotStocks} onClose={onClose} />
+      </ResultSection>
+    )
+  }
+
+  if (filter === 'person') {
+    if (fallback.topPersons.length === 0) {
+      return <p className={styles.empty}>추천 인물이 없습니다.</p>
+    }
+    return (
+      <ResultSection label="오늘 화제 인물">
+        <FallbackPersonList persons={fallback.topPersons} onClose={onClose} />
+      </ResultSection>
+    )
+  }
+
+  if (filter === 'news') {
+    if (fallback.latestNews.length === 0) {
+      return <p className={styles.empty}>추천 뉴스가 없습니다.</p>
+    }
+    return (
+      <ResultSection label="최신 뉴스">
+        <SearchNewsRows items={latestNewsRows} />
+      </ResultSection>
+    )
+  }
+
+  if (
+    fallback.hotStocks.length === 0 &&
+    fallback.topPersons.length === 0 &&
+    fallback.latestNews.length === 0
+  ) {
+    return <p className={styles.empty}>추천 콘텐츠가 없습니다.</p>
+  }
+
+  return (
+    <>
+      {fallback.hotStocks.length > 0 ? (
+        <ResultSection label="오늘 언급량 상위 종목">
+          <FallbackStockList stocks={fallback.hotStocks} onClose={onClose} />
+        </ResultSection>
+      ) : null}
+      {fallback.topPersons.length > 0 ? (
+        <ResultSection label="오늘 화제 인물">
+          <FallbackPersonList persons={fallback.topPersons} onClose={onClose} />
+        </ResultSection>
+      ) : null}
+      {fallback.latestNews.length > 0 ? (
+        <ResultSection label="최신 뉴스">
+          <SearchNewsRows items={latestNewsRows} />
+        </ResultSection>
+      ) : null}
+    </>
+  )
+}
+
 function PersonSearchResults({
   persons,
   personNewsFlat,
@@ -391,52 +573,68 @@ function PersonSearchResults({
   )
 }
 
-export function TopNavSearchModal({ isOpen, onClose }: TopNavSearchModalProps) {
+export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalProps) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<UnifiedSearchResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [results, setResults] = useState<UnifiedSearchResult | null>(() =>
+    seed.kind === 'success' ? seed.results : null,
+  )
+  const [error, setError] = useState<string | null>(() =>
+    seed.kind === 'error' ? seed.message : null,
+  )
   const [domain, setDomain] = useState<SearchDomain>('stock')
   const [stockFilter, setStockFilter] = useState<StockFilter>('all')
   const [personFilter, setPersonFilter] = useState<PersonFilter>('all')
+  const [fallbackFilter, setFallbackFilter] = useState<FallbackFilter>('all')
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const skipNextEmptyFetch = useRef(seed.kind === 'success')
 
   useEffect(() => {
     if (!isOpen) return
     setQuery('')
-    setResults(null)
-    setError(null)
-    setDomain('stock')
     setStockFilter('all')
     setPersonFilter('all')
-  }, [isOpen])
+    setFallbackFilter('all')
+
+    if (seed.kind === 'success') {
+      setResults(seed.results)
+      setError(null)
+      setLoading(false)
+      syncDomainFromResults(seed.results, setDomain)
+      skipNextEmptyFetch.current = true
+    } else {
+      setResults(null)
+      setError(seed.message)
+      setLoading(false)
+      setDomain('stock')
+      skipNextEmptyFetch.current = false
+    }
+  }, [isOpen, seed])
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setLoading(false)
+      skipNextEmptyFetch.current = false
+      return
+    }
+
     const trimmed = query.trim()
-    if (!trimmed) {
-      setResults(null)
-      setError(null)
+    if (skipNextEmptyFetch.current && !trimmed) {
+      skipNextEmptyFetch.current = false
       return
     }
 
     let cancelled = false
     setLoading(true)
+    setError(null)
+
     const timer = window.setTimeout(async () => {
       try {
         const data = await fetchUnifiedSearch(trimmed)
         if (!cancelled) {
           setResults(data)
           setError(null)
-          const hasStocks = data.stocks.length > 0
-          const hasPersons = data.persons.length > 0
-          if (hasStocks && hasPersons) {
-            setDomain((prev) => (prev === 'person' ? 'person' : 'stock'))
-          } else if (hasPersons) {
-            setDomain('person')
-          } else {
-            setDomain('stock')
-          }
+          syncDomainFromResults(data, setDomain)
         }
       } catch (e) {
         if (!cancelled) {
@@ -446,18 +644,18 @@ export function TopNavSearchModal({ isOpen, onClose }: TopNavSearchModalProps) {
       } finally {
         if (!cancelled) setLoading(false)
       }
-    }, 200)
+    }, trimmed ? 200 : 0)
 
     return () => {
       cancelled = true
       window.clearTimeout(timer)
-      setLoading(false)
     }
   }, [isOpen, query])
 
   useEffect(() => {
     setStockFilter('all')
     setPersonFilter('all')
+    if (!query.trim()) setFallbackFilter('all')
   }, [query])
 
   useEffect(() => {
@@ -492,7 +690,21 @@ export function TopNavSearchModal({ isOpen, onClose }: TopNavSearchModalProps) {
     [stocks.length, persons.length],
   )
 
-  const hasResults = hasStocks || hasPersons
+  const hasSearchResults = hasStocks || hasPersons
+  const fallback = results?.fallback ?? null
+  const hasFallback = Boolean(
+    fallback &&
+      (fallback.hotStocks.length > 0 ||
+        fallback.topPersons.length > 0 ||
+        fallback.latestNews.length > 0),
+  )
+  const showFallback = Boolean(
+    !loading && !error && results && hasFallback && (!trimmedQuery || !hasSearchResults),
+  )
+  const showEmptySearchMessage = Boolean(trimmedQuery && results && !hasSearchResults && !loading && !error)
+  const showSearchFilters = Boolean(trimmedQuery && results && hasSearchResults)
+  const contentReady = results !== null || Boolean(error)
+  const showError = Boolean(error && !loading)
 
   return (
     <Modal
@@ -505,11 +717,8 @@ export function TopNavSearchModal({ isOpen, onClose }: TopNavSearchModalProps) {
       bodyClassName={styles.dialogBody}
       initialFocusRef={inputRef}
     >
-      <section aria-label="통합 검색">
-        <div className={styles.inputRow}>
-          <span className={styles.inputIcon} aria-hidden>
-            ⌕
-          </span>
+      <section className={styles.searchSection} aria-label="통합 검색">
+        <div className={clsx(styles.inputRow, query && styles.inputRowHasClear)}>
           <input
             ref={inputRef}
             className={styles.input}
@@ -529,50 +738,87 @@ export function TopNavSearchModal({ isOpen, onClose }: TopNavSearchModalProps) {
           ) : null}
         </div>
 
-        {showDomainTabs ? (
-          <FilterChips options={domainOptions} value={domain} onChange={setDomain} />
+        {contentReady ? (
+          <>
+            {showDomainTabs && showSearchFilters ? (
+              <div className={styles.tabNavStrip}>
+                <UnderlineTabNav
+                  ariaLabel="검색 범주"
+                  options={domainOptions}
+                  value={domain}
+                  onChange={setDomain}
+                />
+              </div>
+            ) : null}
+
+            {showSearchFilters ? (
+              <div className={styles.tabNavStrip}>
+                <UnderlineTabNav
+                  ariaLabel="검색 결과 필터"
+                  options={effectiveDomain === 'stock' ? STOCK_FILTERS : PERSON_FILTERS}
+                  value={effectiveDomain === 'stock' ? stockFilter : personFilter}
+                  onChange={(key) => {
+                    if (effectiveDomain === 'stock') setStockFilter(key as StockFilter)
+                    else setPersonFilter(key as PersonFilter)
+                  }}
+                />
+              </div>
+            ) : null}
+
+            {showFallback ? (
+              <div className={styles.tabNavStrip}>
+                <UnderlineTabNav
+                  ariaLabel="추천 콘텐츠 필터"
+                  options={FALLBACK_FILTERS}
+                  value={fallbackFilter}
+                  onChange={setFallbackFilter}
+                />
+              </div>
+            ) : null}
+
+            <div className={styles.scrollBody}>
+              {showEmptySearchMessage ? (
+                <p className={styles.emptyHint}>검색 결과가 없습니다.</p>
+              ) : null}
+
+              {showSearchFilters && effectiveDomain === 'stock' ? (
+                <StockSearchResults
+                  stocks={stocks}
+                  stockNewsFlat={stockNewsFlat}
+                  filter={stockFilter}
+                  onClose={onClose}
+                />
+              ) : null}
+
+              {showSearchFilters && effectiveDomain === 'person' ? (
+                <PersonSearchResults
+                  persons={persons}
+                  personNewsFlat={personNewsFlat}
+                  personStatementsFlat={personStatementsFlat}
+                  filter={personFilter}
+                  onClose={onClose}
+                />
+              ) : null}
+
+              {showFallback && fallback ? (
+                <SearchFallbackResults
+                  fallback={fallback}
+                  filter={fallbackFilter}
+                  onClose={onClose}
+                />
+              ) : null}
+
+              {!showFallback && !showSearchFilters && trimmedQuery ? (
+                <p className={styles.empty}>검색 결과가 없습니다.</p>
+              ) : null}
+            </div>
+          </>
         ) : null}
 
-        {trimmedQuery && results && (effectiveDomain === 'stock' ? hasStocks : hasPersons) ? (
-          <FilterChips
-            options={effectiveDomain === 'stock' ? STOCK_FILTERS : PERSON_FILTERS}
-            value={effectiveDomain === 'stock' ? stockFilter : personFilter}
-            onChange={(key) => {
-              if (effectiveDomain === 'stock') setStockFilter(key as StockFilter)
-              else setPersonFilter(key as PersonFilter)
-            }}
-          />
-        ) : null}
-
-        <div className={styles.scrollBody}>
-          {loading ? <p className={styles.empty}>검색 중...</p> : null}
-          {error ? <p className={styles.empty}>{error}</p> : null}
-          {!loading && !error && trimmedQuery && !hasResults ? (
-            <p className={styles.empty}>검색 결과가 없습니다.</p>
-          ) : null}
-
-          {!loading && !error && trimmedQuery && results && effectiveDomain === 'stock' ? (
-            <StockSearchResults
-              stocks={stocks}
-              stockNewsFlat={stockNewsFlat}
-              filter={stockFilter}
-              onClose={onClose}
-            />
-          ) : null}
-
-          {!loading && !error && trimmedQuery && results && effectiveDomain === 'person' ? (
-            <PersonSearchResults
-              persons={persons}
-              personNewsFlat={personNewsFlat}
-              personStatementsFlat={personStatementsFlat}
-              filter={personFilter}
-              onClose={onClose}
-            />
-          ) : null}
-        </div>
+        {showError ? <p className={styles.error}>{error}</p> : null}
 
         <div className={styles.footerHints}>
-          <span>종목·인물 분리 검색</span>
+          <span>/ 검색</span>
           <span>관심목록 즉시 반영</span>
           <span>ESC 모달 닫기</span>
         </div>

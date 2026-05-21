@@ -36,7 +36,28 @@ export interface SearchPersonResult {
   relatedStatements: SearchStatementPreview[]
 }
 
+export interface SearchFallbackStock {
+  code: string
+  name: string
+  mentionCount: number
+}
+
+export interface SearchFallbackPerson {
+  personId: string
+  personName: string
+  role: string
+  organizationName: string
+  mentionCount: number
+}
+
+export interface SearchFallbackSections {
+  hotStocks: SearchFallbackStock[]
+  topPersons: SearchFallbackPerson[]
+  latestNews: SearchNewsPreview[]
+}
+
 export interface UnifiedSearchResult {
   stocks: SearchStockResult[]
   persons: SearchPersonResult[]
+  fallback: SearchFallbackSections | null
 }

@@ -30,7 +30,28 @@ export interface PersonSearchItemResponse {
   relatedStatements: PersonStatementItemResponse[]
 }
 
+export interface FallbackStockItemResponse {
+  stockCode: string
+  stockName: string
+  mentionCount: number
+}
+
+export interface FallbackPersonItemResponse {
+  personId: number
+  personName: string
+  personRole: string
+  organizationName: string
+  mentionCount: number
+}
+
+export interface FallbackSectionsResponse {
+  hotStocks: FallbackStockItemResponse[]
+  topPersons: FallbackPersonItemResponse[]
+  latestNews: NewsFeedItemResponse[]
+}
+
 export interface SearchResponse {
   stocks: StockSearchItemResponse[]
   persons: PersonSearchItemResponse[]
+  fallbackSections?: FallbackSectionsResponse | null
 }

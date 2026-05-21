@@ -1,7 +1,7 @@
 import { mockNewsFeed } from './news.mock'
 import { mockPersonStatementsResponse } from './person.mock'
 import { mockStockDirectory } from './stockDirectory.mock'
-import type { SearchResponse } from '../types/searchApi'
+import type { FallbackSectionsResponse, SearchResponse } from '../types/searchApi'
 
 function newsDtoSlice(count: number) {
   return mockNewsFeed.slice(0, count).map((item, index) => ({
@@ -17,10 +17,36 @@ function newsDtoSlice(count: number) {
   }))
 }
 
+function buildMockFallbackSections(): FallbackSectionsResponse {
+  const hotStocks = [
+    { stockCode: '000660', stockName: 'SK하이닉스', mentionCount: 482 },
+    { stockCode: '005930', stockName: '삼성전자', mentionCount: 391 },
+    { stockCode: '006400', stockName: '삼성SDI', mentionCount: 256 },
+    { stockCode: '035720', stockName: '카카오', mentionCount: 198 },
+    { stockCode: '068270', stockName: '셀트리온', mentionCount: 174 },
+  ]
+
+  const topPersons = mockPersonStatementsResponse.slice(0, 5).map((row, index) => ({
+    personId: row.personId,
+    personName: row.personName,
+    personRole: row.personRole,
+    organizationName: row.organizationName,
+    mentionCount: 120 - index * 18,
+  }))
+
+  return {
+    hotStocks,
+    topPersons,
+    latestNews: newsDtoSlice(10),
+  }
+}
+
 export function buildMockSearchResponse(query: string): SearchResponse {
   const normalized = query.trim().toLowerCase()
+  const fallbackSections = buildMockFallbackSections()
+
   if (!normalized) {
-    return { stocks: [], persons: [] }
+    return { stocks: [], persons: [], fallbackSections }
   }
 
   const stocks = mockStockDirectory.sectors
@@ -72,5 +98,5 @@ export function buildMockSearchResponse(query: string): SearchResponse {
         })),
     }))
 
-  return { stocks, persons }
+  return { stocks, persons, fallbackSections }
 }
