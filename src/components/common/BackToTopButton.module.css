@@ -46,7 +46,7 @@
   color: var(--color-fab-on-surface);
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-fab-on-surface) 28%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-bg-app) 55%, transparent);
   transition:
     background-color var(--duration-fast) ease,
     color var(--duration-fast) ease,

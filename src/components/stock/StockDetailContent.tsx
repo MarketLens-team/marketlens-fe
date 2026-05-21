@@ -522,11 +522,16 @@ export function StockDetailContent({
                 )}
               </ul>
             </div>
+            <div className={styles.peoplePanelFabSlot} data-people-panel-fab>
+              <BackToTopButton
+                placement="inline"
+                tooltipSide="left"
+                className={styles.peoplePanelFabBtn}
+              />
+            </div>
           </section>
         </div>
       </div>
-
-      <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useLayoutEffect, type RefObject } from 'react'
 import { getLayoutScrollRoot } from './useInfiniteScroll'
 
-const STOCK_BACK_TO_TOP_SELECTOR = '[data-stock-back-to-top]'
+const PEOPLE_PANEL_FAB_SELECTOR = '[data-people-panel-fab]'
 const LIST_TOP_GAP_PX = 8
 const MIN_LIST_HEIGHT_PX = 96
 
@@ -19,8 +19,8 @@ export function useStockPeopleTimelineScrollMax(
 
     const sync = () => {
       const listTop = list.getBoundingClientRect().top
-      const button = document.querySelector<HTMLElement>(STOCK_BACK_TO_TOP_SELECTOR)
-      const anchorTop = button?.getBoundingClientRect().top ?? window.innerHeight - 72
+      const fab = document.querySelector<HTMLElement>(PEOPLE_PANEL_FAB_SELECTOR)
+      const anchorTop = fab?.getBoundingClientRect().top ?? window.innerHeight - 72
       const maxH = Math.max(MIN_LIST_HEIGHT_PX, Math.floor(anchorTop - listTop - LIST_TOP_GAP_PX))
       stack.style.setProperty('--people-timeline-max-height', `${maxH}px`)
     }

@@ -86,11 +86,11 @@
     var(--layout-back-to-top-size) + var(--layout-back-to-top-bottom) + var(--space-2)
   );
 
-  /* FAB 맨 위로 — 다크 UI에서는 밝은 버튼 */
-  --color-fab-surface: #f2f6fb;
-  --color-fab-on-surface: #0f151e;
-  --color-fab-border: color-mix(in srgb, var(--color-fab-on-surface) 18%, transparent);
-  --color-fab-surface-hover: #ffffff;
+  /* FAB 맨 위로 — CMC 톤(다크 UI: 차분한 회색 면 + 밝은 아이콘) */
+  --color-fab-surface: #323946;
+  --color-fab-on-surface: #e8edf3;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 65%, transparent);
+  --color-fab-surface-hover: #3a4150;
 
   /* Motion */
   --duration-instant: 120ms;
@@ -127,9 +127,9 @@
   --color-interactive-active-text: #ffffff;
   --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
 
-  /* FAB 맨 위로 — 라이트 UI에서는 어두운 버튼 */
-  --color-fab-surface: #1a2433;
-  --color-fab-on-surface: #ffffff;
-  --color-fab-border: color-mix(in srgb, var(--color-fab-on-surface) 22%, transparent);
-  --color-fab-surface-hover: #101828;
+  /* FAB 맨 위로 — 라이트 UI에서도 대비용 진회색 면 */
+  --color-fab-surface: #344054;
+  --color-fab-on-surface: #f9fafb;
+  --color-fab-border: color-mix(in srgb, var(--color-fab-surface) 88%, var(--color-border-strong));
+  --color-fab-surface-hover: #1d2939;
 }
