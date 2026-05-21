@@ -33,6 +33,9 @@ export interface PersonSearchItemResponse {
 export interface FallbackStockItemResponse {
   stockCode: string
   stockName: string
+  market?: string
+  sectorCode?: string
+  sectorName?: string
   mentionCount: number
 }
 

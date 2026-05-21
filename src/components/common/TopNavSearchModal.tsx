@@ -13,7 +13,6 @@ import { fetchUnifiedSearch } from '../../data/clients/searchClient'
 import type {
   SearchFallbackPerson,
   SearchFallbackSections,
-  SearchFallbackStock,
   SearchNewsPreview,
   SearchPersonResult,
   SearchStatementPreview,
@@ -21,6 +20,7 @@ import type {
   UnifiedSearchResult,
 } from '../../data/types/search'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
+import { groupStocksBySector } from '../../lib/groupStocksBySector'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { Modal } from '../ui/Modal'
 import { UnderlineTabNav } from './UnderlineTabNav'
@@ -130,12 +130,120 @@ function flattenPersonStatements(persons: SearchPersonResult[]): StatementWithCo
   return rows
 }
 
-function ResultSection({ label, children }: { label: string; children: ReactNode }) {
+function ResultSection({
+  label,
+  children,
+  variant = 'panel',
+}: {
+  label: string
+  children: ReactNode
+  variant?: 'panel' | 'rows'
+}) {
   return (
     <section className={styles.resultSection}>
       <h3 className={styles.sectionLabel}>{label}</h3>
-      <div className={styles.resultPanel}>{children}</div>
+      <div className={variant === 'rows' ? styles.resultPanelRows : styles.resultPanel}>
+        {children}
+      </div>
     </section>
+  )
+}
+
+type StockSearchRowModel = {
+  code: string
+  name: string
+  market?: string
+  sectorCode?: string
+  sectorName?: string
+  mentionCount?: number
+}
+
+function StockSearchRow({
+  stock,
+  onClose,
+  showMentionCount,
+}: {
+  stock: StockSearchRowModel
+  onClose: () => void
+  showMentionCount?: boolean
+}) {
+  const navigate = useNavigate()
+  const { add, remove, has } = useWatchlistStore()
+  const inWatchlist = has(stock.code)
+
+  return (
+    <li
+      className={clsx(
+        styles.searchRow,
+        showMentionCount ? styles.searchRowWithStat : styles.searchRowTwoCol,
+      )}
+    >
+      <div className={styles.stockIdentity}>
+        <p className={styles.stockName}>{stock.name}</p>
+        <p className={styles.stockMeta}>
+          {stock.code}
+          {stock.market ? ` · ${stock.market}` : ''}
+        </p>
+      </div>
+      {showMentionCount && stock.mentionCount != null ? (
+        <p className={styles.searchRowStat}>{formatMentionCount(stock.mentionCount)}</p>
+      ) : null}
+      <div className={styles.stockActions}>
+        <button
+          type="button"
+          className={styles.actionBtn}
+          onClick={() => {
+            if (inWatchlist) remove(stock.code)
+            else add({ code: stock.code, name: stock.name })
+          }}
+        >
+          {inWatchlist ? '관심해제' : '관심추가'}
+        </button>
+        <button
+          type="button"
+          className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
+          onClick={() => {
+            navigate(`/stock/${stock.code}`)
+            onClose()
+          }}
+        >
+          상세보기
+        </button>
+      </div>
+    </li>
+  )
+}
+
+function StockRowsBySector({
+  stocks,
+  onClose,
+  showMentionCount = false,
+}: {
+  stocks: StockSearchRowModel[]
+  onClose: () => void
+  showMentionCount?: boolean
+}) {
+  const groups = useMemo(() => groupStocksBySector(stocks), [stocks])
+
+  if (groups.length === 0) return null
+
+  return (
+    <>
+      {groups.map((group) => (
+        <ResultSection key={group.sectorKey} label={group.sectorName} variant="rows">
+          <ul className={styles.rowList}>
+            {group.items.map((stock) => (
+              <StockSearchRow
+                key={stock.code}
+                stock={stock}
+                onClose={onClose}
+                showMentionCount={showMentionCount}
+              />
+            ))}
+          </ul>
+        </ResultSection>
+      ))}
+    </>
   )
 }
 
@@ -185,57 +293,8 @@ function SearchNewsRowContent({ item }: { item: NewsWithContext }) {
   )
 }
 
-function StockResultList({
-  stocks,
-  onClose,
-}: {
-  stocks: SearchStockResult[]
-  onClose: () => void
-}) {
-  const navigate = useNavigate()
-  const { add, remove, has } = useWatchlistStore()
-
-  return (
-    <ul className={styles.stockList}>
-      {stocks.map((stock) => {
-        const inWatchlist = has(stock.code)
-        return (
-          <li key={stock.code} className={styles.stockRow}>
-            <div className={styles.stockIdentity}>
-              <p className={styles.stockName}>{stock.name}</p>
-              <p className={styles.stockMeta}>
-                {stock.code}
-                {stock.market ? ` · ${stock.market}` : ''}
-                {stock.sectorName ? ` · ${stock.sectorName}` : ''}
-              </p>
-            </div>
-            <div className={styles.stockActions}>
-              <button
-                type="button"
-                className={styles.actionBtn}
-                onClick={() => {
-                  if (inWatchlist) remove(stock.code)
-                  else add({ code: stock.code, name: stock.name })
-                }}
-              >
-                {inWatchlist ? '관심해제' : '관심추가'}
-              </button>
-              <button
-                type="button"
-                className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-                onClick={() => {
-                  navigate(`/stock/${stock.code}`)
-                  onClose()
-                }}
-              >
-                상세보기
-              </button>
-            </div>
-          </li>
-        )
-      })}
-    </ul>
-  )
+function StockResultList({ stocks, onClose }: { stocks: SearchStockResult[]; onClose: () => void }) {
+  return <StockRowsBySector stocks={stocks} onClose={onClose} />
 }
 
 function PersonResultList({
@@ -248,9 +307,9 @@ function PersonResultList({
   const navigate = useNavigate()
 
   return (
-    <ul className={styles.personList}>
+    <ul className={styles.rowList}>
       {persons.map((person) => (
-        <li key={person.personId} className={styles.personRow}>
+        <li key={person.personId} className={clsx(styles.searchRow, styles.searchRowTwoCol)}>
           <div className={styles.stockIdentity}>
             <p className={styles.personName}>{person.personName}</p>
             <p className={styles.personMeta}>
@@ -307,11 +366,7 @@ function StockSearchResults({
 }) {
   if (filter === 'stock') {
     if (stocks.length === 0) return <p className={styles.empty}>종목 결과가 없습니다.</p>
-    return (
-      <ResultSection label="종목">
-        <StockResultList stocks={stocks} onClose={onClose} />
-      </ResultSection>
-    )
+    return <StockResultList stocks={stocks} onClose={onClose} />
   }
 
   if (filter === 'news') {
@@ -329,68 +384,13 @@ function StockSearchResults({
 
   return (
     <>
-      {stocks.length > 0 ? (
-        <ResultSection label="종목">
-          <StockResultList stocks={stocks} onClose={onClose} />
-        </ResultSection>
-      ) : null}
+      {stocks.length > 0 ? <StockResultList stocks={stocks} onClose={onClose} /> : null}
       {stockNewsFlat.length > 0 ? (
         <ResultSection label="뉴스">
           <SearchNewsRows items={stockNewsFlat} />
         </ResultSection>
       ) : null}
     </>
-  )
-}
-
-function FallbackStockList({
-  stocks,
-  onClose,
-}: {
-  stocks: SearchFallbackStock[]
-  onClose: () => void
-}) {
-  const navigate = useNavigate()
-  const { add, remove, has } = useWatchlistStore()
-
-  return (
-    <ul className={styles.stockList}>
-      {stocks.map((stock) => {
-        const inWatchlist = has(stock.code)
-        return (
-          <li key={stock.code} className={styles.stockRow}>
-            <div className={styles.stockIdentity}>
-              <p className={styles.stockName}>{stock.name}</p>
-              <p className={styles.stockMeta}>
-                {stock.code} · {formatMentionCount(stock.mentionCount)}
-              </p>
-            </div>
-            <div className={styles.stockActions}>
-              <button
-                type="button"
-                className={styles.actionBtn}
-                onClick={() => {
-                  if (inWatchlist) remove(stock.code)
-                  else add({ code: stock.code, name: stock.name })
-                }}
-              >
-                {inWatchlist ? '관심해제' : '관심추가'}
-              </button>
-              <button
-                type="button"
-                className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-                onClick={() => {
-                  navigate(`/stock/${stock.code}`)
-                  onClose()
-                }}
-              >
-                상세보기
-              </button>
-            </div>
-          </li>
-        )
-      })}
-    </ul>
   )
 }
 
@@ -404,9 +404,9 @@ function FallbackPersonList({
   const navigate = useNavigate()
 
   return (
-    <ul className={styles.personList}>
+    <ul className={styles.rowList}>
       {persons.map((person) => (
-        <li key={person.personId} className={styles.personRow}>
+        <li key={person.personId} className={clsx(styles.searchRow, styles.searchRowTwoCol)}>
           <div className={styles.stockIdentity}>
             <p className={styles.personName}>{person.personName}</p>
             <p className={styles.personMeta}>
@@ -447,14 +447,11 @@ function SearchFallbackResults({
   }))
 
   if (filter === 'stock') {
-    if (fallback.hotStocks.length === 0) {
+    const fallbackStocks = fallback.stockSectors.flatMap((sector) => sector.stocks)
+    if (fallbackStocks.length === 0) {
       return <p className={styles.empty}>추천 종목이 없습니다.</p>
     }
-    return (
-      <ResultSection label="오늘 언급량 상위 종목">
-        <FallbackStockList stocks={fallback.hotStocks} onClose={onClose} />
-      </ResultSection>
-    )
+    return <StockRowsBySector stocks={fallbackStocks} onClose={onClose} showMentionCount />
   }
 
   if (filter === 'person') {
@@ -480,22 +477,22 @@ function SearchFallbackResults({
   }
 
   if (
-    fallback.hotStocks.length === 0 &&
+    fallback.stockSectors.length === 0 &&
     fallback.topPersons.length === 0 &&
     fallback.latestNews.length === 0
   ) {
     return <p className={styles.empty}>추천 콘텐츠가 없습니다.</p>
   }
 
+  const fallbackStocks = fallback.stockSectors.flatMap((sector) => sector.stocks)
+
   return (
     <>
-      {fallback.hotStocks.length > 0 ? (
-        <ResultSection label="오늘 언급량 상위 종목">
-          <FallbackStockList stocks={fallback.hotStocks} onClose={onClose} />
-        </ResultSection>
+      {fallbackStocks.length > 0 ? (
+        <StockRowsBySector stocks={fallbackStocks} onClose={onClose} showMentionCount />
       ) : null}
       {fallback.topPersons.length > 0 ? (
-        <ResultSection label="오늘 화제 인물">
+        <ResultSection label="오늘 화제 인물" variant="rows">
           <FallbackPersonList persons={fallback.topPersons} onClose={onClose} />
         </ResultSection>
       ) : null}
@@ -694,7 +691,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const fallback = results?.fallback ?? null
   const hasFallback = Boolean(
     fallback &&
-      (fallback.hotStocks.length > 0 ||
+      (fallback.stockSectors.length > 0 ||
         fallback.topPersons.length > 0 ||
         fallback.latestNews.length > 0),
   )

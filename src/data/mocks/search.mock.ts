@@ -18,13 +18,16 @@ function newsDtoSlice(count: number) {
 }
 
 function buildMockFallbackSections(): FallbackSectionsResponse {
-  const hotStocks = [
-    { stockCode: '000660', stockName: 'SK하이닉스', mentionCount: 482 },
-    { stockCode: '005930', stockName: '삼성전자', mentionCount: 391 },
-    { stockCode: '006400', stockName: '삼성SDI', mentionCount: 256 },
-    { stockCode: '035720', stockName: '카카오', mentionCount: 198 },
-    { stockCode: '068270', stockName: '셀트리온', mentionCount: 174 },
-  ]
+  const hotStocks = mockStockDirectory.sectors.flatMap((sector) =>
+    sector.stocks.slice(0, 2).map((stock, index) => ({
+      stockCode: stock.code,
+      stockName: stock.name,
+      market: stock.market,
+      sectorCode: sector.sectorCode,
+      sectorName: sector.sectorName,
+      mentionCount: 420 - index * 37,
+    })),
+  )
 
   const topPersons = mockPersonStatementsResponse.slice(0, 5).map((row, index) => ({
     personId: row.personId,
@@ -53,6 +56,7 @@ export function buildMockSearchResponse(query: string): SearchResponse {
     .flatMap((sector) =>
       sector.stocks.map((stock) => ({
         stock,
+        sectorCode: sector.sectorCode,
         sectorName: sector.sectorName,
       })),
     )
@@ -62,11 +66,12 @@ export function buildMockSearchResponse(query: string): SearchResponse {
         stock.name.toLowerCase().includes(normalized),
     )
     .slice(0, 5)
-    .map(({ stock, sectorName }) => ({
+    .map(({ stock, sectorCode, sectorName }) => ({
       stockId: 0,
       stockCode: stock.code,
       stockName: stock.name,
       market: stock.market,
+      sectorCode,
       sectorName,
       relatedNews: newsDtoSlice(10),
     }))

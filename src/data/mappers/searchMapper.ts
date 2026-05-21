@@ -8,9 +8,11 @@ import type {
   SearchResponse,
   StockSearchItemResponse,
 } from '../types/searchApi'
+import { groupStocksBySector } from '../../lib/groupStocksBySector'
 import type {
   SearchFallbackPerson,
   SearchFallbackSections,
+  SearchFallbackSectorGroup,
   SearchFallbackStock,
   SearchNewsPreview,
   SearchPersonResult,
@@ -51,6 +53,7 @@ function mapStockResult(dto: StockSearchItemResponse, query: string): SearchStoc
     code: dto.stockCode,
     name: dto.stockName,
     market: dto.market,
+    sectorCode: dto.sectorCode,
     sectorName: dto.sectorName,
     relatedNews: mapNewsPreviews(dto.relatedNews, highlight),
   }
@@ -72,8 +75,19 @@ function mapFallbackStock(dto: FallbackStockItemResponse): SearchFallbackStock {
   return {
     code: dto.stockCode,
     name: dto.stockName,
+    market: dto.market,
+    sectorCode: dto.sectorCode,
+    sectorName: dto.sectorName,
     mentionCount: dto.mentionCount,
   }
+}
+
+function mapFallbackStockSectors(stocks: SearchFallbackStock[]): SearchFallbackSectorGroup[] {
+  return groupStocksBySector(stocks).map((group) => ({
+    sectorCode: group.sectorKey,
+    sectorName: group.sectorName,
+    stocks: group.items,
+  }))
 }
 
 function mapFallbackPerson(dto: FallbackPersonItemResponse): SearchFallbackPerson {
@@ -92,14 +106,15 @@ function mapFallbackSections(
   if (!dto) return null
 
   const hotStocks = (dto.hotStocks ?? []).map(mapFallbackStock)
+  const stockSectors = mapFallbackStockSectors(hotStocks)
   const topPersons = (dto.topPersons ?? []).map(mapFallbackPerson)
   const latestNews = mapNewsPreviews(dto.latestNews ?? [])
 
-  if (hotStocks.length === 0 && topPersons.length === 0 && latestNews.length === 0) {
+  if (stockSectors.length === 0 && topPersons.length === 0 && latestNews.length === 0) {
     return null
   }
 
-  return { hotStocks, topPersons, latestNews }
+  return { stockSectors, topPersons, latestNews }
 }
 
 export function mapSearchResponse(dto: SearchResponse, query: string): UnifiedSearchResult {

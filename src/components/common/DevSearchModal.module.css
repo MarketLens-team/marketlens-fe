@@ -1,7 +1,11 @@
 .dialogContent {
-  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-6)));
+  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
   border-radius: var(--radius-lg);
-  background: var(--color-bg-card);
+  background: var(--color-bg-modal);
+  border: 1px solid var(--color-border-strong);
+  box-shadow:
+    0 24px 64px color-mix(in srgb, var(--color-bg-app) 72%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-text-primary) 4%, transparent);
 }
 
 .dialogBody {

@@ -6,7 +6,11 @@
   /* 배경: 레퍼런스처럼 바탕과 거의 같고 한 단계만 밝게 (Coinness/거래소 톤) */
   --color-bg-app: #0a0f16;
   --color-bg-section: #0c121a;
-  --color-bg-modal: #0b1018;
+  /*
+   * 모달: 셸(회색 트레이) + inset(안쪽 필드·입력) — 페이지 카드(#0f151e)와 별도.
+   */
+  --color-bg-modal: #212630;
+  --color-bg-modal-inset: #282e3a;
   --color-bg-card: #0f151e;
   --color-bg-elevated: #141c27;
 
@@ -69,7 +73,7 @@
   /* Layout (shared shell / modal widths) */
   --layout-page-max: 83rem; /* 1328px */
   --layout-sidebar-width: 196px; /* Layout .sidebar */
-  --layout-modal-search: 45rem; /* 720px */
+  --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
   --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
   --layout-search-modal-top: calc(var(--layout-top-strip-height) + var(--space-3));
   --layout-sidebar-accordion: 16.25rem; /* 260px */
@@ -90,7 +94,8 @@
 :root[data-theme='light'] {
   --color-bg-app: #f4f7fb;
   --color-bg-section: #ffffff;
-  --color-bg-modal: #eef2f7;
+  --color-bg-modal: #eceff4;
+  --color-bg-modal-inset: #f4f6fa;
   --color-bg-card: #f7f9fc;
   --color-bg-elevated: #edf2f8;
   --color-border-default: #d7e0ea;

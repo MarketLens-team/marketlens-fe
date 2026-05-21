@@ -23,6 +23,7 @@ export interface SearchStockResult {
   code: string
   name: string
   market?: string
+  sectorCode?: string
   sectorName?: string
   relatedNews: SearchNewsPreview[]
 }
@@ -39,7 +40,16 @@ export interface SearchPersonResult {
 export interface SearchFallbackStock {
   code: string
   name: string
+  market?: string
+  sectorCode?: string
+  sectorName?: string
   mentionCount: number
+}
+
+export interface SearchFallbackSectorGroup {
+  sectorCode: string
+  sectorName: string
+  stocks: SearchFallbackStock[]
 }
 
 export interface SearchFallbackPerson {
@@ -51,7 +61,7 @@ export interface SearchFallbackPerson {
 }
 
 export interface SearchFallbackSections {
-  hotStocks: SearchFallbackStock[]
+  stockSectors: SearchFallbackSectorGroup[]
   topPersons: SearchFallbackPerson[]
   latestNews: SearchNewsPreview[]
 }

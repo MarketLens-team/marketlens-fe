@@ -3,8 +3,8 @@
   top: var(--layout-search-modal-top);
   left: 50%;
   transform: translateX(-50%);
-  width: min(var(--layout-modal-search), calc(100vw - var(--space-6)));
-  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-6)));
+  width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
+  max-width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
   max-height: calc(100vh - var(--layout-search-modal-top) - var(--space-6));
   margin: 0;
   overflow: hidden;
@@ -12,11 +12,14 @@
   flex-direction: column;
   border-radius: var(--radius-lg);
   background: var(--color-bg-modal);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-strong);
+  box-shadow:
+    0 24px 64px color-mix(in srgb, var(--color-bg-app) 72%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-text-primary) 4%, transparent);
 }
 
 .dialogBody {
-  padding: var(--space-4) var(--space-5) var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-3);
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -34,7 +37,7 @@
   box-sizing: border-box;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  background: var(--color-bg-card);
+  background: var(--color-bg-modal-inset);
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
   font-family: var(--font-sans);
@@ -107,33 +110,61 @@
 }
 
 .resultPanel {
-  border: 1px solid var(--color-border-default);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 65%, var(--color-bg-modal));
   border-radius: var(--radius-md);
-  background: var(--color-bg-card);
+  background: var(--color-bg-modal-inset);
   overflow: hidden;
 }
 
-.stockList {
+.resultPanelRows {
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.rowList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.stockRow {
-  display: flex;
+.searchRow {
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-3) var(--space-4);
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-default);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-modal-inset);
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
-.stockRow:last-child {
-  border-bottom: none;
+.searchRowTwoCol {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.stockRow:hover {
-  background: color-mix(in srgb, var(--color-bg-elevated) 45%, transparent);
+.searchRowWithStat {
+  grid-template-columns: minmax(0, 1fr) minmax(5.5rem, auto) auto;
+}
+
+.searchRow:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.searchRowStat {
+  margin: 0;
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-border-default);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .stockIdentity {
@@ -162,7 +193,7 @@
 .actionBtn {
   border: none;
   border-radius: var(--radius-full);
-  background: var(--color-bg-elevated);
+  background: color-mix(in srgb, var(--color-bg-modal-inset) 55%, var(--color-bg-modal));
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -174,39 +205,16 @@
 
 .actionBtn:hover {
   color: var(--color-text-primary);
-  background: var(--color-bg-section);
+  background: color-mix(in srgb, var(--color-text-primary) 8%, var(--color-bg-modal-inset));
 }
 
 .actionBtnPrimary {
   color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-elevated));
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-modal-inset));
 }
 
 .actionBtnPrimary:hover {
-  background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-elevated));
-}
-
-.personList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.personRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.personRow:last-child {
-  border-bottom: none;
-}
-
-.personRow:hover {
-  background: color-mix(in srgb, var(--color-bg-elevated) 45%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-modal-inset));
 }
 
 .personName {
@@ -247,7 +255,7 @@
 }
 
 .newsLink:hover {
-  background: color-mix(in srgb, var(--color-bg-elevated) 45%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-modal-inset));
 }
 
 .newsLink:hover .newsTitle {
@@ -306,7 +314,7 @@
 }
 
 .statementItem:hover {
-  background: color-mix(in srgb, var(--color-bg-elevated) 45%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-modal-inset));
 }
 
 .statementPerson {

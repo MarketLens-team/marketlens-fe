@@ -37,6 +37,8 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
   - 5월 인덱스 → 기능별 상세로 연결
 - [changelog/2026-05-15-feat-design-tokens.md](./changelog/2026-05-15-feat-design-tokens.md)  
   - `feat/design-tokens` 브랜치 작업 (토큰·Stylelint·CSS 마이그레이션)
+- [changelog/2026-05-21-feat-design-refresh-search-modal.md](./changelog/2026-05-21-feat-design-refresh-search-modal.md)  
+  - `feat/design-refresh` 통합 검색 모달 너비·모달 서피스 (5/15 문서와 분리)
 - [design/ui-product-overview.md](./design/ui-product-overview.md)  
   - 홈·종목·버즈·인물·마이 등 **현재 제품 UI 톤·화면 패턴** 개요 (스냅샷 권장 목록 포함)
 - [changelog/2026-04.md](./changelog/2026-04.md)  
