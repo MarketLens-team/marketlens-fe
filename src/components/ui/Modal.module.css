@@ -37,6 +37,27 @@
   padding: var(--space-5) var(--space-5) var(--space-3);
 }
 
+/* 제목 없이 닫기만 있을 때 — 본문 위 빈 헤더 띠 제거 */
+.headerCloseOnly {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  left: auto;
+  z-index: 2;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.headerCloseOnly .headingGroup {
+  display: none;
+}
+
+.headerCloseOnly .closeButton {
+  pointer-events: auto;
+}
+
 .headingGroup {
   min-width: 0;
   flex: 1;

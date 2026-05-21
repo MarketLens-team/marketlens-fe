@@ -33,10 +33,16 @@
 .cardInModal {
   width: 100%;
   max-width: none;
+  padding: var(--space-5) var(--space-6) var(--space-6);
   border: none;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.cardInModal .tabs {
+  margin-top: 0;
+  margin-bottom: var(--space-5);
 }
 
 .pageInModal {

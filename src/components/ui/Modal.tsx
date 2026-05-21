@@ -155,7 +155,12 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {(title || headerMeta || showCloseButton) ? (
-          <header className={styles.header}>
+          <header
+            className={clsx(
+              styles.header,
+              showCloseButton && !title && !headerMeta && styles.headerCloseOnly,
+            )}
+          >
             <div className={styles.headingGroup}>
               {title ? (
                 <h2 id={titleId} className={styles.title}>

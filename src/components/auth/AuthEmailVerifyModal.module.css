@@ -1,8 +1,8 @@
 .overlay {
   z-index: var(--z-overlay-stacked);
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--space-4);
+  padding: clamp(var(--space-6), 12dvh, var(--space-12)) var(--space-4) var(--space-4);
   box-sizing: border-box;
 }
 
