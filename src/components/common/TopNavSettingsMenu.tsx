@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthFlow } from '../../hooks/useAuthFlow'
 import { useAuthStore } from '../../store/authStore'
 import { useUserPreferencesStore } from '../../store/userPreferencesStore'
 import styles from './TopNavSettingsMenu.module.css'
@@ -29,7 +30,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
   const panelId = useId()
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
-  const logout = useAuthStore((s) => s.logout)
+  const { handleLogout } = useAuthFlow()
   const { theme, language, currency, aiAssistant, setTheme, setAiAssistant } = useUserPreferencesStore()
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange])
@@ -129,9 +130,8 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
               type="button"
               className={styles.linkBtn}
               onClick={() => {
-                logout()
                 close()
-                navigate('/')
+                handleLogout()
               }}
             >
               로그아웃

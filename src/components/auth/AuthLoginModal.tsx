@@ -40,10 +40,7 @@ export function AuthLoginModal({ isOpen, onClose }: AuthLoginModalProps) {
         presentation="modal"
         mode={mode}
         onModeChange={setMode}
-        onLogin={async (email, password) => {
-          await handleLogin(email, password)
-          onClose()
-        }}
+        onLogin={handleLogin}
         onCompleteRegistration={async () => undefined}
         onSignupAccountNext={handleSignupAccountNext}
       />
