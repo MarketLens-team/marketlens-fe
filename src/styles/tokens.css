@@ -88,11 +88,11 @@
   /* 종목 상세 — 최신 인물 발언 타임라인 카드 높이 */
   --layout-stock-people-panel-height: 28rem;
 
-  /* FAB 맨 위로 — CMC 톤(다크 UI: 차분한 회색 면 + 밝은 아이콘) */
-  --color-fab-surface: #323946;
-  --color-fab-on-surface: #e8edf3;
-  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 65%, transparent);
-  --color-fab-surface-hover: #3a4150;
+  /* FAB 맨 위로 — CMC 톤(다크 UI: 밝은 회색 면) */
+  --color-fab-surface: #5a6578;
+  --color-fab-on-surface: #f2f6fa;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
+  --color-fab-surface-hover: #6b778c;
 
   /* Motion */
   --duration-instant: 120ms;
@@ -129,9 +129,9 @@
   --color-interactive-active-text: #ffffff;
   --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
 
-  /* FAB 맨 위로 — 라이트 UI에서도 대비용 진회색 면 */
-  --color-fab-surface: #344054;
-  --color-fab-on-surface: #f9fafb;
-  --color-fab-border: color-mix(in srgb, var(--color-fab-surface) 88%, var(--color-border-strong));
-  --color-fab-surface-hover: #1d2939;
+  /* FAB 맨 위로 — 라이트 UI */
+  --color-fab-surface: #475467;
+  --color-fab-on-surface: #ffffff;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 70%, transparent);
+  --color-fab-surface-hover: #344054;
 }

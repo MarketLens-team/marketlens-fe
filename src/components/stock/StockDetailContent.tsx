@@ -25,6 +25,9 @@ import styles from './StockDetailContent.module.css'
 
 type NewsFilter = 'all' | 'positive' | 'negative'
 
+/** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
+const RELATED_STOCKS_DISPLAY_MAX = 3
+
 function scoreToneClass(score: number) {
   if (score > 0) return styles.scoreUp
   if (score < 0) return styles.scoreDown
@@ -444,7 +447,7 @@ export function StockDetailContent({
                 연관 종목
               </h2>
               <ul className={styles.simpleList}>
-                {relatedStocks.map((related) => (
+                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
                   <li key={related.code} className={styles.simpleListItem}>
                     <Link className={styles.stockLink} to={`/stock/${related.code}`}>
                       <span className={styles.stockLinkName}>{related.name}</span>
@@ -518,16 +521,11 @@ export function StockDetailContent({
                 )}
               </ul>
             </div>
-            <div className={styles.peoplePanelFabSlot} data-people-panel-fab>
-              <BackToTopButton
-                placement="inline"
-                tooltipSide="left"
-                className={styles.peoplePanelFabBtn}
-              />
-            </div>
           </section>
         </div>
       </div>
+
+      <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />
     </div>
   )
 }
