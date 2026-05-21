@@ -43,7 +43,7 @@
 - `dialogContent`: 좌우 여백 `space-8`, `border-strong`, box-shadow
 - `dialogBody`: 가로 패딩 `space-6`
 - `.input`·`.resultPanel`: `--color-bg-modal-inset`, hover/버튼도 inset 기준 mix
-- `--layout-search-modal-top`: 탑바 직하 (`space-1` 간격), `--layout-search-modal-bottom`으로 하단 스크롤 여유
+- `--layout-search-modal-top`: `41px`, `--layout-search-modal-bottom`: `82px`
 
 ### `DevSearchModal.module.css`
 

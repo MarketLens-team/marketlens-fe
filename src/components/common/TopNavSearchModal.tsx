@@ -695,6 +695,8 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       showCloseButton={false}
       closeOnEsc
       closeOnOverlay
+      contentClassOnly
+      overlayClassName={styles.searchOverlay}
       contentClassName={styles.dialogContent}
       bodyClassName={styles.dialogBody}
       initialFocusRef={inputRef}

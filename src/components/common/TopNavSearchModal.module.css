@@ -1,12 +1,20 @@
+/* 오버레이: 상단 여백 최소, 하단 스크롤 여유 */
+.searchOverlay {
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--layout-search-modal-top) var(--space-4) var(--layout-search-modal-bottom) !important;
+}
+
 .dialogContent {
-  position: fixed;
-  top: var(--layout-search-modal-top);
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
   max-width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
-  max-height: calc(100vh - var(--layout-search-modal-top) - var(--layout-search-modal-bottom));
+  max-height: calc(
+    100dvh - var(--layout-search-modal-top) - var(--layout-search-modal-bottom)
+  );
   margin: 0;
+  flex-shrink: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
