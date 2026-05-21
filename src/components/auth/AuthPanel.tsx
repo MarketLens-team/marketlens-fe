@@ -2,10 +2,12 @@ import {
   useId,
   useRef,
   useState,
+  type Dispatch,
   type FocusEventHandler,
   type FormEvent,
   type KeyboardEventHandler,
   type RefObject,
+  type SetStateAction,
 } from 'react'
 import {
   checkEmailAvailability,
@@ -14,6 +16,7 @@ import {
   sendSignupEmailVerification,
 } from '../../data/clients/authClient'
 import type { CompleteRegistrationInput } from '../../data/clients/completeRegistration'
+import { getApiErrorMessage, parseApiFieldError } from '../../data/util/apiError'
 import type { AlertSettings } from '../../data/types/member'
 import type { WatchlistItem } from '../../store/watchlistStore'
 import { ButtonSpinner } from '../ui/ButtonSpinner'
@@ -66,6 +69,29 @@ function isEmailDuplicateError(message: string) {
 
 function isNicknameDuplicateError(message: string) {
   return message.includes('이미 사용 중인 닉네임')
+}
+
+function applySignupApiError(
+  rawMessage: string,
+  setErrors: Dispatch<SetStateAction<FieldErrors>>,
+  setSignupSubmitError: Dispatch<SetStateAction<string | null>>,
+) {
+  const { field, message } = parseApiFieldError(rawMessage)
+  setSignupSubmitError(null)
+  if (field === 'email') {
+    setErrors({ email: message })
+    return 'email' as const
+  }
+  if (field === 'nickname') {
+    setErrors({ nickname: message })
+    return 'nickname' as const
+  }
+  if (field === 'password') {
+    setErrors({ password: message })
+    return 'password' as const
+  }
+  setSignupSubmitError(message)
+  return null
 }
 
 type AvailabilityStatus = 'idle' | 'checking' | 'available' | 'unavailable'
@@ -261,6 +287,7 @@ export default function AuthPanel({
   const validateEmail = (value: string) => {
     const trimmed = value.trim()
     if (!trimmed) return '이메일을 입력해주세요.'
+    if (trimmed.includes('..')) return '올바른 이메일 형식을 입력해주세요.'
     if (!EMAIL_PATTERN.test(trimmed)) return '올바른 이메일 형식을 입력해주세요.'
     return undefined
   }
@@ -397,12 +424,12 @@ export default function AuthPanel({
       }
     } catch (error) {
       setNicknameCheckStatus('idle')
-      const message = error instanceof Error ? error.message : '닉네임 확인에 실패했습니다.'
+      const message = getApiErrorMessage(error, '닉네임 확인에 실패했습니다.')
       if (isNicknameDuplicateError(message)) {
         setErrors({ nickname: message })
         setNicknameCheckStatus('unavailable')
       } else {
-        setSignupSubmitError(message)
+        applySignupApiError(message, setErrors, setSignupSubmitError)
       }
     }
   }
@@ -435,13 +462,18 @@ export default function AuthPanel({
       await sendSignupEmailVerification(email.trim())
       setEmailVerifyModalOpen(true)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '인증 메일 발송에 실패했습니다.'
+      const message = getApiErrorMessage(error, '인증 메일 발송에 실패했습니다.')
       if (isEmailDuplicateError(message)) {
         setErrors({ email: message })
         setEmailCheckStatus('unavailable')
+        emailRef.current?.focus()
         return
       }
-      setSignupSubmitError(message)
+      const field = applySignupApiError(message, setErrors, setSignupSubmitError)
+      if (field === 'email') {
+        setEmailCheckStatus('idle')
+        emailRef.current?.focus()
+      }
     } finally {
       setIsSubmitting(false)
     }

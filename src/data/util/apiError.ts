@@ -10,20 +10,72 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
   return Boolean(value && typeof value === 'object' && ('code' in value || 'message' in value))
 }
 
-const VALIDATION_FIELD_MESSAGES: Record<string, string> = {
-  password: '비밀번호는 8자 이상이어야 합니다.',
+export type ApiValidationField = 'email' | 'nickname' | 'password' | 'code'
+
+const VALIDATION_FIELD_MESSAGES: Record<ApiValidationField, string> = {
   email: '올바른 이메일 형식을 입력해주세요.',
   nickname: '닉네임은 2~20자로 입력해주세요.',
+  password: '비밀번호는 8자 이상이어야 합니다.',
   code: '인증 코드 6자리를 입력해주세요.',
 }
 
-function normalizeValidationMessage(message: string): string {
-  const match = message.match(/^(\w+):\s*(.+)$/)
-  if (!match) return message
-  const [, field, detail] = match
-  if (VALIDATION_FIELD_MESSAGES[field]) return VALIDATION_FIELD_MESSAGES[field]
-  if (detail.includes('8') && field === 'password') return VALIDATION_FIELD_MESSAGES.password
+function inferFieldFromPath(path: string): ApiValidationField | undefined {
+  const lower = path.toLowerCase()
+  if (lower.includes('email')) return 'email'
+  if (lower.includes('nickname')) return 'nickname'
+  if (lower.includes('password')) return 'password'
+  if (lower.includes('code')) return 'code'
+  return undefined
+}
+
+function inferFieldFromDetail(detail: string): ApiValidationField | undefined {
+  if (detail.includes('이메일')) return 'email'
+  if (detail.includes('닉네임')) return 'nickname'
+  if (detail.includes('비밀번호') || detail.includes('password')) return 'password'
+  if (detail.includes('인증 코드') || detail.includes('코드')) return 'code'
+  return undefined
+}
+
+/** `checkEmail.email: …` 같은 백엔드 검증 메시지를 사용자용 문구로 변환 */
+export function normalizeValidationMessage(message: string): string {
+  const colonIdx = message.indexOf(':')
+  if (colonIdx === -1) {
+    const field = inferFieldFromDetail(message)
+    return field ? VALIDATION_FIELD_MESSAGES[field] : message
+  }
+
+  const pathPart = message.slice(0, colonIdx).trim()
+  const detail = message.slice(colonIdx + 1).trim()
+  const fieldKey = pathPart.split('.').pop()?.toLowerCase() ?? ''
+  const field =
+    (fieldKey in VALIDATION_FIELD_MESSAGES ? (fieldKey as ApiValidationField) : undefined) ??
+    inferFieldFromPath(pathPart) ??
+    inferFieldFromDetail(detail)
+
+  if (field) return VALIDATION_FIELD_MESSAGES[field]
+  if (detail) return detail
   return message
+}
+
+export function parseApiFieldError(message: string): {
+  field: ApiValidationField | null
+  message: string
+} {
+  const normalized = normalizeValidationMessage(message)
+  const colonIdx = message.indexOf(':')
+  if (colonIdx === -1) {
+    const field = inferFieldFromDetail(message)
+    return { field: field ?? null, message: normalized }
+  }
+
+  const pathPart = message.slice(0, colonIdx).trim()
+  const fieldKey = pathPart.split('.').pop()?.toLowerCase() ?? ''
+  const field =
+    (fieldKey in VALIDATION_FIELD_MESSAGES ? (fieldKey as ApiValidationField) : undefined) ??
+    inferFieldFromPath(pathPart) ??
+    inferFieldFromDetail(message.slice(colonIdx + 1))
+
+  return { field: field ?? null, message: normalized }
 }
 
 /** `error.message` 우선, 없으면 `error.code` → ERROR_CODE_MESSAGES */
@@ -60,7 +112,7 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
   }
 
   if (error instanceof Error && error.message && error.message !== 'Network Error') {
-    return error.message
+    return normalizeValidationMessage(error.message)
   }
   return fallback
 }
