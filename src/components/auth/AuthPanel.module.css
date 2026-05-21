@@ -30,6 +30,19 @@
   max-width: 480px;
 }
 
+.cardInModal {
+  width: 100%;
+  max-width: none;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pageInModal {
+  width: 100%;
+}
+
 .pageSignup {
   align-items: flex-start;
   padding-top: var(--space-6);

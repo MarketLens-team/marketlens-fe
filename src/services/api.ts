@@ -30,7 +30,7 @@ api.interceptors.response.use(
     const isAuthEndpoint = requestUrl.includes('/api/auth/')
     if (status === 401 && !isAuthEndpoint) {
       useAuthStore.getState().logout()
-      window.location.assign('/login')
+      window.location.assign('/')
     }
     return Promise.reject(error)
   },

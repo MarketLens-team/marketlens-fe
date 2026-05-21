@@ -20,11 +20,22 @@ export type AuthMode = 'login' | 'signup'
 
 type SignupStep = 1 | 2 | 3
 
+export interface SignupAccountDraft {
+  email: string
+  password: string
+  nickname: string
+}
+
 export interface AuthPanelProps {
+  presentation?: 'page' | 'modal'
+  /** account-only: 로그인·회원가입 1단계만. full: 관심종목·알림까지 (/login 직접 접근) */
+  scope?: 'account-only' | 'full'
   mode: AuthMode
   onModeChange: (mode: AuthMode) => void
   onLogin: (email: string, password: string) => void | Promise<void>
   onCompleteRegistration: (input: CompleteRegistrationInput) => void | Promise<void>
+  /** scope=account-only 일 때 회원가입 「다음」 */
+  onSignupAccountNext?: (draft: SignupAccountDraft) => void
 }
 
 type FieldErrors = Partial<Record<'email' | 'password' | 'confirmPassword' | 'nickname', string>>
@@ -117,7 +128,15 @@ export function AuthField({
   )
 }
 
-export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegistration }: AuthPanelProps) {
+export default function AuthPanel({
+  presentation = 'page',
+  scope = 'full',
+  mode,
+  onModeChange,
+  onLogin,
+  onCompleteRegistration,
+  onSignupAccountNext,
+}: AuthPanelProps) {
   const formId = useId()
   const [signupStep, setSignupStep] = useState<SignupStep>(1)
   const [email, setEmail] = useState('')
@@ -140,7 +159,8 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
   const nicknameRef = useRef<HTMLInputElement>(null)
   const confirmRef = useRef<HTMLInputElement>(null)
 
-  const isSignupMultiStep = mode === 'signup' && signupStep > 1
+  const isAccountOnly = scope === 'account-only'
+  const isSignupMultiStep = !isAccountOnly && mode === 'signup' && signupStep > 1
 
   const clearFieldError = (key: keyof FieldErrors) => {
     setErrors((prev) => {
@@ -289,6 +309,14 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     setFormMessage(null)
     setStepError(null)
     if (!validateSignupAccount()) return
+    if (isAccountOnly) {
+      onSignupAccountNext?.({
+        email: email.trim(),
+        password,
+        nickname: nickname.trim(),
+      })
+      return
+    }
     setSignupStep(2)
   }
 
@@ -333,18 +361,25 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
     }
   }
 
+  const isModal = presentation === 'modal'
   const cardClass = [
     styles.card,
-    signupStep === 2 && styles.cardExpanded,
-    signupStep === 3 && styles.cardAlerts,
+    isModal && styles.cardInModal,
+    !isModal && signupStep === 2 && styles.cardExpanded,
+    !isModal && signupStep === 3 && styles.cardAlerts,
   ]
     .filter(Boolean)
     .join(' ')
-  const pageClass = [styles.page, isSignupMultiStep ? styles.pageSignup : ''].filter(Boolean).join(' ')
+  const pageClass = [
+    styles.page,
+    isModal && styles.pageInModal,
+    !isModal && isSignupMultiStep && styles.pageSignup,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  return (
-    <div className={pageClass}>
-      <main className={cardClass}>
+  const panel = (
+    <main className={cardClass}>
         <div className={styles.tabs} role="tablist" aria-label="인증">
           <button
             type="button"
@@ -515,7 +550,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
               </form>
             ) : null}
 
-            {signupStep === 2 ? (
+            {!isAccountOnly && signupStep === 2 ? (
               <div className={styles.signupStep}>
                 <SignupWatchlistStep
                   selected={watchlistSelection}
@@ -531,7 +566,7 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
               </div>
             ) : null}
 
-            {signupStep === 3 ? (
+            {!isAccountOnly && signupStep === 3 ? (
               <div className={styles.signupStep}>
                 <SignupAlertsStep
                   settings={alertSettings}
@@ -562,7 +597,10 @@ export default function AuthPanel({ mode, onModeChange, onLogin, onCompleteRegis
             ) : null}
           </div>
         )}
-      </main>
-    </div>
+    </main>
   )
+
+  if (isModal) return panel
+
+  return <div className={pageClass}>{panel}</div>
 }

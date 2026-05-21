@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { fetchUnifiedSearch } from '../../data/clients/searchClient'
 import { withMinDuration } from '../../lib/withMinDuration'
 import type { UnifiedSearchResult } from '../../data/types/search'
 import { useAuthStore } from '../../store/authStore'
-import { PillButton } from '../ui/PillButton'
+import { useAuthModalStore } from '../../store/authModalStore'
 import { TopNavSearchModal } from './TopNavSearchModal'
 import { TopNavSettingsMenu } from './TopNavSettingsMenu'
 import { TopNavWatchlistMenu } from './TopNavWatchlistMenu'
@@ -22,8 +21,10 @@ type SearchSeed =
   | { kind: 'error'; message: string }
 
 export function TopNavActions() {
-  const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
+  const openAuthModal = useAuthModalStore((s) => s.open)
+  const closeAuthModal = useAuthModalStore((s) => s.close)
+  const isAuthModalOpen = useAuthModalStore((s) => s.isOpen)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchSeed, setSearchSeed] = useState<SearchSeed | null>(null)
   const [isSearchOpening, setIsSearchOpening] = useState(false)
@@ -41,6 +42,7 @@ export function TopNavActions() {
     searchOpeningRef.current = true
     setIsSearchOpening(true)
     setIsSettingsOpen(false)
+    closeAuthModal()
 
     try {
       const data = await withMinDuration(() => fetchUnifiedSearch(''))
@@ -74,7 +76,7 @@ export function TopNavActions() {
     <>
       <div className={styles.actions}>
         <TopNavWatchlistMenu
-          suppressPanel={isSettingsOpen || isSearchOpen}
+          suppressPanel={isSettingsOpen || isSearchOpen || isAuthModalOpen}
           onRequestOpen={() => {
             setIsSettingsOpen(false)
           }}
@@ -101,14 +103,16 @@ export function TopNavActions() {
             }}
           />
         ) : (
-          <PillButton
-            variant="secondary"
-            compact
-            className={styles.loginBtn}
-            onClick={() => navigate('/login')}
+          <button
+            type="button"
+            className={styles.loginTrigger}
+            onClick={() => {
+              setIsSettingsOpen(false)
+              openAuthModal()
+            }}
           >
             로그인
-          </PillButton>
+          </button>
         )}
       </div>
       {isSearchOpen && searchSeed ? (

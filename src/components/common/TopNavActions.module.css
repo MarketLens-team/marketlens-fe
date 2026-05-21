@@ -45,8 +45,27 @@
   line-height: 1.2;
 }
 
-.loginBtn {
+.loginTrigger {
   flex-shrink: 0;
+  height: 38px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-sans);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.loginTrigger:hover {
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
 }
 
 @media (max-width: 920px) {

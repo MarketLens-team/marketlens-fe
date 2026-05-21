@@ -131,7 +131,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
               onClick={() => {
                 logout()
                 close()
-                navigate('/login')
+                navigate('/')
               }}
             >
               로그아웃

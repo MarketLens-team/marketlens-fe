@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 
 export interface PrivateRouteProps {
@@ -6,11 +6,18 @@ export interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ requiredRole }: PrivateRouteProps) {
+  const location = useLocation()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const role = useAuthStore((s) => s.role)
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" replace />
+    return (
+      <Navigate
+        to="/"
+        replace
+        state={{ from: location.pathname + location.search }}
+      />
+    )
   }
 
   if (requiredRole === 'ADMIN' && role !== 'ADMIN') {
