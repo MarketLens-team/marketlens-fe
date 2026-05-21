@@ -204,6 +204,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
           <PillButton
             variant={interested ? 'secondary' : 'primary'}
             active={interested}
+            disableHover
             onClick={() => void toggleWatchlist()}
             disabled={watchlistPending}
             aria-pressed={interested}

@@ -10,6 +10,8 @@ export interface PillButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
   compact?: boolean
   /** secondary 필터·탭 등 선택 상태 */
   active?: boolean
+  /** true면 hover 시 색·scale 변화 없음 */
+  disableHover?: boolean
   children: ReactNode
 }
 
@@ -18,6 +20,7 @@ export function PillButton({
   fullWidth = false,
   compact = false,
   active = false,
+  disableHover = false,
   className,
   type = 'button',
   children,
@@ -32,6 +35,7 @@ export function PillButton({
         fullWidth && styles.fullWidth,
         compact && styles.compact,
         variant === 'secondary' && active && styles.secondaryActive,
+        disableHover && styles.noHover,
         className,
       )}
       {...rest}
