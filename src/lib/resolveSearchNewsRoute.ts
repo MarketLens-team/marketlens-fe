@@ -25,7 +25,8 @@ export function resolveSearchNewsRoute(item: SearchNewsPreview): string | null {
   return null
 }
 
-export function formatSearchNewsContextLabel(item: SearchNewsPreview): string | undefined {
+/** 뉴스 카드 좌상단 종목명 (대표 종목 우선) */
+export function formatSearchNewsStockLabel(item: SearchNewsPreview): string | undefined {
   if (item.primaryStockCode) {
     const primary = item.stocks.find((s) => s.stockCode === item.primaryStockCode)
     if (primary) return primary.stockName

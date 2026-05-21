@@ -22,10 +22,8 @@ import type {
 } from '../../data/types/search'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { groupStocksBySector } from '../../lib/groupStocksBySector'
-import {
-  formatSearchNewsContextLabel,
-  resolveSearchNewsRoute,
-} from '../../lib/resolveSearchNewsRoute'
+import { formatSearchNewsStockLabel, resolveSearchNewsRoute } from '../../lib/resolveSearchNewsRoute'
+import { formatStockScore } from '../stock/stockScore'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { Modal } from '../ui/Modal'
 import { UnderlineTabNav } from './UnderlineTabNav'
@@ -58,26 +56,13 @@ function syncDomainFromResults(
 
 type SearchDomain = 'stock' | 'person'
 type StockFilter = 'all' | 'stock' | 'news'
-type PersonFilter = 'all' | 'person' | 'statement' | 'news'
+type PersonFilter = 'all' | 'person' | 'statement'
 type FallbackFilter = 'all' | 'stock' | 'person' | 'news'
 
 const FALLBACK_FILTERS: { key: FallbackFilter; label: string }[] = [
   { key: 'all', label: '전체' },
   { key: 'stock', label: '종목' },
   { key: 'person', label: '인물' },
-  { key: 'news', label: '뉴스' },
-]
-
-const STOCK_FILTERS: { key: StockFilter; label: string }[] = [
-  { key: 'all', label: '전체' },
-  { key: 'stock', label: '종목' },
-  { key: 'news', label: '뉴스' },
-]
-
-const PERSON_FILTERS: { key: PersonFilter; label: string }[] = [
-  { key: 'all', label: '전체' },
-  { key: 'person', label: '인물' },
-  { key: 'statement', label: '발언' },
   { key: 'news', label: '뉴스' },
 ]
 
@@ -96,17 +81,27 @@ function formatMentionCount(count: number) {
   return `언급 ${count.toLocaleString('ko-KR')}`
 }
 
-type NewsWithContext = SearchNewsPreview & { contextLabel?: string; rowKey: string }
+type NewsWithContext = SearchNewsPreview & { stockLabel?: string; rowKey: string }
+
+function searchNewsSentimentClass(score: number) {
+  if (score > 0) return styles.newsSentimentPos
+  if (score < 0) return styles.newsSentimentNeg
+  return styles.newsSentimentNeu
+}
 
 function mapSearchNewsRows(news: SearchNewsPreview[], keyPrefix = 'news'): NewsWithContext[] {
   return news.map((item) => ({
     ...item,
-    contextLabel: formatSearchNewsContextLabel(item),
+    stockLabel: formatSearchNewsStockLabel(item),
     rowKey: `${keyPrefix}-${item.id}`,
   }))
 }
 
-type StatementWithContext = SearchStatementPreview & { personName: string; rowKey: string }
+type StatementWithContext = SearchStatementPreview & {
+  personId: string
+  personName: string
+  rowKey: string
+}
 
 function flattenPersonStatements(persons: SearchPersonResult[]): StatementWithContext[] {
   const rows: StatementWithContext[] = []
@@ -114,6 +109,7 @@ function flattenPersonStatements(persons: SearchPersonResult[]): StatementWithCo
     for (const item of person.relatedStatements) {
       rows.push({
         ...item,
+        personId: person.personId,
         personName: person.personName,
         rowKey: `stmt-${person.personId}-${item.id}`,
       })
@@ -295,13 +291,18 @@ function SearchNewsRows({
 }
 
 function SearchNewsRowContent({ item }: { item: NewsWithContext }) {
+  const stockLabel = item.stockLabel ?? formatSearchNewsStockLabel(item)
+
   return (
     <>
       <div className={styles.newsText}>
+        {stockLabel ? <p className={styles.newsStockLabel}>{stockLabel}</p> : null}
         <p className={styles.newsTitle}>{item.title}</p>
         <p className={styles.newsMeta}>
-          {item.contextLabel ? `${item.contextLabel} · ` : ''}
-          {item.source} · {formatNewsMeta(item.publishedAt)}
+          {item.source} · {formatNewsMeta(item.publishedAt)} ·{' '}
+          <span className={clsx(styles.newsSentiment, searchNewsSentimentClass(item.sentimentScore))}>
+            {formatStockScore(item.sentimentScore)}
+          </span>
         </p>
       </div>
       {item.imageUrl ? (
@@ -317,6 +318,57 @@ function StockResultList({ stocks, onClose }: { stocks: SearchStockResult[]; onC
   return <StockRowsBySector stocks={stocks} onClose={onClose} />
 }
 
+type PersonRowModel = {
+  personId: string
+  personName: string
+  organizationName: string
+  role: string
+  mentionCount?: number
+}
+
+function PersonSearchRow({
+  person,
+  onClose,
+}: {
+  person: PersonRowModel
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+  const showMentionStat = person.mentionCount != null
+
+  return (
+    <li
+      className={clsx(
+        styles.searchRow,
+        showMentionStat ? styles.searchRowWithStat : styles.searchRowTwoCol,
+      )}
+    >
+      <div className={styles.stockIdentity}>
+        <p className={styles.personName}>{person.personName}</p>
+        <p className={styles.personMeta}>
+          {person.organizationName}
+          {person.role ? ` · ${person.role}` : ''}
+        </p>
+      </div>
+      {showMentionStat ? (
+        <p className={styles.searchRowStat}>{formatMentionCount(person.mentionCount!)}</p>
+      ) : null}
+      <div className={styles.stockActions}>
+        <button
+          type="button"
+          className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
+          onClick={() => {
+            navigate('/person')
+            onClose()
+          }}
+        >
+          인물 보기
+        </button>
+      </div>
+    </li>
+  )
+}
+
 function PersonResultList({
   persons,
   onClose,
@@ -324,18 +376,33 @@ function PersonResultList({
   persons: SearchPersonResult[]
   onClose: () => void
 }) {
-  const navigate = useNavigate()
-
   return (
     <ul className={styles.rowList}>
       {persons.map((person) => (
-        <li key={person.personId} className={clsx(styles.searchRow, styles.searchRowTwoCol)}>
+        <PersonSearchRow key={person.personId} person={person} onClose={onClose} />
+      ))}
+    </ul>
+  )
+}
+
+function StatementRows({
+  items,
+  onClose,
+}: {
+  items: StatementWithContext[]
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+
+  if (items.length === 0) return null
+
+  return (
+    <ul className={styles.rowList}>
+      {items.map((stmt) => (
+        <li key={stmt.rowKey} className={clsx(styles.searchRow, styles.searchRowTwoCol, styles.searchRowStatement)}>
           <div className={styles.stockIdentity}>
-            <p className={styles.personName}>{person.personName}</p>
-            <p className={styles.personMeta}>
-              {person.organizationName}
-              {person.role ? ` · ${person.role}` : ''}
-            </p>
+            <p className={styles.statementQuote}>{stmt.quote}</p>
+            <p className={styles.statementMeta}>{formatNewsMeta(stmt.publishedAt)}</p>
           </div>
           <div className={styles.stockActions}>
             <button
@@ -346,7 +413,7 @@ function PersonResultList({
                 onClose()
               }}
             >
-              인물 보기
+              발언 보기
             </button>
           </div>
         </li>
@@ -355,21 +422,44 @@ function PersonResultList({
   )
 }
 
-function StatementRows({ items }: { items: StatementWithContext[] }) {
-  if (items.length === 0) return null
+function mapPersonStatements(person: SearchPersonResult): StatementWithContext[] {
+  return person.relatedStatements.map((item) => ({
+    ...item,
+    personId: person.personId,
+    personName: person.personName,
+    rowKey: `stmt-${person.personId}-${item.id}`,
+  }))
+}
+
+function PersonStatementSections({
+  persons,
+  onClose,
+  sectionLabel = '발언',
+}: {
+  persons: SearchPersonResult[]
+  onClose: () => void
+  sectionLabel?: string
+}) {
+  const withStatements = persons.filter((person) => person.relatedStatements.length > 0)
+  if (withStatements.length === 0) return null
+
+  if (withStatements.length === 1) {
+    const person = withStatements[0]
+    return (
+      <ResultSection label={sectionLabel} variant="rows">
+        <StatementRows items={mapPersonStatements(person)} onClose={onClose} />
+      </ResultSection>
+    )
+  }
 
   return (
-    <ul className={styles.statementList}>
-      {items.map((stmt) => (
-        <li key={stmt.rowKey} className={styles.statementItem}>
-          <p className={styles.statementPerson}>{stmt.personName}</p>
-          <p className={styles.statementQuote}>{stmt.quote}</p>
-          <p className={styles.statementMeta}>
-            {stmt.sourceName} · {formatNewsMeta(stmt.publishedAt)}
-          </p>
-        </li>
+    <>
+      {withStatements.map((person) => (
+        <ResultSection key={person.personId} label={person.personName} variant="rows">
+          <StatementRows items={mapPersonStatements(person)} onClose={onClose} />
+        </ResultSection>
       ))}
-    </ul>
+    </>
   )
 }
 
@@ -421,32 +511,14 @@ function FallbackPersonList({
   persons: SearchFallbackPerson[]
   onClose: () => void
 }) {
-  const navigate = useNavigate()
-
   return (
     <ul className={styles.rowList}>
       {persons.map((person) => (
-        <li key={person.personId} className={clsx(styles.searchRow, styles.searchRowTwoCol)}>
-          <div className={styles.stockIdentity}>
-            <p className={styles.personName}>{person.personName}</p>
-            <p className={styles.personMeta}>
-              {person.organizationName}
-              {person.role ? ` · ${person.role}` : ''} · {formatMentionCount(person.mentionCount)}
-            </p>
-          </div>
-          <div className={styles.stockActions}>
-            <button
-              type="button"
-              className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-              onClick={() => {
-                navigate('/person')
-                onClose()
-              }}
-            >
-              인물 보기
-            </button>
-          </div>
-        </li>
+        <PersonSearchRow
+          key={person.personId}
+          person={{ ...person, mentionCount: person.mentionCount }}
+          onClose={onClose}
+        />
       ))}
     </ul>
   )
@@ -476,7 +548,7 @@ function SearchFallbackResults({
       return <p className={styles.empty}>추천 인물이 없습니다.</p>
     }
     return (
-      <ResultSection label="오늘 화제 인물">
+      <ResultSection label="오늘 화제 인물" variant="rows">
         <FallbackPersonList persons={fallback.topPersons} onClose={onClose} />
       </ResultSection>
     )
@@ -524,13 +596,11 @@ function SearchFallbackResults({
 
 function PersonSearchResults({
   persons,
-  searchNews,
   personStatementsFlat,
   filter,
   onClose,
 }: {
   persons: SearchPersonResult[]
-  searchNews: NewsWithContext[]
   personStatementsFlat: StatementWithContext[]
   filter: PersonFilter
   onClose: () => void
@@ -538,7 +608,7 @@ function PersonSearchResults({
   if (filter === 'person') {
     if (persons.length === 0) return <p className={styles.empty}>인물 결과가 없습니다.</p>
     return (
-      <ResultSection label="인물">
+      <ResultSection label="인물" variant="rows">
         <PersonResultList persons={persons} onClose={onClose} />
       </ResultSection>
     )
@@ -546,23 +616,10 @@ function PersonSearchResults({
 
   if (filter === 'statement') {
     if (personStatementsFlat.length === 0) return <p className={styles.empty}>발언 결과가 없습니다.</p>
-    return (
-      <ResultSection label="발언">
-        <StatementRows items={personStatementsFlat} />
-      </ResultSection>
-    )
+    return <PersonStatementSections persons={persons} onClose={onClose} />
   }
 
-  if (filter === 'news') {
-    if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
-    return (
-      <ResultSection label="뉴스" variant="rows">
-        <SearchNewsRows items={searchNews} onClose={onClose} />
-      </ResultSection>
-    )
-  }
-
-  if (persons.length === 0 && searchNews.length === 0 && personStatementsFlat.length === 0) {
+  if (persons.length === 0 && personStatementsFlat.length === 0) {
     return <p className={styles.empty}>검색 결과가 없습니다.</p>
   }
 
@@ -573,16 +630,7 @@ function PersonSearchResults({
           <PersonResultList persons={persons} onClose={onClose} />
         </ResultSection>
       ) : null}
-      {personStatementsFlat.length > 0 ? (
-        <ResultSection label="발언">
-          <StatementRows items={personStatementsFlat} />
-        </ResultSection>
-      ) : null}
-      {searchNews.length > 0 ? (
-        <ResultSection label="뉴스" variant="rows">
-          <SearchNewsRows items={searchNews} onClose={onClose} />
-        </ResultSection>
-      ) : null}
+      <PersonStatementSections persons={persons} onClose={onClose} />
     </>
   )
 }
@@ -710,6 +758,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const hasStocks = stocks.length > 0
   const hasPersons = persons.length > 0
   const hasNews = searchNews.length > 0
+  const hasPersonStatements = personStatementsFlat.length > 0
   const showDomainTabs = Boolean(trimmedQuery && results && hasStocks && hasPersons)
 
   const effectiveDomain: SearchDomain = useMemo(() => {
@@ -727,7 +776,28 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
     [stocks.length, persons.length],
   )
 
-  const hasSearchResults = hasStocks || hasPersons || hasNews
+  const hasSearchResults = hasStocks || hasPersons || hasNews || hasPersonStatements
+
+  const stockFilterOptions = useMemo(
+    () => [
+      { key: 'all' as const, label: '전체' },
+      { key: 'stock' as const, label: hasStocks ? `종목 (${stocks.length})` : '종목' },
+      { key: 'news' as const, label: hasNews ? `뉴스 (${searchNews.length})` : '뉴스' },
+    ],
+    [hasStocks, hasNews, stocks.length, searchNews.length],
+  )
+
+  const personFilterOptions = useMemo(
+    () => [
+      { key: 'all' as const, label: '전체' },
+      { key: 'person' as const, label: hasPersons ? `인물 (${persons.length})` : '인물' },
+      {
+        key: 'statement' as const,
+        label: hasPersonStatements ? `발언 (${personStatementsFlat.length})` : '발언',
+      },
+    ],
+    [hasPersons, hasPersonStatements, persons.length, personStatementsFlat.length],
+  )
   const fallback = results?.fallback ?? null
   const hasFallback = Boolean(
     fallback &&
@@ -797,7 +867,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
               <div className={styles.tabNavStrip}>
                 <UnderlineTabNav
                   ariaLabel="검색 결과 필터"
-                  options={effectiveDomain === 'stock' ? STOCK_FILTERS : PERSON_FILTERS}
+                  options={effectiveDomain === 'stock' ? stockFilterOptions : personFilterOptions}
                   value={effectiveDomain === 'stock' ? stockFilter : personFilter}
                   onChange={(key) => {
                     if (effectiveDomain === 'stock') setStockFilter(key as StockFilter)
@@ -835,7 +905,6 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
               {showSearchFilters && effectiveDomain === 'person' ? (
                 <PersonSearchResults
                   persons={persons}
-                  searchNews={searchNews}
                   personStatementsFlat={personStatementsFlat}
                   filter={personFilter}
                   onClose={onClose}

@@ -276,6 +276,35 @@ button.newsRowCard {
   min-width: 0;
 }
 
+.newsStockLabel {
+  margin: 0 0 var(--space-1);
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  line-height: var(--line-height-tight);
+}
+
+.newsSentiment {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.newsSentimentPos {
+  color: var(--color-success);
+}
+
+.newsSentimentNeg {
+  color: var(--color-danger);
+}
+
+.newsSentimentNeu {
+  color: var(--color-text-muted);
+}
+
 .newsTitle {
   margin: 0;
   font-size: var(--font-size-base);
@@ -308,30 +337,8 @@ button.newsRowCard {
   border: 1px solid var(--color-border-default);
 }
 
-.statementList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.statementItem {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.statementItem:last-child {
-  border-bottom: none;
-}
-
-.statementItem:hover {
-  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-modal-inset));
-}
-
-.statementPerson {
-  margin: 0 0 var(--space-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
+.searchRowStatement {
+  align-items: start;
 }
 
 .statementQuote {
