@@ -375,12 +375,16 @@ export default function AuthPanel({
     try {
       await Promise.resolve(onLogin(email.trim(), password))
     } catch (error) {
-      const message = error instanceof Error ? error.message : '로그인에 실패했습니다.'
+      const message = getApiErrorMessage(error, '로그인에 실패했습니다.')
       if (isLoginCredentialError(message)) {
+        setErrors({})
         setLoginAuthError(LOGIN_AUTH_ERROR_MESSAGE)
         passwordRef.current?.focus()
       } else {
-        setLoginAuthError(message)
+        const field = applySignupApiError(message, setErrors, setLoginAuthError)
+        if (field === 'email') {
+          emailRef.current?.focus()
+        }
       }
     } finally {
       setIsSubmitting(false)
@@ -667,7 +671,7 @@ export default function AuthPanel({
               placeholder="이메일 주소 입력..."
               type="email"
               error={errors.email}
-              invalid={Boolean(loginAuthError)}
+              invalid={Boolean(errors.email)}
               inputRef={emailRef}
               autoComplete="email"
               onBlur={handleEmailBlur}
@@ -694,19 +698,14 @@ export default function AuthPanel({
               }}
               placeholder="비밀번호 입력..."
               type="password"
-              error={errors.password}
-              invalid={Boolean(loginAuthError)}
+              error={errors.password || (loginAuthError && !errors.email ? loginAuthError : undefined)}
+              invalid={Boolean(errors.password || loginAuthError)}
               inputRef={passwordRef}
               autoComplete="current-password"
               showToggle
               visible={passwordVisible}
               onToggleVisible={() => setPasswordVisible((v) => !v)}
             />
-            {loginAuthError ? (
-              <p className={styles.formAuthError} role="alert">
-                {loginAuthError}
-              </p>
-            ) : null}
             <button
               type="submit"
               className={styles.submit}

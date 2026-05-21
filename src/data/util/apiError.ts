@@ -28,7 +28,22 @@ function inferFieldFromPath(path: string): ApiValidationField | undefined {
   return undefined
 }
 
+/** 필드 검증 문구가 아닌, 그대로 보여줘야 하는 인증·중복 등 메시지 */
+function isPreservedApiMessage(message: string): boolean {
+  return (
+    message.includes('이메일 또는 비밀번호') ||
+    message.includes('이미 사용 중인') ||
+    message.includes('인증이 완료되지 않았습니다') ||
+    message.includes('인증 코드가') ||
+    message.includes('회원가입 세션') ||
+    message.includes('서버에 연결') ||
+    message.includes('로그인에 실패') ||
+    message.includes('회원가입')
+  )
+}
+
 function inferFieldFromDetail(detail: string): ApiValidationField | undefined {
+  if (isPreservedApiMessage(detail)) return undefined
   if (detail.includes('이메일')) return 'email'
   if (detail.includes('닉네임')) return 'nickname'
   if (detail.includes('비밀번호') || detail.includes('password')) return 'password'
@@ -38,6 +53,8 @@ function inferFieldFromDetail(detail: string): ApiValidationField | undefined {
 
 /** `checkEmail.email: …` 같은 백엔드 검증 메시지를 사용자용 문구로 변환 */
 export function normalizeValidationMessage(message: string): string {
+  if (isPreservedApiMessage(message)) return message
+
   const colonIdx = message.indexOf(':')
   if (colonIdx === -1) {
     const field = inferFieldFromDetail(message)
