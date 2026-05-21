@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
 import { BackToTopButton } from '../common/BackToTopButton'
+import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
+import { PillButton } from '../ui/PillButton'
 import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
@@ -199,15 +201,15 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.stockTitle}>{stock.name}</h1>
-          <button
-            type="button"
-            className={styles.watchlistBtn}
+          <PillButton
+            variant={interested ? 'secondary' : 'primary'}
+            active={interested}
             onClick={() => void toggleWatchlist()}
             disabled={watchlistPending}
             aria-pressed={interested}
           >
-            {interested ? '★ 관심종목' : '☆ 관심종목 추가'}
-          </button>
+            {interested ? '★ 관심종목' : '관심종목 추가'}
+          </PillButton>
         </div>
         <div className={styles.headerBody}>
           <div className={styles.headerLeft}>
@@ -342,15 +344,16 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                   ['negative', '부정'],
                 ] as const
               ).map(([key, label]) => (
-                <button
+                <PillButton
                   key={key}
-                  type="button"
-                  className={clsx(styles.filterBtn, newsFilter === key && styles.filterBtnActive)}
+                  variant="secondary"
+                  compact
+                  active={newsFilter === key}
                   aria-pressed={newsFilter === key}
                   onClick={() => setNewsFilter(key)}
                 >
                   {label}
-                </button>
+                </PillButton>
               ))}
             </div>
           </div>
@@ -360,7 +363,12 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
             </div>
           ) : null}
           {!loadingNewsFilter && displayNews.length === 0 ? (
-            <p className={styles.emptyNews}>해당 필터에 맞는 뉴스가 없습니다.</p>
+            <EmptyState
+              className={styles.emptyNews}
+              title="뉴스가 없어요"
+              message="선택한 감성 필터에 맞는 기사가 없습니다."
+              hint="전체 탭에서 다시 확인해 보세요."
+            />
           ) : null}
           {!loadingNewsFilter && displayNews.length > 0 ? (
             <ul className={styles.newsList}>
@@ -417,7 +425,11 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
               <ul className={styles.simpleList}>
                 {peopleTimeline.length === 0 ? (
                   <li className={styles.simpleListItem}>
-                    <p className={styles.emptyPeople}>연관된 인물 발언이 없습니다.</p>
+                    <EmptyState
+                      className={styles.emptyPeople}
+                      title="발언이 없어요"
+                      message="이 종목과 연결된 인물 발언이 아직 없습니다."
+                    />
                   </li>
                 ) : (
                   peopleTimeline.map((person) => (
