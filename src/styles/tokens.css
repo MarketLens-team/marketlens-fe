@@ -71,7 +71,11 @@
   --radius-full: 9999px;
 
   /* Layout (shared shell / modal widths) */
-  --layout-page-max: 83rem; /* 1328px */
+  /* 본문 좌우 여백 — 작은 화면 24px, 넓을수록 최대 48px */
+  --layout-main-pad-inline: clamp(var(--space-6), 2.5vw, var(--space-12));
+  /* 본문: .main 안에서는 100%로 채움. 초광폭만 --layout-page-wide-cap 으로 상한 */
+  --layout-page-wide-cap: 120rem;
+  --layout-page-max: min(var(--layout-page-wide-cap), 100%);
   --layout-sidebar-width: 196px; /* Layout .sidebar */
   --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
   --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */

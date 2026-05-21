@@ -6,21 +6,15 @@
   box-sizing: border-box;
 }
 
-/* 종목 상세 우측 컬럼 하단 (좌측 nav + main 패딩 + bottomGrid 기준) */
+/* 종목 상세 우측 컬럼 하단 (main 패딩 + bottomGrid 기준, 기본 레이아웃은 사이드바 없음) */
 .wrapFixed {
-  --page-w: min(
-    var(--layout-page-max),
-    100vw - var(--layout-sidebar-width) - 2 * var(--main-pad-inline, var(--space-6))
-  );
-  --main-inner: calc(
-    100vw - var(--layout-sidebar-width) - 2 * var(--main-pad-inline, var(--space-6))
-  );
+  --main-inner: calc(100vw - 2 * var(--main-pad-inline, var(--layout-main-pad-inline)));
+  --page-w: min(var(--layout-page-wide-cap, 120rem), var(--main-inner));
   position: fixed;
   bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-dropdown);
   left: calc(
-    var(--layout-sidebar-width) + var(--main-pad-inline, var(--space-6)) +
-      max(0px, (var(--main-inner) - var(--page-w)) / 2) + var(--page-w) - 8.25rem +
+    var(--main-pad-inline, var(--layout-main-pad-inline)) + var(--page-w) - 8.25rem +
       var(--back-to-top-offset-x, 0px)
   );
   transform: translateX(-50%);
@@ -121,10 +115,7 @@
 
 @media (max-width: 960px) {
   .wrapFixed {
-    left: calc(
-      var(--layout-sidebar-width) + (100vw - var(--layout-sidebar-width)) / 2 +
-        var(--back-to-top-offset-x, 0px)
-    );
+    left: calc(50vw + var(--back-to-top-offset-x, 0px));
     transform: translateX(-50%);
   }
 }

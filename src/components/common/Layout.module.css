@@ -54,7 +54,9 @@
   flex-direction: column;
   align-items: stretch;
   --main-pad-block: var(--space-5);
-  --main-pad-inline: var(--space-6);
+  --main-pad-inline: var(--layout-main-pad-inline);
+  /* 고정 83rem 대신 main 가용 너비 사용 (큰 모니터 여백 방지) */
+  --layout-page-max: min(var(--layout-page-wide-cap), 100%);
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
