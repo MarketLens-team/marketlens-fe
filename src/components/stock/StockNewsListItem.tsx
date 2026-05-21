@@ -13,9 +13,10 @@ function sentimentScoreClass(score: number) {
 
 export interface StockNewsListItemProps {
   item: StockNewsItem
+  highlighted?: boolean
 }
 
-export function StockNewsListItem({ item }: StockNewsListItemProps) {
+export function StockNewsListItem({ item, highlighted = false }: StockNewsListItemProps) {
   const timeBadge = formatNewsTimeBadge(item.publishedAt)
   const dateLabel = formatNewsDateLong(item.publishedAt)
   const body = (
@@ -47,10 +48,12 @@ export function StockNewsListItem({ item }: StockNewsListItemProps) {
     </>
   )
 
+  const linkClassName = clsx(styles.link, highlighted && styles.linkFocusedFromSearch)
+
   if (item.url) {
     return (
-      <li className={styles.item}>
-        <a className={styles.link} href={item.url} target="_blank" rel="noopener noreferrer">
+      <li id={`stock-news-${item.id}`} className={styles.item}>
+        <a className={linkClassName} href={item.url} target="_blank" rel="noopener noreferrer">
           {body}
         </a>
       </li>
@@ -58,8 +61,8 @@ export function StockNewsListItem({ item }: StockNewsListItemProps) {
   }
 
   return (
-    <li className={styles.item}>
-      <div className={styles.link}>{body}</div>
+    <li id={`stock-news-${item.id}`} className={styles.item}>
+      <div className={linkClassName}>{body}</div>
     </li>
   )
 }

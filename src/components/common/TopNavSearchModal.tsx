@@ -22,7 +22,11 @@ import type {
 } from '../../data/types/search'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { groupStocksBySector } from '../../lib/groupStocksBySector'
-import { formatSearchNewsStockLabel, resolveSearchNewsRoute } from '../../lib/resolveSearchNewsRoute'
+import {
+  formatSearchNewsStockLabel,
+  resolveSearchNewsRoute,
+  resolveSearchNewsStockRoute,
+} from '../../lib/resolveSearchNewsRoute'
 import { formatStockScore } from '../stock/stockScore'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { Modal } from '../ui/Modal'
@@ -249,8 +253,21 @@ function SearchNewsRows({
   return (
     <ul className={styles.rowList}>
       {items.map((item) => {
-        const inner = <SearchNewsRowContent item={item} />
         const inAppRoute = resolveSearchNewsRoute(item)
+        const stockRoute = resolveSearchNewsStockRoute(item)
+        const inner = (
+          <SearchNewsRowContent
+            item={item}
+            onStockClick={
+              stockRoute
+                ? () => {
+                    navigate(stockRoute)
+                    onClose()
+                  }
+                : undefined
+            }
+          />
+        )
 
         if (inAppRoute) {
           return (
@@ -290,13 +307,32 @@ function SearchNewsRows({
   )
 }
 
-function SearchNewsRowContent({ item }: { item: NewsWithContext }) {
+function SearchNewsRowContent({
+  item,
+  onStockClick,
+}: {
+  item: NewsWithContext
+  onStockClick?: () => void
+}) {
   const stockLabel = item.stockLabel ?? formatSearchNewsStockLabel(item)
 
   return (
     <>
       <div className={styles.newsText}>
-        {stockLabel ? <p className={styles.newsStockLabel}>{stockLabel}</p> : null}
+        {stockLabel && onStockClick ? (
+          <button
+            type="button"
+            className={styles.newsStockLabelBtn}
+            onClick={(e) => {
+              e.stopPropagation()
+              onStockClick()
+            }}
+          >
+            {stockLabel}
+          </button>
+        ) : stockLabel ? (
+          <p className={styles.newsStockLabel}>{stockLabel}</p>
+        ) : null}
         <p className={styles.newsTitle}>{item.title}</p>
         <p className={styles.newsMeta}>
           {item.source} · {formatNewsMeta(item.publishedAt)} ·{' '}

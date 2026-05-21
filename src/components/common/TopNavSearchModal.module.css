@@ -276,13 +276,28 @@ button.newsRowCard {
   min-width: 0;
 }
 
-.newsStockLabel {
+.newsStockLabel,
+.newsStockLabelBtn {
   margin: 0 0 var(--space-1);
   min-width: 0;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
   line-height: var(--line-height-tight);
+}
+
+.newsStockLabelBtn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.newsStockLabelBtn:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
 }
 
 .newsSentiment {

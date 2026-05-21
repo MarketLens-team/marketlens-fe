@@ -1,5 +1,8 @@
 .item {
   border-bottom: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  scroll-margin-top: 6rem;
+  scroll-margin-bottom: 4rem;
 }
 
 .item:last-child {
@@ -18,6 +21,14 @@
 
 .link:hover .title {
   color: var(--color-primary);
+}
+
+.linkFocusedFromSearch .title {
+  color: var(--color-success);
+}
+
+.linkFocusedFromSearch:hover .title {
+  color: var(--color-success);
 }
 
 .link:focus-visible {
@@ -109,7 +120,8 @@
 .title mark {
   padding: 0;
   font: inherit;
-  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  color: inherit;
   background: transparent;
 }
 

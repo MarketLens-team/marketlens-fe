@@ -51,9 +51,16 @@ function filterNews(items: StockNewsItem[], filter: NewsFilter): StockNewsItem[]
 
 export interface StockDetailContentProps {
   data: StockDetail
+  /** 검색 등에서 진입 시 강조·스크롤할 뉴스 id */
+  focusNewsId?: string | null
+  onClearFocusNews?: () => void
 }
 
-export function StockDetailContent({ data }: StockDetailContentProps) {
+export function StockDetailContent({
+  data,
+  focusNewsId = null,
+  onClearFocusNews,
+}: StockDetailContentProps) {
   const {
     stock,
     watchlistInterested,
@@ -128,6 +135,41 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     () => (useApiNewsFilter ? newsItems : filterNews(newsItems, newsFilter)),
     [newsItems, newsFilter, useApiNewsFilter],
   )
+
+  useEffect(() => {
+    if (!focusNewsId) return
+    setNewsFilter('all')
+    skipNewsFilterFetchRef.current = true
+  }, [focusNewsId, stock.code])
+
+  useEffect(() => {
+    if (!focusNewsId || loadingNewsFilter) return
+    const hasTarget = displayNews.some((item) => item.id === focusNewsId)
+    if (!hasTarget) return
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`stock-news-${focusNewsId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [focusNewsId, displayNews, loadingNewsFilter])
+
+  useEffect(() => {
+    if (!focusNewsId || !onClearFocusNews) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const focusedEl = document.getElementById(`stock-news-${focusNewsId}`)
+      if (focusedEl?.contains(target)) return
+      onClearFocusNews()
+    }
+
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [focusNewsId, onClearFocusNews])
 
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
 
@@ -374,7 +416,11 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
           {!loadingNewsFilter && displayNews.length > 0 ? (
             <ul className={styles.newsList}>
               {displayNews.map((item) => (
-                <StockNewsListItem key={item.id} item={item} />
+                <StockNewsListItem
+                  key={item.id}
+                  item={item}
+                  highlighted={focusNewsId === item.id}
+                />
               ))}
             </ul>
           ) : null}
