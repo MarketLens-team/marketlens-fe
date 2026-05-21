@@ -20,9 +20,10 @@
 
 ### 통합 검색 UX
 
+- **검색 응답** — OpenAPI `SearchResponse.news` (최대 10건) 연동. 종목·인물 중첩 `relatedNews` flatten 제거, 뉴스 탭은 공통 `news` 배열만 사용. 발언·fallback 뉴스도 `SEARCH_NEWS_MAX=10` 슬라이스.
 - **Fallback** — OpenAPI `FallbackStockItem`의 `sectorCode`·`sectorName`·`market` 매핑 후 `stockSectors`로 업종별 섹션 표시 (CMC 카테고리 헤더 패턴).
 - **검색 결과 종목** — 동일하게 업종별 `ResultSection` 분리.
-- **행 UI** — 리스트를 칸 단위(`rowList` + `searchRow`)로 분리, hover 시 **파란 테두리** (`--color-primary`).
+- **행 UI** — 종목·인물·**뉴스**를 칸 단위(`rowList` + `searchRow` / `newsRowCard`)로 분리, hover 시 **파란 테두리** (`--color-primary`).
 - `src/lib/groupStocksBySector.ts` — fallback·검색 공용 그룹 유틸.
 
 ### `src/styles/tokens.css`
@@ -42,6 +43,7 @@
 - `dialogContent`: 좌우 여백 `space-8`, `border-strong`, box-shadow
 - `dialogBody`: 가로 패딩 `space-6`
 - `.input`·`.resultPanel`: `--color-bg-modal-inset`, hover/버튼도 inset 기준 mix
+- `--layout-search-modal-top`: 탑바 직하 (`space-1` 간격), `--layout-search-modal-bottom`으로 하단 스크롤 여유
 
 ### `DevSearchModal.module.css`
 

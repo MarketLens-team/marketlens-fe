@@ -49,7 +49,7 @@ export function buildMockSearchResponse(query: string): SearchResponse {
   const fallbackSections = buildMockFallbackSections()
 
   if (!normalized) {
-    return { stocks: [], persons: [], fallbackSections }
+    return { stocks: [], persons: [], news: [], fallbackSections }
   }
 
   const stocks = mockStockDirectory.sectors
@@ -73,7 +73,7 @@ export function buildMockSearchResponse(query: string): SearchResponse {
       market: stock.market,
       sectorCode,
       sectorName,
-      relatedNews: newsDtoSlice(10),
+      relatedNews: [],
     }))
 
   const persons = mockPersonStatementsResponse
@@ -89,7 +89,7 @@ export function buildMockSearchResponse(query: string): SearchResponse {
       personName: row.personName,
       personRole: row.personRole,
       organizationName: row.organizationName,
-      relatedNews: newsDtoSlice(3),
+      relatedNews: [],
       relatedStatements: mockPersonStatementsResponse
         .filter((s) => s.personId === row.personId)
         .slice(0, 10)
@@ -103,5 +103,5 @@ export function buildMockSearchResponse(query: string): SearchResponse {
         })),
     }))
 
-  return { stocks, persons, fallbackSections }
+  return { stocks, persons, news: newsDtoSlice(10), fallbackSections }
 }

@@ -5,7 +5,7 @@
   transform: translateX(-50%);
   width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
   max-width: min(var(--layout-modal-search), calc(100vw - var(--space-8)));
-  max-height: calc(100vh - var(--layout-search-modal-top) - var(--space-6));
+  max-height: calc(100vh - var(--layout-search-modal-top) - var(--layout-search-modal-bottom));
   margin: 0;
   overflow: hidden;
   display: flex;
@@ -230,35 +230,30 @@
   color: var(--color-text-muted);
 }
 
-.newsList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.newsItem {
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.newsItem:last-child {
-  border-bottom: none;
-}
-
-.newsLink {
+.newsRowCard {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 6.5rem;
   gap: var(--space-3);
   align-items: start;
+  box-sizing: border-box;
+  width: 100%;
   padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-modal-inset);
   color: inherit;
   text-decoration: none;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
-.newsLink:hover {
-  background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-modal-inset));
+.newsRowCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
 
-.newsLink:hover .newsTitle {
+.newsRowCard:hover .newsTitle {
   color: var(--color-primary);
 }
 

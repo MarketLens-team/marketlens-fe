@@ -69,5 +69,7 @@ export interface SearchFallbackSections {
 export interface UnifiedSearchResult {
   stocks: SearchStockResult[]
   persons: SearchPersonResult[]
+  /** 검색 결과 공통 뉴스 (최대 10건) */
+  news: SearchNewsPreview[]
   fallback: SearchFallbackSections | null
 }

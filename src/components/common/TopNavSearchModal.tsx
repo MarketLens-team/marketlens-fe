@@ -86,32 +86,11 @@ function formatMentionCount(count: number) {
 
 type NewsWithContext = SearchNewsPreview & { contextLabel?: string; rowKey: string }
 
-function flattenStockNews(stocks: SearchStockResult[]): NewsWithContext[] {
-  const rows: NewsWithContext[] = []
-  for (const stock of stocks) {
-    for (const item of stock.relatedNews) {
-      rows.push({
-        ...item,
-        rowKey: `stock-${stock.code}-${item.id}`,
-        contextLabel: `${stock.name} · ${stock.code}`,
-      })
-    }
-  }
-  return rows
-}
-
-function flattenPersonNews(persons: SearchPersonResult[]): NewsWithContext[] {
-  const rows: NewsWithContext[] = []
-  for (const person of persons) {
-    for (const item of person.relatedNews) {
-      rows.push({
-        ...item,
-        rowKey: `person-${person.personId}-${item.id}`,
-        contextLabel: person.personName,
-      })
-    }
-  }
-  return rows
+function mapSearchNewsRows(news: SearchNewsPreview[]): NewsWithContext[] {
+  return news.map((item) => ({
+    ...item,
+    rowKey: `news-${item.id}`,
+  }))
 }
 
 type StatementWithContext = SearchStatementPreview & { personName: string; rowKey: string }
@@ -251,25 +230,26 @@ function SearchNewsRows({ items }: { items: NewsWithContext[] }) {
   if (items.length === 0) return null
 
   return (
-    <ul className={styles.newsList}>
-      {items.map((item) => (
-        <li key={item.rowKey} className={styles.newsItem}>
-          {item.url ? (
-            <a
-              className={styles.newsLink}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <SearchNewsRowContent item={item} />
-            </a>
-          ) : (
-            <div className={styles.newsLink}>
-              <SearchNewsRowContent item={item} />
-            </div>
-          )}
-        </li>
-      ))}
+    <ul className={styles.rowList}>
+      {items.map((item) => {
+        const inner = <SearchNewsRowContent item={item} />
+        return (
+          <li key={item.rowKey}>
+            {item.url ? (
+              <a
+                className={styles.newsRowCard}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {inner}
+              </a>
+            ) : (
+              <div className={styles.newsRowCard}>{inner}</div>
+            )}
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -355,12 +335,12 @@ function StatementRows({ items }: { items: StatementWithContext[] }) {
 
 function StockSearchResults({
   stocks,
-  stockNewsFlat,
+  searchNews,
   filter,
   onClose,
 }: {
   stocks: SearchStockResult[]
-  stockNewsFlat: NewsWithContext[]
+  searchNews: NewsWithContext[]
   filter: StockFilter
   onClose: () => void
 }) {
@@ -370,24 +350,24 @@ function StockSearchResults({
   }
 
   if (filter === 'news') {
-    if (stockNewsFlat.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
+    if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
     return (
-      <ResultSection label="뉴스">
-        <SearchNewsRows items={stockNewsFlat} />
+      <ResultSection label="뉴스" variant="rows">
+        <SearchNewsRows items={searchNews} />
       </ResultSection>
     )
   }
 
-  if (stocks.length === 0 && stockNewsFlat.length === 0) {
+  if (stocks.length === 0 && searchNews.length === 0) {
     return <p className={styles.empty}>검색 결과가 없습니다.</p>
   }
 
   return (
     <>
       {stocks.length > 0 ? <StockResultList stocks={stocks} onClose={onClose} /> : null}
-      {stockNewsFlat.length > 0 ? (
-        <ResultSection label="뉴스">
-          <SearchNewsRows items={stockNewsFlat} />
+      {searchNews.length > 0 ? (
+        <ResultSection label="뉴스" variant="rows">
+          <SearchNewsRows items={searchNews} />
         </ResultSection>
       ) : null}
     </>
@@ -470,7 +450,7 @@ function SearchFallbackResults({
       return <p className={styles.empty}>추천 뉴스가 없습니다.</p>
     }
     return (
-      <ResultSection label="최신 뉴스">
+      <ResultSection label="최신 뉴스" variant="rows">
         <SearchNewsRows items={latestNewsRows} />
       </ResultSection>
     )
@@ -497,7 +477,7 @@ function SearchFallbackResults({
         </ResultSection>
       ) : null}
       {fallback.latestNews.length > 0 ? (
-        <ResultSection label="최신 뉴스">
+        <ResultSection label="최신 뉴스" variant="rows">
           <SearchNewsRows items={latestNewsRows} />
         </ResultSection>
       ) : null}
@@ -507,13 +487,13 @@ function SearchFallbackResults({
 
 function PersonSearchResults({
   persons,
-  personNewsFlat,
+  searchNews,
   personStatementsFlat,
   filter,
   onClose,
 }: {
   persons: SearchPersonResult[]
-  personNewsFlat: NewsWithContext[]
+  searchNews: NewsWithContext[]
   personStatementsFlat: StatementWithContext[]
   filter: PersonFilter
   onClose: () => void
@@ -537,22 +517,22 @@ function PersonSearchResults({
   }
 
   if (filter === 'news') {
-    if (personNewsFlat.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
+    if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
     return (
-      <ResultSection label="뉴스">
-        <SearchNewsRows items={personNewsFlat} />
+      <ResultSection label="뉴스" variant="rows">
+        <SearchNewsRows items={searchNews} />
       </ResultSection>
     )
   }
 
-  if (persons.length === 0 && personNewsFlat.length === 0 && personStatementsFlat.length === 0) {
+  if (persons.length === 0 && searchNews.length === 0 && personStatementsFlat.length === 0) {
     return <p className={styles.empty}>검색 결과가 없습니다.</p>
   }
 
   return (
     <>
       {persons.length > 0 ? (
-        <ResultSection label="인물">
+        <ResultSection label="인물" variant="rows">
           <PersonResultList persons={persons} onClose={onClose} />
         </ResultSection>
       ) : null}
@@ -561,9 +541,9 @@ function PersonSearchResults({
           <StatementRows items={personStatementsFlat} />
         </ResultSection>
       ) : null}
-      {personNewsFlat.length > 0 ? (
-        <ResultSection label="뉴스">
-          <SearchNewsRows items={personNewsFlat} />
+      {searchNews.length > 0 ? (
+        <ResultSection label="뉴스" variant="rows">
+          <SearchNewsRows items={searchNews} />
         </ResultSection>
       ) : null}
     </>
@@ -664,12 +644,15 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const stocks = results?.stocks ?? []
   const persons = results?.persons ?? []
 
-  const stockNewsFlat = useMemo(() => flattenStockNews(stocks), [stocks])
-  const personNewsFlat = useMemo(() => flattenPersonNews(persons), [persons])
+  const searchNews = useMemo(
+    () => mapSearchNewsRows(results?.news ?? []),
+    [results?.news],
+  )
   const personStatementsFlat = useMemo(() => flattenPersonStatements(persons), [persons])
 
   const hasStocks = stocks.length > 0
   const hasPersons = persons.length > 0
+  const hasNews = searchNews.length > 0
   const showDomainTabs = Boolean(trimmedQuery && results && hasStocks && hasPersons)
 
   const effectiveDomain: SearchDomain = useMemo(() => {
@@ -687,7 +670,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
     [stocks.length, persons.length],
   )
 
-  const hasSearchResults = hasStocks || hasPersons
+  const hasSearchResults = hasStocks || hasPersons || hasNews
   const fallback = results?.fallback ?? null
   const hasFallback = Boolean(
     fallback &&
@@ -698,7 +681,9 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const showFallback = Boolean(
     !loading && !error && results && hasFallback && (!trimmedQuery || !hasSearchResults),
   )
-  const showEmptySearchMessage = Boolean(trimmedQuery && results && !hasSearchResults && !loading && !error)
+  const showEmptySearchMessage = Boolean(
+    trimmedQuery && results && !hasSearchResults && !loading && !error,
+  )
   const showSearchFilters = Boolean(trimmedQuery && results && hasSearchResults)
   const contentReady = results !== null || Boolean(error)
   const showError = Boolean(error && !loading)
@@ -781,7 +766,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
               {showSearchFilters && effectiveDomain === 'stock' ? (
                 <StockSearchResults
                   stocks={stocks}
-                  stockNewsFlat={stockNewsFlat}
+                  searchNews={searchNews}
                   filter={stockFilter}
                   onClose={onClose}
                 />
@@ -790,7 +775,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
               {showSearchFilters && effectiveDomain === 'person' ? (
                 <PersonSearchResults
                   persons={persons}
-                  personNewsFlat={personNewsFlat}
+                  searchNews={searchNews}
                   personStatementsFlat={personStatementsFlat}
                   filter={personFilter}
                   onClose={onClose}

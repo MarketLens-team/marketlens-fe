@@ -18,7 +18,7 @@ export interface StockSearchItemResponse {
   market?: string
   sectorCode?: string
   sectorName?: string
-  relatedNews: NewsFeedItemResponse[]
+  relatedNews?: NewsFeedItemResponse[]
 }
 
 export interface PersonSearchItemResponse {
@@ -26,8 +26,8 @@ export interface PersonSearchItemResponse {
   personName: string
   personRole: string
   organizationName: string
-  relatedNews: NewsFeedItemResponse[]
-  relatedStatements: PersonStatementItemResponse[]
+  relatedNews?: NewsFeedItemResponse[]
+  relatedStatements?: PersonStatementItemResponse[]
 }
 
 export interface FallbackStockItemResponse {
@@ -56,5 +56,7 @@ export interface FallbackSectionsResponse {
 export interface SearchResponse {
   stocks: StockSearchItemResponse[]
   persons: PersonSearchItemResponse[]
+  /** 검색어 매칭 시 관련 최신 뉴스 (최대 10건) */
+  news?: NewsFeedItemResponse[]
   fallbackSections?: FallbackSectionsResponse | null
 }

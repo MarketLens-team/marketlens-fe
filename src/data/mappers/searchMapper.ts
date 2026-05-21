@@ -1,3 +1,4 @@
+import { SEARCH_NEWS_MAX, SEARCH_STATEMENTS_MAX } from '../constants/search'
 import { mapNewsFeedItems } from './stockMapper'
 import type {
   FallbackPersonItemResponse,
@@ -24,16 +25,19 @@ import type {
 function mapNewsPreviews(
   items: StockSearchItemResponse['relatedNews'],
   highlightTerms?: string[],
+  max = SEARCH_NEWS_MAX,
 ): SearchNewsPreview[] {
-  return mapNewsFeedItems(items ?? [], highlightTerms).map((item) => ({
-    id: item.id,
-    title: item.title,
-    source: item.source,
-    publishedAt: item.publishedAt,
-    url: item.url,
-    imageUrl: item.imageUrl,
-    sentimentScore: item.sentimentScore,
-  }))
+  return mapNewsFeedItems(items ?? [], highlightTerms)
+    .slice(0, max)
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      source: item.source,
+      publishedAt: item.publishedAt,
+      url: item.url,
+      imageUrl: item.imageUrl,
+      sentimentScore: item.sentimentScore,
+    }))
 }
 
 function mapStatementPreview(dto: PersonStatementItemResponse): SearchStatementPreview {
@@ -67,7 +71,9 @@ function mapPersonResult(dto: PersonSearchItemResponse, query: string): SearchPe
     role: dto.personRole,
     organizationName: dto.organizationName,
     relatedNews: mapNewsPreviews(dto.relatedNews, highlight),
-    relatedStatements: (dto.relatedStatements ?? []).map(mapStatementPreview),
+    relatedStatements: (dto.relatedStatements ?? [])
+      .slice(0, SEARCH_STATEMENTS_MAX)
+      .map(mapStatementPreview),
   }
 }
 
@@ -108,7 +114,7 @@ function mapFallbackSections(
   const hotStocks = (dto.hotStocks ?? []).map(mapFallbackStock)
   const stockSectors = mapFallbackStockSectors(hotStocks)
   const topPersons = (dto.topPersons ?? []).map(mapFallbackPerson)
-  const latestNews = mapNewsPreviews(dto.latestNews ?? [])
+  const latestNews = mapNewsPreviews(dto.latestNews ?? [], undefined, SEARCH_NEWS_MAX)
 
   if (stockSectors.length === 0 && topPersons.length === 0 && latestNews.length === 0) {
     return null
@@ -118,9 +124,13 @@ function mapFallbackSections(
 }
 
 export function mapSearchResponse(dto: SearchResponse, query: string): UnifiedSearchResult {
+  const highlight = query.trim() ? [query.trim()] : undefined
+  const news = mapNewsPreviews(dto.news, highlight, SEARCH_NEWS_MAX)
+
   return {
     stocks: (dto.stocks ?? []).map((item) => mapStockResult(item, query)),
     persons: (dto.persons ?? []).map((item) => mapPersonResult(item, query)),
+    news,
     fallback: mapFallbackSections(dto.fallbackSections),
   }
 }

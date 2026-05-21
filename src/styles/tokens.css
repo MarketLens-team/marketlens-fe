@@ -75,7 +75,9 @@
   --layout-sidebar-width: 196px; /* Layout .sidebar */
   --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
   --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
-  --layout-search-modal-top: calc(var(--layout-top-strip-height) + var(--space-3));
+  /* 검색 모달: 티커+탑바 바로 아래, 하단 여백은 스크롤용으로 넉넉히 */
+  --layout-search-modal-top: calc(var(--layout-top-strip-height) + var(--space-1));
+  --layout-search-modal-bottom: var(--space-6);
   --layout-sidebar-accordion: 16.25rem; /* 260px */
 
   /* Motion */
