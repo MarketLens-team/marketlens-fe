@@ -3,13 +3,14 @@
 
 :root {
   /* Color (semantic) */
+  /* 배경: 레퍼런스처럼 바탕과 거의 같고 한 단계만 밝게 (Coinness/거래소 톤) */
   --color-bg-app: #0a0f16;
-  --color-bg-section: #0e1723;
-  --color-bg-card: #1a2332;
-  --color-bg-elevated: #243040;
+  --color-bg-section: #0c121a;
+  --color-bg-card: #0f151e;
+  --color-bg-elevated: #141c27;
 
-  --color-border-default: #2a3847;
-  --color-border-strong: #344757;
+  --color-border-default: #1c2734;
+  --color-border-strong: #263445;
 
   --color-text-primary: #ffffff;
   --color-text-secondary: #b8c2cc;
