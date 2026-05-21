@@ -1,3 +1,11 @@
+.item {
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
 .link {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 9rem;
@@ -38,9 +46,9 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
 }
 
@@ -56,7 +64,7 @@
 .date {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .metaSep {
@@ -91,8 +99,8 @@
 
 .title {
   margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   color: var(--color-text-primary);
   transition: color var(--duration-fast) ease;
@@ -106,8 +114,8 @@
 }
 
 .description {
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-base);
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-lg);
   line-height: var(--line-height-loose);
   color: var(--color-text-secondary);
   display: -webkit-box;
@@ -120,14 +128,14 @@
   width: 9rem;
   height: 6rem;
   object-fit: cover;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
 }
 
 .thumbPlaceholder {
   width: 9rem;
   height: 6rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: linear-gradient(
     145deg,
     color-mix(in srgb, var(--color-bg-elevated) 90%, var(--color-text-muted)),

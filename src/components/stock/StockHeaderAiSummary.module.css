@@ -9,14 +9,15 @@
 .label {
   margin: 0;
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
 }
 
 .text {
   margin: 0;
   font-size: var(--font-size-lg);
   line-height: var(--line-height-loose);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .textClamped {
