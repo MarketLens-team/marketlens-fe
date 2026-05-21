@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -69,6 +70,22 @@ const FALLBACK_FILTERS: { key: FallbackFilter; label: string }[] = [
   { key: 'person', label: '인물' },
   { key: 'news', label: '뉴스' },
 ]
+
+const SEARCH_NAV_ITEM = 'data-search-nav-item'
+const SEARCH_NAV_PRIMARY = 'data-search-nav-primary'
+const SEARCH_NAV_SELECTED = 'data-search-nav-selected'
+
+function cycleTabOption<T extends string>(
+  options: { key: T }[],
+  current: T,
+  delta: -1 | 1,
+): T {
+  if (options.length === 0) return current
+  const idx = options.findIndex((option) => option.key === current)
+  const base = idx < 0 ? 0 : idx
+  const next = (base + delta + options.length) % options.length
+  return options[next].key
+}
 
 function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false
@@ -165,6 +182,7 @@ function StockSearchRow({
 
   return (
     <li
+      data-search-nav-item
       className={clsx(
         styles.searchRow,
         showMentionCount ? styles.searchRowWithStat : styles.searchRowTwoCol,
@@ -193,6 +211,7 @@ function StockSearchRow({
         </button>
         <button
           type="button"
+          data-search-nav-primary
           className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
           onClick={() => {
             navigate(`/stock/${stock.code}`)
@@ -271,9 +290,10 @@ function SearchNewsRows({
 
         if (inAppRoute) {
           return (
-            <li key={item.rowKey}>
+            <li key={item.rowKey} data-search-nav-item>
               <button
                 type="button"
+                data-search-nav-primary
                 className={styles.newsRowCard}
                 onClick={() => {
                   navigate(inAppRoute)
@@ -287,9 +307,10 @@ function SearchNewsRows({
         }
 
         return (
-          <li key={item.rowKey}>
+          <li key={item.rowKey} data-search-nav-item={item.url ? true : undefined}>
             {item.url ? (
               <a
+                data-search-nav-primary
                 className={styles.newsRowCard}
                 href={item.url}
                 target="_blank"
@@ -374,6 +395,7 @@ function PersonSearchRow({
 
   return (
     <li
+      data-search-nav-item
       className={clsx(
         styles.searchRow,
         showMentionStat ? styles.searchRowWithStat : styles.searchRowTwoCol,
@@ -392,6 +414,7 @@ function PersonSearchRow({
       <div className={styles.stockActions}>
         <button
           type="button"
+          data-search-nav-primary
           className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
           onClick={() => {
             navigate('/person')
@@ -435,7 +458,11 @@ function StatementRows({
   return (
     <ul className={styles.rowList}>
       {items.map((stmt) => (
-        <li key={stmt.rowKey} className={clsx(styles.searchRow, styles.searchRowTwoCol, styles.searchRowStatement)}>
+        <li
+          key={stmt.rowKey}
+          data-search-nav-item
+          className={clsx(styles.searchRow, styles.searchRowTwoCol, styles.searchRowStatement)}
+        >
           <div className={styles.stockIdentity}>
             <p className={styles.statementQuote}>{stmt.quote}</p>
             <p className={styles.statementMeta}>{formatNewsMeta(stmt.publishedAt)}</p>
@@ -443,6 +470,7 @@ function StatementRows({
           <div className={styles.stockActions}>
             <button
               type="button"
+              data-search-nav-primary
               className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
               onClick={() => {
                 navigate('/person')
@@ -685,7 +713,9 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const [personFilter, setPersonFilter] = useState<PersonFilter>('all')
   const [fallbackFilter, setFallbackFilter] = useState<FallbackFilter>('all')
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const scrollRegionRef = useRef<HTMLDivElement | null>(null)
   const skipNextEmptyFetch = useRef(seed.kind === 'success')
+  const [selectedRowIndex, setSelectedRowIndex] = useState(-1)
 
   const focusSearchInput = useCallback(() => {
     inputRef.current?.focus()
@@ -694,21 +724,39 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   useEffect(() => {
     if (!isOpen) return
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      // 한글 IME에서는 event.key가 'p'가 아닌 'ㅔ' 등으로 옴 → 물리 키 코드 사용
-      if (event.code !== 'KeyP' || event.metaKey || event.ctrlKey || event.altKey) return
-      if (event.target === inputRef.current) return
-      if (isEditableTarget(event.target)) return
+    const onWheel = (event: WheelEvent) => {
+      const region = scrollRegionRef.current
+      if (!region) return
+
+      const dialog = region.closest('[role="dialog"]')
+      if (!dialog) return
+
+      const overlay = dialog.parentElement
+      if (!overlay?.classList.contains('modal-overlay')) return
+
+      const target = event.target
+      if (!(target instanceof Node) || !overlay.contains(target)) return
+      if (region.contains(target)) return
+      if (isEditableTarget(target)) return
+
+      const { scrollTop, scrollHeight, clientHeight } = region
+      if (scrollHeight <= clientHeight) return
+
+      const atTop = scrollTop <= 0
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 1
+      if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) return
+
+      region.scrollTop += event.deltaY
       event.preventDefault()
-      focusSearchInput()
     }
 
-    window.addEventListener('keydown', onKeyDown, true)
-    return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [isOpen, focusSearchInput])
+    document.addEventListener('wheel', onWheel, { passive: false })
+    return () => document.removeEventListener('wheel', onWheel)
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
+    setSelectedRowIndex(-1)
     setQuery('')
     setStockFilter('all')
     setPersonFilter('all')
@@ -851,6 +899,112 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const contentReady = results !== null || Boolean(error)
   const showError = Boolean(error && !loading)
 
+  const hasFilterTabs = showFallback || showSearchFilters
+
+  useEffect(() => {
+    setSelectedRowIndex(-1)
+  }, [
+    query,
+    stockFilter,
+    personFilter,
+    fallbackFilter,
+    domain,
+    effectiveDomain,
+    results,
+    showFallback,
+    showSearchFilters,
+    loading,
+  ])
+
+  useLayoutEffect(() => {
+    const region = scrollRegionRef.current
+    if (!region) return
+    const items = region.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
+    items.forEach((element, index) => {
+      element.setAttribute(SEARCH_NAV_SELECTED, index === selectedRowIndex ? 'true' : 'false')
+    })
+    const active = items[selectedRowIndex]
+    if (active) {
+      active.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [selectedRowIndex, query, stockFilter, personFilter, fallbackFilter, domain, results, loading])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      const dialog = scrollRegionRef.current?.closest('[role="dialog"]')
+      if (!dialog) return
+
+      if (event.code === 'KeyP' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        if (event.target === inputRef.current) return
+        if (isEditableTarget(event.target)) return
+        event.preventDefault()
+        focusSearchInput()
+        return
+      }
+
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        if (!hasFilterTabs) return
+        event.preventDefault()
+        const delta: -1 | 1 = event.key === 'ArrowRight' ? 1 : -1
+        if (showFallback) {
+          setFallbackFilter((prev) => cycleTabOption(FALLBACK_FILTERS, prev, delta))
+        } else if (showSearchFilters) {
+          if (effectiveDomain === 'stock') {
+            setStockFilter((prev) => cycleTabOption(stockFilterOptions, prev, delta))
+          } else {
+            setPersonFilter((prev) => cycleTabOption(personFilterOptions, prev, delta))
+          }
+        }
+        return
+      }
+
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter') return
+
+      const items = scrollRegionRef.current?.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
+      const itemCount = items?.length ?? 0
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (itemCount === 0) return
+        event.preventDefault()
+        setSelectedRowIndex((prev) => {
+          if (event.key === 'ArrowDown') {
+            if (prev < 0) return 0
+            return (prev + 1) % itemCount
+          }
+          if (prev <= 0) {
+            window.requestAnimationFrame(() => focusSearchInput())
+            return -1
+          }
+          return prev - 1
+        })
+        return
+      }
+
+      if (event.key === 'Enter' && selectedRowIndex >= 0 && itemCount > 0) {
+        if (event.target === inputRef.current) return
+        event.preventDefault()
+        const row = items?.[selectedRowIndex]
+        const primary = row?.querySelector(`[${SEARCH_NAV_PRIMARY}]`) as HTMLElement | null
+        primary?.click()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [
+    isOpen,
+    focusSearchInput,
+    hasFilterTabs,
+    showFallback,
+    showSearchFilters,
+    effectiveDomain,
+    stockFilterOptions,
+    personFilterOptions,
+    selectedRowIndex,
+  ])
+
   return (
     <Modal
       isOpen={isOpen}
@@ -887,7 +1041,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
         </div>
 
         {contentReady ? (
-          <>
+          <div ref={scrollRegionRef} className={styles.scrollRegion}>
             {showDomainTabs && showSearchFilters ? (
               <div className={styles.tabNavStrip}>
                 <UnderlineTabNav
@@ -959,14 +1113,15 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
                 <p className={styles.empty}>검색 결과가 없습니다.</p>
               ) : null}
             </div>
-          </>
+          </div>
         ) : null}
 
         {showError ? <p className={styles.error}>{error}</p> : null}
 
         <div className={styles.footerHints}>
           <span>p 검색</span>
-          <span>관심목록 즉시 반영</span>
+          <span>↑↓ 항목 · ←→ 탭</span>
+          <span>Enter 이동</span>
           <span>ESC 모달 닫기</span>
         </div>
       </section>
