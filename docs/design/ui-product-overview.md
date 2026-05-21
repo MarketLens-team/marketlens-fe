@@ -136,5 +136,6 @@ PR·DDR 근거로 쓰기 좋은 화면 단위:
 | [changelog/2026-05-15-feat-design-tokens.md](../changelog/2026-05-15-feat-design-tokens.md) | 토큰·Stylelint 도입 이력 |
 | [changelog/2026-05-19-feat-core-pages.md](../changelog/2026-05-19-feat-core-pages.md) | 홈 대시보드·레이아웃 |
 | [changelog/2026-05-20-feat-core-pages-frontend.md](../changelog/2026-05-20-feat-core-pages-frontend.md) | 인물 트래커·에러 UI |
+| [snapshots/2026-05-21/ui-pre-design-refresh.md](../snapshots/2026-05-21/ui-pre-design-refresh.md) | 디자인 리프레시 **이전** UI 스크린샷·IA 베이스라인 |
 
 이 문서는 **제품·UI 관점 서술**이며, 컴포넌트 파일명·props는 필요 시 각 페이지·컴포넌트 소스와 changelog를 함께 본다.
