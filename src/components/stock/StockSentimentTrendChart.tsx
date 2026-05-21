@@ -39,7 +39,6 @@ import {
 import {
   maxMentionCount,
   toChartTime,
-  trendToAreaData,
   trendToMentionHistogramData,
 } from './stockSentimentTrendChartData'
 import styles from './StockSentimentTrendChart.module.css'
@@ -153,7 +152,6 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   const zoneLabelsLayerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const mainSeriesRef = useRef<ISeriesApi<'Line'> | null>(null)
-  const spineSeriesRef = useRef<ISeriesApi<'Line'> | null>(null)
   const lineSeriesListRef = useRef<ISeriesApi<'Line'>[]>([])
   const histogramSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null)
   const currentBadgeRef = useRef<HTMLDivElement>(null)
@@ -166,7 +164,6 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
 
   const clampedCurrent = Math.min(SCORE_MAX, Math.max(SCORE_MIN, currentScore))
   const lineSegments = useMemo(() => buildSentimentLineSegments(trend), [trend])
-  const scoreLineData = useMemo(() => trendToAreaData(trend), [trend])
   const mentionMax = useMemo(() => maxMentionCount(trend), [trend])
   const histogramData = useMemo(
     () => trendToMentionHistogramData(trend, mentionMax),
@@ -240,7 +237,6 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   }
 
   useEffect(() => {
-    spineSeriesRef.current?.applyOptions({ visible: visibility.score })
     lineSeriesListRef.current.forEach((s) => s.applyOptions({ visible: visibility.score }))
     histogramSeriesRef.current?.applyOptions({ visible: visibility.mention })
     syncOverlays()
@@ -258,22 +254,6 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
     chartRef.current = chart
 
     lineSeriesListRef.current = []
-
-    const spineSeries = chart.addSeries(LineSeries, {
-      priceScaleId: 'right',
-      color: withAlpha(colors.chartText, 0.3),
-      lineWidth: SENTIMENT_SCORE_LINE_WIDTH,
-      lineType: LineType.Curved,
-      crosshairMarkerVisible: false,
-      lastValueVisible: false,
-      priceLineVisible: false,
-      autoscaleInfoProvider: () => ({
-        priceRange: { minValue: SCORE_MIN, maxValue: SCORE_MAX },
-      }),
-    })
-    spineSeries.setData(scoreLineData)
-    spineSeries.applyOptions({ visible: visibility.score })
-    spineSeriesRef.current = spineSeries
 
     lineSegments.forEach((segment, index) => {
       const lineSeries = chart.addSeries(LineSeries, {
@@ -374,11 +354,10 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       chart.remove()
       chartRef.current = null
       mainSeriesRef.current = null
-      spineSeriesRef.current = null
       lineSeriesListRef.current = []
       histogramSeriesRef.current = null
     }
-  }, [trend, colors, lineSegments, scoreLineData, histogramData, mentionMax, syncOverlays])
+  }, [trend, colors, lineSegments, histogramData, mentionMax, syncOverlays])
 
   useEffect(() => {
     syncOverlays()
