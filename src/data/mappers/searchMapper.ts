@@ -6,6 +6,8 @@ import type {
   FallbackStockItemResponse,
   PersonSearchItemResponse,
   PersonStatementItemResponse,
+  SearchNewsItemResponse,
+  SearchNewsSourceType,
   SearchResponse,
   StockSearchItemResponse,
 } from '../types/searchApi'
@@ -15,14 +17,58 @@ import type {
   SearchFallbackSections,
   SearchFallbackSectorGroup,
   SearchFallbackStock,
+  SearchNewsPersonTag,
   SearchNewsPreview,
+  SearchNewsStockTag,
   SearchPersonResult,
   SearchStatementPreview,
   SearchStockResult,
   UnifiedSearchResult,
 } from '../types/search'
 
-function mapNewsPreviews(
+function parseSearchNewsSourceType(value: string | undefined): SearchNewsSourceType {
+  if (value === 'stock' || value === 'person' || value === 'mixed' || value === 'unknown') {
+    return value
+  }
+  return 'unknown'
+}
+
+function mapNewsStockTags(dto: SearchNewsItemResponse['stocks']): SearchNewsStockTag[] {
+  return (dto ?? []).map((tag) => ({
+    stockCode: tag.stockCode,
+    stockName: tag.stockName,
+    relevanceScore: tag.relevanceScore,
+  }))
+}
+
+function mapNewsPersonTags(dto: SearchNewsItemResponse['persons']): SearchNewsPersonTag[] {
+  return (dto ?? []).map((tag) => ({
+    personId: String(tag.personId),
+    personName: tag.personName,
+    personRole: tag.personRole,
+    organizationName: tag.organizationName,
+    relevanceScore: tag.relevanceScore,
+  }))
+}
+
+function mapSearchNewsItem(dto: SearchNewsItemResponse): SearchNewsPreview {
+  return {
+    id: String(dto.id),
+    title: dto.title,
+    source: dto.source,
+    publishedAt: dto.publishedAt,
+    url: dto.originalLink || undefined,
+    imageUrl: dto.imageUrl || null,
+    sentimentScore: dto.sentimentScore,
+    sentiment: dto.sentiment,
+    sourceType: parseSearchNewsSourceType(dto.sourceType),
+    primaryStockCode: dto.primaryStockCode ?? null,
+    stocks: mapNewsStockTags(dto.stocks),
+    persons: mapNewsPersonTags(dto.persons),
+  }
+}
+
+function mapNewsPreviewsFromFeed(
   items: StockSearchItemResponse['relatedNews'],
   highlightTerms?: string[],
   max = SEARCH_NEWS_MAX,
@@ -37,7 +83,17 @@ function mapNewsPreviews(
       url: item.url,
       imageUrl: item.imageUrl,
       sentimentScore: item.sentimentScore,
+      sentiment: item.sentiment,
+      stocks: [],
+      persons: [],
     }))
+}
+
+function mapSearchNewsPreviews(
+  items: SearchNewsItemResponse[] | undefined,
+  max = SEARCH_NEWS_MAX,
+): SearchNewsPreview[] {
+  return (items ?? []).slice(0, max).map(mapSearchNewsItem)
 }
 
 function mapStatementPreview(dto: PersonStatementItemResponse): SearchStatementPreview {
@@ -59,18 +115,16 @@ function mapStockResult(dto: StockSearchItemResponse, query: string): SearchStoc
     market: dto.market,
     sectorCode: dto.sectorCode,
     sectorName: dto.sectorName,
-    relatedNews: mapNewsPreviews(dto.relatedNews, highlight),
+    relatedNews: mapNewsPreviewsFromFeed(dto.relatedNews, highlight),
   }
 }
 
-function mapPersonResult(dto: PersonSearchItemResponse, query: string): SearchPersonResult {
-  const highlight = [dto.personName, query]
+function mapPersonResult(dto: PersonSearchItemResponse): SearchPersonResult {
   return {
     personId: String(dto.personId),
     personName: dto.personName,
     role: dto.personRole,
     organizationName: dto.organizationName,
-    relatedNews: mapNewsPreviews(dto.relatedNews, highlight),
     relatedStatements: (dto.relatedStatements ?? [])
       .slice(0, SEARCH_STATEMENTS_MAX)
       .map(mapStatementPreview),
@@ -114,7 +168,7 @@ function mapFallbackSections(
   const hotStocks = (dto.hotStocks ?? []).map(mapFallbackStock)
   const stockSectors = mapFallbackStockSectors(hotStocks)
   const topPersons = (dto.topPersons ?? []).map(mapFallbackPerson)
-  const latestNews = mapNewsPreviews(dto.latestNews ?? [], undefined, SEARCH_NEWS_MAX)
+  const latestNews = mapSearchNewsPreviews(dto.latestNews ?? [], SEARCH_NEWS_MAX)
 
   if (stockSectors.length === 0 && topPersons.length === 0 && latestNews.length === 0) {
     return null
@@ -124,12 +178,11 @@ function mapFallbackSections(
 }
 
 export function mapSearchResponse(dto: SearchResponse, query: string): UnifiedSearchResult {
-  const highlight = query.trim() ? [query.trim()] : undefined
-  const news = mapNewsPreviews(dto.news, highlight, SEARCH_NEWS_MAX)
+  const news = mapSearchNewsPreviews(dto.news, SEARCH_NEWS_MAX)
 
   return {
     stocks: (dto.stocks ?? []).map((item) => mapStockResult(item, query)),
-    persons: (dto.persons ?? []).map((item) => mapPersonResult(item, query)),
+    persons: (dto.persons ?? []).map(mapPersonResult),
     news,
     fallback: mapFallbackSections(dto.fallbackSections),
   }

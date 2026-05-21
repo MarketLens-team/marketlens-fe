@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -21,6 +22,10 @@ import type {
 } from '../../data/types/search'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { groupStocksBySector } from '../../lib/groupStocksBySector'
+import {
+  formatSearchNewsContextLabel,
+  resolveSearchNewsRoute,
+} from '../../lib/resolveSearchNewsRoute'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { Modal } from '../ui/Modal'
 import { UnderlineTabNav } from './UnderlineTabNav'
@@ -76,6 +81,13 @@ const PERSON_FILTERS: { key: PersonFilter; label: string }[] = [
   { key: 'news', label: '뉴스' },
 ]
 
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false
+  if (target.isContentEditable) return true
+  const tag = target.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+}
+
 function formatNewsMeta(iso: string) {
   return `${formatNewsDateLong(iso)} · ${formatNewsTimeBadge(iso)}`
 }
@@ -86,10 +98,11 @@ function formatMentionCount(count: number) {
 
 type NewsWithContext = SearchNewsPreview & { contextLabel?: string; rowKey: string }
 
-function mapSearchNewsRows(news: SearchNewsPreview[]): NewsWithContext[] {
+function mapSearchNewsRows(news: SearchNewsPreview[], keyPrefix = 'news'): NewsWithContext[] {
   return news.map((item) => ({
     ...item,
-    rowKey: `news-${item.id}`,
+    contextLabel: formatSearchNewsContextLabel(item),
+    rowKey: `${keyPrefix}-${item.id}`,
   }))
 }
 
@@ -226,13 +239,40 @@ function StockRowsBySector({
   )
 }
 
-function SearchNewsRows({ items }: { items: NewsWithContext[] }) {
+function SearchNewsRows({
+  items,
+  onClose,
+}: {
+  items: NewsWithContext[]
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+
   if (items.length === 0) return null
 
   return (
     <ul className={styles.rowList}>
       {items.map((item) => {
         const inner = <SearchNewsRowContent item={item} />
+        const inAppRoute = resolveSearchNewsRoute(item)
+
+        if (inAppRoute) {
+          return (
+            <li key={item.rowKey}>
+              <button
+                type="button"
+                className={styles.newsRowCard}
+                onClick={() => {
+                  navigate(inAppRoute)
+                  onClose()
+                }}
+              >
+                {inner}
+              </button>
+            </li>
+          )
+        }
+
         return (
           <li key={item.rowKey}>
             {item.url ? (
@@ -353,7 +393,7 @@ function StockSearchResults({
     if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
     return (
       <ResultSection label="뉴스" variant="rows">
-        <SearchNewsRows items={searchNews} />
+        <SearchNewsRows items={searchNews} onClose={onClose} />
       </ResultSection>
     )
   }
@@ -367,7 +407,7 @@ function StockSearchResults({
       {stocks.length > 0 ? <StockResultList stocks={stocks} onClose={onClose} /> : null}
       {searchNews.length > 0 ? (
         <ResultSection label="뉴스" variant="rows">
-          <SearchNewsRows items={searchNews} />
+          <SearchNewsRows items={searchNews} onClose={onClose} />
         </ResultSection>
       ) : null}
     </>
@@ -421,10 +461,7 @@ function SearchFallbackResults({
   filter: FallbackFilter
   onClose: () => void
 }) {
-  const latestNewsRows: NewsWithContext[] = fallback.latestNews.map((item) => ({
-    ...item,
-    rowKey: `fallback-news-${item.id}`,
-  }))
+  const latestNewsRows = mapSearchNewsRows(fallback.latestNews, 'fallback-news')
 
   if (filter === 'stock') {
     const fallbackStocks = fallback.stockSectors.flatMap((sector) => sector.stocks)
@@ -451,7 +488,7 @@ function SearchFallbackResults({
     }
     return (
       <ResultSection label="최신 뉴스" variant="rows">
-        <SearchNewsRows items={latestNewsRows} />
+        <SearchNewsRows items={latestNewsRows} onClose={onClose} />
       </ResultSection>
     )
   }
@@ -478,7 +515,7 @@ function SearchFallbackResults({
       ) : null}
       {fallback.latestNews.length > 0 ? (
         <ResultSection label="최신 뉴스" variant="rows">
-          <SearchNewsRows items={latestNewsRows} />
+          <SearchNewsRows items={latestNewsRows} onClose={onClose} />
         </ResultSection>
       ) : null}
     </>
@@ -520,7 +557,7 @@ function PersonSearchResults({
     if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
     return (
       <ResultSection label="뉴스" variant="rows">
-        <SearchNewsRows items={searchNews} />
+        <SearchNewsRows items={searchNews} onClose={onClose} />
       </ResultSection>
     )
   }
@@ -543,7 +580,7 @@ function PersonSearchResults({
       ) : null}
       {searchNews.length > 0 ? (
         <ResultSection label="뉴스" variant="rows">
-          <SearchNewsRows items={searchNews} />
+          <SearchNewsRows items={searchNews} onClose={onClose} />
         </ResultSection>
       ) : null}
     </>
@@ -565,6 +602,26 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const [fallbackFilter, setFallbackFilter] = useState<FallbackFilter>('all')
   const inputRef = useRef<HTMLInputElement | null>(null)
   const skipNextEmptyFetch = useRef(seed.kind === 'success')
+
+  const focusSearchInput = useCallback(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      // 한글 IME에서는 event.key가 'p'가 아닌 'ㅔ' 등으로 옴 → 물리 키 코드 사용
+      if (event.code !== 'KeyP' || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.target === inputRef.current) return
+      if (isEditableTarget(event.target)) return
+      event.preventDefault()
+      focusSearchInput()
+    }
+
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
+  }, [isOpen, focusSearchInput])
 
   useEffect(() => {
     if (!isOpen) return
@@ -709,6 +766,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="종목명·코드, 인물명으로 검색..."
+            aria-keyshortcuts="p"
           />
           {query ? (
             <button
@@ -802,7 +860,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
         {showError ? <p className={styles.error}>{error}</p> : null}
 
         <div className={styles.footerHints}>
-          <span>/ 검색</span>
+          <span>p 검색</span>
           <span>관심목록 즉시 반영</span>
           <span>ESC 모달 닫기</span>
         </div>

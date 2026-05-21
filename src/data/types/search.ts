@@ -1,5 +1,21 @@
 /** 통합 검색 UI 모델 */
 
+export type SearchNewsSourceType = 'stock' | 'person' | 'mixed' | 'unknown'
+
+export interface SearchNewsStockTag {
+  stockCode: string
+  stockName: string
+  relevanceScore?: number
+}
+
+export interface SearchNewsPersonTag {
+  personId: string
+  personName: string
+  personRole?: string
+  organizationName?: string
+  relevanceScore?: number
+}
+
 export interface SearchNewsPreview {
   id: string
   title: string
@@ -8,6 +24,12 @@ export interface SearchNewsPreview {
   url?: string
   imageUrl?: string | null
   sentimentScore: number
+  sentiment: string
+  /** 통합·fallback 뉴스에만 채워짐 (종목 nested relatedNews는 비움) */
+  sourceType?: SearchNewsSourceType
+  primaryStockCode?: string | null
+  stocks: SearchNewsStockTag[]
+  persons: SearchNewsPersonTag[]
 }
 
 export interface SearchStatementPreview {
@@ -33,7 +55,6 @@ export interface SearchPersonResult {
   personName: string
   role: string
   organizationName: string
-  relatedNews: SearchNewsPreview[]
   relatedStatements: SearchStatementPreview[]
 }
 

@@ -1,10 +1,14 @@
 import { mockNewsFeed } from './news.mock'
 import { mockPersonStatementsResponse } from './person.mock'
 import { mockStockDirectory } from './stockDirectory.mock'
-import type { FallbackSectionsResponse, SearchResponse } from '../types/searchApi'
+import type { FallbackSectionsResponse, SearchNewsItemResponse, SearchResponse } from '../types/searchApi'
 
-function newsDtoSlice(count: number) {
-  return mockNewsFeed.slice(0, count).map((item, index) => ({
+function toSearchNewsItem(
+  item: (typeof mockNewsFeed)[number],
+  index: number,
+  routing: Pick<SearchNewsItemResponse, 'sourceType' | 'primaryStockCode' | 'stocks' | 'persons'>,
+): SearchNewsItemResponse {
+  return {
     id: Number(item.id.replace(/\D/g, '')) || index + 1,
     title: item.title,
     description: item.summary ?? '',
@@ -14,7 +18,25 @@ function newsDtoSlice(count: number) {
     imageUrl: item.imageUrl ?? '',
     sentimentScore: item.sentimentScore,
     sentiment: item.sentimentScore >= 0 ? 'positive' : 'negative',
-  }))
+    sourceType: routing.sourceType,
+    primaryStockCode: routing.primaryStockCode,
+    stocks: routing.stocks,
+    persons: routing.persons,
+  }
+}
+
+function newsDtoSlice(count: number): SearchNewsItemResponse[] {
+  const sampleStock = mockStockDirectory.sectors[0]?.stocks[0]
+  return mockNewsFeed.slice(0, count).map((item, index) =>
+    toSearchNewsItem(item, index, {
+      sourceType: 'stock',
+      primaryStockCode: sampleStock?.code ?? '005930',
+      stocks: sampleStock
+        ? [{ stockCode: sampleStock.code, stockName: sampleStock.name, relevanceScore: 90 }]
+        : [],
+      persons: [],
+    }),
+  )
 }
 
 function buildMockFallbackSections(): FallbackSectionsResponse {
@@ -89,7 +111,6 @@ export function buildMockSearchResponse(query: string): SearchResponse {
       personName: row.personName,
       personRole: row.personRole,
       organizationName: row.organizationName,
-      relatedNews: [],
       relatedStatements: mockPersonStatementsResponse
         .filter((s) => s.personId === row.personId)
         .slice(0, 10)

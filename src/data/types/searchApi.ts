@@ -2,6 +2,39 @@
 
 import type { NewsFeedItemResponse } from './stockApi'
 
+export type SearchNewsSourceType = 'stock' | 'person' | 'mixed' | 'unknown'
+
+export interface SearchNewsStockTagResponse {
+  stockCode: string
+  stockName: string
+  relevanceScore?: number
+}
+
+export interface SearchNewsPersonTagResponse {
+  personId: number
+  personName: string
+  personRole?: string
+  organizationName?: string
+  relevanceScore?: number
+}
+
+/** `SearchResponse.SearchNewsItem` — 통합·fallback 뉴스 */
+export interface SearchNewsItemResponse {
+  id: number
+  title: string
+  description: string
+  originalLink: string
+  source: string
+  publishedAt: string
+  imageUrl: string
+  sentimentScore: number
+  sentiment: string
+  sourceType: SearchNewsSourceType | string
+  primaryStockCode: string | null
+  stocks: SearchNewsStockTagResponse[]
+  persons: SearchNewsPersonTagResponse[]
+}
+
 export interface PersonStatementItemResponse {
   statementId: number
   speechQuote: string
@@ -26,7 +59,6 @@ export interface PersonSearchItemResponse {
   personName: string
   personRole: string
   organizationName: string
-  relatedNews?: NewsFeedItemResponse[]
   relatedStatements?: PersonStatementItemResponse[]
 }
 
@@ -50,13 +82,13 @@ export interface FallbackPersonItemResponse {
 export interface FallbackSectionsResponse {
   hotStocks: FallbackStockItemResponse[]
   topPersons: FallbackPersonItemResponse[]
-  latestNews: NewsFeedItemResponse[]
+  latestNews: SearchNewsItemResponse[]
 }
 
 export interface SearchResponse {
   stocks: StockSearchItemResponse[]
   persons: PersonSearchItemResponse[]
   /** 검색어 매칭 시 관련 최신 뉴스 (최대 10건) */
-  news?: NewsFeedItemResponse[]
+  news?: SearchNewsItemResponse[]
   fallbackSections?: FallbackSectionsResponse | null
 }
