@@ -45,6 +45,22 @@
   margin-bottom: var(--space-5);
 }
 
+/* 검색 모달(TopNavSearchModal)과 동일한 모달·입력 색 */
+.cardInModal .input {
+  background: var(--color-bg-modal-inset);
+  border-color: var(--color-border-default);
+}
+
+.cardInModal .input:focus {
+  border-color: var(--color-border-strong);
+  outline: none;
+}
+
+.cardInModal .inputDisabled,
+.cardInModal .input:disabled {
+  background: color-mix(in srgb, var(--color-bg-modal-inset) 65%, var(--color-bg-modal));
+}
+
 .pageInModal {
   width: 100%;
 }
