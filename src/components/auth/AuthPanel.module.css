@@ -370,6 +370,13 @@
   color: var(--color-text-secondary);
 }
 
+.forgotLead {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
 .authBackLink {
   display: inline-flex;
   align-items: center;

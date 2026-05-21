@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import {
-  confirmSignupEmailVerification,
-  sendSignupEmailVerification,
+  confirmEmailVerification,
+  sendEmailVerification,
 } from '../../data/clients/authClient'
+import type { EmailVerificationPurpose } from '../../data/types/auth'
 import { useResendCooldown } from '../../hooks/useResendCooldown'
 import { ButtonSpinner } from '../ui/ButtonSpinner'
 import { OtpCodeInput } from './OtpCodeInput'
@@ -10,6 +11,7 @@ import styles from './AuthEmailVerifyStep.module.css'
 
 export interface AuthEmailVerifyStepProps {
   email: string
+  purpose?: EmailVerificationPurpose
   onBack: () => void
   onVerified: () => void | Promise<void>
   showTopBar?: boolean
@@ -46,6 +48,7 @@ function ChevronIcon({ expanded }: { expanded: boolean }) {
 
 export function AuthEmailVerifyStep({
   email,
+  purpose = 'SIGNUP',
   onBack,
   onVerified,
   showTopBar = true,
@@ -71,7 +74,7 @@ export function AuthEmailVerifyStep({
     setIsVerifying(true)
     setVerifyError(null)
     try {
-      await confirmSignupEmailVerification({ email, code: nextCode })
+      await confirmEmailVerification({ email, code: nextCode }, purpose)
       await Promise.resolve(onVerified())
     } catch (error) {
       setVerifyError(error instanceof Error ? error.message : '이메일 인증에 실패했습니다.')
@@ -87,7 +90,7 @@ export function AuthEmailVerifyStep({
     setResendError(null)
     setVerifyError(null)
     try {
-      await sendSignupEmailVerification(email)
+      await sendEmailVerification(email, purpose)
       restart()
       setCode('')
     } catch (error) {

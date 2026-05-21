@@ -13,8 +13,11 @@ import {
   checkEmailAvailability,
   checkNicknameAvailability,
   createPendingSignup,
+  resetPassword,
+  sendEmailVerification,
   sendSignupEmailVerification,
 } from '../../data/clients/authClient'
+import type { EmailVerificationPurpose } from '../../data/types/auth'
 import type { CompleteRegistrationInput } from '../../data/clients/completeRegistration'
 import { getApiErrorMessage, parseApiFieldError } from '../../data/util/apiError'
 import type { AlertSettings } from '../../data/types/member'
@@ -70,6 +73,12 @@ function isEmailDuplicateError(message: string) {
 function isNicknameDuplicateError(message: string) {
   return message.includes('이미 사용 중인 닉네임')
 }
+
+function isMemberNotFoundError(message: string) {
+  return message.includes('존재하지 않는 회원')
+}
+
+type LoginPhase = 'signin' | 'forgot-email' | 'forgot-password'
 
 function applySignupApiError(
   rawMessage: string,
@@ -213,6 +222,9 @@ export default function AuthPanel({
   const [nicknameCheckStatus, setNicknameCheckStatus] = useState<AvailabilityStatus>('idle')
   const [emailVerified, setEmailVerified] = useState(false)
   const [emailVerifyModalOpen, setEmailVerifyModalOpen] = useState(false)
+  const [emailVerifyPurpose, setEmailVerifyPurpose] = useState<EmailVerificationPurpose>('SIGNUP')
+  const [loginPhase, setLoginPhase] = useState<LoginPhase>('signin')
+  const [passwordResetVerified, setPasswordResetVerified] = useState(false)
   const [pendingSignupToken, setPendingSignupToken] = useState<string | null>(null)
   const [signupStep, setSignupStep] = useState<SignupStep>(1)
   const [email, setEmail] = useState('')
@@ -264,12 +276,24 @@ export default function AuthPanel({
     setNicknameCheckStatus('idle')
     setEmailVerified(false)
     setEmailVerifyModalOpen(false)
+    setEmailVerifyPurpose('SIGNUP')
     setPendingSignupToken(null)
     setSignupStep(1)
     setWatchlistSelection([])
     setAlertSettings(DEFAULT_ALERT_SETTINGS)
     setStepError(null)
     setSignupSubmitError(null)
+  }
+
+  const resetLoginForgotFlow = () => {
+    setLoginPhase('signin')
+    setPasswordResetVerified(false)
+    setPassword('')
+    setConfirmPassword('')
+    setPasswordVisible(false)
+    setConfirmVisible(false)
+    setEmailVerifyPurpose('SIGNUP')
+    setEmailVerifyModalOpen(false)
   }
 
   const switchMode = (next: AuthMode) => {
@@ -281,6 +305,7 @@ export default function AuthPanel({
     setPasswordVisible(false)
     setConfirmVisible(false)
     resetSignupFlow()
+    resetLoginForgotFlow()
     onModeChange(next)
   }
 
@@ -463,6 +488,7 @@ export default function AuthPanel({
         setEmailCheckStatus('available')
       }
 
+      setEmailVerifyPurpose('SIGNUP')
       await sendSignupEmailVerification(email.trim())
       setEmailVerifyModalOpen(true)
     } catch (error) {
@@ -488,6 +514,133 @@ export default function AuthPanel({
     setEmailVerifyModalOpen(false)
     window.requestAnimationFrame(() => nicknameRef.current?.focus())
   }
+
+  const startForgotPassword = () => {
+    setLoginAuthError(null)
+    setSignupSubmitError(null)
+    setFormMessage(null)
+    setErrors({})
+    setPassword('')
+    setConfirmPassword('')
+    setPasswordResetVerified(false)
+    setLoginPhase('forgot-email')
+  }
+
+  const exitForgotPassword = () => {
+    resetLoginForgotFlow()
+    setErrors({})
+    setLoginAuthError(null)
+    setSignupSubmitError(null)
+  }
+
+  const handleOpenPasswordResetVerification = async () => {
+    if (passwordResetVerified) return
+    const emailError = validateEmail(email)
+    if (emailError) {
+      setErrors((prev) => ({ ...prev, email: emailError }))
+      emailRef.current?.focus()
+      return
+    }
+
+    setSignupSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      setEmailVerifyPurpose('PASSWORD_RESET')
+      await sendEmailVerification(email.trim(), 'PASSWORD_RESET')
+      setEmailVerifyModalOpen(true)
+    } catch (error) {
+      const message = getApiErrorMessage(error, '인증 메일 발송에 실패했습니다.')
+      if (isMemberNotFoundError(message)) {
+        setErrors({ email: message })
+        emailRef.current?.focus()
+        return
+      }
+      const field = applySignupApiError(message, setErrors, setSignupSubmitError)
+      if (field === 'email') {
+        emailRef.current?.focus()
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handlePasswordResetEmailVerified = () => {
+    setPasswordResetVerified(true)
+    setEmailVerifyModalOpen(false)
+    setLoginPhase('forgot-password')
+    setPassword('')
+    setConfirmPassword('')
+    window.requestAnimationFrame(() => passwordRef.current?.focus())
+  }
+
+  const handleEmailVerifiedFromModal = () => {
+    if (emailVerifyPurpose === 'PASSWORD_RESET') {
+      handlePasswordResetEmailVerified()
+      return
+    }
+    handleEmailVerified()
+  }
+
+  const validatePasswordReset = () => {
+    const next: FieldErrors = {}
+    if (password.length < 8) {
+      next.password = '비밀번호는 8자 이상이어야 합니다.'
+    }
+    if (password !== confirmPassword) {
+      next.confirmPassword = '비밀번호가 일치하지 않습니다.'
+    }
+    setErrors(next)
+    if (next.password) {
+      passwordRef.current?.focus()
+      return false
+    }
+    if (next.confirmPassword) {
+      confirmRef.current?.focus()
+      return false
+    }
+    return true
+  }
+
+  const handlePasswordResetSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isSubmitting) return
+    if (!passwordResetVerified) {
+      setSignupSubmitError('이메일 인증을 완료해주세요.')
+      setLoginPhase('forgot-email')
+      return
+    }
+    setSignupSubmitError(null)
+    if (!validatePasswordReset()) return
+
+    setIsSubmitting(true)
+    try {
+      await resetPassword({ email: email.trim(), newPassword: password })
+      setFormMessage({ type: 'success', text: '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.' })
+      resetLoginForgotFlow()
+    } catch (error) {
+      const message = getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.')
+      if (message.includes('이메일 인증이 완료되지 않았습니다') || message.includes('비밀번호 재설정')) {
+        setPasswordResetVerified(false)
+        setLoginPhase('forgot-email')
+        setSignupSubmitError(message)
+        return
+      }
+      applySignupApiError(message, setErrors, setSignupSubmitError)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const passwordResetEmailTrailingAction = {
+    label: passwordResetVerified ? '인증 완료' : '인증',
+    onClick: () => void handleOpenPasswordResetVerification(),
+    disabled: passwordResetVerified || isSubmitting || !email.trim(),
+    busy: isSubmitting,
+    done: passwordResetVerified,
+  }
+
+  const isPasswordResetSubmitEnabled =
+    passwordResetVerified && password.length >= 8 && password === confirmPassword
 
   const goToSignupNextStep = async () => {
     setFormMessage(null)
@@ -658,65 +811,196 @@ export default function AuthPanel({
         ) : null}
 
         {mode === 'login' ? (
-          <form id={`${formId}-login`} className={styles.form} onSubmit={handleLoginSubmit} noValidate>
-            <AuthField
-              id="auth-email"
-              label="이메일 주소"
-              value={email}
-              onChange={(value) => {
-                setEmail(value)
-                clearFieldError('email')
-                setLoginAuthError(null)
-              }}
-              placeholder="이메일 주소 입력..."
-              type="email"
-              error={errors.email}
-              invalid={Boolean(errors.email)}
-              inputRef={emailRef}
-              autoComplete="email"
-              onBlur={handleEmailBlur}
-              onKeyDown={(event) => {
-                if (event.key !== 'Enter') return
+          loginPhase === 'signin' ? (
+            <form id={`${formId}-login`} className={styles.form} onSubmit={handleLoginSubmit} noValidate>
+              <AuthField
+                id="auth-email"
+                label="이메일 주소"
+                value={email}
+                onChange={(value) => {
+                  setEmail(value)
+                  clearFieldError('email')
+                  setLoginAuthError(null)
+                }}
+                placeholder="이메일 주소 입력..."
+                type="email"
+                error={errors.email}
+                invalid={Boolean(errors.email)}
+                inputRef={emailRef}
+                autoComplete="email"
+                onBlur={handleEmailBlur}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter') return
+                  event.preventDefault()
+                  const emailError = validateEmail(email)
+                  if (emailError) {
+                    setErrors((prev) => ({ ...prev, email: emailError }))
+                    return
+                  }
+                  clearFieldError('email')
+                  passwordRef.current?.focus()
+                }}
+              />
+              <div className={styles.loginPasswordMeta}>
+                <AuthField
+                  id="auth-password"
+                  label="비밀번호"
+                  value={password}
+                  onChange={(value) => {
+                    setPassword(value)
+                    clearFieldError('password')
+                    setLoginAuthError(null)
+                  }}
+                  placeholder="비밀번호 입력..."
+                  type="password"
+                  error={errors.password || (loginAuthError && !errors.email ? loginAuthError : undefined)}
+                  invalid={Boolean(errors.password || loginAuthError)}
+                  inputRef={passwordRef}
+                  autoComplete="current-password"
+                  showToggle
+                  visible={passwordVisible}
+                  onToggleVisible={() => setPasswordVisible((v) => !v)}
+                />
+                <p className={styles.forgotRow}>
+                  <button type="button" className={styles.forgotLink} onClick={startForgotPassword}>
+                    비밀번호를 잊으셨나요?
+                  </button>
+                </p>
+              </div>
+              <button
+                type="submit"
+                className={styles.submit}
+                disabled={isSubmitting || !isLoginSubmitEnabled}
+                aria-busy={isSubmitting}
+                data-loading={isSubmitting ? 'true' : 'false'}
+              >
+                <span className={styles.submitLabel}>로그인</span>
+                {isSubmitting ? <ButtonSpinner /> : null}
+              </button>
+            </form>
+          ) : loginPhase === 'forgot-email' ? (
+            <form
+              id={`${formId}-forgot-email`}
+              className={styles.form}
+              onSubmit={(event) => {
                 event.preventDefault()
-                const emailError = validateEmail(email)
-                if (emailError) {
-                  setErrors((prev) => ({ ...prev, email: emailError }))
-                  return
-                }
-                clearFieldError('email')
-                passwordRef.current?.focus()
+                void handleOpenPasswordResetVerification()
               }}
-            />
-            <AuthField
-              id="auth-password"
-              label="비밀번호"
-              value={password}
-              onChange={(value) => {
-                setPassword(value)
-                clearFieldError('password')
-                setLoginAuthError(null)
-              }}
-              placeholder="비밀번호 입력..."
-              type="password"
-              error={errors.password || (loginAuthError && !errors.email ? loginAuthError : undefined)}
-              invalid={Boolean(errors.password || loginAuthError)}
-              inputRef={passwordRef}
-              autoComplete="current-password"
-              showToggle
-              visible={passwordVisible}
-              onToggleVisible={() => setPasswordVisible((v) => !v)}
-            />
-            <button
-              type="submit"
-              className={styles.submit}
-              disabled={isSubmitting || !isLoginSubmitEnabled}
-              aria-busy={isSubmitting}
-              data-loading={isSubmitting ? 'true' : 'false'}
+              noValidate
             >
-              <span className={styles.submitLabel}>로그인</span>
-              {isSubmitting ? <ButtonSpinner /> : null}
-            </button>
-          </form>
+              <button type="button" className={styles.authBackLink} onClick={exitForgotPassword}>
+                로그인으로 돌아가기
+              </button>
+              <p className={styles.forgotLead}>가입한 이메일로 인증 후 새 비밀번호를 설정할 수 있습니다.</p>
+              <AuthField
+                id="auth-forgot-email"
+                label="이메일 주소"
+                value={email}
+                onChange={(value) => {
+                  setEmail(value)
+                  clearFieldError('email')
+                  setSignupSubmitError(null)
+                  if (passwordResetVerified) {
+                    setPasswordResetVerified(false)
+                  }
+                }}
+                placeholder="이메일 주소 입력..."
+                type="email"
+                error={errors.email}
+                invalid={Boolean(errors.email)}
+                inputRef={emailRef}
+                autoComplete="email"
+                onBlur={handleEmailBlur}
+                trailingAction={passwordResetEmailTrailingAction}
+                disabled={passwordResetVerified}
+              />
+              {signupSubmitError ? (
+                <p className={styles.formBanner} role="alert">
+                  {signupSubmitError}
+                </p>
+              ) : null}
+              {passwordResetVerified ? (
+                <button
+                  type="button"
+                  className={styles.submit}
+                  onClick={() => setLoginPhase('forgot-password')}
+                >
+                  <span className={styles.submitLabel}>새 비밀번호 설정</span>
+                </button>
+              ) : null}
+            </form>
+          ) : (
+            <form
+              id={`${formId}-forgot-password`}
+              className={styles.form}
+              onSubmit={handlePasswordResetSubmit}
+              noValidate
+            >
+              <button
+                type="button"
+                className={styles.authBackLink}
+                onClick={() => {
+                  setLoginPhase('forgot-email')
+                  setErrors({})
+                  setSignupSubmitError(null)
+                }}
+              >
+                이메일 인증으로 돌아가기
+              </button>
+              <AuthField
+                id="auth-reset-password"
+                label="새 비밀번호"
+                value={password}
+                onChange={(value) => {
+                  setPassword(value)
+                  clearFieldError('password')
+                  syncPasswordMatch(value, confirmPassword)
+                }}
+                placeholder="8자 이상 입력..."
+                type="password"
+                error={errors.password}
+                invalid={Boolean(errors.password)}
+                inputRef={passwordRef}
+                autoComplete="new-password"
+                showToggle
+                visible={passwordVisible}
+                onToggleVisible={() => setPasswordVisible((v) => !v)}
+              />
+              <AuthField
+                id="auth-reset-confirm"
+                label="새 비밀번호 확인"
+                value={confirmPassword}
+                onChange={(value) => {
+                  setConfirmPassword(value)
+                  syncPasswordMatch(password, value)
+                }}
+                placeholder="비밀번호 다시 입력..."
+                type="password"
+                error={errors.confirmPassword}
+                invalid={Boolean(errors.confirmPassword)}
+                inputRef={confirmRef}
+                autoComplete="new-password"
+                showToggle
+                visible={confirmVisible}
+                onToggleVisible={() => setConfirmVisible((v) => !v)}
+              />
+              {signupSubmitError ? (
+                <p className={styles.formBanner} role="alert">
+                  {signupSubmitError}
+                </p>
+              ) : null}
+              <button
+                type="submit"
+                className={styles.submit}
+                disabled={isSubmitting || !isPasswordResetSubmitEnabled}
+                aria-busy={isSubmitting}
+                data-loading={isSubmitting ? 'true' : 'false'}
+              >
+                <span className={styles.submitLabel}>비밀번호 변경</span>
+                {isSubmitting ? <ButtonSpinner /> : null}
+              </button>
+            </form>
+          )
         ) : (
           <div className={styles.signupFlow}>
             {signupStep === 1 ? (
@@ -867,8 +1151,9 @@ export default function AuthPanel({
       <AuthEmailVerifyModal
         isOpen={emailVerifyModalOpen}
         email={email.trim()}
+        purpose={emailVerifyPurpose}
         onClose={() => setEmailVerifyModalOpen(false)}
-        onVerified={handleEmailVerified}
+        onVerified={handleEmailVerifiedFromModal}
       />
     </>
   )

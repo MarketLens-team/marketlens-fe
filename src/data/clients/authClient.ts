@@ -4,8 +4,10 @@ import type {
   AvailabilityResponse,
   CompleteSignupRequest,
   EmailVerificationConfirmRequest,
+  EmailVerificationPurpose,
   EmailVerificationSendRequest,
   LoginRequest,
+  PasswordResetRequest,
   PendingSignupRequest,
   PendingSignupResponse,
   SignupRequest,
@@ -79,8 +81,11 @@ export async function checkEmailAvailability(email: string): Promise<boolean> {
   }
 }
 
-export async function sendSignupEmailVerification(email: string): Promise<void> {
-  const payload: EmailVerificationSendRequest = { email, purpose: 'SIGNUP' }
+export async function sendEmailVerification(
+  email: string,
+  purpose: EmailVerificationPurpose,
+): Promise<void> {
+  const payload: EmailVerificationSendRequest = { email, purpose }
   if (isMockDataSource()) {
     await mockDelay(280)
     return
@@ -93,10 +98,11 @@ export async function sendSignupEmailVerification(email: string): Promise<void> 
   }
 }
 
-export async function confirmSignupEmailVerification(
+export async function confirmEmailVerification(
   payload: Omit<EmailVerificationConfirmRequest, 'purpose'>,
+  purpose: EmailVerificationPurpose,
 ): Promise<void> {
-  const body: EmailVerificationConfirmRequest = { ...payload, purpose: 'SIGNUP' }
+  const body: EmailVerificationConfirmRequest = { ...payload, purpose }
   if (isMockDataSource()) {
     await mockDelay(200)
     if (body.code !== '000000') {
@@ -109,6 +115,29 @@ export async function confirmSignupEmailVerification(
     unwrapApiEnvelope(data, '이메일 인증에 실패했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '이메일 인증에 실패했습니다.'))
+  }
+}
+
+export async function sendSignupEmailVerification(email: string): Promise<void> {
+  return sendEmailVerification(email, 'SIGNUP')
+}
+
+export async function confirmSignupEmailVerification(
+  payload: Omit<EmailVerificationConfirmRequest, 'purpose'>,
+): Promise<void> {
+  return confirmEmailVerification(payload, 'SIGNUP')
+}
+
+export async function resetPassword(payload: PasswordResetRequest): Promise<void> {
+  if (isMockDataSource()) {
+    await mockDelay(240)
+    return
+  }
+  try {
+    const { data } = await api.post<ApiEnvelope<unknown>>('/api/auth/password-reset', payload)
+    unwrapApiEnvelope(data, '비밀번호 변경에 실패했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.'))
   }
 }
 

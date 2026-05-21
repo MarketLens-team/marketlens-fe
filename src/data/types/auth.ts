@@ -46,3 +46,8 @@ export interface PendingSignupResponse {
 export interface CompleteSignupRequest {
   pendingSignupToken: string
 }
+
+export interface PasswordResetRequest {
+  email: string
+  newPassword: string
+}
