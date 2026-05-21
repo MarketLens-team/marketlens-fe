@@ -40,6 +40,7 @@ export default function DevRefinedStylePage() {
             <a href="#notice">Notice</a>
             <Link to="/dev/refined/mock">더미 대시보드</Link>
             <Link to="/dev/errors">에러 페이지 (풀스크린)</Link>
+            <Link to="/dev/loading">페이지 로딩</Link>
           </nav>
         </header>
 

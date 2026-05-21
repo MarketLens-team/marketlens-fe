@@ -6,6 +6,7 @@ import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
+import DevPageLoadingPage from '../pages/DevPageLoadingPage'
 import DevErrorPagePreview from '../pages/DevErrorPagePreview'
 import DevErrorPagesPage from '../pages/DevErrorPagesPage'
 import DevRefinedMockPage from '../pages/DevRefinedMockPage'
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
   {
     path: '/dev',
     element: <DevActionButtonPage />,
+  },
+  {
+    path: '/dev/loading',
+    element: <DevPageLoadingPage />,
   },
   {
     path: '/dev/refined',
