@@ -21,45 +21,13 @@
   pointer-events: none;
 }
 
-.wrapFixed .btn {
+.wrapFixed .btnWrap {
   pointer-events: auto;
 }
 
-.btn {
+.btnWrap {
   position: relative;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--layout-back-to-top-size);
-  height: var(--layout-back-to-top-size);
-  padding: 0;
-  margin: 0;
-  border: 1px solid var(--color-fab-border);
-  border-radius: var(--radius-full);
-  background: var(--color-fab-surface);
-  color: var(--color-fab-on-surface);
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-bg-app) 55%, transparent);
-  transition:
-    background-color var(--duration-fast) ease,
-    color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
-}
-
-.btn:hover {
-  background: var(--color-fab-surface-hover);
-  border-color: color-mix(in srgb, var(--color-fab-border) 80%, var(--color-fab-on-surface));
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.icon {
-  display: block;
   flex-shrink: 0;
 }
 
@@ -94,8 +62,8 @@
   transform: translateY(-50%) rotate(45deg);
 }
 
-.btn:hover .tooltip,
-.btn:focus-visible .tooltip {
+.btnWrap:hover .tooltip,
+.btnWrap:focus-within .tooltip {
   opacity: 1;
 }
 

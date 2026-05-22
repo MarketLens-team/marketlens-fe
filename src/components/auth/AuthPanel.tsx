@@ -23,6 +23,7 @@ import { getApiErrorMessage, parseApiFieldError } from '../../data/util/apiError
 import type { AlertSettings } from '../../data/types/member'
 import type { WatchlistItem } from '../../store/watchlistStore'
 import { ButtonSpinner } from '../ui/ButtonSpinner'
+import { IconCircleButton } from '../ui/IconCircleButton'
 import { AuthPasswordVisibilityToggle } from './AuthPasswordVisibilityToggle'
 import { DEFAULT_ALERT_SETTINGS, SignupAlertsStep } from './SignupAlertsStep'
 import { AuthEmailVerifyModal } from './AuthEmailVerifyModal'
@@ -79,22 +80,6 @@ function isMemberNotFoundError(message: string) {
 }
 
 type LoginPhase = 'signin' | 'forgot'
-
-function AuthBackButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button type="button" className={styles.authBackBtn} onClick={onClick} aria-label={label}>
-      <svg className={styles.authBackIcon} viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M15 18l-6-6 6-6"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </button>
-  )
-}
 
 function applySignupApiError(
   rawMessage: string,
@@ -900,8 +885,19 @@ export default function AuthPanel({
               onSubmit={handlePasswordResetSubmit}
               noValidate
             >
-              <AuthBackButton label="로그인으로 돌아가기" onClick={exitForgotPassword} />
-              <p className={styles.forgotLead}>가입한 이메일로 인증 후 새 비밀번호를 설정할 수 있습니다.</p>
+              <div className={styles.forgotIntro}>
+                <IconCircleButton
+                  direction="back"
+                  surface="modal"
+                  aria-label="로그인으로 돌아가기"
+                  onClick={exitForgotPassword}
+                />
+                <p className={styles.forgotLead}>
+                  가입한 이메일로 인증 후
+                  <br />
+                  새 비밀번호를 설정할 수 있습니다.
+                </p>
+              </div>
               <AuthField
                 id="auth-forgot-email"
                 label="이메일 주소"

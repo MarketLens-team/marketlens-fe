@@ -370,38 +370,27 @@
   color: var(--color-text-secondary);
 }
 
-.forgotLead {
-  margin: calc(-1 * var(--space-2)) 0 var(--space-4);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-base);
-}
-
-.authBackBtn {
-  display: inline-flex;
+.forgotIntro {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
   align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  width: 36px;
-  height: 36px;
-  margin: 0 0 var(--space-1);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.forgotLead {
+  grid-column: 2;
+  margin: 0;
   padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-loose);
+  text-align: center;
 }
 
-.authBackBtn:hover {
-  color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
-}
-
-.authBackIcon {
-  width: 20px;
-  height: 20px;
-  display: block;
+.forgotIntro > :first-child {
+  grid-column: 1;
 }
 
 .authHeader {

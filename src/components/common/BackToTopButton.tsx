@@ -2,24 +2,10 @@ import clsx from 'clsx'
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getLayoutScrollRoot } from '../../hooks/useInfiniteScroll'
+import { IconCircleButton } from '../ui/IconCircleButton'
 import styles from './BackToTopButton.module.css'
 
 const SHOW_AFTER_PX = 200
-
-function ChevronUpIcon() {
-  return (
-    <svg className={styles.icon} viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-      <path
-        d="M6 15l6-6 6 6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
 
 interface BackToTopButtonProps {
   /** inline: 부모 안 / fixed: 화면 하단 우측 컬럼 */
@@ -75,20 +61,20 @@ export function BackToTopButton({
       )}
       {...(stockDetailMarker ? { 'data-stock-back-to-top': '' } : {})}
     >
-      <button
-        type="button"
-        className={styles.btn}
-        onClick={scrollToTop}
-        aria-label="맨 위로"
-      >
-        <ChevronUpIcon />
+      <div className={styles.btnWrap}>
+        <IconCircleButton
+          direction="up"
+          size="lg"
+          aria-label="맨 위로"
+          onClick={scrollToTop}
+        />
         <span
           className={clsx(styles.tooltip, tooltipSide === 'left' && styles.tooltipLeft)}
           role="tooltip"
         >
           맨 위로
         </span>
-      </button>
+      </div>
     </div>
   )
 
