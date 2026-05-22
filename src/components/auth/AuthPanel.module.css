@@ -318,7 +318,7 @@
   flex-direction: column;
   gap: var(--space-2);
   margin-top: calc(-1 * var(--space-1));
-  margin-bottom: var(--space-4);
+  margin-bottom: 0;
 }
 
 .formAuthError {
@@ -417,6 +417,11 @@
 /* 필드 간: gap + 다음 필드 라벨. 마지막 input→버튼도 같은 리듬으로 맞춤 */
 .form > .submit {
   margin-top: calc(var(--font-size-base) * var(--line-height-base) + var(--space-2));
+}
+
+/* 비밀번호·찾기 링크 블록 뒤에는 라벨 리듬 여백 불필요 (form gap만) */
+.loginPasswordMeta + .submit {
+  margin-top: 0;
 }
 
 .submit {
