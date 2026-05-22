@@ -6,12 +6,16 @@ import styles from './PersonFrequentStocksPanel.module.css'
 
 interface PersonFrequentStocksPanelProps {
   items: PersonFrequentStock[]
+  title?: string
 }
 
-export function PersonFrequentStocksPanel({ items }: PersonFrequentStocksPanelProps) {
+export function PersonFrequentStocksPanel({
+  items,
+  title = '자주 언급된 종목',
+}: PersonFrequentStocksPanelProps) {
   return (
     <Card padding="md" className={styles.card}>
-      <CardSectionHeader title="자주 언급된 종목" variant="embedded" />
+      <CardSectionHeader title={title} variant="embedded" />
       {items.length === 0 ? (
         <p className={styles.empty}>연관 종목 데이터가 없습니다</p>
       ) : (

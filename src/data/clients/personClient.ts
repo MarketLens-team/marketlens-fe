@@ -2,12 +2,18 @@ import { isMockDataSource } from '../../config/dataSource'
 import { appendNewsCursorParam } from '../../lib/encodeNewsCursor'
 import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { api } from '../../services/api'
-import { mergePersonTrackerPage } from '../mappers/personMapper'
+import { mapPersonMentionsCursor, mergePersonTrackerPage } from '../mappers/personMapper'
 import { personStatementRelatesToStock } from '../mappers/stockMapper'
 import { mockFrequentStockItems, mockPersonStatementsResponse, mockPersonTopResponse } from '../mocks/person.mock'
 import type { ApiEnvelope } from '../types/api'
-import type { PersonMentionsRange, PersonTrackerPageData } from '../types/person'
 import type {
+  PersonDetailPageData,
+  PersonMentionsFeedData,
+  PersonMentionsRange,
+  PersonTrackerPageData,
+} from '../types/person'
+import type {
+  PersonFrequentStockResponse,
   PersonMentionCursorResponse,
   PersonSidebarResponse,
   PersonStatementResponse,
@@ -38,6 +44,7 @@ export interface FetchPersonMentionsCursorParams extends FetchPersonMentionsPara
 }
 
 const PERSON_CURSOR_DEFAULT_LIMIT = 50
+const PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT = 20
 const PERSON_CURSOR_MAX_MATCH_PAGES_STOCK = 5
 
 async function getPersonApiData<T>(
@@ -58,6 +65,23 @@ function buildPersonRangeParams(params?: FetchPersonMentionsParams): Record<stri
   if (params?.personId != null) searchParams.personId = String(params.personId)
   if (params?.stockCode) searchParams.stockCode = params.stockCode
   if (params?.range != null) searchParams.range = PERSON_MENTIONS_RANGE_QUERY[params.range]
+  return searchParams
+}
+
+function buildPersonRangeOnlyParams(range?: PersonMentionsRange): Record<string, string> {
+  if (range == null) return {}
+  return { range: PERSON_MENTIONS_RANGE_QUERY[range] }
+}
+
+function buildPersonCursorQueryParams(
+  params?: Omit<FetchPersonMentionsCursorParams, 'personId'>,
+): URLSearchParams {
+  const searchParams = new URLSearchParams()
+  if (params?.stockCode) searchParams.set('stockCode', params.stockCode)
+  if (params?.range != null) searchParams.set('range', PERSON_MENTIONS_RANGE_QUERY[params.range])
+  const limit = params?.limit ?? PERSON_CURSOR_DEFAULT_LIMIT
+  searchParams.set('limit', String(limit))
+  if (params?.cursor) appendNewsCursorParam(searchParams, params.cursor)
   return searchParams
 }
 
@@ -119,7 +143,97 @@ export async function fetchPersonStatementsCursor(
   }
 }
 
-/** OpenAPI `GET /api/v1/persons/sidebar` — 우측 패널 전용 */
+/** OpenAPI `GET /api/v1/persons/{personId}/mentions/cursor` — 인물 상세 전용 */
+export async function fetchPersonMentionsCursorByPersonId(
+  personId: number,
+  params?: Omit<FetchPersonMentionsCursorParams, 'personId'>,
+): Promise<PersonMentionCursorResponse> {
+  const limit = params?.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = filterMockStatementsForParams({ ...params, personId })
+    const start = mockPersonCursorStartIndex(params?.cursor)
+    const slice = all.slice(start, start + limit)
+    const end = start + slice.length
+    return {
+      items: slice,
+      nextCursor: mockPersonCursorNext(all.length, end),
+      hasNext: end < all.length,
+    }
+  }
+
+  const searchParams = buildPersonCursorQueryParams({ ...params, limit })
+  const query = searchParams.toString()
+  const path = `${PERSONS_BASE}/${personId}/mentions/cursor${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<PersonMentionCursorResponse>>(path)
+    return unwrapApiEnvelope(data, '인물 발언을 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '인물 발언을 불러오지 못했습니다.'))
+  }
+}
+
+export async function fetchPersonMentionsFeedPage(
+  personId: number,
+  params?: FetchPersonMentionsParams & { limit?: number },
+): Promise<PersonMentionsFeedData> {
+  const page = await fetchPersonMentionsCursorByPersonId(personId, {
+    range: params?.range,
+    limit: params?.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT,
+  })
+  return mapPersonMentionsCursor(page)
+}
+
+/** OpenAPI `GET /api/v1/persons/top-mentioned` — 언급량 TOP 5 인물 */
+export async function fetchPersonTopMentioned(params?: FetchPersonMentionsParams): Promise<PersonTopResponse[]> {
+  if (isMockDataSource()) {
+    await mockDelay(50)
+    return mockPersonTopResponse
+  }
+
+  return getPersonApiData<PersonTopResponse[]>(
+    `${PERSONS_BASE}/top-mentioned`,
+    '화제 인물을 불러오지 못했습니다.',
+    buildPersonRangeParams(params),
+  )
+}
+
+/** OpenAPI `GET /api/v1/persons/{personId}/frequent-stocks` — 인물별 연관 종목 */
+export async function fetchPersonFrequentStocksByPersonId(
+  personId: number,
+  params?: FetchPersonMentionsParams,
+): Promise<PersonFrequentStockResponse[]> {
+  if (isMockDataSource()) {
+    await mockDelay(50)
+    const rows = filterMockStatementsForParams({ ...params, personId })
+    const counts = new Map<string, PersonFrequentStockResponse>()
+    for (const row of rows) {
+      for (const stock of row.relatedStocks ?? []) {
+        const code = stock.stockCode ?? stock.code ?? ''
+        if (!code) continue
+        const hit = counts.get(code) ?? {
+          stockCode: code,
+          stockName: stock.stockName ?? code,
+          mentionCount: 0,
+        }
+        hit.mentionCount = (hit.mentionCount ?? 0) + 1
+        counts.set(code, hit)
+      }
+    }
+    const derived = [...counts.values()].sort((a, b) => (b.mentionCount ?? 0) - (a.mentionCount ?? 0))
+    return derived.length ? derived : mockFrequentStockItems
+  }
+
+  return getPersonApiData<PersonFrequentStockResponse[]>(
+    `${PERSONS_BASE}/${personId}/frequent-stocks`,
+    '연관 종목을 불러오지 못했습니다.',
+    buildPersonRangeOnlyParams(params?.range),
+  )
+}
+
+/** OpenAPI `GET /api/v1/persons/sidebar` — (레거시) 전역 자주 언급 종목 등 */
 export async function fetchPersonSidebar(params?: FetchPersonMentionsParams): Promise<PersonSidebarResponse> {
   if (isMockDataSource()) {
     await mockDelay(60)
@@ -172,20 +286,28 @@ export async function fetchPersonTop(): Promise<PersonTopResponse[]> {
 }
 
 export async function fetchPersonTrackerPage(params?: FetchPersonMentionsParams): Promise<PersonTrackerPageData> {
-  if (isMockDataSource()) {
-    await mockDelay(140)
-    const [cursorPage, sidebar] = await Promise.all([
-      fetchPersonStatementsCursor({ ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT }),
-      fetchPersonSidebar(params),
-    ])
-    return mergePersonTrackerPage(cursorPage, sidebar)
-  }
-
-  const [cursorPage, sidebar] = await Promise.all([
-    fetchPersonStatementsCursor({ ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT }),
+  const cursorParams = { ...params, limit: PERSON_CURSOR_DEFAULT_LIMIT }
+  const [cursorPage, topPersons, sidebar] = await Promise.all([
+    fetchPersonStatementsCursor(cursorParams),
+    fetchPersonTopMentioned(params),
     fetchPersonSidebar(params),
   ])
-  return mergePersonTrackerPage(cursorPage, sidebar)
+  return mergePersonTrackerPage(cursorPage, topPersons, sidebar.frequentStocks ?? [])
+}
+
+export async function fetchPersonDetailPage(
+  personId: number,
+  params?: FetchPersonMentionsParams & { limit?: number },
+): Promise<PersonDetailPageData> {
+  const [cursorPage, topPersons, frequentStocks] = await Promise.all([
+    fetchPersonMentionsCursorByPersonId(personId, {
+      range: params?.range,
+      limit: params?.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT,
+    }),
+    fetchPersonTopMentioned(params),
+    fetchPersonFrequentStocksByPersonId(personId, params),
+  ])
+  return mergePersonTrackerPage(cursorPage, topPersons, frequentStocks)
 }
 
 /** @deprecated fetchPersonTrackerPage 사용 */

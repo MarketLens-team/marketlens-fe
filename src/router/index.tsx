@@ -21,6 +21,7 @@ import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import LoginPage from '../pages/LoginPage'
 import OnboardingPage from '../pages/OnboardingPage'
 import MyPage from '../pages/MyPage'
+import PersonDetailPage from '../pages/PersonDetailPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: '/sector', element: <SectorPage /> },
       { path: '/stock/:stockCode', element: <StockDetailPage /> },
       { path: '/person', element: <PersonTrackerPage /> },
+      { path: '/person/:personId', element: <PersonDetailPage /> },
       { path: '/buzz', element: <BuzzAlertPage /> },
       {
         element: <PrivateRoute />,

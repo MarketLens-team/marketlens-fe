@@ -32,12 +32,15 @@ export interface PersonTopResponse {
   mentionCount: number
 }
 
-/** OpenAPI `FrequentStockItem` */
+/** OpenAPI `FrequentStockItem` / `PersonFrequentStockResponse` */
 export interface FrequentStockItemResponse {
   stockCode?: string
   stockName?: string
   mentionCount?: number
 }
+
+/** `GET /api/v1/persons/{personId}/frequent-stocks` */
+export type PersonFrequentStockResponse = FrequentStockItemResponse
 
 /** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
 export interface PersonMentionCursorResponse {

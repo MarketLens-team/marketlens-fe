@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
@@ -15,21 +16,23 @@ export function PersonTop5Panel({ items }: PersonTop5PanelProps) {
       <CardSectionHeader title="언급량 TOP 5 인물" variant="embedded" />
       <ol className={styles.list}>
         {items.map((person, index) => (
-          <li key={person.personId} className={styles.item}>
-            <span className={styles.rank}>{index + 1}</span>
-            <EntityAvatar
-              variant="person"
-              size="md"
-              name={person.personName}
-              imageUrl={person.imageUrl}
-            />
-            <div className={styles.body}>
-              <p className={styles.name}>{person.personName}</p>
-              <p className={styles.role}>
-                {formatPersonRole(person.organizationName, person.role)}
-              </p>
-            </div>
-            <span className={styles.count}>{person.mentionCount}</span>
+          <li key={person.personId}>
+            <Link to={`/person/${person.personId}`} className={styles.item}>
+              <span className={styles.rank}>{index + 1}</span>
+              <EntityAvatar
+                variant="person"
+                size="md"
+                name={person.personName}
+                imageUrl={person.imageUrl}
+              />
+              <div className={styles.body}>
+                <p className={styles.name}>{person.personName}</p>
+                <p className={styles.role}>
+                  {formatPersonRole(person.organizationName, person.role)}
+                </p>
+              </div>
+              <span className={styles.count}>{person.mentionCount}</span>
+            </Link>
           </li>
         ))}
       </ol>

@@ -2,6 +2,8 @@ import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import type {
   PersonFrequentStock,
   PersonMention,
+  PersonMentionsFeedData,
+  PersonProfileSummary,
   PersonRelatedStock,
   PersonTopItem,
   PersonTrackerPageData,
@@ -68,6 +70,15 @@ export function mapFrequentStockItem(dto: FrequentStockItemResponse): PersonFreq
   }
 }
 
+export function mapFrequentStockList(
+  items: FrequentStockItemResponse[],
+  mentionsFallback?: PersonMention[],
+): PersonFrequentStock[] {
+  const mapped = items.map(mapFrequentStockItem).filter((x): x is PersonFrequentStock => x != null)
+  if (mapped.length) return mapped
+  return mentionsFallback ? aggregateFrequentStocks(mentionsFallback) : []
+}
+
 export function aggregateFrequentStocks(mentions: PersonMention[], limit = 12): PersonFrequentStock[] {
   const counts = new Map<string, PersonFrequentStock>()
 
@@ -107,13 +118,9 @@ export function mapPersonMentionsCursor(page: PersonMentionCursorResponse) {
 }
 
 export function mapPersonSidebar(sidebar: PersonSidebarResponse, mentionsFallback: PersonMention[]) {
-  const frequentFromApi = (sidebar.frequentStocks ?? [])
-    .map(mapFrequentStockItem)
-    .filter((x): x is PersonFrequentStock => x != null)
-
   return {
     topPersons: (sidebar.topPersons ?? []).map(mapPersonTopItem),
-    frequentStocks: frequentFromApi.length ? frequentFromApi : aggregateFrequentStocks(mentionsFallback),
+    frequentStocks: mapFrequentStockList(sidebar.frequentStocks ?? [], mentionsFallback),
   }
 }
 
@@ -129,11 +136,39 @@ export function mapPersonTrackerFromCursorResponse(page: PersonMentionCursorResp
 
 export function mergePersonTrackerPage(
   cursor: PersonMentionCursorResponse,
-  sidebar: PersonSidebarResponse,
+  topPersons: PersonTopResponse[],
+  frequentStocks: FrequentStockItemResponse[],
 ): PersonTrackerPageData {
   const cursorPart = mapPersonMentionsCursor(cursor)
-  const sidebarPart = mapPersonSidebar(sidebar, cursorPart.mentions)
-  return { ...cursorPart, ...sidebarPart }
+  return {
+    ...cursorPart,
+    topPersons: topPersons.map(mapPersonTopItem),
+    frequentStocks: mapFrequentStockList(frequentStocks, cursorPart.mentions),
+  }
+}
+
+export function personProfileFromMention(mention: PersonMention): PersonProfileSummary {
+  return {
+    personId: mention.personId,
+    personName: mention.personName,
+    imageUrl: mention.imageUrl,
+    role: mention.role,
+    organizationName: mention.organizationName,
+  }
+}
+
+/** 인물 상세 — 다음 커서 페이지 합침 */
+export function mergePersonMentionsFeedPage(
+  prev: PersonMentionsFeedData,
+  newStatements: PersonStatementResponse[],
+  cursorMeta: { nextCursor: string | null; hasNext: boolean },
+): PersonMentionsFeedData {
+  const more = newStatements.map(mapPersonStatement)
+  return {
+    mentions: [...prev.mentions, ...more],
+    mentionsNextCursor: cursorMeta.nextCursor,
+    mentionsHasNext: cursorMeta.hasNext,
+  }
 }
 
 /** 인물 트래커 — 다음 커서 페이지를 기존 데이터에 합침 (우측 top/자주 언급은 첫 응답 유지) */
