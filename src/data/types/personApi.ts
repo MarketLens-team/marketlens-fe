@@ -42,8 +42,12 @@ export interface FrequentStockItemResponse {
 /** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
 export interface PersonMentionCursorResponse {
   items: PersonStatementResponse[]
-  topPersons?: PersonTopResponse[]
-  frequentStocks?: FrequentStockItemResponse[]
   nextCursor?: string | null
   hasNext?: boolean
+}
+
+/** OpenAPI `PersonSidebarResponse` — `GET /api/v1/persons/sidebar` */
+export interface PersonSidebarResponse {
+  topPersons: PersonTopResponse[]
+  frequentStocks: FrequentStockItemResponse[]
 }

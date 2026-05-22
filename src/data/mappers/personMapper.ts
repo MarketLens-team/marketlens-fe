@@ -9,6 +9,7 @@ import type {
 import type {
   FrequentStockItemResponse,
   PersonMentionCursorResponse,
+  PersonSidebarResponse,
   PersonStatementResponse,
   PersonTopResponse,
 } from '../types/personApi'
@@ -96,20 +97,43 @@ export function mapPersonTrackerPage(
   }
 }
 
-/** 커서 API 한 번에 피드 + 우측 패널까지 오는 응답을 페이지 모델로 변환 */
-export function mapPersonTrackerFromCursorResponse(page: PersonMentionCursorResponse): PersonTrackerPageData {
+export function mapPersonMentionsCursor(page: PersonMentionCursorResponse) {
   const mappedMentions = page.items.map(mapPersonStatement)
-  const frequentFromApi = (page.frequentStocks ?? [])
+  return {
+    mentions: mappedMentions,
+    mentionsNextCursor: page.nextCursor ?? null,
+    mentionsHasNext: page.hasNext ?? false,
+  }
+}
+
+export function mapPersonSidebar(sidebar: PersonSidebarResponse, mentionsFallback: PersonMention[]) {
+  const frequentFromApi = (sidebar.frequentStocks ?? [])
     .map(mapFrequentStockItem)
     .filter((x): x is PersonFrequentStock => x != null)
 
   return {
-    mentions: mappedMentions,
-    topPersons: (page.topPersons ?? []).map(mapPersonTopItem),
-    frequentStocks: frequentFromApi.length ? frequentFromApi : aggregateFrequentStocks(mappedMentions),
-    mentionsNextCursor: page.nextCursor ?? null,
-    mentionsHasNext: page.hasNext ?? false,
+    topPersons: (sidebar.topPersons ?? []).map(mapPersonTopItem),
+    frequentStocks: frequentFromApi.length ? frequentFromApi : aggregateFrequentStocks(mentionsFallback),
   }
+}
+
+/** @deprecated mapPersonMentionsCursor + mapPersonSidebar 사용 */
+export function mapPersonTrackerFromCursorResponse(page: PersonMentionCursorResponse): PersonTrackerPageData {
+  const cursor = mapPersonMentionsCursor(page)
+  return {
+    ...cursor,
+    topPersons: [],
+    frequentStocks: aggregateFrequentStocks(cursor.mentions),
+  }
+}
+
+export function mergePersonTrackerPage(
+  cursor: PersonMentionCursorResponse,
+  sidebar: PersonSidebarResponse,
+): PersonTrackerPageData {
+  const cursorPart = mapPersonMentionsCursor(cursor)
+  const sidebarPart = mapPersonSidebar(sidebar, cursorPart.mentions)
+  return { ...cursorPart, ...sidebarPart }
 }
 
 /** 인물 트래커 — 다음 커서 페이지를 기존 데이터에 합침 (우측 top/자주 언급은 첫 응답 유지) */
