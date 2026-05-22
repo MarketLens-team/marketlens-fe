@@ -46,6 +46,10 @@
   background: var(--color-bg-card);
 }
 
+.heroRefreshing {
+  opacity: 0.55;
+}
+
 .heroRangeToggle {
   position: absolute;
   top: var(--space-4);

@@ -10,5 +10,5 @@ export function usePersonTopMentioned(range: PersonMentionsRange) {
     return rows.map(mapPersonTopItem)
   }, [range])
 
-  return useAsyncData<PersonTopItem[]>(factory)
+  return useAsyncData<PersonTopItem[]>(factory, { keepPreviousData: true, minLoadingMs: 0 })
 }

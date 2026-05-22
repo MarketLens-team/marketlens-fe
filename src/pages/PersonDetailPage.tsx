@@ -39,16 +39,32 @@ export default function PersonDetailPage() {
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
   const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
 
-  const { data: feed, loading: feedLoading, error: feedError, loadMore, loadingMore } = usePersonDetail(
+  const {
+    data: feed,
+    loading: feedLoading,
+    isInitialLoading: feedInitialLoading,
+    error: feedError,
+    loadMore,
+    loadingMore,
+  } = usePersonDetail(
     personId ?? 0,
     feedRange,
   )
-  const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
-  const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(
-    stocksRange,
-    personId ?? undefined,
-  )
-  const { data: mentionCount } = usePersonMentionCount(personId ?? 0, feedRange)
+  const {
+    data: topPersons,
+    loading: topLoading,
+    refreshing: topRefreshing,
+  } = usePersonTopMentioned(topRange)
+  const {
+    data: frequentStocks,
+    loading: stocksLoading,
+    refreshing: stocksRefreshing,
+  } = usePersonFrequentStocks(stocksRange, personId ?? undefined)
+  const {
+    data: mentionCount,
+    loading: mentionCountLoading,
+    refreshing: mentionCountRefreshing,
+  } = usePersonMentionCount(personId ?? 0, feedRange)
 
   const profile = useMemo(() => {
     const first = feed?.mentions[0]
@@ -79,7 +95,7 @@ export default function PersonDetailPage() {
     )
   }
 
-  const showInitialSkeleton = feedLoading && !feed && !feedError
+  const showInitialSkeleton = feedInitialLoading && !feedError
 
   return (
     <Layout>
@@ -120,12 +136,17 @@ export default function PersonDetailPage() {
                 items={topPersons ?? []}
                 range={topRange}
                 onRangeChange={setTopRange}
-                loading={topLoading}
+                loading={topLoading || topRefreshing}
               />
             </aside>
 
             <div id="person-detail-feed-scroll" className={styles.feedCol}>
-              <header className={styles.hero}>
+              <header
+                className={clsx(
+                  styles.hero,
+                  (mentionCountLoading || mentionCountRefreshing) && styles.heroRefreshing,
+                )}
+              >
                 <PersonPanelRangeToggle
                   range={feedRange}
                   onChange={setFeedRange}
@@ -189,7 +210,7 @@ export default function PersonDetailPage() {
                 title="함께 언급된 종목"
                 range={stocksRange}
                 onRangeChange={setStocksRange}
-                loading={stocksLoading}
+                loading={stocksLoading || stocksRefreshing}
               />
             </aside>
           </div>

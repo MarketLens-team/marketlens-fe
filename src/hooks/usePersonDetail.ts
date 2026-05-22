@@ -11,15 +11,21 @@ export function usePersonDetail(personId: number, feedRange: PersonMentionsRange
     () => fetchPersonMentionsFeedPage(personId, { range: feedRange, limit: PERSON_FEED_PAGE_LIMIT }),
     [personId, feedRange],
   )
-  const asyncResult = useAsyncData<PersonMentionsFeedData>(factory, { enabled: personId > 0 })
+  const asyncResult = useAsyncData<PersonMentionsFeedData>(factory, {
+    enabled: personId > 0,
+    keepPreviousData: true,
+    minLoadingMs: 0,
+  })
   const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
 
   useEffect(() => {
-    setViewData(asyncResult.data)
+    if (asyncResult.data) setViewData(asyncResult.data)
   }, [asyncResult.data])
 
-  const displayData = viewData ?? asyncResult.data
+  const displayData = asyncResult.refreshing
+    ? asyncResult.data
+    : (viewData ?? asyncResult.data)
 
   const loadMore = useCallback(async () => {
     const base = displayData
@@ -46,7 +52,8 @@ export function usePersonDetail(personId: number, feedRange: PersonMentionsRange
 
   return {
     data: displayData,
-    loading: asyncResult.loading,
+    loading: asyncResult.loading || asyncResult.refreshing,
+    isInitialLoading: asyncResult.loading && displayData == null,
     error: asyncResult.error,
     loadMore,
     loadingMore,

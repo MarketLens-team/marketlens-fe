@@ -9,15 +9,20 @@ import { useAsyncData } from './useAsyncData'
 
 export function usePersonTracker(feedRange: PersonMentionsRange) {
   const factory = useCallback(() => fetchPersonTrackerFeedPage({ range: feedRange }), [feedRange])
-  const asyncResult = useAsyncData<PersonMentionsFeedData>(factory)
+  const asyncResult = useAsyncData<PersonMentionsFeedData>(factory, {
+    keepPreviousData: true,
+    minLoadingMs: 0,
+  })
   const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMoreMentions, setLoadingMoreMentions] = useState(false)
 
   useEffect(() => {
-    setViewData(asyncResult.data)
+    if (asyncResult.data) setViewData(asyncResult.data)
   }, [asyncResult.data])
 
-  const displayData = viewData ?? asyncResult.data
+  const displayData = asyncResult.refreshing
+    ? asyncResult.data
+    : (viewData ?? asyncResult.data)
 
   const loadMoreMentions = useCallback(async () => {
     const base = displayData
@@ -44,7 +49,8 @@ export function usePersonTracker(feedRange: PersonMentionsRange) {
 
   return {
     data: displayData,
-    loading: asyncResult.loading,
+    loading: asyncResult.loading || asyncResult.refreshing,
+    isInitialLoading: asyncResult.loading && displayData == null,
     error: asyncResult.error,
     loadMoreMentions,
     loadingMoreMentions,

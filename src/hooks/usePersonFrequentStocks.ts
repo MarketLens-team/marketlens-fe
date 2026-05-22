@@ -19,5 +19,7 @@ export function usePersonFrequentStocks(range: PersonMentionsRange, personId?: n
 
   return useAsyncData<PersonFrequentStock[]>(factory, {
     enabled: personId == null || personId > 0,
+    keepPreviousData: true,
+    minLoadingMs: 0,
   })
 }

@@ -23,10 +23,24 @@ export default function PersonTrackerPage() {
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
   const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
 
-  const { data: feed, loading: feedLoading, error: feedError, loadMoreMentions, loadingMoreMentions } =
-    usePersonTracker(feedRange)
-  const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
-  const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(stocksRange)
+  const {
+    data: feed,
+    loading: feedLoading,
+    isInitialLoading: feedInitialLoading,
+    error: feedError,
+    loadMoreMentions,
+    loadingMoreMentions,
+  } = usePersonTracker(feedRange)
+  const {
+    data: topPersons,
+    loading: topLoading,
+    refreshing: topRefreshing,
+  } = usePersonTopMentioned(topRange)
+  const {
+    data: frequentStocks,
+    loading: stocksLoading,
+    refreshing: stocksRefreshing,
+  } = usePersonFrequentStocks(stocksRange)
 
   const infiniteEnabled = Boolean(feed?.mentionsHasNext)
   const sentinelRef = useInfiniteScroll({
@@ -41,7 +55,7 @@ export default function PersonTrackerPage() {
     return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
   }
 
-  const showInitialSkeleton = feedLoading && !feed && !feedError
+  const showInitialSkeleton = feedInitialLoading && !feedError
 
   return (
     <Layout>
@@ -73,7 +87,7 @@ export default function PersonTrackerPage() {
                 items={topPersons ?? []}
                 range={topRange}
                 onRangeChange={setTopRange}
-                loading={topLoading}
+                loading={topLoading || topRefreshing}
               />
             </aside>
 
@@ -99,7 +113,7 @@ export default function PersonTrackerPage() {
                 items={frequentStocks ?? []}
                 range={stocksRange}
                 onRangeChange={setStocksRange}
-                loading={stocksLoading}
+                loading={stocksLoading || stocksRefreshing}
               />
             </aside>
           </div>

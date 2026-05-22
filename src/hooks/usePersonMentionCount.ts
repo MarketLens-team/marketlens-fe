@@ -9,5 +9,5 @@ export function usePersonMentionCount(personId: number, range: PersonMentionsRan
     return res.mentionCount
   }, [personId, range])
 
-  return useAsyncData<number>(factory, { enabled: personId > 0 })
+  return useAsyncData<number>(factory, { enabled: personId > 0, keepPreviousData: true, minLoadingMs: 0 })
 }
