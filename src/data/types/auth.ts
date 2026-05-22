@@ -16,6 +16,10 @@ export interface TokenResponse {
   refreshToken: string
 }
 
+export interface ReissueRequest {
+  refreshToken: string
+}
+
 export type EmailVerificationPurpose = 'SIGNUP' | 'PASSWORD_RESET'
 
 export interface AvailabilityResponse {

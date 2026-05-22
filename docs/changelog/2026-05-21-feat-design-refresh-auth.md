@@ -29,6 +29,8 @@
 | `684bc07` | style: 회원가입 필드 완료 상태 문구 초록색 강조 |
 | `9ebabf4` | feat: 비밀번호 찾기 플로우(이메일 인증·재설정) 추가 |
 
+세션·refresh token 상세는 [auth-session changelog](./2026-05-21-feat-design-refresh-auth-session.md)를 참고합니다.
+
 ## 요약
 
 1. **로그인 진입점** — `/login` 전용 페이지 대신 탑 네비 **로그인 모달**(`AuthLoginModal`); 회원가입 1단계 후 **`/onboarding`**(관심종목·알림) 분리.

@@ -1,5 +1,5 @@
-import { AUTH_TOKEN_KEY } from '../../constants/storage'
 import type { WatchlistItem } from '../../store/watchlistStore'
+import { useAuthStore } from '../../store/authStore'
 import { completeSignup } from './authClient'
 import { updateAlertSettings } from './memberClient'
 import type { AlertSettings } from '../types/member'
@@ -14,14 +14,14 @@ export interface CompleteRegistrationInput {
 
 export async function completeRegistration(input: CompleteRegistrationInput): Promise<TokenResponse> {
   const tokens = await completeSignup({ pendingSignupToken: input.pendingSignupToken })
-  localStorage.setItem(AUTH_TOKEN_KEY, tokens.accessToken)
+  useAuthStore.getState().setTokens(tokens, 'USER')
   try {
     if (input.watchlist.length > 0) {
       await syncWatchlistItems(input.watchlist)
     }
     await updateAlertSettings(input.alertSettings)
   } catch (error) {
-    localStorage.removeItem(AUTH_TOKEN_KEY)
+    useAuthStore.getState().logout()
     throw error
   }
   return tokens
