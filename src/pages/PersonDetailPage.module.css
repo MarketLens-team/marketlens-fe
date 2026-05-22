@@ -2,13 +2,61 @@
   max-width: var(--layout-page-max);
   margin: 0 auto;
   padding-bottom: var(--space-6);
+  /* 뒤로가기(40px) + gap — 중앙·우측 패널 상단을 TOP5 카드와 맞춤 */
+  --person-detail-panel-offset: calc(40px + var(--space-3));
 }
 
-.toolbar {
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) minmax(14rem, 18rem);
+  column-gap: var(--space-4);
+  row-gap: 0;
+  align-items: start;
+}
+
+.detailGrid > .detailLeftSticky,
+.detailGrid > .detailFeedCol,
+.detailGrid > .detailRightPanel {
+  grid-row: 1;
+  align-self: start;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.detailLeftSticky {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   position: sticky;
   top: var(--space-4);
-  z-index: var(--z-dropdown);
-  margin-bottom: var(--space-4);
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.detailFeedCol {
+  grid-column: 2;
+  padding-top: var(--person-detail-panel-offset);
+}
+
+.detailRightPanel {
+  grid-column: 3;
+  padding-top: var(--person-detail-panel-offset);
+  position: sticky;
+  top: var(--space-4);
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.asideBackBtn {
+  flex-shrink: 0;
   width: fit-content;
 }
 
@@ -57,8 +105,6 @@
   opacity: 0.55;
   pointer-events: none;
 }
-
-/* personPageLayout.module.css — mainGrid, aside, feedList */
 
 .feedColDetail {
   display: flex;
@@ -119,7 +165,6 @@
   color: var(--color-text-muted);
 }
 
-
 .infiniteSentinel {
   height: 1px;
 }
@@ -152,3 +197,39 @@
   border-radius: var(--radius-md);
 }
 
+@media (max-width: 1100px) {
+  .detailGrid {
+    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr) minmax(11rem, 14rem);
+    column-gap: var(--space-3);
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    --person-detail-panel-offset: 0;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid > .detailLeftSticky,
+  .detailGrid > .detailFeedCol,
+  .detailGrid > .detailRightPanel {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .detailLeftSticky,
+  .detailRightPanel {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .detailFeedCol,
+  .detailRightPanel {
+    padding-top: 0;
+  }
+}

@@ -32,6 +32,23 @@ function parsePersonId(raw: string | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
+function PersonTimelineBackButton({ onBack }: { onBack: () => void }) {
+  return (
+    <div className={styles.asideBackBtn}>
+      <div className={styles.toolbarBtnWrap}>
+        <IconCircleButton
+          direction="back"
+          aria-label="전체 인물 타임라인으로 이동"
+          onClick={onBack}
+        />
+        <span className={styles.toolbarTooltip} role="tooltip">
+          전체 인물 타임라인으로 이동
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export default function PersonDetailPage() {
   const navigate = useNavigate()
   const { personId: personIdParam } = useParams()
@@ -101,52 +118,44 @@ export default function PersonDetailPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <div className={styles.toolbar}>
-          <div className={styles.toolbarBtnWrap}>
-            <IconCircleButton
-              direction="back"
-              aria-label="전체 인물 타임라인으로 이동"
-              onClick={() => navigate('/person')}
-            />
-            <span className={styles.toolbarTooltip} role="tooltip">
-              전체 인물 타임라인으로 이동
-            </span>
-          </div>
-        </div>
-
         {feedError ? (
           <PageFetchError title="인물 발언을 불러오지 못했어요" message={feedError.message} />
         ) : null}
 
         {showInitialSkeleton ? (
-          <div className={gridStyles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
-            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
+          <div className={styles.detailGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <div className={styles.detailLeftSticky}>
+              <PersonTimelineBackButton onBack={() => navigate('/person')} />
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
-            </aside>
-            <div className={clsx(gridStyles.feedCol, styles.feedColDetail)}>
+            </div>
+            <div className={clsx(styles.detailFeedCol, styles.feedColDetail)}>
               <div className={clsx(skeleton.block, styles.skeletonHero)} />
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
+            <aside className={styles.detailRightPanel}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
           </div>
         ) : null}
 
         {feed ? (
-          <div className={gridStyles.mainGrid}>
-            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
+          <div className={styles.detailGrid}>
+            <div className={styles.detailLeftSticky}>
+              <PersonTimelineBackButton onBack={() => navigate('/person')} />
               <PersonTop5Panel
                 items={topPersons ?? []}
                 range={topRange}
                 onRangeChange={setTopRange}
                 loading={topLoading || topRefreshing}
               />
-            </aside>
+            </div>
 
-            <div id="person-detail-feed-scroll" className={clsx(gridStyles.feedCol, styles.feedColDetail)}>
+            <div
+              id="person-detail-feed-scroll"
+              className={clsx(styles.detailFeedCol, styles.feedColDetail)}
+            >
               <header
                 className={clsx(
                   styles.hero,
@@ -210,7 +219,7 @@ export default function PersonDetailPage() {
               </div>
             </div>
 
-            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
+            <aside className={styles.detailRightPanel}>
               <PersonFrequentStocksPanel
                 items={frequentStocks ?? []}
                 title="함께 언급된 종목"
