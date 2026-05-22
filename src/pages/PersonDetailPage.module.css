@@ -22,6 +22,10 @@
   min-width: 0;
   margin: 0;
   padding-top: var(--person-detail-panel-offset);
+}
+
+.detailLeftSticky,
+.detailRightPanel {
   position: sticky;
   top: var(--space-4);
   max-height: calc(100vh - 4.5rem);
@@ -37,6 +41,7 @@
 
 .detailFeedCol {
   grid-column: 2;
+  /* 중앙은 Layout main 스크롤만 사용 — 내부 스크롤 없음 */
 }
 
 .detailRightPanel {
@@ -214,11 +219,15 @@
   .detailGrid > .detailLeftSticky,
   .detailGrid > .detailFeedCol,
   .detailGrid > .detailRightPanel {
+    padding-top: 0;
+  }
+
+  .detailLeftSticky,
+  .detailRightPanel {
     position: static;
     max-height: none;
     overflow: visible;
     padding-right: 0;
-    padding-top: 0;
   }
 
   .asideBackBtn {

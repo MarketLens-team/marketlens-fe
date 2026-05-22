@@ -24,8 +24,6 @@ import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
-const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
-
 function parsePersonId(raw: string | undefined): number | null {
   if (!raw?.trim()) return null
   const n = Number(raw)
@@ -152,10 +150,7 @@ export default function PersonDetailPage() {
               />
             </div>
 
-            <div
-              id="person-detail-feed-scroll"
-              className={clsx(styles.detailFeedCol, styles.feedColDetail)}
-            >
+            <div className={clsx(styles.detailFeedCol, styles.feedColDetail)}>
               <header
                 className={clsx(
                   styles.hero,
@@ -215,7 +210,7 @@ export default function PersonDetailPage() {
               {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
 
               <div className={styles.feedFooter}>
-                <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
+                <BackToTopButton placement="inline" />
               </div>
             </div>
 
