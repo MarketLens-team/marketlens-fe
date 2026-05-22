@@ -356,16 +356,24 @@ function SearchNewsRowContent({
     <>
       <div className={styles.newsText}>
         {stockLabel && onStockClick ? (
-          <button
-            type="button"
+          <span
+            role="link"
+            tabIndex={-1}
             className={styles.newsStockLabelBtn}
             onClick={(e) => {
               e.stopPropagation()
               onStockClick()
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.stopPropagation()
+                e.preventDefault()
+                onStockClick()
+              }
+            }}
           >
             {stockLabel}
-          </button>
+          </span>
         ) : stockLabel ? (
           <p className={styles.newsStockLabel}>{stockLabel}</p>
         ) : null}
@@ -946,6 +954,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   useLayoutEffect(() => {
     const region = scrollRegionRef.current
     if (!region) return
+    region.setAttribute('data-search-nav-active', selectedRowIndex >= 0 ? 'true' : 'false')
     const items = region.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
     items.forEach((element, index) => {
       element.setAttribute(SEARCH_NAV_SELECTED, index === selectedRowIndex ? 'true' : 'false')
@@ -955,6 +964,24 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       active.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     }
   }, [selectedRowIndex, query, stockFilter, personFilter, fallbackFilter, domain, results, loading])
+
+  useEffect(() => {
+    const region = scrollRegionRef.current
+    if (!region || !isOpen) return
+
+    const syncSelectionFromPointer = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const item = target.closest(`[${SEARCH_NAV_ITEM}]`)
+      if (!item || !region.contains(item)) return
+      const items = region.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
+      const index = Array.from(items).indexOf(item)
+      if (index >= 0) setSelectedRowIndex(index)
+    }
+
+    region.addEventListener('pointermove', syncSelectionFromPointer)
+    return () => region.removeEventListener('pointermove', syncSelectionFromPointer)
+  }, [isOpen, results, stockFilter, personFilter, fallbackFilter, domain, effectiveDomain, showFallback, showSearchFilters])
 
   useEffect(() => {
     if (!isOpen) return
@@ -995,10 +1022,20 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         if (itemCount === 0) return
         event.preventDefault()
+        const scrollRegion = scrollRegionRef.current
+        const activeEl = document.activeElement
+        if (
+          scrollRegion &&
+          activeEl instanceof HTMLElement &&
+          activeEl !== inputRef.current &&
+          scrollRegion.contains(activeEl)
+        ) {
+          activeEl.blur()
+        }
         setSelectedRowIndex((prev) => {
           if (event.key === 'ArrowDown') {
             if (prev < 0) return 0
-            return (prev + 1) % itemCount
+            return Math.min(prev + 1, itemCount - 1)
           }
           if (prev <= 0) {
             window.requestAnimationFrame(() => focusSearchInput())
@@ -1010,7 +1047,6 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       }
 
       if (event.key === 'Enter' && selectedRowIndex >= 0 && itemCount > 0) {
-        if (event.target === inputRef.current) return
         event.preventDefault()
         const row = items?.[selectedRowIndex]
         const primary = row?.querySelector(`[${SEARCH_NAV_PRIMARY}]`) as HTMLElement | null
@@ -1068,43 +1104,46 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
         </div>
 
         {contentReady ? (
-          <div ref={scrollRegionRef} className={styles.scrollRegion}>
-            {showDomainTabs && showSearchFilters ? (
-              <div className={styles.tabNavStrip}>
-                <UnderlineTabNav
-                  ariaLabel="검색 범주"
-                  options={domainOptions}
-                  value={domain}
-                  onChange={setDomain}
-                />
-              </div>
-            ) : null}
+          <div className={styles.resultsPanel}>
+            <div className={styles.filterChrome}>
+              {showDomainTabs && showSearchFilters ? (
+                <div className={styles.tabNavStrip}>
+                  <UnderlineTabNav
+                    ariaLabel="검색 범주"
+                    options={domainOptions}
+                    value={domain}
+                    onChange={setDomain}
+                  />
+                </div>
+              ) : null}
 
-            {showSearchFilters ? (
-              <div className={styles.tabNavStrip}>
-                <UnderlineTabNav
-                  ariaLabel="검색 결과 필터"
-                  options={effectiveDomain === 'stock' ? stockFilterOptions : personFilterOptions}
-                  value={effectiveDomain === 'stock' ? stockFilter : personFilter}
-                  onChange={(key) => {
-                    if (effectiveDomain === 'stock') setStockFilter(key as StockFilter)
-                    else setPersonFilter(key as PersonFilter)
-                  }}
-                />
-              </div>
-            ) : null}
+              {showSearchFilters ? (
+                <div className={styles.tabNavStrip}>
+                  <UnderlineTabNav
+                    ariaLabel="검색 결과 필터"
+                    options={effectiveDomain === 'stock' ? stockFilterOptions : personFilterOptions}
+                    value={effectiveDomain === 'stock' ? stockFilter : personFilter}
+                    onChange={(key) => {
+                      if (effectiveDomain === 'stock') setStockFilter(key as StockFilter)
+                      else setPersonFilter(key as PersonFilter)
+                    }}
+                  />
+                </div>
+              ) : null}
 
-            {showFallback ? (
-              <div className={styles.tabNavStrip}>
-                <UnderlineTabNav
-                  ariaLabel="추천 콘텐츠 필터"
-                  options={FALLBACK_FILTERS}
-                  value={fallbackFilter}
-                  onChange={setFallbackFilter}
-                />
-              </div>
-            ) : null}
+              {showFallback ? (
+                <div className={styles.tabNavStrip}>
+                  <UnderlineTabNav
+                    ariaLabel="추천 콘텐츠 필터"
+                    options={FALLBACK_FILTERS}
+                    value={fallbackFilter}
+                    onChange={setFallbackFilter}
+                  />
+                </div>
+              ) : null}
+            </div>
 
+            <div ref={scrollRegionRef} className={styles.scrollRegion}>
             <div className={styles.scrollBody}>
               {showEmptySearchMessage ? (
                 <p className={styles.emptyHint}>검색 결과가 없습니다.</p>
@@ -1140,6 +1179,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
               {!showFallback && !showSearchFilters && trimmedQuery ? (
                 <p className={styles.empty}>검색 결과가 없습니다.</p>
               ) : null}
+            </div>
             </div>
           </div>
         ) : null}

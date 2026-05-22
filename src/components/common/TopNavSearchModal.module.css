@@ -83,12 +83,23 @@
   color: var(--color-text-primary);
 }
 
-.tabNavStrip {
+.resultsPanel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   margin-top: var(--space-2);
+}
+
+.filterChrome {
+  flex-shrink: 0;
+}
+
+.tabNavStrip {
   border-bottom: 1px solid var(--color-border-default);
 }
 
-.tabNavStrip + .tabNavStrip {
+.filterChrome .tabNavStrip + .tabNavStrip {
   margin-top: 0;
 }
 
@@ -169,10 +180,17 @@
   grid-template-columns: minmax(0, 1fr) minmax(5.5rem, auto) auto;
 }
 
-.searchRow:hover,
 .searchRow[data-search-nav-selected='true'] {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scrollRegion:not([data-search-nav-active='true']) .searchRow:hover,
+  .scrollRegion[data-search-nav-active='true'] .searchRow[data-search-nav-selected='true']:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
 }
 
 .searchRowStat {
@@ -281,15 +299,26 @@ button.newsRowCard {
   appearance: none;
 }
 
-.newsRowCard:hover,
 li[data-search-nav-selected='true'] .newsRowCard {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
 
-.newsRowCard:hover .newsTitle,
 li[data-search-nav-selected='true'] .newsRowCard .newsTitle {
   color: var(--color-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scrollRegion:not([data-search-nav-active='true']) .newsRowCard:hover,
+  .scrollRegion[data-search-nav-active='true'] li[data-search-nav-selected='true'] .newsRowCard:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .scrollRegion:not([data-search-nav-active='true']) .newsRowCard:hover .newsTitle,
+  .scrollRegion[data-search-nav-active='true'] li[data-search-nav-selected='true'] .newsRowCard:hover .newsTitle {
+    color: var(--color-primary);
+  }
 }
 
 .newsText {
