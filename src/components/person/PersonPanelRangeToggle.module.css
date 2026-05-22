@@ -2,23 +2,22 @@
   flex-shrink: 0;
   margin: 0;
   padding: 0.25rem 0.65rem;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border-strong));
+  border: none;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-section));
+  background: var(--color-primary);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   line-height: 1.2;
   cursor: pointer;
   transition:
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
+    filter var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
 }
 
 .btn:hover {
-  background: color-mix(in srgb, var(--color-primary) 32%, var(--color-bg-section));
-  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--color-border-strong));
+  filter: brightness(1.06);
 }
 
 .btn:focus-visible {
