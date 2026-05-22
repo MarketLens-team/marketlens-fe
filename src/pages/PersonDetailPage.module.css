@@ -5,11 +5,26 @@
 }
 
 .toolbar {
+  margin-bottom: var(--space-4);
+}
+
+.feedHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  gap: var(--space-3);
+}
+
+.feedTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.feedDimmed {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .mainGrid {
@@ -86,38 +101,6 @@
   display: flex;
   justify-content: center;
   padding-top: var(--space-2);
-}
-
-.segmented {
-  display: inline-flex;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-strong);
-  overflow: hidden;
-  background: var(--color-bg-section);
-}
-
-.segmentBtn {
-  margin: 0;
-  padding: 0.35rem 0.85rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
-}
-
-.segmentBtn:hover {
-  color: var(--color-text-primary);
-}
-
-.segmentBtnActive {
-  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-card));
-  color: var(--color-text-primary);
 }
 
 .empty {

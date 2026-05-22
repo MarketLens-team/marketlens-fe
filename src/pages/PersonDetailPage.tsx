@@ -7,6 +7,7 @@ import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
+import { PersonPanelRangeToggle } from '../components/person/PersonPanelRangeToggle'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import { formatPersonRole } from '../components/person/personDisplay'
@@ -17,6 +18,8 @@ import type { PersonMentionsRange } from '../data/types/person'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonDetail } from '../hooks/usePersonDetail'
+import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
+import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import styles from './PersonDetailPage.module.css'
 
 const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
@@ -27,58 +30,38 @@ function parsePersonId(raw: string | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
-function RangeToggle({
-  range,
-  onChange,
-  className,
-}: {
-  range: PersonMentionsRange
-  onChange: (range: PersonMentionsRange) => void
-  className?: string
-}) {
-  return (
-    <div className={clsx(styles.segmented, className)} role="group" aria-label="기간">
-      <button
-        type="button"
-        className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
-        aria-pressed={range === 'today'}
-        onClick={() => onChange('today')}
-      >
-        오늘
-      </button>
-      <button
-        type="button"
-        className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
-        aria-pressed={range === '7d'}
-        onClick={() => onChange('7d')}
-      >
-        7일
-      </button>
-    </div>
-  )
-}
-
 export default function PersonDetailPage() {
   const navigate = useNavigate()
   const { personId: personIdParam } = useParams()
   const personId = parsePersonId(personIdParam)
-  const [range, setRange] = useState<PersonMentionsRange>('today')
-  const { data, loading, error, loadMore, loadingMore } = usePersonDetail(personId ?? 0, range)
+  const [feedRange, setFeedRange] = useState<PersonMentionsRange>('today')
+  const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
+  const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
+
+  const { data: feed, loading: feedLoading, error: feedError, loadMore, loadingMore } = usePersonDetail(
+    personId ?? 0,
+    feedRange,
+  )
+  const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
+  const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(
+    stocksRange,
+    personId ?? undefined,
+  )
 
   const profile = useMemo(() => {
-    const first = data?.mentions[0]
+    const first = feed?.mentions[0]
     return first ? personProfileFromMention(first) : null
-  }, [data?.mentions])
+  }, [feed?.mentions])
 
-  const infiniteEnabled = Boolean(data?.mentionsHasNext)
+  const infiniteEnabled = Boolean(feed?.mentionsHasNext)
   const sentinelRef = useInfiniteScroll({
     enabled: infiniteEnabled && personId != null,
-    hasMore: Boolean(data?.mentionsHasNext),
+    hasMore: Boolean(feed?.mentionsHasNext),
     loading: loadingMore,
     onLoadMore: () => void loadMore(),
   })
 
-  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  const httpFullscreenPreset = feedError ? fullscreenPresetFromAppError(feedError) : null
   if (httpFullscreenPreset) {
     return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/person" />
   }
@@ -94,6 +77,8 @@ export default function PersonDetailPage() {
     )
   }
 
+  const showInitialSkeleton = feedLoading && !feed && !feedError
+
   return (
     <Layout>
       <div className={styles.page}>
@@ -103,14 +88,13 @@ export default function PersonDetailPage() {
             aria-label="인물 발언 목록으로"
             onClick={() => navigate('/person')}
           />
-          <RangeToggle range={range} onChange={setRange} />
         </div>
 
-        {error ? (
-          <PageFetchError title="인물 발언을 불러오지 못했어요" message={error.message} />
+        {feedError ? (
+          <PageFetchError title="인물 발언을 불러오지 못했어요" message={feedError.message} />
         ) : null}
 
-        {loading && !data && !error ? (
+        {showInitialSkeleton ? (
           <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
             <aside className={styles.leftAside}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
@@ -127,10 +111,15 @@ export default function PersonDetailPage() {
           </div>
         ) : null}
 
-        {data ? (
+        {feed ? (
           <div className={styles.mainGrid}>
             <aside className={styles.leftAside}>
-              <PersonTop5Panel items={data.topPersons} />
+              <PersonTop5Panel
+                items={topPersons ?? []}
+                range={topRange}
+                onRangeChange={setTopRange}
+                loading={topLoading}
+              />
             </aside>
 
             <div id="person-detail-feed-scroll" className={styles.feedCol}>
@@ -148,46 +137,46 @@ export default function PersonDetailPage() {
                       <p className={styles.heroRole}>
                         {formatPersonRole(profile.organizationName, profile.role)}
                       </p>
-                      <p className={styles.heroMeta}>
-                        {range === 'today' ? '오늘' : '최근 7일'} 발언 {data.mentions.length}건
-                        {data.mentionsHasNext ? '+' : ''}
-                      </p>
                     </div>
                   </>
                 ) : (
                   <div className={styles.heroText}>
                     <h1 className={styles.heroName}>인물 #{personId}</h1>
-                    <p className={styles.heroMeta}>이 기간에 표시할 발언이 없습니다</p>
                   </div>
                 )}
               </header>
 
-              <ul className={styles.feedList}>
-                {data.mentions.map((mention) => (
+              <div className={styles.feedHead}>
+                <h2 className={styles.feedTitle}>발언</h2>
+                <PersonPanelRangeToggle range={feedRange} onChange={setFeedRange} aria-label="발언 기간" />
+              </div>
+
+              <ul className={clsx(styles.feedList, feedLoading && styles.feedDimmed)}>
+                {feed.mentions.map((mention) => (
                   <li key={mention.id}>
                     <PersonStatementCard mention={mention} variant="feed" />
                   </li>
                 ))}
               </ul>
 
-              {data.mentions.length === 0 ? (
+              {feed.mentions.length === 0 ? (
                 <p className={styles.empty}>이 기간에 표시할 발언이 없습니다</p>
               ) : null}
 
               {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
 
               <div className={styles.feedFooter}>
-                <BackToTopButton
-                  placement="inline"
-                  scrollRootSelector={FEED_SCROLL_ROOT}
-                />
+                <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
               </div>
             </div>
 
             <aside className={styles.rightAside}>
               <PersonFrequentStocksPanel
-                items={data.frequentStocks}
+                items={frequentStocks ?? []}
                 title="함께 언급된 종목"
+                range={stocksRange}
+                onRangeChange={setStocksRange}
+                loading={stocksLoading}
               />
             </aside>
           </div>

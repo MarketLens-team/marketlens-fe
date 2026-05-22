@@ -186,6 +186,17 @@ export async function fetchPersonMentionsFeedPage(
   return mapPersonMentionsCursor(page)
 }
 
+/** 인물 발언 목록 — 커서 피드만 */
+export async function fetchPersonTrackerFeedPage(
+  params?: FetchPersonMentionsParams & { limit?: number },
+): Promise<PersonMentionsFeedData> {
+  const page = await fetchPersonStatementsCursor({
+    ...params,
+    limit: params?.limit ?? PERSON_CURSOR_DEFAULT_LIMIT,
+  })
+  return mapPersonMentionsCursor(page)
+}
+
 /** OpenAPI `GET /api/v1/persons/top-mentioned` — 언급량 TOP 5 인물 */
 export async function fetchPersonTopMentioned(params?: FetchPersonMentionsParams): Promise<PersonTopResponse[]> {
   if (isMockDataSource()) {

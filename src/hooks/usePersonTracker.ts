@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchPersonStatementsCursor, fetchPersonTrackerPage } from '../data/clients/personClient'
-import { mergePersonTrackerMentionsPage } from '../data/mappers/personMapper'
-import type { PersonMentionsRange, PersonTrackerPageData } from '../data/types/person'
+import {
+  fetchPersonStatementsCursor,
+  fetchPersonTrackerFeedPage,
+} from '../data/clients/personClient'
+import { mergePersonMentionsFeedPage } from '../data/mappers/personMapper'
+import type { PersonMentionsFeedData, PersonMentionsRange } from '../data/types/person'
 import { useAsyncData } from './useAsyncData'
 
-export function usePersonTracker(range: PersonMentionsRange) {
-  const factory = useCallback(() => fetchPersonTrackerPage({ range }), [range])
-  const asyncResult = useAsyncData<PersonTrackerPageData>(factory)
-  const [viewData, setViewData] = useState<PersonTrackerPageData | null>(null)
+export function usePersonTracker(feedRange: PersonMentionsRange) {
+  const factory = useCallback(() => fetchPersonTrackerFeedPage({ range: feedRange }), [feedRange])
+  const asyncResult = useAsyncData<PersonMentionsFeedData>(factory)
+  const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMoreMentions, setLoadingMoreMentions] = useState(false)
 
   useEffect(() => {
-    if (asyncResult.data) setViewData(asyncResult.data)
+    setViewData(asyncResult.data)
   }, [asyncResult.data])
 
   const displayData = viewData ?? asyncResult.data
@@ -24,12 +27,12 @@ export function usePersonTracker(range: PersonMentionsRange) {
       const chunk = await fetchPersonStatementsCursor({
         cursor: base.mentionsNextCursor,
         limit: 50,
-        range,
+        range: feedRange,
       })
       setViewData((prev) => {
         const p = prev ?? asyncResult.data
         if (!p) return prev
-        return mergePersonTrackerMentionsPage(p, chunk.items, {
+        return mergePersonMentionsFeedPage(p, chunk.items, {
           nextCursor: chunk.nextCursor ?? null,
           hasNext: chunk.hasNext ?? false,
         })
@@ -37,7 +40,7 @@ export function usePersonTracker(range: PersonMentionsRange) {
     } finally {
       setLoadingMoreMentions(false)
     }
-  }, [displayData, loadingMoreMentions, asyncResult.data, range])
+  }, [displayData, loadingMoreMentions, asyncResult.data, feedRange])
 
   return {
     data: displayData,

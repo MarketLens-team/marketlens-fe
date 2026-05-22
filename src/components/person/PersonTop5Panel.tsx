@@ -1,20 +1,28 @@
+import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
-import type { PersonTopItem } from '../../data/types/person'
+import type { PersonMentionsRange, PersonTopItem } from '../../data/types/person'
+import { PersonPanelRangeToggle } from './PersonPanelRangeToggle'
 import { formatPersonRole } from './personDisplay'
 import styles from './PersonTop5Panel.module.css'
 
 interface PersonTop5PanelProps {
   items: PersonTopItem[]
+  range: PersonMentionsRange
+  onRangeChange: (range: PersonMentionsRange) => void
+  loading?: boolean
 }
 
-export function PersonTop5Panel({ items }: PersonTop5PanelProps) {
+export function PersonTop5Panel({ items, range, onRangeChange, loading }: PersonTop5PanelProps) {
   return (
-    <Card padding="md" className={styles.card}>
-      <CardSectionHeader title="언급량 TOP 5 인물" variant="embedded" />
-      <ol className={styles.list}>
+    <Card padding="md" className={styles.card} aria-busy={loading || undefined}>
+      <div className={styles.cardHead}>
+        <CardSectionHeader title="언급량 TOP 5 인물" variant="embedded" className={styles.cardTitle} />
+        <PersonPanelRangeToggle range={range} onChange={onRangeChange} aria-label="TOP 5 기간" />
+      </div>
+      <ol className={clsx(styles.list, loading && styles.listDimmed)}>
         {items.map((person, index) => (
           <li key={person.personId}>
             <Link to={`/person/${person.personId}`} className={styles.item}>

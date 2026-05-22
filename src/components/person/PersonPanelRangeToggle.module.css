@@ -1,0 +1,33 @@
+.root {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-strong);
+  overflow: hidden;
+  background: var(--color-bg-section);
+}
+
+.btn {
+  margin: 0;
+  padding: 0.2rem 0.55rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.btn:hover {
+  color: var(--color-text-primary);
+}
+
+.btnActive {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-card));
+  color: var(--color-text-primary);
+}
