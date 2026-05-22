@@ -6,8 +6,16 @@ interface PersonPanelRangeToggleProps {
   range: PersonMentionsRange
   onChange: (range: PersonMentionsRange) => void
   className?: string
-  /** 카드 헤더용 짧은 라벨 */
   'aria-label'?: string
+}
+
+const RANGE_LABEL: Record<PersonMentionsRange, string> = {
+  today: '오늘',
+  '7d': '7일',
+}
+
+function nextRange(current: PersonMentionsRange): PersonMentionsRange {
+  return current === 'today' ? '7d' : 'today'
 }
 
 export function PersonPanelRangeToggle({
@@ -16,24 +24,16 @@ export function PersonPanelRangeToggle({
   className,
   'aria-label': ariaLabel = '기간',
 }: PersonPanelRangeToggleProps) {
+  const label = RANGE_LABEL[range]
+
   return (
-    <div className={clsx(styles.root, className)} role="group" aria-label={ariaLabel}>
-      <button
-        type="button"
-        className={clsx(styles.btn, range === 'today' && styles.btnActive)}
-        aria-pressed={range === 'today'}
-        onClick={() => onChange('today')}
-      >
-        오늘
-      </button>
-      <button
-        type="button"
-        className={clsx(styles.btn, range === '7d' && styles.btnActive)}
-        aria-pressed={range === '7d'}
-        onClick={() => onChange('7d')}
-      >
-        7일
-      </button>
-    </div>
+    <button
+      type="button"
+      className={clsx(styles.btn, className)}
+      aria-label={`${ariaLabel}: ${label}. 클릭하면 기간이 바뀝니다`}
+      onClick={() => onChange(nextRange(range))}
+    >
+      {label}
+    </button>
   )
 }
