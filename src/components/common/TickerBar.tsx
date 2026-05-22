@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useStockPrices } from '../../hooks/useStockPrices'
 import type { TickerStockRow } from '../../data/types/stock'
 import styles from './TickerBar.module.css'
@@ -9,7 +10,11 @@ function Row({ row }: { row: TickerStockRow }) {
   const sign = up ? '+' : ''
 
   return (
-    <span className={styles.item}>
+    <Link
+      className={styles.item}
+      to={`/stock/${row.code}`}
+      aria-label={`${row.name}(${row.code}) 종목 상세`}
+    >
       <span className={styles.symbol}>
         {row.name} ({row.code})
       </span>
@@ -18,7 +23,7 @@ function Row({ row }: { row: TickerStockRow }) {
         {sign}
         {row.changePercent.toFixed(2)}%
       </span>
-    </span>
+    </Link>
   )
 }
 
