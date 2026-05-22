@@ -1,3 +1,4 @@
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { SEARCH_NEWS_MAX, SEARCH_STATEMENTS_MAX } from '../constants/search'
 import { mapNewsFeedItems } from './stockMapper'
 import type {
@@ -58,7 +59,7 @@ function mapSearchNewsItem(dto: SearchNewsItemResponse): SearchNewsPreview {
     source: dto.source,
     publishedAt: dto.publishedAt,
     url: dto.originalLink || undefined,
-    imageUrl: dto.imageUrl || null,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     sentimentScore: dto.sentimentScore,
     sentiment: dto.sentiment,
     sourceType: parseSearchNewsSourceType(dto.sourceType),
@@ -112,6 +113,7 @@ function mapStockResult(dto: StockSearchItemResponse, query: string): SearchStoc
   return {
     code: dto.stockCode,
     name: dto.stockName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     market: dto.market,
     sectorCode: dto.sectorCode,
     sectorName: dto.sectorName,
@@ -123,6 +125,7 @@ function mapPersonResult(dto: PersonSearchItemResponse): SearchPersonResult {
   return {
     personId: String(dto.personId),
     personName: dto.personName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     role: dto.personRole,
     organizationName: dto.organizationName,
     relatedStatements: (dto.relatedStatements ?? [])
@@ -135,6 +138,7 @@ function mapFallbackStock(dto: FallbackStockItemResponse): SearchFallbackStock {
   return {
     code: dto.stockCode,
     name: dto.stockName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     market: dto.market,
     sectorCode: dto.sectorCode,
     sectorName: dto.sectorName,
@@ -154,6 +158,7 @@ function mapFallbackPerson(dto: FallbackPersonItemResponse): SearchFallbackPerso
   return {
     personId: String(dto.personId),
     personName: dto.personName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     role: dto.personRole,
     organizationName: dto.organizationName,
     mentionCount: dto.mentionCount,

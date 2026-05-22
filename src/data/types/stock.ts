@@ -9,6 +9,7 @@ export interface StockPriceInfo {
 export interface StockSummary {
   code: string
   name: string
+  imageUrl?: string | null
   market: string
   sector: string
   sentimentScore: number
@@ -71,6 +72,7 @@ export interface StockNewsItem {
 export interface StockRelatedStock {
   code: string
   name: string
+  imageUrl?: string | null
   market?: string
   sentimentScore: number
 }
@@ -78,6 +80,7 @@ export interface StockRelatedStock {
 export interface StockPersonTimelineItem {
   id: string
   personName: string
+  imageUrl?: string | null
   role: string
   /** OpenAPI `statementSummary` */
   summary: string

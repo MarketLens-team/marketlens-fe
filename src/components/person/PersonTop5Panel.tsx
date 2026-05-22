@@ -1,3 +1,4 @@
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { PersonTopItem } from '../../data/types/person'
@@ -16,6 +17,12 @@ export function PersonTop5Panel({ items }: PersonTop5PanelProps) {
         {items.map((person, index) => (
           <li key={person.personId} className={styles.item}>
             <span className={styles.rank}>{index + 1}</span>
+            <EntityAvatar
+              variant="person"
+              size="md"
+              name={person.personName}
+              imageUrl={person.imageUrl}
+            />
             <div className={styles.body}>
               <p className={styles.name}>{person.personName}</p>
               <p className={styles.role}>

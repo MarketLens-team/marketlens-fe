@@ -2,10 +2,10 @@ import clsx from 'clsx'
 import { AiSummaryText } from '../common/AiSummaryText'
 import type { PersonMention } from '../../data/types/person'
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import {
   formatPersonRole,
   formatPersonSentimentBadge,
-  getPersonInitials,
   personSentimentToneClass,
   type PersonSentimentTone,
 } from './personDisplay'
@@ -28,9 +28,12 @@ export function PersonStatementCard({ mention }: PersonStatementCardProps) {
     <article className={styles.card}>
       <header className={styles.header}>
         <div className={styles.profile}>
-          <span className={styles.avatar} aria-hidden>
-            {getPersonInitials(mention.personName)}
-          </span>
+          <EntityAvatar
+            variant="person"
+            size="lg"
+            name={mention.personName}
+            imageUrl={mention.imageUrl}
+          />
           <div className={styles.identity}>
             <p className={styles.name}>{mention.personName}</p>
             <p className={styles.role}>

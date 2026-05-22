@@ -12,6 +12,7 @@ export interface PersonMention {
   id: string
   personId: string
   personName: string
+  imageUrl?: string | null
   role: string
   organizationName: string
   context: string
@@ -25,6 +26,7 @@ export interface PersonMention {
 export interface PersonTopItem {
   personId: string
   personName: string
+  imageUrl?: string | null
   role: string
   organizationName: string
   mentionCount: number

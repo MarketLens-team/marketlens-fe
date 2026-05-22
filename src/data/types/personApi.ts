@@ -13,6 +13,7 @@ export interface PersonStatementResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   statementSummary: string
   sourceName: string
   publishedAt: string
@@ -27,6 +28,7 @@ export interface PersonTopResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   mentionCount: number
 }
 

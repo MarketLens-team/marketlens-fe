@@ -30,6 +30,7 @@ import {
 } from '../../lib/resolveSearchNewsRoute'
 import { formatStockScore } from '../stock/stockScore'
 import { useWatchlistStore } from '../../store/watchlistStore'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { Modal } from '../ui/Modal'
 import { UnderlineTabNav } from './UnderlineTabNav'
 import styles from './TopNavSearchModal.module.css'
@@ -161,6 +162,7 @@ function ResultSection({
 type StockSearchRowModel = {
   code: string
   name: string
+  imageUrl?: string | null
   market?: string
   sectorCode?: string
   sectorName?: string
@@ -189,11 +191,14 @@ function StockSearchRow({
       )}
     >
       <div className={styles.stockIdentity}>
+        <EntityAvatar variant="stock" size="md" name={stock.name} imageUrl={stock.imageUrl} />
+        <div className={styles.stockIdentityText}>
         <p className={styles.stockName}>{stock.name}</p>
         <p className={styles.stockMeta}>
           {stock.code}
           {stock.market ? ` · ${stock.market}` : ''}
         </p>
+        </div>
       </div>
       {showMentionCount && stock.mentionCount != null ? (
         <p className={styles.searchRowStat}>{formatMentionCount(stock.mentionCount)}</p>
@@ -378,6 +383,7 @@ function StockResultList({ stocks, onClose }: { stocks: SearchStockResult[]; onC
 type PersonRowModel = {
   personId: string
   personName: string
+  imageUrl?: string | null
   organizationName: string
   role: string
   mentionCount?: number
@@ -402,11 +408,14 @@ function PersonSearchRow({
       )}
     >
       <div className={styles.stockIdentity}>
+        <EntityAvatar variant="person" size="md" name={person.personName} imageUrl={person.imageUrl} />
+        <div className={styles.stockIdentityText}>
         <p className={styles.personName}>{person.personName}</p>
         <p className={styles.personMeta}>
           {person.organizationName}
           {person.role ? ` · ${person.role}` : ''}
         </p>
+        </div>
       </div>
       {showMentionStat ? (
         <p className={styles.searchRowStat}>{formatMentionCount(person.mentionCount!)}</p>

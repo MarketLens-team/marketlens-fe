@@ -1,3 +1,4 @@
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import type {
   PersonFrequentStock,
   PersonMention,
@@ -33,6 +34,7 @@ export function mapPersonStatement(dto: PersonStatementResponse): PersonMention 
     id: String(dto.statementId),
     personId: String(dto.personId),
     personName: dto.personName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     role: dto.personRole,
     organizationName: dto.organizationName,
     context: dto.statementSummary ?? '',
@@ -48,6 +50,7 @@ export function mapPersonTopItem(dto: PersonTopResponse): PersonTopItem {
   return {
     personId: String(dto.personId),
     personName: dto.personName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
     role: dto.personRole,
     organizationName: dto.organizationName,
     mentionCount: dto.mentionCount,

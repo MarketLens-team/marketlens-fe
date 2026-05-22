@@ -44,6 +44,7 @@ export interface SearchStatementPreview {
 export interface SearchStockResult {
   code: string
   name: string
+  imageUrl?: string | null
   market?: string
   sectorCode?: string
   sectorName?: string
@@ -53,6 +54,7 @@ export interface SearchStockResult {
 export interface SearchPersonResult {
   personId: string
   personName: string
+  imageUrl?: string | null
   role: string
   organizationName: string
   relatedStatements: SearchStatementPreview[]
@@ -61,6 +63,7 @@ export interface SearchPersonResult {
 export interface SearchFallbackStock {
   code: string
   name: string
+  imageUrl?: string | null
   market?: string
   sectorCode?: string
   sectorName?: string
@@ -76,6 +79,7 @@ export interface SearchFallbackSectorGroup {
 export interface SearchFallbackPerson {
   personId: string
   personName: string
+  imageUrl?: string | null
   role: string
   organizationName: string
   mentionCount: number

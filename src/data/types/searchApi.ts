@@ -48,6 +48,7 @@ export interface StockSearchItemResponse {
   stockId?: number
   stockCode: string
   stockName: string
+  imageUrl?: string
   market?: string
   sectorCode?: string
   sectorName?: string
@@ -59,12 +60,14 @@ export interface PersonSearchItemResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   relatedStatements?: PersonStatementItemResponse[]
 }
 
 export interface FallbackStockItemResponse {
   stockCode: string
   stockName: string
+  imageUrl?: string
   market?: string
   sectorCode?: string
   sectorName?: string
@@ -76,6 +79,7 @@ export interface FallbackPersonItemResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   mentionCount: number
 }
 

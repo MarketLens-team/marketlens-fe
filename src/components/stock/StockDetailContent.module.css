@@ -26,6 +26,14 @@
   gap: var(--space-4);
 }
 
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1;
+}
+
 .headerBody {
   display: flex;
   flex-wrap: wrap;
@@ -499,8 +507,8 @@
 
 .personTimelineRow {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: 4rem auto minmax(0, 1fr);
+  gap: var(--space-3) var(--space-4);
   align-items: start;
 }
 

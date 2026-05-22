@@ -5,6 +5,7 @@ export interface StockInfoResponse {
   name: string
   market: string
   sectorName: string
+  imageUrl?: string
   currentPrice?: number
   changeRate?: number
 }
@@ -57,6 +58,7 @@ export interface RelatedStockItemResponse {
   code: string
   name: string
   market: string
+  imageUrl?: string
   sentimentScore: number
 }
 

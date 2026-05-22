@@ -1,4 +1,5 @@
 import { formatPersonTimelineTime } from '../../lib/formatRelativeTime'
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { truncateText } from '../../lib/truncateText'
 import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
@@ -89,6 +90,7 @@ export function mapRelatedStocks(
     .map((item) => ({
       code: item.code,
       name: item.name,
+      imageUrl: normalizeImageUrl(item.imageUrl),
       market: item.market,
       sentimentScore: item.sentimentScore,
     }))
@@ -108,7 +110,7 @@ export function mapNewsFeedItems(
     sentimentScore: item.sentimentScore,
     aiReason: '',
     highlightTerms,
-    imageUrl: item.imageUrl || null,
+    imageUrl: normalizeImageUrl(item.imageUrl),
     url: item.originalLink || undefined,
   }))
 }
@@ -160,6 +162,7 @@ export function mapStockPeopleTimeline(
       return {
         id: String(row.statementId),
         personName: row.personName,
+        imageUrl: normalizeImageUrl(row.imageUrl),
         role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
         summary: truncateText(row.statementSummary?.trim() || '—', STOCK_PERSON_SUMMARY_MAX_LEN),
         sourceName: row.sourceName?.trim() || '—',
@@ -186,6 +189,7 @@ export function mapStockDetailPage(
   const stockSummary: StockSummary = {
     code: stock.code,
     name: stock.name,
+    imageUrl: normalizeImageUrl(stock.imageUrl),
     market: stock.market,
     sector: stock.sectorName,
     sentimentScore: toFiniteNumber(summary.score),

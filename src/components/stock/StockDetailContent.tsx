@@ -17,6 +17,7 @@ import type {
   StockNewsPagination,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
 import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
@@ -245,7 +246,15 @@ export function StockDetailContent({
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.headerTop}>
-          <h1 className={styles.stockTitle}>{stock.name}</h1>
+          <div className={styles.headerTitleRow}>
+            <EntityAvatar
+              variant="stock"
+              size="xl"
+              name={stock.name}
+              imageUrl={stock.imageUrl}
+            />
+            <h1 className={styles.stockTitle}>{stock.name}</h1>
+          </div>
           <PillButton
             variant={interested ? 'secondary' : 'primary'}
             active={interested}
@@ -450,6 +459,12 @@ export function StockDetailContent({
                 {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
                   <li key={related.code} className={styles.simpleListItem}>
                     <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={related.name}
+                        imageUrl={related.imageUrl}
+                      />
                       <span className={styles.stockLinkName}>{related.name}</span>
                       <span
                         className={clsx(
@@ -496,6 +511,12 @@ export function StockDetailContent({
                         >
                           {person.relativeLabel}
                         </span>
+                        <EntityAvatar
+                          variant="person"
+                          size="sm"
+                          name={person.personName}
+                          imageUrl={person.imageUrl}
+                        />
                         <div className={styles.personTimelineContent}>
                           <p className={styles.personTimelineHeadline}>{person.summary}</p>
                           <p className={styles.personTimelineMeta}>
