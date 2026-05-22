@@ -54,7 +54,11 @@
 /* 아바타 아래 → 다음 항목까지 이어지는 타임라인 선 */
 .timelineItem {
   position: relative;
-  padding-bottom: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+
+.timelineItem + .timelineItem {
+  padding-top: var(--space-5);
 }
 
 .timelineItem:not(:last-child)::after {
@@ -62,7 +66,7 @@
   position: absolute;
   left: calc(1.25rem - 1px);
   top: 2.5rem;
-  bottom: 0;
+  bottom: calc(-1 * var(--space-5));
   width: 2px;
   background: var(--color-border-strong);
   border-radius: var(--radius-full);
