@@ -14,7 +14,38 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonTracker } from '../hooks/usePersonTracker'
 import styles from './PersonTrackerPage.module.css'
 
-const ASIDE_SCROLL_ROOT = '#person-tracker-aside-scroll'
+const FEED_SCROLL_ROOT = '#person-tracker-feed-scroll'
+
+function RangeToggle({
+  range,
+  onChange,
+  className,
+}: {
+  range: PersonMentionsRange
+  onChange: (range: PersonMentionsRange) => void
+  className?: string
+}) {
+  return (
+    <div className={clsx(styles.segmented, className)} role="group" aria-label="기간">
+      <button
+        type="button"
+        className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
+        aria-pressed={range === 'today'}
+        onClick={() => onChange('today')}
+      >
+        오늘
+      </button>
+      <button
+        type="button"
+        className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
+        aria-pressed={range === '7d'}
+        onClick={() => onChange('7d')}
+      >
+        7일
+      </button>
+    </div>
+  )
+}
 
 export default function PersonTrackerPage() {
   const [range, setRange] = useState<PersonMentionsRange>('today')
@@ -36,20 +67,26 @@ export default function PersonTrackerPage() {
   return (
     <Layout>
       <div className={styles.page}>
+        <div className={styles.toolbar}>
+          <h1 className={styles.pageTitle}>인물 발언</h1>
+          <RangeToggle range={range} onChange={setRange} />
+        </div>
+
         {error ? (
           <PageFetchError title="인물 발언을 불러오지 못했어요" message={error.message} />
         ) : null}
 
         {loading && !data && !error ? (
           <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <aside className={styles.leftAside}>
+              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            </aside>
             <div className={styles.feedCol}>
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <aside className={styles.asideCol}>
-              <div className={clsx(skeleton.block, styles.skeletonRange)} />
-              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            <aside className={styles.rightAside}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
           </div>
@@ -57,7 +94,11 @@ export default function PersonTrackerPage() {
 
         {data ? (
           <div className={styles.mainGrid}>
-            <div className={styles.feedCol}>
+            <aside className={styles.leftAside}>
+              <PersonTop5Panel items={data.topPersons} />
+            </aside>
+
+            <div id="person-tracker-feed-scroll" className={styles.feedCol}>
               <ul className={styles.feedList}>
                 {data.mentions.map((mention) => (
                   <li key={mention.id}>
@@ -69,39 +110,13 @@ export default function PersonTrackerPage() {
                 <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
               ) : null}
               {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
+              <div className={styles.feedFooter}>
+                <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
+              </div>
             </div>
-            <aside className={styles.asideCol}>
-              <div className={styles.rangeRow} role="group" aria-label="기간">
-                <div className={styles.segmented}>
-                  <button
-                    type="button"
-                    className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
-                    aria-pressed={range === 'today'}
-                    onClick={() => setRange('today')}
-                  >
-                    오늘
-                  </button>
-                  <button
-                    type="button"
-                    className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
-                    aria-pressed={range === '7d'}
-                    onClick={() => setRange('7d')}
-                  >
-                    7일
-                  </button>
-                </div>
-              </div>
-              <div id="person-tracker-aside-scroll" className={styles.asideScroll}>
-                <PersonTop5Panel items={data.topPersons} />
-                <PersonFrequentStocksPanel items={data.frequentStocks} />
-              </div>
-              <div className={styles.asideFooter}>
-                <BackToTopButton
-                  placement="inline"
-                  tooltipSide="left"
-                  scrollRootSelector={ASIDE_SCROLL_ROOT}
-                />
-              </div>
+
+            <aside className={styles.rightAside}>
+              <PersonFrequentStocksPanel items={data.frequentStocks} />
             </aside>
           </div>
         ) : null}

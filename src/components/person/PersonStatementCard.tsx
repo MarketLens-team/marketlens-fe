@@ -32,9 +32,7 @@ export function PersonStatementCard({ mention, variant = 'full' }: PersonStateme
     <article className={clsx(styles.card, isFeed && styles.cardFeed)}>
       {isFeed ? (
         <header className={styles.feedHeader}>
-          <p className={styles.feedMeta}>
-            {mention.sourceName} · {formatRelativeTimeKo(mention.publishedAt)}
-          </p>
+          <p className={styles.feedMeta}>{formatRelativeTimeKo(mention.publishedAt)}</p>
           <span className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[tone])}>
             {formatPersonSentimentBadge(mention.sentiment, mention.sentimentScore)}
           </span>
@@ -57,9 +55,7 @@ export function PersonStatementCard({ mention, variant = 'full' }: PersonStateme
               <p className={styles.role}>
                 {formatPersonRole(mention.organizationName, mention.role)}
               </p>
-              <p className={styles.meta}>
-                {mention.sourceName} · {formatRelativeTimeKo(mention.publishedAt)}
-              </p>
+              <p className={styles.meta}>{formatRelativeTimeKo(mention.publishedAt)}</p>
             </div>
           </div>
           <span className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[tone])}>

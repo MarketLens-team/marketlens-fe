@@ -19,12 +19,43 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonDetail } from '../hooks/usePersonDetail'
 import styles from './PersonDetailPage.module.css'
 
-const ASIDE_SCROLL_ROOT = '#person-detail-aside-scroll'
+const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
 
 function parsePersonId(raw: string | undefined): number | null {
   if (!raw?.trim()) return null
   const n = Number(raw)
   return Number.isFinite(n) && n > 0 ? n : null
+}
+
+function RangeToggle({
+  range,
+  onChange,
+  className,
+}: {
+  range: PersonMentionsRange
+  onChange: (range: PersonMentionsRange) => void
+  className?: string
+}) {
+  return (
+    <div className={clsx(styles.segmented, className)} role="group" aria-label="기간">
+      <button
+        type="button"
+        className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
+        aria-pressed={range === 'today'}
+        onClick={() => onChange('today')}
+      >
+        오늘
+      </button>
+      <button
+        type="button"
+        className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
+        aria-pressed={range === '7d'}
+        onClick={() => onChange('7d')}
+      >
+        7일
+      </button>
+    </div>
+  )
 }
 
 export default function PersonDetailPage() {
@@ -72,6 +103,7 @@ export default function PersonDetailPage() {
             aria-label="인물 발언 목록으로"
             onClick={() => navigate('/person')}
           />
+          <RangeToggle range={range} onChange={setRange} />
         </div>
 
         {error ? (
@@ -80,15 +112,16 @@ export default function PersonDetailPage() {
 
         {loading && !data && !error ? (
           <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <aside className={styles.leftAside}>
+              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            </aside>
             <div className={styles.feedCol}>
               <div className={clsx(skeleton.block, styles.skeletonHero)} />
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <aside className={styles.asideCol}>
-              <div className={clsx(skeleton.block, styles.skeletonRange)} />
-              <div className={clsx(skeleton.block, styles.skeletonAside)} />
+            <aside className={styles.rightAside}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
           </div>
@@ -96,7 +129,11 @@ export default function PersonDetailPage() {
 
         {data ? (
           <div className={styles.mainGrid}>
-            <div className={styles.feedCol}>
+            <aside className={styles.leftAside}>
+              <PersonTop5Panel items={data.topPersons} />
+            </aside>
+
+            <div id="person-detail-feed-scroll" className={styles.feedCol}>
               <header className={styles.hero}>
                 {profile ? (
                   <>
@@ -138,43 +175,20 @@ export default function PersonDetailPage() {
               ) : null}
 
               {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
-            </div>
 
-            <aside className={styles.asideCol}>
-              <div className={styles.rangeRow} role="group" aria-label="기간">
-                <div className={styles.segmented}>
-                  <button
-                    type="button"
-                    className={clsx(styles.segmentBtn, range === 'today' && styles.segmentBtnActive)}
-                    aria-pressed={range === 'today'}
-                    onClick={() => setRange('today')}
-                  >
-                    오늘
-                  </button>
-                  <button
-                    type="button"
-                    className={clsx(styles.segmentBtn, range === '7d' && styles.segmentBtnActive)}
-                    aria-pressed={range === '7d'}
-                    onClick={() => setRange('7d')}
-                  >
-                    7일
-                  </button>
-                </div>
-              </div>
-              <div id="person-detail-aside-scroll" className={styles.asideScroll}>
-                <PersonTop5Panel items={data.topPersons} />
-                <PersonFrequentStocksPanel
-                  items={data.frequentStocks}
-                  title="함께 언급된 종목"
-                />
-              </div>
-              <div className={styles.asideFooter}>
+              <div className={styles.feedFooter}>
                 <BackToTopButton
                   placement="inline"
-                  tooltipSide="left"
-                  scrollRootSelector={ASIDE_SCROLL_ROOT}
+                  scrollRootSelector={FEED_SCROLL_ROOT}
                 />
               </div>
+            </div>
+
+            <aside className={styles.rightAside}>
+              <PersonFrequentStocksPanel
+                items={data.frequentStocks}
+                title="함께 언급된 종목"
+              />
             </aside>
           </div>
         ) : null}
