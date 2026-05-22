@@ -21,43 +21,34 @@
   align-self: start;
   min-width: 0;
   margin: 0;
-  padding: 0;
+  padding-top: var(--person-detail-panel-offset);
+  position: sticky;
+  top: var(--space-4);
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  scrollbar-width: thin;
 }
 
 .detailLeftSticky {
   grid-column: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  position: sticky;
-  top: var(--space-4);
-  max-height: calc(100vh - 4.5rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: 2px;
-  scrollbar-width: thin;
 }
 
 .detailFeedCol {
   grid-column: 2;
-  padding-top: var(--person-detail-panel-offset);
 }
 
 .detailRightPanel {
   grid-column: 3;
-  padding-top: var(--person-detail-panel-offset);
-  position: sticky;
-  top: var(--space-4);
-  max-height: calc(100vh - 4.5rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: 2px;
-  scrollbar-width: thin;
 }
 
+/* 뒤로가기는 offset 영역에 겹쳐 두고, TOP5·히어로·우측 카드는 같은 padding-top 선에서 시작 */
 .asideBackBtn {
-  flex-shrink: 0;
-  width: fit-content;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
 .toolbarBtnWrap {
@@ -220,16 +211,17 @@
     grid-row: auto;
   }
 
-  .detailLeftSticky,
-  .detailRightPanel {
+  .detailGrid > .detailLeftSticky,
+  .detailGrid > .detailFeedCol,
+  .detailGrid > .detailRightPanel {
     position: static;
     max-height: none;
     overflow: visible;
     padding-right: 0;
+    padding-top: 0;
   }
 
-  .detailFeedCol,
-  .detailRightPanel {
-    padding-top: 0;
+  .asideBackBtn {
+    position: static;
   }
 }
