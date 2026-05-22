@@ -46,7 +46,7 @@ export function EntityAvatar({
     >
       {src && !imgFailed ? (
         <img
-          className={styles.img}
+          className={clsx(styles.img, variant === 'stock' ? styles.imgStock : styles.imgPerson)}
           src={src}
           alt=""
           width={px}
