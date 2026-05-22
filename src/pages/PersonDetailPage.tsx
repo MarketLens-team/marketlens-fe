@@ -21,6 +21,7 @@ import { usePersonDetail } from '../hooks/usePersonDetail'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonMentionCount } from '../hooks/usePersonMentionCount'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
+import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
 const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
@@ -101,11 +102,16 @@ export default function PersonDetailPage() {
     <Layout>
       <div className={styles.page}>
         <div className={styles.toolbar}>
-          <IconCircleButton
-            direction="back"
-            aria-label="인물 발언 목록으로"
-            onClick={() => navigate('/person')}
-          />
+          <div className={styles.toolbarBtnWrap}>
+            <IconCircleButton
+              direction="back"
+              aria-label="전체 인물 타임라인으로 이동"
+              onClick={() => navigate('/person')}
+            />
+            <span className={styles.toolbarTooltip} role="tooltip">
+              전체 인물 타임라인으로 이동
+            </span>
+          </div>
         </div>
 
         {feedError ? (
@@ -113,25 +119,25 @@ export default function PersonDetailPage() {
         ) : null}
 
         {showInitialSkeleton ? (
-          <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
-            <aside className={styles.leftAside}>
+          <div className={gridStyles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
-            <div className={styles.feedCol}>
+            <div className={clsx(gridStyles.feedCol, styles.feedColDetail)}>
               <div className={clsx(skeleton.block, styles.skeletonHero)} />
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <aside className={styles.rightAside}>
+            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
           </div>
         ) : null}
 
         {feed ? (
-          <div className={styles.mainGrid}>
-            <aside className={styles.leftAside}>
+          <div className={gridStyles.mainGrid}>
+            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
               <PersonTop5Panel
                 items={topPersons ?? []}
                 range={topRange}
@@ -140,7 +146,7 @@ export default function PersonDetailPage() {
               />
             </aside>
 
-            <div id="person-detail-feed-scroll" className={styles.feedCol}>
+            <div id="person-detail-feed-scroll" className={clsx(gridStyles.feedCol, styles.feedColDetail)}>
               <header
                 className={clsx(
                   styles.hero,
@@ -185,7 +191,7 @@ export default function PersonDetailPage() {
                 )}
               </header>
 
-              <ul className={clsx(styles.feedList, feedLoading && styles.feedDimmed)}>
+              <ul className={clsx(gridStyles.feedList, styles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
                   <li key={mention.id}>
                     <PersonStatementCard mention={mention} variant="feed" />
@@ -204,7 +210,7 @@ export default function PersonDetailPage() {
               </div>
             </div>
 
-            <aside className={styles.rightAside}>
+            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
               <PersonFrequentStocksPanel
                 items={frequentStocks ?? []}
                 title="함께 언급된 종목"

@@ -14,6 +14,7 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import { usePersonTracker } from '../hooks/usePersonTracker'
+import gridStyles from './personPageLayout.module.css'
 import styles from './PersonTrackerPage.module.css'
 
 const FEED_SCROLL_ROOT = '#person-tracker-feed-scroll'
@@ -65,24 +66,24 @@ export default function PersonTrackerPage() {
         ) : null}
 
         {showInitialSkeleton ? (
-          <div className={styles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
-            <aside className={styles.leftAside}>
+          <div className={gridStyles.mainGrid} aria-busy="true" aria-label="인물 발언 로딩">
+            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
-            <div className={styles.feedCol}>
+            <div className={gridStyles.feedCol}>
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
               ))}
             </div>
-            <aside className={styles.rightAside}>
+            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </aside>
           </div>
         ) : null}
 
         {feed ? (
-          <div className={styles.mainGrid}>
-            <aside className={styles.leftAside}>
+          <div className={gridStyles.mainGrid}>
+            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
               <PersonTop5Panel
                 items={topPersons ?? []}
                 range={topRange}
@@ -91,8 +92,8 @@ export default function PersonTrackerPage() {
               />
             </aside>
 
-            <div id="person-tracker-feed-scroll" className={styles.feedCol}>
-              <ul className={clsx(styles.feedList, feedLoading && styles.feedDimmed)}>
+            <div id="person-tracker-feed-scroll" className={gridStyles.feedCol}>
+              <ul className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
                   <li key={mention.id}>
                     <PersonStatementCard mention={mention} />
@@ -108,7 +109,7 @@ export default function PersonTrackerPage() {
               </div>
             </div>
 
-            <aside className={styles.rightAside}>
+            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
               <PersonFrequentStocksPanel
                 items={frequentStocks ?? []}
                 range={stocksRange}
