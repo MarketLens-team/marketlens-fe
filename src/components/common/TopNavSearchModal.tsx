@@ -27,6 +27,7 @@ import {
   formatSearchNewsStockLabel,
   resolveSearchNewsRoute,
   resolveSearchNewsStockRoute,
+  type SearchNewsStockContext,
 } from '../../lib/resolveSearchNewsRoute'
 import { formatStockScore } from '../stock/stockScore'
 import { useWatchlistStore } from '../../store/watchlistStore'
@@ -111,10 +112,14 @@ function searchNewsSentimentClass(score: number) {
   return styles.newsSentimentNeu
 }
 
-function mapSearchNewsRows(news: SearchNewsPreview[], keyPrefix = 'news'): NewsWithContext[] {
+function mapSearchNewsRows(
+  news: SearchNewsPreview[],
+  keyPrefix = 'news',
+  singleStock?: SearchNewsStockContext | null,
+): NewsWithContext[] {
   return news.map((item) => ({
     ...item,
-    stockLabel: formatSearchNewsStockLabel(item),
+    stockLabel: formatSearchNewsStockLabel(item, singleStock),
     rowKey: `${keyPrefix}-${item.id}`,
   }))
 }
@@ -266,9 +271,11 @@ function StockRowsBySector({
 function SearchNewsRows({
   items,
   onClose,
+  singleStock,
 }: {
   items: NewsWithContext[]
   onClose: () => void
+  singleStock?: SearchNewsStockContext | null
 }) {
   const navigate = useNavigate()
 
@@ -277,11 +284,12 @@ function SearchNewsRows({
   return (
     <ul className={styles.rowList}>
       {items.map((item) => {
-        const inAppRoute = resolveSearchNewsRoute(item)
-        const stockRoute = resolveSearchNewsStockRoute(item)
+        const inAppRoute = resolveSearchNewsRoute(item, singleStock)
+        const stockRoute = resolveSearchNewsStockRoute(item, singleStock)
         const inner = (
           <SearchNewsRowContent
             item={item}
+            singleStock={singleStock}
             onStockClick={
               stockRoute
                 ? () => {
@@ -336,11 +344,13 @@ function SearchNewsRows({
 function SearchNewsRowContent({
   item,
   onStockClick,
+  singleStock,
 }: {
   item: NewsWithContext
   onStockClick?: () => void
+  singleStock?: SearchNewsStockContext | null
 }) {
-  const stockLabel = item.stockLabel ?? formatSearchNewsStockLabel(item)
+  const stockLabel = item.stockLabel ?? formatSearchNewsStockLabel(item, singleStock)
 
   return (
     <>
@@ -541,11 +551,13 @@ function StockSearchResults({
   searchNews,
   filter,
   onClose,
+  singleStock,
 }: {
   stocks: SearchStockResult[]
   searchNews: NewsWithContext[]
   filter: StockFilter
   onClose: () => void
+  singleStock?: SearchNewsStockContext | null
 }) {
   if (filter === 'stock') {
     if (stocks.length === 0) return <p className={styles.empty}>종목 결과가 없습니다.</p>
@@ -556,7 +568,7 @@ function StockSearchResults({
     if (searchNews.length === 0) return <p className={styles.empty}>뉴스 결과가 없습니다.</p>
     return (
       <ResultSection label="뉴스" variant="rows">
-        <SearchNewsRows items={searchNews} onClose={onClose} />
+        <SearchNewsRows items={searchNews} onClose={onClose} singleStock={singleStock} />
       </ResultSection>
     )
   }
@@ -570,7 +582,7 @@ function StockSearchResults({
       {stocks.length > 0 ? <StockResultList stocks={stocks} onClose={onClose} /> : null}
       {searchNews.length > 0 ? (
         <ResultSection label="뉴스" variant="rows">
-          <SearchNewsRows items={searchNews} onClose={onClose} />
+          <SearchNewsRows items={searchNews} onClose={onClose} singleStock={singleStock} />
         </ResultSection>
       ) : null}
     </>
@@ -842,9 +854,15 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const stocks = results?.stocks ?? []
   const persons = results?.persons ?? []
 
+  const singleStockContext = useMemo((): SearchNewsStockContext | null => {
+    if (stocks.length !== 1) return null
+    const stock = stocks[0]
+    return { stockCode: stock.code, stockName: stock.name }
+  }, [stocks])
+
   const searchNews = useMemo(
-    () => mapSearchNewsRows(results?.news ?? []),
-    [results?.news],
+    () => mapSearchNewsRows(results?.news ?? [], 'news', singleStockContext),
+    [results?.news, singleStockContext],
   )
   const personStatementsFlat = useMemo(() => flattenPersonStatements(persons), [persons])
 
@@ -1098,6 +1116,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
                   searchNews={searchNews}
                   filter={stockFilter}
                   onClose={onClose}
+                  singleStock={singleStockContext}
                 />
               ) : null}
 
