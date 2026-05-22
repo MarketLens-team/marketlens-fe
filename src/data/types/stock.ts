@@ -115,3 +115,12 @@ export interface StockSearchItem {
   code: string
   name: string
 }
+
+/** 상단 TickerBar 종목 한 줄 */
+export interface TickerStockRow {
+  id: string
+  code: string
+  name: string
+  price: number
+  changePercent: number
+}

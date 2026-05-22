@@ -20,12 +20,16 @@ import type {
   StockBuzzSurgeResponse,
   StockDetailResponse,
   StockDirectoryResponse,
+  StockPricesResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
-import type { StockDetail, StockSearchItem } from '../types/stock'
+import type { StockDetail, StockSearchItem, TickerStockRow } from '../types/stock'
+import { TICKER_STOCK_CODES } from '../constants/tickerStockCodes'
+import { mapStockPricesToTickerRows } from '../mappers/stockMapper'
+import { buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
@@ -228,6 +232,21 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       peopleTimeline: mapStockPeopleTimeline(mentions, code),
     },
   )
+}
+
+/** OpenAPI `GET /api/v1/stocks/prices` — TickerBar 30종 */
+export async function fetchStockPrices(
+  codes: readonly string[] = TICKER_STOCK_CODES,
+): Promise<TickerStockRow[]> {
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    return mapStockPricesToTickerRows(buildMockStockPricesResponse(), codes)
+  }
+  const data = await getApiData<StockPricesResponse>(
+    `${STOCKS_BASE}/prices`,
+    '종목 시세를 불러오지 못했습니다.',
+  )
+  return mapStockPricesToTickerRows(data, codes)
 }
 
 /** OpenAPI `getBuzzSurge` — `GET /api/v1/stocks/buzz-surge` */

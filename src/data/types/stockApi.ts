@@ -133,6 +133,21 @@ export interface StockBuzzSurgeItemResponse {
   aiSummary: string | null
 }
 
+/** OpenAPI `StockPricesResponse.StockPriceItem` */
+export interface StockPriceItemResponse {
+  stockCode: string
+  stockName: string
+  market: string
+  imageUrl?: string
+  currentPrice?: number
+  changeRate?: number
+}
+
+/** OpenAPI `StockPricesResponse` — `GET /api/v1/stocks/prices` */
+export interface StockPricesResponse {
+  items: StockPriceItemResponse[]
+}
+
 /** OpenAPI `StockBuzzSurgeResponse` — `GET /api/v1/stocks/buzz-surge` */
 export interface StockBuzzSurgeResponse {
   updatedAt: string

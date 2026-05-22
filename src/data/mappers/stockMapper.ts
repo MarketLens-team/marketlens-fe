@@ -8,6 +8,7 @@ import type {
   NewsFeedItemResponse,
   RelatedStocksResponse,
   StockDetailResponse,
+  StockPricesResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
@@ -23,6 +24,7 @@ import type {
   StockSentimentContext,
   StockPersonTimelineItem,
   StockSentimentTrendPoint,
+  TickerStockRow,
   StockSummary,
 } from '../types/stock'
 
@@ -220,4 +222,27 @@ export function mapStockDetailPage(
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
   }
+}
+
+/** `GET /api/v1/stocks/prices` → TickerBar 행 (지정 코드 순서 유지) */
+export function mapStockPricesToTickerRows(
+  response: StockPricesResponse,
+  orderedCodes: readonly string[],
+): TickerStockRow[] {
+  const byCode = new Map(response.items.map((item) => [item.stockCode, item]))
+  return orderedCodes.flatMap((code) => {
+    const item = byCode.get(code)
+    if (!item) return []
+    const price = toFiniteNumber(item.currentPrice)
+    if (price <= 0) return []
+    return [
+      {
+        id: item.stockCode,
+        code: item.stockCode,
+        name: item.stockName,
+        price,
+        changePercent: toFiniteNumber(item.changeRate),
+      },
+    ]
+  })
 }
