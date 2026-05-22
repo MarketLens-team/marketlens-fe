@@ -371,28 +371,37 @@
 }
 
 .forgotLead {
-  margin: 0 0 var(--space-4);
+  margin: calc(-1 * var(--space-2)) 0 var(--space-4);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
 }
 
-.authBackLink {
+.authBackBtn {
   display: inline-flex;
   align-items: center;
-  margin: 0 0 var(--space-4);
+  justify-content: center;
+  align-self: flex-start;
+  width: 36px;
+  height: 36px;
+  margin: 0 0 var(--space-1);
   padding: 0;
   border: none;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  text-decoration: none;
   cursor: pointer;
 }
 
-.authBackLink:hover {
+.authBackBtn:hover {
   color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
+.authBackIcon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .authHeader {

@@ -78,7 +78,23 @@ function isMemberNotFoundError(message: string) {
   return message.includes('존재하지 않는 회원')
 }
 
-type LoginPhase = 'signin' | 'forgot-email' | 'forgot-password'
+type LoginPhase = 'signin' | 'forgot'
+
+function AuthBackButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" className={styles.authBackBtn} onClick={onClick} aria-label={label}>
+      <svg className={styles.authBackIcon} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M15 18l-6-6 6-6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  )
+}
 
 function applySignupApiError(
   rawMessage: string,
@@ -523,7 +539,7 @@ export default function AuthPanel({
     setPassword('')
     setConfirmPassword('')
     setPasswordResetVerified(false)
-    setLoginPhase('forgot-email')
+    setLoginPhase('forgot')
   }
 
   const exitForgotPassword = () => {
@@ -567,7 +583,6 @@ export default function AuthPanel({
   const handlePasswordResetEmailVerified = () => {
     setPasswordResetVerified(true)
     setEmailVerifyModalOpen(false)
-    setLoginPhase('forgot-password')
     setPassword('')
     setConfirmPassword('')
     window.requestAnimationFrame(() => passwordRef.current?.focus())
@@ -606,7 +621,7 @@ export default function AuthPanel({
     if (isSubmitting) return
     if (!passwordResetVerified) {
       setSignupSubmitError('이메일 인증을 완료해주세요.')
-      setLoginPhase('forgot-email')
+      emailRef.current?.focus()
       return
     }
     setSignupSubmitError(null)
@@ -621,8 +636,8 @@ export default function AuthPanel({
       const message = getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.')
       if (message.includes('이메일 인증이 완료되지 않았습니다') || message.includes('비밀번호 재설정')) {
         setPasswordResetVerified(false)
-        setLoginPhase('forgot-email')
         setSignupSubmitError(message)
+        emailRef.current?.focus()
         return
       }
       applySignupApiError(message, setErrors, setSignupSubmitError)
@@ -878,19 +893,14 @@ export default function AuthPanel({
                 {isSubmitting ? <ButtonSpinner /> : null}
               </button>
             </form>
-          ) : loginPhase === 'forgot-email' ? (
+          ) : (
             <form
-              id={`${formId}-forgot-email`}
+              id={`${formId}-forgot`}
               className={styles.form}
-              onSubmit={(event) => {
-                event.preventDefault()
-                void handleOpenPasswordResetVerification()
-              }}
+              onSubmit={handlePasswordResetSubmit}
               noValidate
             >
-              <button type="button" className={styles.authBackLink} onClick={exitForgotPassword}>
-                로그인으로 돌아가기
-              </button>
+              <AuthBackButton label="로그인으로 돌아가기" onClick={exitForgotPassword} />
               <p className={styles.forgotLead}>가입한 이메일로 인증 후 새 비밀번호를 설정할 수 있습니다.</p>
               <AuthField
                 id="auth-forgot-email"
@@ -914,39 +924,6 @@ export default function AuthPanel({
                 trailingAction={passwordResetEmailTrailingAction}
                 disabled={passwordResetVerified}
               />
-              {signupSubmitError ? (
-                <p className={styles.formBanner} role="alert">
-                  {signupSubmitError}
-                </p>
-              ) : null}
-              {passwordResetVerified ? (
-                <button
-                  type="button"
-                  className={styles.submit}
-                  onClick={() => setLoginPhase('forgot-password')}
-                >
-                  <span className={styles.submitLabel}>새 비밀번호 설정</span>
-                </button>
-              ) : null}
-            </form>
-          ) : (
-            <form
-              id={`${formId}-forgot-password`}
-              className={styles.form}
-              onSubmit={handlePasswordResetSubmit}
-              noValidate
-            >
-              <button
-                type="button"
-                className={styles.authBackLink}
-                onClick={() => {
-                  setLoginPhase('forgot-email')
-                  setErrors({})
-                  setSignupSubmitError(null)
-                }}
-              >
-                이메일 인증으로 돌아가기
-              </button>
               <AuthField
                 id="auth-reset-password"
                 label="새 비밀번호"
@@ -965,6 +942,7 @@ export default function AuthPanel({
                 showToggle
                 visible={passwordVisible}
                 onToggleVisible={() => setPasswordVisible((v) => !v)}
+                disabled={!passwordResetVerified}
               />
               <AuthField
                 id="auth-reset-confirm"
@@ -983,6 +961,7 @@ export default function AuthPanel({
                 showToggle
                 visible={confirmVisible}
                 onToggleVisible={() => setConfirmVisible((v) => !v)}
+                disabled={!passwordResetVerified}
               />
               {signupSubmitError ? (
                 <p className={styles.formBanner} role="alert">
