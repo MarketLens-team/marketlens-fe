@@ -14,6 +14,7 @@ import type {
 } from '../types/person'
 import type {
   PersonFrequentStockResponse,
+  PersonMentionCountResponse,
   PersonMentionCursorResponse,
   PersonSidebarResponse,
   PersonStatementResponse,
@@ -208,6 +209,25 @@ export async function fetchPersonTopMentioned(params?: FetchPersonMentionsParams
     `${PERSONS_BASE}/top-mentioned`,
     '화제 인물을 불러오지 못했습니다.',
     buildPersonRangeParams(params),
+  )
+}
+
+/** OpenAPI `GET /api/v1/persons/{personId}/mention-count` — 인물별 기간 언급 건수 */
+export async function fetchPersonMentionCountByPersonId(
+  personId: number,
+  params?: FetchPersonMentionsParams,
+): Promise<PersonMentionCountResponse> {
+  if (isMockDataSource()) {
+    await mockDelay(40)
+    const rows = filterMockStatementsForParams({ ...params, personId })
+    const top = mockPersonTopResponse.find((p) => p.personId === personId)
+    return { mentionCount: rows.length || top?.mentionCount || 0 }
+  }
+
+  return getPersonApiData<PersonMentionCountResponse>(
+    `${PERSONS_BASE}/${personId}/mention-count`,
+    '언급 건수를 불러오지 못했습니다.',
+    buildPersonRangeOnlyParams(params?.range),
   )
 }
 

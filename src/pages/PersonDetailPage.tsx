@@ -19,6 +19,7 @@ import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonDetail } from '../hooks/usePersonDetail'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
+import { usePersonMentionCount } from '../hooks/usePersonMentionCount'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import styles from './PersonDetailPage.module.css'
 
@@ -47,6 +48,7 @@ export default function PersonDetailPage() {
     stocksRange,
     personId ?? undefined,
   )
+  const { data: mentionCount } = usePersonMentionCount(personId ?? 0, feedRange)
 
   const profile = useMemo(() => {
     const first = feed?.mentions[0]
@@ -137,11 +139,21 @@ export default function PersonDetailPage() {
                       <p className={styles.heroRole}>
                         {formatPersonRole(profile.organizationName, profile.role)}
                       </p>
+                      {mentionCount != null ? (
+                        <p className={styles.heroMeta}>
+                          {feedRange === 'today' ? '오늘' : '최근 7일'} 언급 {mentionCount}건
+                        </p>
+                      ) : null}
                     </div>
                   </>
                 ) : (
                   <div className={styles.heroText}>
                     <h1 className={styles.heroName}>인물 #{personId}</h1>
+                    {mentionCount != null ? (
+                      <p className={styles.heroMeta}>
+                        {feedRange === 'today' ? '오늘' : '최근 7일'} 언급 {mentionCount}건
+                      </p>
+                    ) : null}
                   </div>
                 )}
               </header>

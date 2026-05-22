@@ -42,6 +42,11 @@ export interface FrequentStockItemResponse {
 /** `GET /api/v1/persons/{personId}/frequent-stocks` */
 export type PersonFrequentStockResponse = FrequentStockItemResponse
 
+/** `GET /api/v1/persons/{personId}/mention-count` */
+export interface PersonMentionCountResponse {
+  mentionCount: number
+}
+
 /** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
 export interface PersonMentionCursorResponse {
   items: PersonStatementResponse[]
