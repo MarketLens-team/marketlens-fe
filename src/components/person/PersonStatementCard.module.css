@@ -1,3 +1,115 @@
+/* —— 인물 트래커: 유튜브 댓글형 타임라인 —— */
+
+.timeline {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.rail {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.avatar {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.timelineBody {
+  min-width: 0;
+}
+
+.timelineHead {
+  margin-bottom: var(--space-2);
+}
+
+.identity {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+.nameLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nameLink:hover {
+  color: var(--color-primary);
+}
+
+.role {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-secondary);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.metaTime {
+  color: var(--color-text-muted);
+}
+
+.metaDot {
+  color: var(--color-text-muted);
+}
+
+.sentInline {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.statement {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.statementText {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-primary);
+}
+
+.sentPos {
+  color: var(--color-success);
+}
+
+.sentNeu {
+  color: var(--color-warning);
+}
+
+.sentNeg {
+  color: var(--color-danger);
+}
+
+/* —— 인물 상세 피드 —— */
+
 .card {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
@@ -23,86 +135,12 @@
   color: var(--color-text-muted);
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.profile {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-.avatar {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 999px;
-  background: var(--color-bg-section);
-  border: 1px solid var(--color-border-default);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.identity {
-  min-width: 0;
-}
-
-.name {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-}
-
-.nameLink {
-  color: inherit;
-  text-decoration: none;
-}
-
-.nameLink:hover {
-  color: var(--color-primary);
-}
-
-.role {
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
-}
-
-.meta {
-  margin: var(--space-1) 0 0;
-  font-size: var(--font-size-base);
-  color: var(--color-text-muted);
-}
-
 .sentScore {
   flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
-}
-
-.sentPos {
-  color: var(--color-success);
-}
-
-.sentNeu {
-  color: var(--color-warning);
-}
-
-.sentNeg {
-  color: var(--color-danger);
 }
 
 .quote {

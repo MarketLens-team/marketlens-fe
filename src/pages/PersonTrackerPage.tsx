@@ -95,7 +95,7 @@ export default function PersonTrackerPage() {
             <div id="person-tracker-feed-scroll" className={gridStyles.feedCol}>
               <ul className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
-                  <li key={mention.id}>
+                  <li key={mention.id} className={gridStyles.timelineItem}>
                     <PersonStatementCard mention={mention} />
                   </li>
                 ))}
