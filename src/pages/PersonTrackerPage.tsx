@@ -6,7 +6,6 @@ import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
-import { PersonPanelRangeToggle } from '../components/person/PersonPanelRangeToggle'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import type { PersonMentionsRange } from '../data/types/person'
@@ -20,7 +19,7 @@ import styles from './PersonTrackerPage.module.css'
 const FEED_SCROLL_ROOT = '#person-tracker-feed-scroll'
 
 export default function PersonTrackerPage() {
-  const [feedRange, setFeedRange] = useState<PersonMentionsRange>('today')
+  const feedRange: PersonMentionsRange = 'today'
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
   const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
 
@@ -47,8 +46,6 @@ export default function PersonTrackerPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <h1 className={styles.pageTitle}>인물 발언</h1>
-
         {feedError ? (
           <PageFetchError title="인물 발언을 불러오지 못했어요" message={feedError.message} />
         ) : null}
@@ -81,10 +78,6 @@ export default function PersonTrackerPage() {
             </aside>
 
             <div id="person-tracker-feed-scroll" className={styles.feedCol}>
-              <div className={styles.feedHead}>
-                <h2 className={styles.feedTitle}>발언</h2>
-                <PersonPanelRangeToggle range={feedRange} onChange={setFeedRange} aria-label="발언 기간" />
-              </div>
               <ul className={clsx(styles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
                   <li key={mention.id}>
