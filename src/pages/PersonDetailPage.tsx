@@ -126,8 +126,14 @@ export default function PersonDetailPage() {
 
             <div id="person-detail-feed-scroll" className={styles.feedCol}>
               <header className={styles.hero}>
+                <PersonPanelRangeToggle
+                  range={feedRange}
+                  onChange={setFeedRange}
+                  aria-label="발언 기간"
+                  className={styles.heroRangeToggle}
+                />
                 {profile ? (
-                  <>
+                  <div className={styles.heroMain}>
                     <EntityAvatar
                       variant="person"
                       size="lg"
@@ -145,7 +151,7 @@ export default function PersonDetailPage() {
                         </p>
                       ) : null}
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <div className={styles.heroText}>
                     <h1 className={styles.heroName}>인물 #{personId}</h1>
@@ -157,11 +163,6 @@ export default function PersonDetailPage() {
                   </div>
                 )}
               </header>
-
-              <div className={styles.feedHead}>
-                <h2 className={styles.feedTitle}>발언</h2>
-                <PersonPanelRangeToggle range={feedRange} onChange={setFeedRange} aria-label="발언 기간" />
-              </div>
 
               <ul className={clsx(styles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
