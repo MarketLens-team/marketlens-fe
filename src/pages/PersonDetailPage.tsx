@@ -24,7 +24,6 @@ import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
 const PERSON_DETAIL_FEED_RANGE = 'today' as const satisfies PersonMentionsRange
-const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
 
 function parsePersonId(raw: string | undefined): number | null {
   if (!raw?.trim()) return null
@@ -91,7 +90,6 @@ export default function PersonDetailPage() {
     hasMore: Boolean(feed?.mentionsHasNext),
     loading: loadingMore,
     onLoadMore: () => void loadMore(),
-    scrollRootSelector: FEED_SCROLL_ROOT,
   })
 
   const httpFullscreenPreset = feedError ? fullscreenPresetFromAppError(feedError) : null
@@ -128,7 +126,7 @@ export default function PersonDetailPage() {
             <div className={styles.detailFeedCol}>
               <div className={styles.profileTimeline}>
               <div className={clsx(skeleton.block, styles.skeletonProfile)} />
-              <div className={styles.feedScroll}>
+              <div className={styles.feedBody}>
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
                 ))}
@@ -183,7 +181,7 @@ export default function PersonDetailPage() {
                   </div>
                 </header>
 
-                <div id="person-detail-feed-scroll" className={styles.feedScroll}>
+                <div className={styles.feedBody}>
                 <ul
                   className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
                   aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
@@ -191,7 +189,7 @@ export default function PersonDetailPage() {
                   {feed.mentions.map((mention) => (
                     <li
                       key={mention.id}
-                      className={clsx(gridStyles.timelineItemDetail, styles.detailTimelineItem)}
+                      className={gridStyles.timelineItemDetail}
                     >
                       <PersonStatementCard mention={mention} variant="detailFeed" />
                     </li>
@@ -207,7 +205,7 @@ export default function PersonDetailPage() {
                 ) : null}
 
                 <div className={styles.feedFooter}>
-                  <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
+                  <BackToTopButton placement="inline" />
                 </div>
               </div>
               </div>

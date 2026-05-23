@@ -131,6 +131,25 @@
   min-width: 0;
 }
 
+/* -- 세로축에서 시간·감성 행(metaRow) 중앙으로 연결 */
+.detailFeed .metaRow {
+  position: relative;
+  z-index: 1;
+}
+
+.detailFeed .metaRow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: calc(var(--timeline-stub, var(--space-4)) + var(--space-3));
+  height: var(--timeline-line, 2px);
+  transform: translateY(-50%);
+  background: var(--timeline-line-color, var(--color-border-strong));
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
 /* —— 인물 상세 피드(레거시 카드) —— */
 
 .card {

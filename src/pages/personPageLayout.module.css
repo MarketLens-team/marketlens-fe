@@ -81,20 +81,6 @@
   padding-top: var(--space-6);
 }
 
-/* 상세: -- 가로 스텁 (세로축은 PersonDetailPage.profileTimeline) */
-.timelineItemDetail::before {
-  content: '';
-  position: absolute;
-  top: calc(0.65rem - var(--timeline-line) / 2);
-  width: var(--timeline-stub);
-  height: var(--timeline-line);
-  background: var(--timeline-line-color);
-  border-radius: var(--radius-full);
-  pointer-events: none;
-  z-index: 1;
-  left: 0;
-}
-
 @media (max-width: 1100px) {
   .mainGrid {
     grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr) minmax(11rem, 14rem);

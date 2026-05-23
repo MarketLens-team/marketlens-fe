@@ -41,10 +41,7 @@
 
 .detailFeedCol {
   grid-column: 2;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  max-height: calc(100dvh - var(--layout-top-strip-height) - 2 * var(--space-5));
+  min-width: 0;
   /* lg 아바타(3.5rem) 중앙 — 타임라인 세로축 */
   --person-timeline-rail: 1.75rem;
   --timeline-line: 2px;
@@ -54,10 +51,7 @@
 
 .profileTimeline {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  min-width: 0;
 }
 
 /* ㅣ 아바타 중앙에서 발언 목록까지 이어지는 세로축 */
@@ -132,13 +126,8 @@
   pointer-events: none;
 }
 
-.feedScroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: 2px;
-  scrollbar-width: thin;
+.feedBody {
+  min-width: 0;
 }
 
 .profileHeader {
@@ -184,17 +173,6 @@
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-}
-
-/* -- 가로 스텁: 세로축(아바타 중앙)에서 본문으로 */
-.detailTimelineItem::before {
-  left: calc(var(--person-timeline-rail) - var(--timeline-line) / 2);
-  top: calc(0.65rem - var(--timeline-line) / 2);
-  width: var(--timeline-stub);
-}
-
-.detailTimelineItem:not(:last-child)::after {
-  display: none;
 }
 
 .infiniteSentinel {
@@ -262,15 +240,6 @@
   .detailRightPanel {
     position: static;
     max-height: none;
-    overflow: visible;
-    padding-right: 0;
-  }
-
-  .detailFeedCol {
-    max-height: none;
-  }
-
-  .feedScroll {
     overflow: visible;
     padding-right: 0;
   }
