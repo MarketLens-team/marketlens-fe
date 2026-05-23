@@ -6,7 +6,6 @@ import { useAuthStore } from '../../store/authStore'
 import { useAuthModalStore } from '../../store/authModalStore'
 import { TopNavSearchModal } from './TopNavSearchModal'
 import { TopNavSettingsMenu } from './TopNavSettingsMenu'
-import { TopNavWatchlistMenu } from './TopNavWatchlistMenu'
 import styles from './TopNavActions.module.css'
 
 function isEditableTarget(target: EventTarget | null) {
@@ -24,7 +23,6 @@ export function TopNavActions() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const openAuthModal = useAuthModalStore((s) => s.open)
   const closeAuthModal = useAuthModalStore((s) => s.close)
-  const isAuthModalOpen = useAuthModalStore((s) => s.isOpen)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchSeed, setSearchSeed] = useState<SearchSeed | null>(null)
   const [isSearchOpening, setIsSearchOpening] = useState(false)
@@ -75,12 +73,6 @@ export function TopNavActions() {
   return (
     <>
       <div className={styles.actions}>
-        <TopNavWatchlistMenu
-          suppressPanel={isSettingsOpen || isSearchOpen || isAuthModalOpen}
-          onRequestOpen={() => {
-            setIsSettingsOpen(false)
-          }}
-        />
         <button
           type="button"
           className={styles.searchTrigger}
