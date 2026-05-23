@@ -525,39 +525,38 @@ export function StockDetailContent({
                   peopleTimeline.map((person) => (
                     <li key={person.id} className={styles.peopleTimelineItem}>
                       <div className={styles.personTimelineRow}>
+                        <EntityAvatar
+                          className={styles.personTimelineAvatar}
+                          variant="person"
+                          size="md"
+                          name={person.personName}
+                          imageUrl={person.imageUrl}
+                        />
                         <span
                           className={clsx(
                             styles.personTimelineTime,
-                            person.isFresh ? styles.personTimelineTimeFresh : styles.personTimelineTimeMuted,
+                            person.isFresh
+                              ? styles.personTimelineTimeFresh
+                              : styles.personTimelineTimeMuted,
                           )}
                         >
                           {person.relativeLabel}
                         </span>
-                        <EntityAvatar
-                          variant="person"
-                          size="sm"
-                          name={person.personName}
-                          imageUrl={person.imageUrl}
-                        />
-                        <div className={styles.personTimelineContent}>
-                          <p className={styles.personTimelineHeadline}>{person.summary}</p>
-                          <p className={styles.personTimelineMeta}>
-                            <span className={styles.personTimelineName}>{person.personName}</span>
-                            <span aria-hidden> · </span>
-                            <span>{person.role}</span>
-                            <span aria-hidden> · </span>
-                            <span>{person.sourceName}</span>
-                            <span
-                              className={clsx(
-                                styles.personTimelineScore,
-                                styles.mono,
-                                pillClass(person.sentimentScore),
-                              )}
-                            >
-                              {formatStockScore(person.sentimentScore)}
-                            </span>
-                          </p>
-                        </div>
+                        <p className={styles.personTimelineHeadline}>{person.summary}</p>
+                        <p className={styles.personTimelineMeta}>
+                          <span className={styles.personTimelineName}>{person.personName}</span>
+                          <span aria-hidden> · </span>
+                          <span>{person.role}</span>
+                          <span
+                            className={clsx(
+                              styles.personTimelineScore,
+                              styles.mono,
+                              pillClass(person.sentimentScore),
+                            )}
+                          >
+                            {formatStockScore(person.sentimentScore)}
+                          </span>
+                        </p>
                       </div>
                     </li>
                   ))
