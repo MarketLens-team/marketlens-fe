@@ -160,12 +160,55 @@
   min-width: 0;
 }
 
-.middleAside .contextStats {
+.trendPanelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.trendPanelHeadMain {
+  min-width: 0;
+}
+
+.trendPanelHeadMain .panelSub {
   margin-bottom: 0;
 }
 
-.middleAside .panelSub {
-  margin-bottom: var(--space-3);
+.trendContextStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.trendContextStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 5.5rem;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.trendContextStatLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.trendContextStatValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .panelBreakdown {
@@ -198,35 +241,6 @@
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
   color: var(--color-text-secondary);
-}
-
-.contextStats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-.contextStat {
-  padding: var(--space-4);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  text-align: center;
-}
-
-.contextStatLabel {
-  display: block;
-  margin-bottom: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-}
-
-.contextStatValue {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
 }
 
 .gaugeWrap {
@@ -392,24 +406,15 @@
   gap: var(--space-2);
 }
 
-/* 연관 종목 — 우측 패널 여백 절반 */
 .relatedPanel {
   flex-shrink: 0;
 }
 
-.relatedPanel .panelBody {
-  padding: var(--space-2);
+.middleAside .relatedPanel .simpleListItem {
+  padding: var(--space-2) 0;
 }
 
-.relatedPanel .panelTitle {
-  margin: 0 0 var(--space-1);
-}
-
-.relatedPanel .simpleListItem {
-  padding: var(--space-1) 0;
-}
-
-.relatedPanel .simpleListItem:first-child {
+.middleAside .relatedPanel .simpleListItem:first-child {
   padding-top: 0;
 }
 
@@ -753,14 +758,20 @@
     grid-template-columns: 1fr;
   }
 
-  .middleAside .contextStats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 640px) {
-  .contextStats {
-    grid-template-columns: 1fr;
+  .trendPanelHead {
+    flex-direction: column;
+  }
+
+  .trendContextStats {
+    width: 100%;
+  }
+
+  .trendContextStat {
+    flex: 1;
+    min-width: 0;
   }
 
   .header {

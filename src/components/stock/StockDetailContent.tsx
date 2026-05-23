@@ -320,10 +320,38 @@ export function StockDetailContent({
       <div className={styles.middleGrid}>
         <section className={styles.panel} aria-labelledby="stock-trend-title">
           <div className={styles.panelBody}>
-            <h2 id="stock-trend-title" className={styles.panelTitle}>
-              30일 감성 추이
-            </h2>
-            <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
+            <div className={styles.trendPanelHead}>
+              <div className={styles.trendPanelHeadMain}>
+                <h2 id="stock-trend-title" className={styles.panelTitle}>
+                  30일 감성 추이
+                </h2>
+                <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
+              </div>
+              <div className={styles.trendContextStats} aria-label="30일 감성 맥락">
+                <div className={styles.trendContextStat}>
+                  <span className={styles.trendContextStatLabel}>30일 평균</span>
+                  <span
+                    className={clsx(
+                      styles.trendContextStatValue,
+                      scoreToneClass(sentimentContext.avg30d),
+                    )}
+                  >
+                    {formatStockScore(sentimentContext.avg30d)}
+                  </span>
+                </div>
+                <div className={styles.trendContextStat}>
+                  <span className={styles.trendContextStatLabel}>30일 최고</span>
+                  <span
+                    className={clsx(
+                      styles.trendContextStatValue,
+                      scoreToneClass(sentimentContext.high30d),
+                    )}
+                  >
+                    {formatStockScore(sentimentContext.high30d)}
+                  </span>
+                </div>
+              </div>
+            </div>
             <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
           </div>
         </section>
@@ -350,36 +378,38 @@ export function StockDetailContent({
             </div>
           </section>
 
-          <section className={styles.panel} aria-labelledby="stock-context-title">
+          <section
+            className={clsx(styles.panel, styles.relatedPanel)}
+            aria-labelledby="stock-related-title"
+          >
             <div className={styles.panelBody}>
-              <h2 id="stock-context-title" className={styles.panelTitle}>
-                30일 평균 대비 현재 위치
+              <h2 id="stock-related-title" className={styles.panelTitle}>
+                연관 종목
               </h2>
-              <p className={styles.panelSub}>최근 한 달 감성점수 맥락</p>
-              <div className={styles.contextStats}>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>현재</span>
-                  <span
-                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.current))}
-                  >
-                    {formatStockScore(sentimentContext.current)}
-                  </span>
-                </div>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>30일 평균</span>
-                  <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.avg30d))}>
-                    {formatStockScore(sentimentContext.avg30d)}
-                  </span>
-                </div>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>30일 최고</span>
-                  <span
-                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.high30d))}
-                  >
-                    {formatStockScore(sentimentContext.high30d)}
-                  </span>
-                </div>
-              </div>
+              <ul className={styles.simpleList}>
+                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
+                  <li key={related.code} className={styles.simpleListItem}>
+                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={related.name}
+                        imageUrl={related.imageUrl}
+                      />
+                      <span className={styles.stockLinkName}>{related.name}</span>
+                      <span
+                        className={clsx(
+                          styles.stockLinkScore,
+                          styles.mono,
+                          scoreToneClass(related.sentimentScore),
+                        )}
+                      >
+                        {formatStockScore(related.sentimentScore)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
         </aside>
@@ -450,38 +480,6 @@ export function StockDetailContent({
         </section>
 
         <div className={styles.rightStack}>
-          <section className={clsx(styles.panel, styles.relatedPanel)} aria-labelledby="stock-related-title">
-            <div className={styles.panelBody}>
-              <h2 id="stock-related-title" className={styles.panelTitle}>
-                연관 종목
-              </h2>
-              <ul className={styles.simpleList}>
-                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
-                  <li key={related.code} className={styles.simpleListItem}>
-                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
-                      <EntityAvatar
-                        variant="stock"
-                        size="sm"
-                        name={related.name}
-                        imageUrl={related.imageUrl}
-                      />
-                      <span className={styles.stockLinkName}>{related.name}</span>
-                      <span
-                        className={clsx(
-                          styles.stockLinkScore,
-                          styles.mono,
-                          scoreToneClass(related.sentimentScore),
-                        )}
-                      >
-                        {formatStockScore(related.sentimentScore)}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
           <section
             className={clsx(styles.panel, styles.peoplePanel)}
             aria-labelledby="stock-people-title"
