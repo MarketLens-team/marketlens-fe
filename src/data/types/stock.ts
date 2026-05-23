@@ -81,6 +81,7 @@ export interface StockRelatedStock {
 
 export interface StockPersonTimelineItem {
   id: string
+  personId: string
   personName: string
   imageUrl?: string | null
   role: string

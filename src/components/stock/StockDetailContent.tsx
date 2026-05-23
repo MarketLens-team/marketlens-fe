@@ -21,6 +21,7 @@ import { EntityAvatar } from '../ui/EntityAvatar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
 import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
+import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
@@ -524,7 +525,11 @@ export function StockDetailContent({
                 ) : (
                   peopleTimeline.map((person) => (
                     <li key={person.id} className={styles.peopleTimelineItem}>
-                      <div className={styles.personTimelineItemButton}>
+                      <Link
+                        to={buildPersonDetailPath(person.personId, { statementId: person.id })}
+                        className={styles.personTimelineItemLink}
+                        aria-label={`${person.personName} 발언 상세`}
+                      >
                         <EntityAvatar
                           className={styles.personTimelineAvatar}
                           variant="person"
@@ -557,7 +562,7 @@ export function StockDetailContent({
                             {formatStockScore(person.sentimentScore)}
                           </span>
                         </p>
-                      </div>
+                      </Link>
                     </li>
                   ))
                 )}

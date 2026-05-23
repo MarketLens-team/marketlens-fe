@@ -94,7 +94,8 @@ const samsungDetail: StockDetail = {
   ],
   peopleTimeline: [
     {
-      id: 'p1',
+      id: '1',
+      personId: '101',
       personName: '젠슨 황',
       role: 'CEO · 엔비디아',
       summary: 'HBM 수요 급증, 한국 파트너사와 협력 강화 예정',
@@ -105,7 +106,8 @@ const samsungDetail: StockDetail = {
       sentimentScore: 81,
     },
     {
-      id: 'p2',
+      id: '2',
+      personId: '102',
       personName: '이재용',
       role: '회장 · 삼성전자',
       summary: '메모리 반도체 투자 확대, AI 인프라 수요에 대응',
@@ -116,7 +118,8 @@ const samsungDetail: StockDetail = {
       sentimentScore: 12,
     },
     {
-      id: 'p3',
+      id: '3',
+      personId: '102',
       personName: '한종희',
       role: '부회장 · 삼성전자',
       summary: '파운드리 경쟁력 강화와 AI 반도체 라인업 확대 필요',
@@ -231,7 +234,8 @@ function buildFallbackDetail(
     ].filter((s) => s.code !== code),
     peopleTimeline: [
       {
-        id: 'p1',
+        id: '1',
+        personId: '101',
         personName: '—',
         role: '관련 인물',
         summary: '이 종목과 연결된 인물 발언 요약이 표시됩니다.',

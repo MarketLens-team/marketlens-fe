@@ -179,6 +179,7 @@ export function mapStockPeopleTimeline(
       const { label, isFresh } = formatPersonTimelineTime(row.publishedAt)
       return {
         id: String(row.statementId),
+        personId: String(row.personId),
         personName: row.personName,
         imageUrl: normalizeImageUrl(row.imageUrl),
         role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
