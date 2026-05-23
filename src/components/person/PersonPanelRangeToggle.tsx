@@ -30,6 +30,7 @@ export function PersonPanelRangeToggle({
     <button
       type="button"
       className={clsx(styles.btn, className)}
+      aria-pressed
       aria-label={`${ariaLabel}: ${label}. 클릭하면 기간이 바뀝니다`}
       onClick={() => onChange(nextRange(range))}
     >

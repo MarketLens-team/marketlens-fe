@@ -1,26 +1,43 @@
+/* 검색 모달 종목 행(.searchRow) · 관심종목 액션 버튼 톤 */
 .btn {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75rem;
   margin: 0;
-  padding: 0.25rem 0.65rem;
-  border: none;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-card));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  color: var(--color-primary);
   font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   line-height: 1.2;
   cursor: pointer;
   transition:
-    filter var(--duration-fast) ease,
-    opacity var(--duration-fast) ease;
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
-.btn:hover {
-  filter: brightness(1.06);
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-card));
+  }
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.btn:active {
+  background: color-mix(in srgb, var(--color-primary) 28%, var(--color-bg-card));
 }
