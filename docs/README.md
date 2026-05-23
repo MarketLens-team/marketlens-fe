@@ -39,6 +39,8 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
   - `feat/design-tokens` 브랜치 작업 (토큰·Stylelint·CSS 마이그레이션)
 - [changelog/2026-05-21-feat-design-refresh-search-modal.md](./changelog/2026-05-21-feat-design-refresh-search-modal.md)  
   - `feat/design-refresh` 통합 검색 모달 너비·모달 서피스 (5/15 문서와 분리)
+- [changelog/2026-05-23-feat-design-refresh-person-timeline.md](./changelog/2026-05-23-feat-design-refresh-person-timeline.md)  
+  - 인물 트래커/상세 타임라인 축·전역 스크롤·맨 위로 FAB (5/22 인물 3열 이후)
 - [design/ui-product-overview.md](./design/ui-product-overview.md)  
   - 홈·종목·버즈·인물·마이 등 **현재 제품 UI 톤·화면 패턴** 개요 (스냅샷 권장 목록 포함)
 - [design/interactive-surfaces.md](./design/interactive-surfaces.md)  
