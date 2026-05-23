@@ -1,0 +1,46 @@
+/* 검색 모달 .searchRow와 동일 — 테이블 행용 외곽 테두리 + 링 */
+
+.tableBase {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--space-2);
+}
+
+.rowBase {
+  position: relative;
+  cursor: pointer;
+}
+
+.rowBase td {
+  background: var(--color-bg-card);
+  border: none;
+}
+
+.rowBase::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--interactive-surface-border);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rowBase:hover::after {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+  }
+}
+
+.rowBase:focus-visible {
+  outline: none;
+}
+
+.rowBase:focus-visible::after {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}

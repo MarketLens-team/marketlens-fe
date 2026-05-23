@@ -103,8 +103,6 @@
   --interactive-ring-hover: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
   --interactive-ring-focus: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
   --interactive-surface-bg-hover: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
-  --interactive-table-row-shadow-hover: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
-  --interactive-table-row-shadow-focus: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
 
   /* Motion */
   --duration-instant: 120ms;

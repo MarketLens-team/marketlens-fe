@@ -27,8 +27,7 @@
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+  composes: tableBase from '../components/common/interactiveTableRow.module.css';
   font-size: var(--font-size-base);
 }
 
@@ -36,6 +35,9 @@
 .table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
+}
+
+.table thead th {
   border-bottom: 1px solid var(--color-border-default);
 }
 
@@ -48,11 +50,9 @@
   background: var(--color-bg-section);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .table tbody tr:hover td {
-    background: var(--interactive-surface-bg-hover);
-    box-shadow: var(--interactive-table-row-shadow-hover);
-  }
+.rowInteractive {
+  composes: rowBase from '../components/common/interactiveTableRow.module.css';
+  cursor: default;
 }
 
 .mono {
