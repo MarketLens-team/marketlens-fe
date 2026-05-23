@@ -45,26 +45,28 @@ export function PersonStatementCard({ mention, variant = 'full' }: PersonStateme
     )
   }
 
+  const personHref = `/person/${mention.personId}`
+
   return (
     <article className={styles.timeline}>
-      <div className={styles.rail}>
-        <EntityAvatar
-          variant="person"
-          size="md"
-          name={mention.personName}
-          imageUrl={mention.imageUrl}
-          className={styles.avatar}
-        />
-      </div>
+      <Link
+        to={personHref}
+        className={styles.timelineLink}
+        aria-label={`${mention.personName} 인물 상세`}
+      >
+        <div className={styles.rail}>
+          <EntityAvatar
+            variant="person"
+            size="md"
+            name={mention.personName}
+            imageUrl={mention.imageUrl}
+            className={styles.avatar}
+          />
+        </div>
 
-      <div className={styles.timelineBody}>
-        <header className={styles.timelineHead}>
+        <div className={styles.bodyCol}>
           <div className={styles.identity}>
-            <p className={styles.name}>
-              <Link to={`/person/${mention.personId}`} className={styles.nameLink}>
-                {mention.personName}
-              </Link>
-            </p>
+            <p className={styles.name}>{mention.personName}</p>
             {roleLabel ? <p className={styles.role}>{roleLabel}</p> : null}
             <p className={styles.metaRow}>
               <span className={styles.metaTime}>{timeLabel}</span>
@@ -76,12 +78,12 @@ export function PersonStatementCard({ mention, variant = 'full' }: PersonStateme
               </span>
             </p>
           </div>
-        </header>
 
-        <blockquote className={styles.statement}>
-          <AiSummaryText text={mention.context} className={styles.statementText} />
-        </blockquote>
-      </div>
+          <blockquote className={styles.statement}>
+            <AiSummaryText text={mention.context} className={styles.statementText} />
+          </blockquote>
+        </div>
+      </Link>
     </article>
   )
 }
