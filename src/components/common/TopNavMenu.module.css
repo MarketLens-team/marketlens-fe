@@ -48,7 +48,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--color-text-secondary);
   text-decoration: none;
@@ -60,8 +60,12 @@
   transition: color var(--duration-fast) ease;
 }
 
-.menuItem:hover {
-  color: var(--color-text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .menuItem:hover {
+    color: var(--color-text-primary);
+    box-shadow: var(--interactive-ring-hover);
+    border-radius: var(--radius-sm);
+  }
 }
 
 .menuItemActive,

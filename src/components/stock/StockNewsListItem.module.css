@@ -1,12 +1,10 @@
 .item {
-  border-bottom: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
   scroll-margin-top: 6rem;
   scroll-margin-bottom: 4rem;
 }
 
-.item:last-child {
-  border-bottom: none;
+.item:last-child .link {
+  margin-bottom: 0;
 }
 
 .link {
@@ -14,13 +12,30 @@
   grid-template-columns: minmax(0, 1fr) 9rem;
   gap: var(--space-4);
   align-items: start;
-  padding: var(--space-5) 0;
+  padding: var(--space-4);
+  margin: var(--space-3) 0;
+  border: 1px solid var(--interactive-surface-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
   color: inherit;
   text-decoration: none;
+  box-sizing: border-box;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
 }
 
-.link:hover .title {
-  color: var(--color-primary);
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+  }
+
+  .link:hover .title {
+    color: var(--color-primary);
+  }
 }
 
 .linkFocusedFromSearch .title {
@@ -32,9 +47,10 @@
 }
 
 .link:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+  background: var(--interactive-surface-bg-hover);
 }
 
 .body {

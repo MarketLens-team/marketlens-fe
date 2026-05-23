@@ -48,8 +48,11 @@
   background: var(--color-bg-section);
 }
 
-.table tbody tr:hover td {
-  background: var(--color-bg-card);
+@media (hover: hover) and (pointer: fine) {
+  .table tbody tr:hover td {
+    background: var(--interactive-surface-bg-hover);
+    box-shadow: var(--interactive-table-row-shadow-hover);
+  }
 }
 
 .mono {

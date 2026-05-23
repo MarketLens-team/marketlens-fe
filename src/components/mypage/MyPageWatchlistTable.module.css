@@ -67,6 +67,19 @@
   border-bottom: none;
 }
 
+.row {
+  transition:
+    background-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .row:hover td {
+    background: var(--interactive-surface-bg-hover);
+    box-shadow: var(--interactive-table-row-shadow-hover);
+  }
+}
+
 .colStock {
   text-align: left;
   width: 28%;

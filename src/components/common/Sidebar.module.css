@@ -56,13 +56,21 @@
   color: var(--color-text-secondary);
   text-decoration: none;
   border-radius: var(--radius-md);
-  border-left: none;
-  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  border: 1px solid transparent;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
-.link:hover {
-  background: var(--color-interactive-hover);
-  color: var(--color-interactive-active-text);
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
 }
 
 .linkActive {

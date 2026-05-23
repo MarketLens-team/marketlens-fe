@@ -35,7 +35,7 @@
   gap: var(--space-3);
   align-items: start;
   padding: var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  border: 1px solid var(--interactive-surface-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-card);
   text-decoration: none;
@@ -50,15 +50,15 @@
 @media (hover: hover) and (pointer: fine) {
   .item:hover {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
   }
 }
 
 .item:focus-visible {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  box-shadow: var(--interactive-ring-focus);
 }
 
 .rank {

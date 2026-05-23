@@ -83,7 +83,7 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
               const changeClass =
                 row.changePercent > 0 ? styles.changeUp : row.changePercent < 0 ? styles.changeDown : undefined
               return (
-                <tr key={row.code}>
+                <tr key={row.code} className={styles.row}>
                   <td className={styles.stockCell}>
                     <button
                       type="button"

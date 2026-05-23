@@ -115,7 +115,7 @@
 }
 
 .item {
-  border: 1px solid var(--color-border-default);
+  border: 1px solid var(--interactive-surface-border);
   border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
   padding: var(--space-2) var(--space-3);
@@ -123,6 +123,18 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+  }
 }
 
 .meta {

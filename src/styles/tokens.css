@@ -98,6 +98,14 @@
   --color-fab-border: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
   --color-fab-surface-hover: #6b778c;
 
+  /* Interactive surfaces — 검색 종목 행(.searchRow) 호버 */
+  --interactive-surface-border: color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  --interactive-ring-hover: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --interactive-ring-focus: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --interactive-surface-bg-hover: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
+  --interactive-table-row-shadow-hover: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --interactive-table-row-shadow-focus: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+
   /* Motion */
   --duration-instant: 120ms;
   --duration-fast: 160ms;
