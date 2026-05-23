@@ -48,7 +48,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid transparent;
+  border: none;
   background: transparent;
   color: var(--color-text-secondary);
   text-decoration: none;
@@ -63,9 +63,12 @@
 @media (hover: hover) and (pointer: fine) {
   .menuItem:hover {
     color: var(--color-text-primary);
-    box-shadow: var(--interactive-ring-hover);
-    border-radius: var(--radius-sm);
   }
+}
+
+.menuItem:focus-visible {
+  outline: none;
+  color: var(--color-text-primary);
 }
 
 .menuItemActive,
