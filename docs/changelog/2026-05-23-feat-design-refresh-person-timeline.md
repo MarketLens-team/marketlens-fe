@@ -22,6 +22,7 @@
 | `2741cbf` | 상세 세로축(아바타 중앙)·트래커는 세로선만 |
 | `d18a64c` | 상세 가로 스텁을 `metaRow` 중앙 정렬·중앙 내부 스크롤 제거 |
 | `ac47f3b` | 맨 위로 버튼 종목 상세처럼 우측 하단 `fixed` |
+| `61068cf` | 인물 트래커 → 상세 `statementId` 스크롤·초록 강조 (아래 §) |
 
 ## 요약
 
@@ -30,6 +31,52 @@
 3. **스크롤** — 트래커와 동일하게 **`main[data-scroll-root]` 전역 스크롤**만 사용(중앙 열 `max-height`·`overflow-y` 제거). 무한 스크롤·맨 위로도 `main` 기준.
 4. **맨 위로** — 피드 하단 인라인 버튼 제거 → 종목 상세와 동일한 **`placement="fixed"` `tooltipSide="left"`**, 페이지 `padding-bottom: var(--layout-back-to-top-reserve)`.
 5. **사이드 패널** — TOP5·연관 종목·버즈 TOP10에 [링 호버 패턴](../design/interactive-surfaces.md) 적용(메인 타임라인 호버는 별도).
+6. **발언 포커스 (`?statementId=`)** — 검색·트래커·종목 상세 사이드바에서 진입 시 해당 발언 **초록 본문** + **`main` 스크롤 이동**. 트래커에서 상세로 갈 때도 동일.
+
+---
+
+## 2026-05-24 · 발언 포커스 (`statementId`)
+
+### 흐름
+
+```text
+[진입 경로]
+  TopNavSearchModal  ─┐
+  PersonTrackerPage  ─┼─► /person/:personId?statementId={id}
+  StockDetailContent ─┘
+                              │
+                              ▼
+                    usePersonStatementFocus
+                    ├── URL에서 statementId 읽기
+                    ├── 목록에 없으면 onLoadMore 반복(최대 12회)
+                    ├── #person-statement-{id} 로 main 스크롤
+                    └── isStatementFocused → PersonStatementCard highlighted
+```
+
+### Changed
+
+| 파일 | 내용 |
+|------|------|
+| `src/lib/buildPersonRoute.ts` | `buildPersonDetailPath(personId, { statementId })` |
+| `src/hooks/usePersonStatementFocus.ts` | `data-scroll-root` 기준 스크롤·재시도·자동 `loadMore`·바깥 클릭 시 쿼리 제거 |
+| `src/components/person/PersonStatementCard.tsx` | 트래커 `variant="full"` 링에 `statementId` 쿼리 부착 |
+| `src/pages/PersonDetailPage.tsx` | 훅에 `feedInitialLoading`·`hasMore`·`loadMore` 전달 |
+| `src/pages/PersonTrackerPage.tsx` | 동일(트래커 내 `?statementId=` 포커스도 지원) |
+
+### DOM·스타일
+
+- 각 발언 `li`에 `id="person-statement-{mention.id}"` (`mention.id` = API `statementId` 문자열).
+- 상세 `variant="detailFeed"` + `highlighted` → `.detailFeedFocused` → `.statementText` 초록 (`--color-sentiment-positive` 계열).
+- 트래커 `variant="full"` 호버는 **primary(파랑)** 유지; 초록은 **도착 페이지**에서만.
+- `personPageLayout.module.css` `.timelineItem` — `scroll-margin-block: 6rem` (고정 헤더 여백).
+
+### QA (추가)
+
+- [ ] **트래커**: 발언 클릭 → `/person/:id?statementId=…` · 상세에서 해당 카드가 보이도록 스크롤 · 본문 초록
+- [ ] **검색**: 발언 행 클릭 → 동일 동작
+- [ ] **종목 상세**: 인물 타임라인 클릭 → 동일 동작
+- [ ] 첫 페이지에 없는 오래된 발언도 자동 추가 로드 후 스크롤(있을 때)
+- [ ] 포커스 카드 밖 클릭 시 `statementId` 쿼리 제거·초록 해제
 
 ---
 
@@ -109,6 +156,7 @@ detailFeed (padding-left = rail + stub + gap)
 | 발언 카드 | `src/components/person/PersonStatementCard.tsx`, `.module.css` |
 | 맨 위로 | `src/components/common/BackToTopButton.tsx`, `.module.css` |
 | 무한 스크롤 | `src/hooks/useInfiniteScroll.ts` |
+| 발언 포커스 | `src/hooks/usePersonStatementFocus.ts`, `src/lib/buildPersonRoute.ts` |
 | 인터랙션 문서 | `docs/design/interactive-surfaces.md` |
 
 ---

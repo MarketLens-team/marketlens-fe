@@ -86,7 +86,10 @@ export default function PersonDetailPage() {
   }, [feed?.mentions])
 
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
-    loading: feedLoading,
+    loading: feedInitialLoading,
+    hasMore: Boolean(feed?.mentionsHasNext),
+    loadingMore,
+    onLoadMore: () => void loadMore(),
   })
 
   const infiniteEnabled = Boolean(feed?.mentionsHasNext)

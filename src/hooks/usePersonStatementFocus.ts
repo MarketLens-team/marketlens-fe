@@ -1,18 +1,59 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 interface MentionWithId {
   id: string
 }
 
-/** 검색 `?statementId=` — 해당 발언 스크롤·초록 강조, 바깥 클릭 시 쿼리 해제 */
+const MAX_AUTO_LOAD_ATTEMPTS = 12
+const SCROLL_RETRY_COUNT = 10
+const SCROLL_RETRY_MS = 80
+
+function personStatementElementId(statementId: string) {
+  return `person-statement-${statementId}`
+}
+
+/** Layout `.main[data-scroll-root]` 기준으로 발언 카드로 스크롤 */
+function scrollPersonStatementIntoView(statementId: string): boolean {
+  const el = document.getElementById(personStatementElementId(statementId))
+  if (!el) return false
+
+  const scrollRoot = document.querySelector<HTMLElement>('[data-scroll-root]')
+  if (scrollRoot) {
+    const rootRect = scrollRoot.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    const targetTop =
+      scrollRoot.scrollTop +
+      (elRect.top - rootRect.top) -
+      Math.max(0, (scrollRoot.clientHeight - elRect.height) / 2)
+    scrollRoot.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
+    return true
+  }
+
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  return true
+}
+
+interface UsePersonStatementFocusOptions {
+  /** 초기 피드 로딩 중이면 스크롤·추가 로드 보류 */
+  loading?: boolean
+  hasMore?: boolean
+  loadingMore?: boolean
+  onLoadMore?: () => void | Promise<void>
+}
+
+/** 검색·트래커 `?statementId=` — 해당 발언까지 로드·스크롤·초록 강조, 바깥 클릭 시 쿼리 해제 */
 export function usePersonStatementFocus(
   mentions: MentionWithId[],
-  options?: { loading?: boolean },
+  options?: UsePersonStatementFocusOptions,
 ) {
   const [searchParams, setSearchParams] = useSearchParams()
   const focusStatementId = searchParams.get('statementId')?.trim() || null
   const loading = options?.loading ?? false
+  const hasMore = options?.hasMore ?? false
+  const loadingMore = options?.loadingMore ?? false
+  const onLoadMore = options?.onLoadMore
+  const loadAttemptsRef = useRef(0)
 
   const clearFocusStatement = useCallback(() => {
     if (!searchParams.has('statementId')) return
@@ -21,19 +62,46 @@ export function usePersonStatementFocus(
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
-  useEffect(() => {
-    if (!focusStatementId || loading) return
-    const hasTarget = mentions.some((item) => item.id === focusStatementId)
-    if (!hasTarget) return
+  const hasTarget = Boolean(
+    focusStatementId && mentions.some((item) => item.id === focusStatementId),
+  )
 
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById(`person-statement-${focusStatementId}`)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
+  useEffect(() => {
+    loadAttemptsRef.current = 0
+  }, [focusStatementId])
+
+  useEffect(() => {
+    if (!focusStatementId || loading || loadingMore || hasTarget) return
+    if (!hasMore || !onLoadMore || loadAttemptsRef.current >= MAX_AUTO_LOAD_ATTEMPTS) return
+    loadAttemptsRef.current += 1
+    void onLoadMore()
+  }, [focusStatementId, loading, loadingMore, hasTarget, hasMore, onLoadMore])
+
+  useEffect(() => {
+    if (!focusStatementId || loading || !hasTarget) return
+
+    let cancelled = false
+    let timeoutId: number | undefined
+    let rafId = 0
+
+    const attemptScroll = (triesLeft: number) => {
+      if (cancelled) return
+      if (scrollPersonStatementIntoView(focusStatementId)) return
+      if (triesLeft > 0) {
+        timeoutId = window.setTimeout(() => attemptScroll(triesLeft - 1), SCROLL_RETRY_MS)
+      }
+    }
+
+    rafId = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => attemptScroll(SCROLL_RETRY_COUNT))
     })
-    return () => window.cancelAnimationFrame(frame)
-  }, [focusStatementId, mentions, loading])
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      if (timeoutId != null) window.clearTimeout(timeoutId)
+    }
+  }, [focusStatementId, mentions, loading, hasTarget])
 
   useEffect(() => {
     if (!focusStatementId) return
@@ -41,7 +109,7 @@ export function usePersonStatementFocus(
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
-      const focusedEl = document.getElementById(`person-statement-${focusStatementId}`)
+      const focusedEl = document.getElementById(personStatementElementId(focusStatementId))
       if (focusedEl?.contains(target)) return
       clearFocusStatement()
     }

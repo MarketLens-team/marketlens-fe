@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
+import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { AiSummaryText } from '../common/AiSummaryText'
 import type { PersonMention } from '../../data/types/person'
 import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
@@ -69,7 +70,7 @@ export function PersonStatementCard({
     )
   }
 
-  const personHref = `/person/${mention.personId}`
+  const personHref = buildPersonDetailPath(mention.personId, { statementId: mention.id })
 
   return (
     <article className={styles.timeline}>
