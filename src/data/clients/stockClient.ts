@@ -2,6 +2,7 @@ import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
 import {
   mapNewsFeedItems,
+  enrichRelatedStocksWithPrices,
   mapRelatedStocks,
   mapStockDetailPage,
   mapStockPeopleTimeline,
@@ -190,6 +191,10 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       nextCursor: newsFeed.nextCursor,
       hasNext: newsFeed.hasNext,
     }
+    if (hit.relatedStocks.length > 0) {
+      const priceRows = await fetchStockPrices(hit.relatedStocks.map((stock) => stock.code))
+      hit.relatedStocks = enrichRelatedStocksWithPrices(hit.relatedStocks, priceRows)
+    }
     return hit
   }
 
@@ -220,6 +225,15 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
     fetchPersonStatementsForStockDetail(code),
   ])
 
+  const relatedStocks = mapRelatedStocks(related, code)
+  const relatedWithPrices =
+    relatedStocks.length > 0
+      ? enrichRelatedStocksWithPrices(
+          relatedStocks,
+          await fetchStockPrices(relatedStocks.map((stock) => stock.code)),
+        )
+      : relatedStocks
+
   return mapStockDetailPage(
     detail,
     summary,
@@ -228,7 +242,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
     newsFeed.items,
     { nextCursor: newsFeed.nextCursor, hasNext: newsFeed.hasNext },
     {
-      relatedStocks: mapRelatedStocks(related, code),
+      relatedStocks: relatedWithPrices,
       peopleTimeline: mapStockPeopleTimeline(mentions, code),
     },
   )

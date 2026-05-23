@@ -67,7 +67,7 @@
 
 .headerStatLabel {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -96,7 +96,7 @@
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
 }
 
@@ -121,7 +121,7 @@
 
 .priceChange {
   font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -149,8 +149,13 @@
 .middleGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
-  gap: var(--space-4);
+  gap: var(--space-6);
   align-items: start;
+}
+
+.trendChartWrap {
+  margin-inline-end: var(--space-3);
+  min-width: 0;
 }
 
 .middleAside {
@@ -198,7 +203,7 @@
 }
 
 .trendContextStatLabel {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -206,7 +211,7 @@
 
 .trendContextStatValue {
   font-family: var(--font-mono);
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
 }
@@ -229,7 +234,7 @@
 
 .panelTitle {
   margin: 0 0 var(--space-1);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.01em;
   line-height: var(--line-height-tight);
@@ -238,7 +243,7 @@
 
 .panelSub {
   margin: 0 0 var(--space-4);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--color-text-secondary);
 }
@@ -333,7 +338,7 @@
 }
 
 .breakdownLabel {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
@@ -343,7 +348,7 @@
   min-width: 2.75rem;
   padding: var(--space-1) var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   text-align: center;
   border-radius: var(--radius-full);
@@ -408,6 +413,10 @@
 
 .relatedPanel {
   flex-shrink: 0;
+}
+
+.middleAside .relatedPanel .panelTitle {
+  margin-bottom: var(--space-5);
 }
 
 .middleAside .relatedPanel .simpleListItem {
@@ -668,14 +677,35 @@
 .stockLinkName {
   flex: 1;
   min-width: 0;
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
-.stockLinkScore {
+.stockLinkTrailing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--space-2);
   flex-shrink: 0;
   margin-left: auto;
-  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-tight);
+}
+
+.stockLinkPrice {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.stockLinkChange {
+  font-weight: var(--font-weight-semibold);
+}
+
+.stockLinkScore {
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
 

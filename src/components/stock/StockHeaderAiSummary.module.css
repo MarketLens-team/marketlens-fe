@@ -8,14 +8,14 @@
 
 .label {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
 }
 
 .text {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   line-height: var(--line-height-loose);
   color: var(--color-text-primary);
 }

@@ -352,7 +352,12 @@ export function StockDetailContent({
                 </div>
               </div>
             </div>
-            <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
+            <div className={styles.trendChartWrap}>
+              <StockSentimentTrendChart
+                trend={sentimentContext.trend}
+                currentScore={sentimentContext.current}
+              />
+            </div>
           </div>
         </section>
 
@@ -387,28 +392,47 @@ export function StockDetailContent({
                 연관 종목
               </h2>
               <ul className={styles.simpleList}>
-                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
-                  <li key={related.code} className={styles.simpleListItem}>
-                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
-                      <EntityAvatar
-                        variant="stock"
-                        size="sm"
-                        name={related.name}
-                        imageUrl={related.imageUrl}
-                      />
-                      <span className={styles.stockLinkName}>{related.name}</span>
-                      <span
-                        className={clsx(
-                          styles.stockLinkScore,
-                          styles.mono,
-                          scoreToneClass(related.sentimentScore),
-                        )}
-                      >
-                        {formatStockScore(related.sentimentScore)}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => {
+                  const priceUp = (related.price?.changePercent ?? 0) >= 0
+                  return (
+                    <li key={related.code} className={styles.simpleListItem}>
+                      <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                        <EntityAvatar
+                          variant="stock"
+                          size="sm"
+                          name={related.name}
+                          imageUrl={related.imageUrl}
+                        />
+                        <span className={styles.stockLinkName}>{related.name}</span>
+                        <span className={styles.stockLinkTrailing}>
+                          {related.price && related.price.current > 0 ? (
+                            <span className={styles.stockLinkPrice}>
+                              {formatPrice(related.price.current)}
+                            </span>
+                          ) : null}
+                          {related.price && related.price.current > 0 ? (
+                            <span
+                              className={clsx(
+                                styles.stockLinkChange,
+                                priceUp ? styles.priceUp : styles.priceDown,
+                              )}
+                            >
+                              {formatPercent(related.price.changePercent)}
+                            </span>
+                          ) : null}
+                          <span
+                            className={clsx(
+                              styles.stockLinkScore,
+                              scoreToneClass(related.sentimentScore),
+                            )}
+                          >
+                            {formatStockScore(related.sentimentScore)}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </section>

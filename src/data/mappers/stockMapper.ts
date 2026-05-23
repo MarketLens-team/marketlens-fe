@@ -98,6 +98,22 @@ export function mapRelatedStocks(
     }))
 }
 
+/** 연관 종목 코드에 `GET /api/v1/stocks/prices` 시세 병합 */
+export function enrichRelatedStocksWithPrices(
+  stocks: StockRelatedStock[],
+  tickerRows: TickerStockRow[],
+): StockRelatedStock[] {
+  const priceByCode = new Map(tickerRows.map((row) => [row.code, row]))
+  return stocks.map((stock) => {
+    const row = priceByCode.get(stock.code)
+    if (!row || row.price <= 0) return stock
+    return {
+      ...stock,
+      price: mapStockPriceInfo(row.price, row.changePercent),
+    }
+  })
+}
+
 export function mapNewsFeedItems(
   items: NewsFeedItemResponse[],
   highlightTerms?: string[],

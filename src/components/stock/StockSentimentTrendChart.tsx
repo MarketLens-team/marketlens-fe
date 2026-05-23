@@ -60,6 +60,9 @@ interface TooltipState {
 
 const SCORE_MIN = -100
 const SCORE_MAX = 100
+/** 우측 패널과 겹치지 않도록 플롯·툴팁 여백 */
+const CHART_LAYOUT_PADDING_RIGHT = 20
+const TOOLTIP_RIGHT_INSET = CHART_LAYOUT_PADDING_RIGHT + 8
 /** lightweight-charts lineWidth: 1~4 (4가 최대) */
 const SENTIMENT_SCORE_LINE_WIDTH = 2
 type SeriesKey = 'score' | 'mention'
@@ -85,7 +88,8 @@ function buildChartOptions(colors: StockChartColors) {
       background: { type: ColorType.Solid, color: 'transparent' },
       textColor: colors.chartText,
       fontFamily: 'IBM Plex Mono, monospace',
-      fontSize: 11,
+      fontSize: 12,
+      padding: { right: CHART_LAYOUT_PADDING_RIGHT },
     },
     grid: {
       vertLines: { visible: false },
@@ -318,7 +322,12 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       }
 
       const { width, height } = chartArea.getBoundingClientRect()
-      const pos = computeTooltipPosition(width, height, param.point.x, param.point.y)
+      const pos = computeTooltipPosition(
+        Math.max(0, width - TOOLTIP_RIGHT_INSET),
+        height,
+        param.point.x,
+        param.point.y,
+      )
 
       setTooltip({
         left: pos.left,

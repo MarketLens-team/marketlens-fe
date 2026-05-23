@@ -75,6 +75,8 @@ export interface StockRelatedStock {
   imageUrl?: string | null
   market?: string
   sentimentScore: number
+  /** `GET /api/v1/stocks/prices` 병합 */
+  price?: StockPriceInfo
 }
 
 export interface StockPersonTimelineItem {
