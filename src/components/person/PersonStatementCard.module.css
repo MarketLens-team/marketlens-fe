@@ -54,6 +54,7 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   color: var(--color-text-primary);
+  transition: color var(--duration-fast) ease;
 }
 
 .role {
@@ -101,6 +102,8 @@
   transition: color var(--duration-fast) ease;
 }
 
+.timelineLink:hover .name,
+.timelineLink:focus-visible .name,
 .timelineLink:hover .statementText,
 .timelineLink:focus-visible .statementText {
   color: var(--color-primary);
@@ -118,7 +121,14 @@
   color: var(--color-danger);
 }
 
-/* —— 인물 상세 피드 —— */
+/* —— 인물 상세: 프로필 고정 아래 발언 타임라인 —— */
+
+.detailFeed {
+  padding-left: var(--space-4);
+  min-width: 0;
+}
+
+/* —— 인물 상세 피드(레거시 카드) —— */
 
 .card {
   border: 1px solid var(--color-border-default);

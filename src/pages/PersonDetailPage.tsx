@@ -24,6 +24,8 @@ import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
+const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
+
 function parsePersonId(raw: string | undefined): number | null {
   if (!raw?.trim()) return null
   const n = Number(raw)
@@ -93,6 +95,7 @@ export default function PersonDetailPage() {
     hasMore: Boolean(feed?.mentionsHasNext),
     loading: loadingMore,
     onLoadMore: () => void loadMore(),
+    scrollRootSelector: FEED_SCROLL_ROOT,
   })
 
   const httpFullscreenPreset = feedError ? fullscreenPresetFromAppError(feedError) : null
@@ -126,11 +129,13 @@ export default function PersonDetailPage() {
               <PersonTimelineBackButton onBack={() => navigate('/person')} />
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </div>
-            <div className={clsx(styles.detailFeedCol, styles.feedColDetail)}>
+            <div className={styles.detailFeedCol}>
               <div className={clsx(skeleton.block, styles.skeletonHero)} />
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
-              ))}
+              <div className={styles.feedScroll}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
+                ))}
+              </div>
             </div>
             <aside className={styles.detailRightPanel}>
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
@@ -150,7 +155,7 @@ export default function PersonDetailPage() {
               />
             </div>
 
-            <div className={clsx(styles.detailFeedCol, styles.feedColDetail)}>
+            <div className={styles.detailFeedCol}>
               <header
                 className={clsx(
                   styles.hero,
@@ -195,22 +200,29 @@ export default function PersonDetailPage() {
                 )}
               </header>
 
-              <ul className={clsx(gridStyles.feedList, styles.feedList, feedLoading && styles.feedDimmed)}>
-                {feed.mentions.map((mention) => (
-                  <li key={mention.id}>
-                    <PersonStatementCard mention={mention} variant="feed" />
-                  </li>
-                ))}
-              </ul>
+              <div id="person-detail-feed-scroll" className={styles.feedScroll}>
+                <ul
+                  className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
+                  aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
+                >
+                  {feed.mentions.map((mention) => (
+                    <li key={mention.id} className={gridStyles.timelineItemDetail}>
+                      <PersonStatementCard mention={mention} variant="detailFeed" />
+                    </li>
+                  ))}
+                </ul>
 
-              {feed.mentions.length === 0 ? (
-                <p className={styles.empty}>이 기간에 표시할 발언이 없습니다</p>
-              ) : null}
+                {feed.mentions.length === 0 ? (
+                  <p className={styles.empty}>이 기간에 표시할 발언이 없습니다</p>
+                ) : null}
 
-              {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
+                {infiniteEnabled ? (
+                  <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                ) : null}
 
-              <div className={styles.feedFooter}>
-                <BackToTopButton placement="inline" />
+                <div className={styles.feedFooter}>
+                  <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
+                </div>
               </div>
             </div>
 

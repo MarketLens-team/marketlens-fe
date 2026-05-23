@@ -20,16 +20,34 @@ const SENTIMENT_SCORE_CLASS: Record<PersonSentimentTone, string> = {
 
 interface PersonStatementCardProps {
   mention: PersonMention
-  /** 인물 상세 — 프로필 헤더 생략, 발언 본문만 */
-  variant?: 'full' | 'feed'
+  /** full: 트래커 타임라인 · feed: 상세 카드형 · detailFeed: 상세 고정 프로필 아래 발언만 */
+  variant?: 'full' | 'feed' | 'detailFeed'
 }
 
 export function PersonStatementCard({ mention, variant = 'full' }: PersonStatementCardProps) {
   const tone = personSentimentToneClass(mention.sentiment)
   const isFeed = variant === 'feed'
+  const isDetailFeed = variant === 'detailFeed'
   const roleLabel = formatPersonRole(mention.organizationName, mention.role)
   const timeLabel = formatRelativeTimeKo(mention.publishedAt)
   const sentimentLabel = formatPersonSentimentBadge(mention.sentiment, mention.sentimentScore)
+
+  if (isDetailFeed) {
+    return (
+      <article className={styles.detailFeed}>
+        <p className={styles.metaRow}>
+          <span className={styles.metaTime}>{timeLabel}</span>
+          <span className={styles.metaDot} aria-hidden>
+            ·
+          </span>
+          <span className={clsx(styles.sentInline, SENTIMENT_SCORE_CLASS[tone])}>{sentimentLabel}</span>
+        </p>
+        <blockquote className={styles.statement}>
+          <AiSummaryText text={mention.context} className={styles.statementText} />
+        </blockquote>
+      </article>
+    )
+  }
 
   if (isFeed) {
     return (
