@@ -35,6 +35,25 @@
 
 .feedCol {
   display: block;
+  position: relative;
+  --person-tracker-rail: 1.25rem;
+  --timeline-line: 2px;
+  --timeline-line-color: var(--color-border-strong);
+  --timeline-stub: var(--space-4);
+}
+
+/* 트래커: ㅣ 아바타(md) 중앙을 관통하는 세로축만 — 가로 스텁 없음 */
+.feedCol::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--person-tracker-rail) - var(--timeline-line) / 2);
+  top: calc(1.25rem - var(--timeline-line) / 2);
+  bottom: 0;
+  width: var(--timeline-line);
+  background: var(--timeline-line-color);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .feedList {
@@ -51,48 +70,29 @@
   padding: 0;
 }
 
-/* 아바타 아래 → 다음 항목까지 이어지는 타임라인 선 */
-.timelineItem {
-  position: relative;
-  padding-bottom: calc(var(--space-8) + var(--space-2));
-}
-
-.timelineItem + .timelineItem {
-  padding-top: var(--space-6);
-}
-
-.timelineItem:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: calc(1.25rem - 1px);
-  top: 2.5rem;
-  bottom: calc(-1 * var(--space-6));
-  width: 2px;
-  background: var(--color-border-strong);
-  border-radius: var(--radius-full);
-  pointer-events: none;
-}
-
-/* 인물 상세 — 프로필은 히어로에 고정, 발언만 세로선 */
+.timelineItem,
 .timelineItemDetail {
   position: relative;
   padding-bottom: calc(var(--space-8) + var(--space-2));
 }
 
+.timelineItem + .timelineItem,
 .timelineItemDetail + .timelineItemDetail {
   padding-top: var(--space-6);
 }
 
-.timelineItemDetail:not(:last-child)::after {
+/* 상세: -- 가로 스텁 (세로축은 PersonDetailPage.profileTimeline) */
+.timelineItemDetail::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0.35rem;
-  bottom: calc(-1 * var(--space-6));
-  width: 2px;
-  background: var(--color-border-strong);
+  top: calc(0.65rem - var(--timeline-line) / 2);
+  width: var(--timeline-stub);
+  height: var(--timeline-line);
+  background: var(--timeline-line-color);
   border-radius: var(--radius-full);
   pointer-events: none;
+  z-index: 1;
+  left: 0;
 }
 
 @media (max-width: 1100px) {

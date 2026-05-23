@@ -45,6 +45,33 @@
   flex-direction: column;
   min-height: 0;
   max-height: calc(100dvh - var(--layout-top-strip-height) - 2 * var(--space-5));
+  /* lg 아바타(3.5rem) 중앙 — 타임라인 세로축 */
+  --person-timeline-rail: 1.75rem;
+  --timeline-line: 2px;
+  --timeline-line-color: var(--color-border-strong);
+  --timeline-stub: var(--space-4);
+}
+
+.profileTimeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ㅣ 아바타 중앙에서 발언 목록까지 이어지는 세로축 */
+.profileTimeline::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--person-timeline-rail) - var(--timeline-line) / 2);
+  top: calc(1.75rem - var(--timeline-line) / 2);
+  bottom: 0;
+  width: var(--timeline-line);
+  background: var(--timeline-line-color);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .detailRightPanel {
@@ -114,55 +141,60 @@
   scrollbar-width: thin;
 }
 
-.hero {
-  position: relative;
-  flex-shrink: 0;
-  margin-bottom: var(--space-4);
-  padding: var(--space-5);
-  padding-top: var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-default);
-  background: var(--color-bg-card);
-}
-
-.heroRefreshing {
-  opacity: 0.55;
-}
-
-.heroRangeToggle {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-}
-
-.heroMain {
+.profileHeader {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  padding-right: 3.5rem;
-}
-
-.heroText {
+  flex-shrink: 0;
+  margin-bottom: var(--space-4);
   min-width: 0;
 }
 
-.heroName {
+.profileHeaderRefreshing {
+  opacity: 0.55;
+}
+
+.profileAvatar {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.profileText {
+  min-width: 0;
+  flex: 1;
+}
+
+.profileName {
   margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--color-text-primary);
 }
 
-.heroRole {
+.profileRole {
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
   color: var(--color-text-secondary);
 }
 
-.heroMeta {
+.profileMeta {
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+}
+
+/* -- 가로 스텁: 세로축(아바타 중앙)에서 본문으로 */
+.detailTimelineItem::before {
+  left: calc(var(--person-timeline-rail) - var(--timeline-line) / 2);
+  top: calc(0.65rem - var(--timeline-line) / 2);
+  width: var(--timeline-stub);
+}
+
+.detailTimelineItem:not(:last-child)::after {
+  display: none;
 }
 
 .infiniteSentinel {
@@ -182,9 +214,9 @@
   font-size: var(--font-size-sm);
 }
 
-.skeletonHero {
-  height: 7rem;
-  border-radius: var(--radius-lg);
+.skeletonProfile {
+  height: 3.5rem;
+  border-radius: var(--radius-sm);
 }
 
 .skeletonCard {

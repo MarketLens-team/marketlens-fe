@@ -7,7 +7,6 @@ import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
-import { PersonPanelRangeToggle } from '../components/person/PersonPanelRangeToggle'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import { formatPersonRole } from '../components/person/personDisplay'
@@ -24,6 +23,7 @@ import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
+const PERSON_DETAIL_FEED_RANGE = 'today' as const satisfies PersonMentionsRange
 const FEED_SCROLL_ROOT = '#person-detail-feed-scroll'
 
 function parsePersonId(raw: string | undefined): number | null {
@@ -53,7 +53,6 @@ export default function PersonDetailPage() {
   const navigate = useNavigate()
   const { personId: personIdParam } = useParams()
   const personId = parsePersonId(personIdParam)
-  const [feedRange, setFeedRange] = useState<PersonMentionsRange>('today')
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
   const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
 
@@ -64,10 +63,7 @@ export default function PersonDetailPage() {
     error: feedError,
     loadMore,
     loadingMore,
-  } = usePersonDetail(
-    personId ?? 0,
-    feedRange,
-  )
+  } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE)
   const {
     data: topPersons,
     loading: topLoading,
@@ -82,7 +78,7 @@ export default function PersonDetailPage() {
     data: mentionCount,
     loading: mentionCountLoading,
     refreshing: mentionCountRefreshing,
-  } = usePersonMentionCount(personId ?? 0, feedRange)
+  } = usePersonMentionCount(personId ?? 0, PERSON_DETAIL_FEED_RANGE)
 
   const profile = useMemo(() => {
     const first = feed?.mentions[0]
@@ -130,11 +126,13 @@ export default function PersonDetailPage() {
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </div>
             <div className={styles.detailFeedCol}>
-              <div className={clsx(skeleton.block, styles.skeletonHero)} />
+              <div className={styles.profileTimeline}>
+              <div className={clsx(skeleton.block, styles.skeletonProfile)} />
               <div className={styles.feedScroll}>
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
                 ))}
+              </div>
               </div>
             </div>
             <aside className={styles.detailRightPanel}>
@@ -156,64 +154,52 @@ export default function PersonDetailPage() {
             </div>
 
             <div className={styles.detailFeedCol}>
-              <header
-                className={clsx(
-                  styles.hero,
-                  (mentionCountLoading || mentionCountRefreshing) && styles.heroRefreshing,
-                )}
-              >
-                <PersonPanelRangeToggle
-                  range={feedRange}
-                  onChange={setFeedRange}
-                  aria-label="발언 기간"
-                  className={styles.heroRangeToggle}
-                />
-                {profile ? (
-                  <div className={styles.heroMain}>
+              <div className={styles.profileTimeline}>
+                <header
+                  className={clsx(
+                    styles.profileHeader,
+                    (mentionCountLoading || mentionCountRefreshing) && styles.profileHeaderRefreshing,
+                  )}
+                >
+                  {profile ? (
                     <EntityAvatar
                       variant="person"
                       size="lg"
                       name={profile.personName}
                       imageUrl={profile.imageUrl}
+                      className={styles.profileAvatar}
                     />
-                    <div className={styles.heroText}>
-                      <h1 className={styles.heroName}>{profile.personName}</h1>
-                      <p className={styles.heroRole}>
+                  ) : null}
+                  <div className={styles.profileText}>
+                    <h1 className={styles.profileName}>{profile?.personName ?? `인물 #${personId}`}</h1>
+                    {profile ? (
+                      <p className={styles.profileRole}>
                         {formatPersonRole(profile.organizationName, profile.role)}
                       </p>
-                      {mentionCount != null ? (
-                        <p className={styles.heroMeta}>
-                          {feedRange === 'today' ? '오늘' : '최근 7일'} 언급 {mentionCount}건
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={styles.heroText}>
-                    <h1 className={styles.heroName}>인물 #{personId}</h1>
+                    ) : null}
                     {mentionCount != null ? (
-                      <p className={styles.heroMeta}>
-                        {feedRange === 'today' ? '오늘' : '최근 7일'} 언급 {mentionCount}건
-                      </p>
+                      <p className={styles.profileMeta}>오늘 언급 {mentionCount}건</p>
                     ) : null}
                   </div>
-                )}
-              </header>
+                </header>
 
-              <div id="person-detail-feed-scroll" className={styles.feedScroll}>
+                <div id="person-detail-feed-scroll" className={styles.feedScroll}>
                 <ul
                   className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
                   aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
                 >
                   {feed.mentions.map((mention) => (
-                    <li key={mention.id} className={gridStyles.timelineItemDetail}>
+                    <li
+                      key={mention.id}
+                      className={clsx(gridStyles.timelineItemDetail, styles.detailTimelineItem)}
+                    >
                       <PersonStatementCard mention={mention} variant="detailFeed" />
                     </li>
                   ))}
                 </ul>
 
                 {feed.mentions.length === 0 ? (
-                  <p className={styles.empty}>이 기간에 표시할 발언이 없습니다</p>
+                  <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
                 ) : null}
 
                 {infiniteEnabled ? (
@@ -223,6 +209,7 @@ export default function PersonDetailPage() {
                 <div className={styles.feedFooter}>
                   <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
                 </div>
+              </div>
               </div>
             </div>
 
