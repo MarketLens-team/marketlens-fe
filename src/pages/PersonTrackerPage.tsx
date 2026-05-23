@@ -13,6 +13,7 @@ import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
+import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { usePersonTracker } from '../hooks/usePersonTracker'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonTrackerPage.module.css'
@@ -40,6 +41,10 @@ export default function PersonTrackerPage() {
     loading: stocksLoading,
     refreshing: stocksRefreshing,
   } = usePersonFrequentStocks(stocksRange)
+
+  const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
+    loading: feedLoading,
+  })
 
   const infiniteEnabled = Boolean(feed?.mentionsHasNext)
   const sentinelRef = useInfiniteScroll({
@@ -93,8 +98,15 @@ export default function PersonTrackerPage() {
             <div className={gridStyles.feedCol}>
               <ul className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
-                  <li key={mention.id} className={gridStyles.timelineItem}>
-                    <PersonStatementCard mention={mention} />
+                  <li
+                    key={mention.id}
+                    id={`person-statement-${mention.id}`}
+                    className={gridStyles.timelineItem}
+                  >
+                    <PersonStatementCard
+                      mention={mention}
+                      highlighted={isStatementFocused(mention.id)}
+                    />
                   </li>
                 ))}
               </ul>

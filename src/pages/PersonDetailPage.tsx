@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
@@ -83,6 +84,10 @@ export default function PersonDetailPage() {
     const first = feed?.mentions[0]
     return first ? personProfileFromMention(first) : null
   }, [feed?.mentions])
+
+  const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
+    loading: feedLoading,
+  })
 
   const infiniteEnabled = Boolean(feed?.mentionsHasNext)
   const sentinelRef = useInfiniteScroll({
@@ -189,9 +194,14 @@ export default function PersonDetailPage() {
                   {feed.mentions.map((mention) => (
                     <li
                       key={mention.id}
+                      id={`person-statement-${mention.id}`}
                       className={gridStyles.timelineItemDetail}
                     >
-                      <PersonStatementCard mention={mention} variant="detailFeed" />
+                      <PersonStatementCard
+                        mention={mention}
+                        variant="detailFeed"
+                        highlighted={isStatementFocused(mention.id)}
+                      />
                     </li>
                   ))}
                 </ul>

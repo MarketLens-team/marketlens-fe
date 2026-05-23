@@ -109,6 +109,21 @@
   color: var(--color-primary);
 }
 
+.timelineLinkFocusedFromSearch .statementText {
+  color: var(--color-success);
+}
+
+.timelineLinkFocusedFromSearch:hover .name,
+.timelineLinkFocusedFromSearch:hover .statementText,
+.timelineLinkFocusedFromSearch:focus-visible .name,
+.timelineLinkFocusedFromSearch:focus-visible .statementText {
+  color: var(--color-success);
+}
+
+.detailFeedFocused .statementText {
+  color: var(--color-success);
+}
+
 .sentPos {
   color: var(--color-success);
 }

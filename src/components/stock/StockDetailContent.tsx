@@ -524,7 +524,7 @@ export function StockDetailContent({
                 ) : (
                   peopleTimeline.map((person) => (
                     <li key={person.id} className={styles.peopleTimelineItem}>
-                      <div className={styles.personTimelineRow}>
+                      <div className={styles.personTimelineItemButton}>
                         <EntityAvatar
                           className={styles.personTimelineAvatar}
                           variant="person"

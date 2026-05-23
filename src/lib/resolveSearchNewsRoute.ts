@@ -17,10 +17,10 @@ export function resolveSearchNewsStockCode(
   return null
 }
 
-export function buildStockDetailPath(stockCode: string, newsId?: string): string {
+export function buildStockDetailPath(stockCode: string, focus?: { newsId?: string }): string {
   const path = `/stock/${stockCode}`
-  if (!newsId) return path
-  return `${path}?newsId=${encodeURIComponent(newsId)}`
+  if (!focus?.newsId) return path
+  return `${path}?newsId=${encodeURIComponent(focus.newsId)}`
 }
 
 /** 검색 뉴스 행 클릭 — 종목 상세 + 해당 뉴스 포커스 */
@@ -29,7 +29,7 @@ export function resolveSearchNewsRoute(
   singleStock?: SearchNewsStockContext | null,
 ): string | null {
   const stockCode = resolveSearchNewsStockCode(item, singleStock)
-  if (stockCode) return buildStockDetailPath(stockCode, item.id)
+  if (stockCode) return buildStockDetailPath(stockCode, { newsId: item.id })
 
   if (item.sourceType === 'person' && item.stocks.length === 0 && item.persons.length > 0) {
     return '/person'

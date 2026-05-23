@@ -73,6 +73,7 @@
 .timelineItem,
 .timelineItemDetail {
   position: relative;
+  scroll-margin-block: 6rem;
   padding-bottom: calc(var(--space-8) + var(--space-2));
 }
 

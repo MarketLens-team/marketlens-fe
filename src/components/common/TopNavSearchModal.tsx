@@ -23,6 +23,7 @@ import type {
 } from '../../data/types/search'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { groupStocksBySector } from '../../lib/groupStocksBySector'
+import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import {
   formatSearchNewsStockLabel,
   resolveSearchNewsRoute,
@@ -485,28 +486,23 @@ function StatementRows({
   return (
     <ul className={styles.rowList}>
       {items.map((stmt) => (
-        <li
-          key={stmt.rowKey}
-          data-search-nav-item
-          className={clsx(styles.searchRow, styles.searchRowTwoCol, styles.searchRowStatement)}
-        >
-          <div className={styles.stockIdentity}>
+        <li key={stmt.rowKey} data-search-nav-item>
+          <button
+            type="button"
+            data-search-nav-primary
+            className={styles.statementRowCard}
+            onClick={() => {
+              navigate(buildPersonDetailPath(stmt.personId, { statementId: stmt.id }))
+              onClose()
+            }}
+          >
             <p className={styles.statementQuote}>{stmt.quote}</p>
-            <p className={styles.statementMeta}>{formatNewsMeta(stmt.publishedAt)}</p>
-          </div>
-          <div className={styles.stockActions}>
-            <button
-              type="button"
-              data-search-nav-primary
-              className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-              onClick={() => {
-                navigate('/person')
-                onClose()
-              }}
-            >
-              발언 보기
-            </button>
-          </div>
+            <p className={styles.statementMeta}>
+              <span className={styles.statementPersonName}>{stmt.personName}</span>
+              <span aria-hidden> · </span>
+              {formatNewsMeta(stmt.publishedAt)}
+            </p>
+          </button>
         </li>
       ))}
     </ul>
