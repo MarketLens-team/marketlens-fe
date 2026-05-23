@@ -66,6 +66,10 @@
   }
 }
 
+.menuItem:focus {
+  outline: none;
+}
+
 .menuItem:focus-visible {
   outline: none;
   color: var(--color-text-primary);

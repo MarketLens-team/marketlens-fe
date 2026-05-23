@@ -34,6 +34,7 @@
 - **부정 / 하락 / 경고:** 적색 계열 (`--color-danger` 등).
 - **중립·참고:** 회색·노랑 구간(게이지 중앙대 등).
 - **주요 액션:** 파란 **프라이머리** (`--color-primary`, 인터랙티브 텍스트는 `--color-interactive-active-text`).
+- **클릭 가능 행·카드:** 호버·포커스는 [interactive-surfaces.md](./interactive-surfaces.md) 패턴(A 링 행 / B 테이블 / C 텍스트만 / GNB 예외)을 따른다. 수치 토큰은 `--interactive-*` (`tokens.css`).
 
 ---
 

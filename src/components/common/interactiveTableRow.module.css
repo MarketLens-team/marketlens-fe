@@ -1,26 +1,55 @@
-/* 검색 모달 .searchRow와 동일 — 테이블 행용 외곽 테두리 + 링 */
+/* 패턴 B: 테이블 행 — docs/design/interactive-surfaces.md */
 
 .tableBase {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 var(--space-2);
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .rowBase {
-  position: relative;
   cursor: pointer;
 }
 
 .rowBase td {
-  background: var(--color-bg-card);
+  background: transparent;
+  border: none;
+  transition: background-color var(--duration-fast) ease;
+}
+
+.rowBase:focus {
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rowBase:hover td {
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  }
+}
+
+.rowBase:focus-visible {
+  outline: none;
+}
+
+.rowBase:focus-visible td {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+/* 패턴 A (테이블): 링 행 — 홈 워치리스트 등. 평소 테두리 없음, 호버·Tab만 링 */
+.rowRing {
+  position: relative;
+  cursor: pointer;
+}
+
+.rowRing td {
+  background: transparent;
   border: none;
 }
 
-.rowBase::after {
+.rowRing::after {
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid var(--interactive-surface-border);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   pointer-events: none;
   z-index: 1;
@@ -29,18 +58,22 @@
     box-shadow var(--duration-fast) ease;
 }
 
+.rowRing:focus {
+  outline: none;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .rowBase:hover::after {
+  .rowRing:hover::after {
     border-color: var(--color-primary);
     box-shadow: var(--interactive-ring-hover);
   }
 }
 
-.rowBase:focus-visible {
+.rowRing:focus-visible {
   outline: none;
 }
 
-.rowBase:focus-visible::after {
+.rowRing:focus-visible::after {
   border-color: var(--color-primary);
   box-shadow: var(--interactive-ring-focus);
 }

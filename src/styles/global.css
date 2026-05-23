@@ -34,6 +34,12 @@ html {
   outline: none;
 }
 
+/* GNB·클릭 가능 테이블 행 — 전역 포커스 링 제외 (컴포넌트에서 처리) */
+nav[aria-label='상단 메뉴'] a:focus-visible,
+tr[role='link']:focus-visible {
+  outline: none;
+}
+
 * {
   user-select: none;
   -webkit-user-select: none;

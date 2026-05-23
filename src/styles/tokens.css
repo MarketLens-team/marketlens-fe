@@ -98,7 +98,10 @@
   --color-fab-border: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
   --color-fab-surface-hover: #6b778c;
 
-  /* Interactive surfaces — 검색 종목 행(.searchRow) 호버 */
+  /*
+   * Interactive surfaces — 패턴 정의: docs/design/interactive-surfaces.md
+   * 링 행(검색·TOP3) / 테이블 행(interactiveTableRow) / 텍스트만(뉴스) 구분
+   */
   --interactive-surface-border: color-mix(in srgb, var(--color-border-default) 75%, transparent);
   --interactive-ring-hover: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
   --interactive-ring-focus: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);

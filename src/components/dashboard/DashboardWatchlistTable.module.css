@@ -34,7 +34,7 @@
 }
 
 .rowClickable {
-  composes: rowBase from '../common/interactiveTableRow.module.css';
+  composes: rowRing from '../common/interactiveTableRow.module.css';
 }
 
 .stockName {

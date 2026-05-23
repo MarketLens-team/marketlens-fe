@@ -41,6 +41,8 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
   - `feat/design-refresh` 통합 검색 모달 너비·모달 서피스 (5/15 문서와 분리)
 - [design/ui-product-overview.md](./design/ui-product-overview.md)  
   - 홈·종목·버즈·인물·마이 등 **현재 제품 UI 톤·화면 패턴** 개요 (스냅샷 권장 목록 포함)
+- [design/interactive-surfaces.md](./design/interactive-surfaces.md)  
+  - **호버·포커스·링 행·테이블 행** 인터랙션 패턴 (토큰 `src/styles/tokens.css` 와 대응)
 - [changelog/2026-04.md](./changelog/2026-04.md)  
   - 4월 변경 이력 ("무엇을 바꿨는지" 중심)
 - [snapshots/README.md](./snapshots/README.md)  
