@@ -358,25 +358,36 @@
   font-family: var(--font-mono);
 }
 
-/* Bottom grid — 연관 종목 | 인물 발언 */
+/* Bottom grid — 상단 차트 그리드와 동일 비율(뉴스 | 사이드) */
 .bottomGrid {
   display: grid;
-  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
   gap: var(--space-4);
   align-items: start;
 }
 
-.bottomGrid .panelBody {
+.rightStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  align-self: start;
+  position: sticky;
+  top: var(--space-1);
+  max-height: calc(100vh - var(--space-5) - var(--space-4));
+}
+
+.rightStack .panelBody {
   padding: var(--space-3);
 }
 
-.bottomGrid .panelTitle {
+.rightStack .panelTitle {
   margin: 0 0 var(--space-2);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
 }
 
-.bottomGrid .simpleListItem {
+.rightStack .simpleListItem {
   padding: var(--space-2) 0;
   gap: var(--space-2);
 }
@@ -402,13 +413,37 @@
   padding-top: 0;
 }
 
-.bottomGrid .stockLink {
+.rightStack .stockLink {
   gap: var(--space-2);
 }
 
-.bottomGrid .stockLinkName {
+.rightStack .stockLinkName {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+}
+
+.rightStack .personRow {
+  gap: var(--space-2);
+}
+
+.rightStack .personTime {
+  font-size: var(--font-size-xs);
+}
+
+.rightStack .personName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.rightStack .personRole {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+}
+
+.rightStack .scorePill {
+  padding: 2px var(--space-1);
+  font-size: var(--font-size-xs);
 }
 
 /* 최신 인물 발언 타임라인 — Bloomberg Latest 스타일 */
@@ -523,6 +558,27 @@
 .personTimelineScore {
   margin-left: var(--space-1);
   font-weight: var(--font-weight-semibold);
+}
+
+.panelHeadRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6) 0;
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.newsList {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-6) var(--space-4);
 }
 
 .scorePill {
@@ -647,6 +703,34 @@
   margin: var(--space-1) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.newsFilterLoading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6) 0;
+}
+
+.newsScrollFoot {
+  position: relative;
+}
+
+.newsSentinel {
+  width: 100%;
+  height: 1px;
+  pointer-events: none;
+}
+
+.loadMoreError {
+  margin: var(--space-3) var(--space-6) 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.emptyNews {
+  padding-block: var(--space-6);
 }
 
 .emptyPeople {

@@ -1,21 +1,30 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
 import { BackToTopButton } from '../common/BackToTopButton'
 import { EmptyState } from '../common/EmptyState'
+import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
 import { PillButton } from '../ui/PillButton'
+import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
+import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
   SentimentPolarity,
   StockDetail,
+  StockNewsItem,
+  StockNewsPagination,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
+import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
+
+type NewsFilter = 'all' | 'positive' | 'negative'
 
 /** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
 const RELATED_STOCKS_DISPLAY_MAX = 3
@@ -38,25 +47,169 @@ function barSegmentClass(polarity: SentimentPolarity) {
   return styles.barNeu
 }
 
-export interface StockDetailContentProps {
-  data: StockDetail
+function filterNews(items: StockNewsItem[], filter: NewsFilter): StockNewsItem[] {
+  if (filter === 'all') return items
+  if (filter === 'positive') return items.filter((n) => n.sentiment === 'positive')
+  return items.filter((n) => n.sentiment === 'negative')
 }
 
-export function StockDetailContent({ data }: StockDetailContentProps) {
+export interface StockDetailContentProps {
+  data: StockDetail
+  /** 검색 등에서 진입 시 강조·스크롤할 뉴스 id */
+  focusNewsId?: string | null
+  onClearFocusNews?: () => void
+}
+
+export function StockDetailContent({
+  data,
+  focusNewsId = null,
+  onClearFocusNews,
+}: StockDetailContentProps) {
   const {
     stock,
     watchlistInterested,
     sentimentContext,
     sentimentBreakdown,
+    recentNews,
+    newsPagination,
     relatedStocks,
     peopleTimeline,
   } = data
+  const [newsFilter, setNewsFilter] = useState<NewsFilter>('all')
+  const [newsItems, setNewsItems] = useState(recentNews)
+  const [pagination, setPagination] = useState<StockNewsPagination>(newsPagination)
+  const [loadingMoreNews, setLoadingMoreNews] = useState(false)
+  const [loadingNewsFilter, setLoadingNewsFilter] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [interested, setInterested] = useState(watchlistInterested)
   const [watchlistPending, setWatchlistPending] = useState(false)
+  const skipNewsFilterFetchRef = useRef(true)
+  const useApiNewsFilter = !isMockDataSource()
+
+  useEffect(() => {
+    setNewsFilter('all')
+    setNewsItems(recentNews)
+    setPagination(newsPagination)
+    setLoadMoreError(null)
+    skipNewsFilterFetchRef.current = true
+  }, [stock.code, recentNews, newsPagination])
 
   useEffect(() => {
     setInterested(watchlistInterested)
   }, [watchlistInterested, stock.code])
+
+  useEffect(() => {
+    if (!useApiNewsFilter) return
+    if (skipNewsFilterFetchRef.current) {
+      skipNewsFilterFetchRef.current = false
+      return
+    }
+
+    let cancelled = false
+    const run = async () => {
+      setLoadingNewsFilter(true)
+      setLoadMoreError(null)
+      try {
+        const page = await fetchStockNewsFeedCursor(stock.code, {
+          limit: 20,
+          sentiment: newsFilter === 'all' ? undefined : newsFilter,
+        })
+        if (cancelled) return
+        setNewsItems(mapNewsFeedItems(page.items, [stock.name, stock.code]))
+        setPagination({
+          nextCursor: page.nextCursor,
+          hasNext: page.hasNext,
+        })
+      } catch (e) {
+        if (!cancelled) {
+          setLoadMoreError(e instanceof Error ? e.message : '뉴스를 불러오지 못했습니다.')
+        }
+      } finally {
+        if (!cancelled) setLoadingNewsFilter(false)
+      }
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [newsFilter, stock.code, stock.name, useApiNewsFilter])
+
+  const displayNews = useMemo(
+    () => (useApiNewsFilter ? newsItems : filterNews(newsItems, newsFilter)),
+    [newsItems, newsFilter, useApiNewsFilter],
+  )
+
+  useEffect(() => {
+    if (!focusNewsId) return
+    setNewsFilter('all')
+    skipNewsFilterFetchRef.current = true
+  }, [focusNewsId, stock.code])
+
+  useEffect(() => {
+    if (!focusNewsId || loadingNewsFilter) return
+    const hasTarget = displayNews.some((item) => item.id === focusNewsId)
+    if (!hasTarget) return
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`stock-news-${focusNewsId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [focusNewsId, displayNews, loadingNewsFilter])
+
+  useEffect(() => {
+    if (!focusNewsId || !onClearFocusNews) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const focusedEl = document.getElementById(`stock-news-${focusNewsId}`)
+      if (focusedEl?.contains(target)) return
+      onClearFocusNews()
+    }
+
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () => document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [focusNewsId, onClearFocusNews])
+
+  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
+
+  const loadMoreNews = useCallback(async () => {
+    if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
+    setLoadingMoreNews(true)
+    setLoadMoreError(null)
+    try {
+      const page = await fetchStockNewsFeedCursor(stock.code, {
+        limit: 20,
+        cursor: pagination.nextCursor,
+        sentiment: newsSentimentParam,
+      })
+      const mapped = mapNewsFeedItems(page.items, [stock.name, stock.code])
+      setNewsItems((prev) => {
+        const seen = new Set(prev.map((item) => item.id))
+        const next = mapped.filter((item) => !seen.has(item.id))
+        return [...prev, ...next]
+      })
+      setPagination({
+        nextCursor: page.nextCursor,
+        hasNext: page.hasNext,
+      })
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+    } finally {
+      setLoadingMoreNews(false)
+    }
+  }, [
+    loadingMoreNews,
+    pagination.hasNext,
+    pagination.nextCursor,
+    newsSentimentParam,
+    stock.code,
+    stock.name,
+  ])
 
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
@@ -79,6 +232,13 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       setWatchlistPending(false)
     }
   }, [interested, stock.code, watchlistPending])
+
+  const newsSentinelRef = useInfiniteScroll({
+    enabled: displayNews.length > 0,
+    hasMore: pagination.hasNext,
+    loading: loadingMoreNews,
+    onLoadMore: () => void loadMoreNews(),
+  })
 
   const priceUp = stock.price.change >= 0
 
@@ -226,99 +386,164 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       </div>
 
       <div className={styles.bottomGrid}>
-        <section className={clsx(styles.panel, styles.relatedPanel)} aria-labelledby="stock-related-title">
-          <div className={styles.panelBody}>
-            <h2 id="stock-related-title" className={styles.panelTitle}>
-              연관 종목
+        <section className={styles.panel} aria-labelledby="stock-news-title">
+          <div className={styles.panelHeadRow}>
+            <h2 id="stock-news-title" className={styles.panelTitle}>
+              관련 뉴스
             </h2>
-            <ul className={styles.simpleList}>
-              {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
-                <li key={related.code} className={styles.simpleListItem}>
-                  <Link className={styles.stockLink} to={`/stock/${related.code}`}>
-                    <EntityAvatar
-                      variant="stock"
-                      size="sm"
-                      name={related.name}
-                      imageUrl={related.imageUrl}
-                    />
-                    <span className={styles.stockLinkName}>{related.name}</span>
-                    <span
-                      className={clsx(
-                        styles.stockLinkScore,
-                        styles.mono,
-                        scoreToneClass(related.sentimentScore),
-                      )}
-                    >
-                      {formatStockScore(related.sentimentScore)}
-                    </span>
-                  </Link>
-                </li>
+            <div className={styles.filterGroup} role="group" aria-label="뉴스 감성 필터">
+              {(
+                [
+                  ['all', '전체'],
+                  ['positive', '긍정'],
+                  ['negative', '부정'],
+                ] as const
+              ).map(([key, label]) => (
+                <PillButton
+                  key={key}
+                  variant="secondary"
+                  compact
+                  active={newsFilter === key}
+                  aria-pressed={newsFilter === key}
+                  onClick={() => setNewsFilter(key)}
+                >
+                  {label}
+                </PillButton>
+              ))}
+            </div>
+          </div>
+          {loadingNewsFilter ? (
+            <div className={styles.newsFilterLoading} aria-busy="true">
+              <FeedLoadingSpinner />
+            </div>
+          ) : null}
+          {!loadingNewsFilter && displayNews.length === 0 ? (
+            <EmptyState
+              className={styles.emptyNews}
+              title="뉴스가 없어요"
+              message="선택한 감성 필터에 맞는 기사가 없습니다."
+              hint="전체 탭에서 다시 확인해 보세요."
+            />
+          ) : null}
+          {!loadingNewsFilter && displayNews.length > 0 ? (
+            <ul className={styles.newsList}>
+              {displayNews.map((item) => (
+                <StockNewsListItem
+                  key={item.id}
+                  item={item}
+                  highlighted={focusNewsId === item.id}
+                />
               ))}
             </ul>
-          </div>
+          ) : null}
+          {pagination.hasNext && !loadingNewsFilter ? (
+            <div className={styles.newsScrollFoot}>
+              <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
+              {loadingMoreNews ? <FeedLoadingSpinner /> : null}
+            </div>
+          ) : null}
+          {loadMoreError ? (
+            <p className={styles.loadMoreError} role="alert">
+              {loadMoreError}
+            </p>
+          ) : null}
         </section>
 
-        <section
-          className={clsx(styles.panel, styles.peoplePanel)}
-          aria-labelledby="stock-people-title"
-        >
-          <div className={styles.peoplePanelBody}>
-            <h2 id="stock-people-title" className={styles.peoplePanelTitle}>
-              최신 인물 발언 타임라인
-            </h2>
-            <ul className={styles.peopleTimelineList}>
-              {peopleTimeline.length === 0 ? (
-                <li className={styles.peopleTimelineItem}>
-                  <EmptyState
-                    className={styles.emptyPeople}
-                    title="발언이 없어요"
-                    message="이 종목과 연결된 인물 발언이 아직 없습니다."
-                  />
-                </li>
-              ) : (
-                peopleTimeline.map((person) => (
-                  <li key={person.id} className={styles.peopleTimelineItem}>
-                    <div className={styles.personTimelineRow}>
+        <div className={styles.rightStack}>
+          <section className={clsx(styles.panel, styles.relatedPanel)} aria-labelledby="stock-related-title">
+            <div className={styles.panelBody}>
+              <h2 id="stock-related-title" className={styles.panelTitle}>
+                연관 종목
+              </h2>
+              <ul className={styles.simpleList}>
+                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => (
+                  <li key={related.code} className={styles.simpleListItem}>
+                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={related.name}
+                        imageUrl={related.imageUrl}
+                      />
+                      <span className={styles.stockLinkName}>{related.name}</span>
                       <span
                         className={clsx(
-                          styles.personTimelineTime,
-                          person.isFresh ? styles.personTimelineTimeFresh : styles.personTimelineTimeMuted,
+                          styles.stockLinkScore,
+                          styles.mono,
+                          scoreToneClass(related.sentimentScore),
                         )}
                       >
-                        {person.relativeLabel}
+                        {formatStockScore(related.sentimentScore)}
                       </span>
-                      <EntityAvatar
-                        variant="person"
-                        size="sm"
-                        name={person.personName}
-                        imageUrl={person.imageUrl}
-                      />
-                      <div className={styles.personTimelineContent}>
-                        <p className={styles.personTimelineHeadline}>{person.summary}</p>
-                        <p className={styles.personTimelineMeta}>
-                          <span className={styles.personTimelineName}>{person.personName}</span>
-                          <span aria-hidden> · </span>
-                          <span>{person.role}</span>
-                          <span aria-hidden> · </span>
-                          <span>{person.sourceName}</span>
-                          <span
-                            className={clsx(
-                              styles.personTimelineScore,
-                              styles.mono,
-                              pillClass(person.sentimentScore),
-                            )}
-                          >
-                            {formatStockScore(person.sentimentScore)}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
+                    </Link>
                   </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </section>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section
+            className={clsx(styles.panel, styles.peoplePanel)}
+            aria-labelledby="stock-people-title"
+          >
+            <div className={styles.peoplePanelBody}>
+              <h2 id="stock-people-title" className={styles.peoplePanelTitle}>
+                최신 인물 발언 타임라인
+              </h2>
+              <ul className={styles.peopleTimelineList}>
+                {peopleTimeline.length === 0 ? (
+                  <li className={styles.peopleTimelineItem}>
+                    <EmptyState
+                      className={styles.emptyPeople}
+                      title="발언이 없어요"
+                      message="이 종목과 연결된 인물 발언이 아직 없습니다."
+                    />
+                  </li>
+                ) : (
+                  peopleTimeline.map((person) => (
+                    <li key={person.id} className={styles.peopleTimelineItem}>
+                      <div className={styles.personTimelineRow}>
+                        <span
+                          className={clsx(
+                            styles.personTimelineTime,
+                            person.isFresh ? styles.personTimelineTimeFresh : styles.personTimelineTimeMuted,
+                          )}
+                        >
+                          {person.relativeLabel}
+                        </span>
+                        <EntityAvatar
+                          variant="person"
+                          size="sm"
+                          name={person.personName}
+                          imageUrl={person.imageUrl}
+                        />
+                        <div className={styles.personTimelineContent}>
+                          <p className={styles.personTimelineHeadline}>{person.summary}</p>
+                          <p className={styles.personTimelineMeta}>
+                            <span className={styles.personTimelineName}>{person.personName}</span>
+                            <span aria-hidden> · </span>
+                            <span>{person.role}</span>
+                            <span aria-hidden> · </span>
+                            <span>{person.sourceName}</span>
+                            <span
+                              className={clsx(
+                                styles.personTimelineScore,
+                                styles.mono,
+                                pillClass(person.sentimentScore),
+                              )}
+                            >
+                              {formatStockScore(person.sentimentScore)}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          </section>
+        </div>
       </div>
 
       <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />
