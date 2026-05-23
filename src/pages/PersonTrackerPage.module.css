@@ -1,7 +1,7 @@
 .page {
   max-width: var(--layout-page-max);
   margin: 0 auto;
-  padding-bottom: var(--space-6);
+  padding-bottom: var(--layout-back-to-top-reserve);
 }
 
 .feedDimmed {
@@ -13,13 +13,6 @@
 
 .infiniteSentinel {
   height: 1px;
-}
-
-.feedFooter {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-5);
-  padding-top: var(--space-2);
 }
 
 .empty {

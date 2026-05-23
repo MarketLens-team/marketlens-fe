@@ -203,10 +203,6 @@ export default function PersonDetailPage() {
                 {infiniteEnabled ? (
                   <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
                 ) : null}
-
-                <div className={styles.feedFooter}>
-                  <BackToTopButton placement="inline" />
-                </div>
               </div>
               </div>
             </div>
@@ -222,6 +218,8 @@ export default function PersonDetailPage() {
             </aside>
           </div>
         ) : null}
+
+        {feed ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
       </div>
     </Layout>
   )

@@ -17,8 +17,6 @@ import { usePersonTracker } from '../hooks/usePersonTracker'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonTrackerPage.module.css'
 
-const FEED_SCROLL_ROOT = '#person-tracker-feed-scroll'
-
 export default function PersonTrackerPage() {
   const feedRange: PersonMentionsRange = 'today'
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
@@ -92,7 +90,7 @@ export default function PersonTrackerPage() {
               />
             </aside>
 
-            <div id="person-tracker-feed-scroll" className={gridStyles.feedCol}>
+            <div className={gridStyles.feedCol}>
               <ul className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
                   <li key={mention.id} className={gridStyles.timelineItem}>
@@ -104,9 +102,6 @@ export default function PersonTrackerPage() {
                 <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
               ) : null}
               {infiniteEnabled ? <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden /> : null}
-              <div className={styles.feedFooter}>
-                <BackToTopButton placement="inline" scrollRootSelector={FEED_SCROLL_ROOT} />
-              </div>
             </div>
 
             <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
@@ -119,6 +114,8 @@ export default function PersonTrackerPage() {
             </aside>
           </div>
         ) : null}
+
+        {feed ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
       </div>
     </Layout>
   )
