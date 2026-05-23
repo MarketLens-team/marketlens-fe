@@ -30,35 +30,14 @@
 }
 
 .item {
+  composes: ringRow from '../common/interactiveListRow.module.css';
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: var(--space-3);
   align-items: start;
   padding: var(--space-3);
-  border: 1px solid var(--interactive-surface-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-card);
   text-decoration: none;
   color: inherit;
-  box-sizing: border-box;
-  transition:
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease,
-    background-color var(--duration-fast) ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .item:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--interactive-ring-hover);
-    background: var(--interactive-surface-bg-hover);
-  }
-}
-
-.item:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--interactive-ring-focus);
 }
 
 .rank {

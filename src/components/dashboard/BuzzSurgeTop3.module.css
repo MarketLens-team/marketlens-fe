@@ -11,40 +11,16 @@
   gap: var(--space-2);
 }
 
-/* 패턴 A: 링 행 — docs/design/interactive-surfaces.md */
 .item {
+  composes: ringRow from '../common/interactiveListRow.module.css';
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
   font-size: var(--font-size-base);
   text-decoration: none;
   color: inherit;
-  box-sizing: border-box;
-  transition:
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
-}
-
-.item:focus {
-  outline: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .item:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--interactive-ring-hover);
-  }
-}
-
-.item:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--interactive-ring-focus);
 }
 
 .rank {

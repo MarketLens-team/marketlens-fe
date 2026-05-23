@@ -45,36 +45,15 @@
 
 | 컴포넌트 | 파일 | 비고 |
 |----------|------|------|
-| 언급량 급증 TOP 3 | `BuzzSurgeTop3.module.css` `.item` | 홈 좌측 — **평소 transparent**, 호버만 링 |
+| 언급량 급증 TOP 3 | `BuzzSurgeTop3` → `ringRow` | 홈 좌측 |
+| 언급량 급등 TOP 10 | `BuzzSurgeTop10Table` → `rowRing` | `/buzz` 테이블 |
+| 인물 TOP5 | `PersonTop5Panel` → `ringRow` | 사이드 패널 |
+| 인물 연관 종목 칩 | `PersonFrequentStocksPanel` → `ringChip` | 사이드 패널 |
 | 통합 검색 종목 행 | `TopNavSearchModal.module.css` `.searchRow` | 모달 inset 배경 + 기본 border |
-| TOP5·연관종목 등 | `PersonTop5Panel.module.css` 등 | 카드 리스트 — 기본 border 있음 |
 
-**CSS 스니펫 (평소 테두리 없음)**
+**공유 모듈:** `src/components/common/interactiveListRow.module.css` — `composes: ringRow` (행) / `ringChip` (칩)
 
-```css
-.item {
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
-  transition:
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
-}
-.item:focus {
-  outline: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .item:hover {
-    border-color: var(--color-primary);
-    box-shadow: var(--interactive-ring-hover);
-  }
-}
-.item:focus-visible {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--interactive-ring-focus);
-}
-```
+**CSS 스니펫** — 모듈에 정의되어 있음. 컴포넌트에서는 `composes: ringRow` 만 추가하고 레이아웃(`display`, `padding` 등)만 지정한다.
 
 ---
 
@@ -90,7 +69,7 @@
 | `:focus-visible` | `td` 배경 `primary 8%` mix, **링·테두리 없음** |
 | `:focus` (마우스 클릭 후) | 링 없음 (`outline: none`) |
 
-**적용 예:** `BuzzSurgeTop10Table`, `MyPageWatchlistTable`, `AdminStocksPage`
+**적용 예:** `MyPageWatchlistTable`, `AdminStocksPage` (`rowBase`)
 
 > 테이블에 행 `border-bottom` 구분선·항상 보이는 `border`를 넣지 않는다.
 
@@ -104,7 +83,15 @@
 
 | 적용 예 | 파일 |
 |---------|------|
-| 홈 관심종목 워치리스트 | `DashboardWatchlistTable.module.css` `.rowClickable` |
+| 홈 관심종목 워치리스트 | `DashboardWatchlistTable` |
+| 언급량 급등 TOP 10 | `BuzzSurgeTop10Table` |
+
+---
+
+### 메인 영역 제외 (인물 발언)
+
+중앙 **발언 타임라인**(`PersonStatementCard`, `personPageLayout` 피드)은 이 패턴을 쓰지 않는다.  
+사이드 **TOP5·연관 종목**만 `ringRow` / `ringChip`. 기간 토글(`PersonPanelRangeToggle`)은 칩 UI 유지.
 
 ---
 
@@ -184,6 +171,7 @@ tr[role='link']:focus-visible {
 | 토큰 | `src/styles/tokens.css` |
 | 테이블 공유 | `src/components/common/interactiveTableRow.module.css` (`rowBase` / `rowRing`) |
 | 링 테이블 (워치리스트) | `DashboardWatchlistTable.module.css` |
+| 링 행 공유 | `src/components/common/interactiveListRow.module.css` |
 | 링 행 (TOP3) | `src/components/dashboard/BuzzSurgeTop3.module.css` |
 | 링 행 (검색) | `src/components/common/TopNavSearchModal.module.css` |
 | 텍스트만 | `src/components/stock/StockNewsListItem.module.css` |
