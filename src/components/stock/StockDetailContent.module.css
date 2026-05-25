@@ -490,6 +490,7 @@
 }
 
 .peopleTimelineList {
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -503,12 +504,36 @@
   padding-bottom: var(--space-1);
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-border-strong) 70%, transparent) transparent;
+  /* md 아바타(2.5rem) 중앙 — 좌측 4rem 열 기준 */
+  --stock-person-timeline-rail: 2rem;
+  --stock-person-avatar-size: 2.5rem;
+  --stock-person-time-gap: var(--space-1);
+  --stock-person-time-line: calc(var(--font-size-sm) * var(--line-height-base));
+  --stock-person-rail-header: calc(
+    var(--stock-person-avatar-size) + var(--stock-person-time-gap) + var(--stock-person-time-line)
+  );
+  --timeline-line: 2px;
+  --timeline-line-color: var(--color-border-strong);
 }
 
 .peopleTimelineItem {
+  position: relative;
   scroll-margin-block: var(--space-3);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-default);
+  padding: var(--space-5) 0;
+}
+
+/* 시간 라벨 아래부터 다음 항목까지 세로축 (아바타·시간 구간 제외) */
+.peopleTimelineItem::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--stock-person-timeline-rail) - var(--timeline-line) / 2);
+  top: var(--stock-person-rail-header);
+  bottom: 0;
+  width: var(--timeline-line);
+  background: var(--timeline-line-color);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .peopleTimelineItem:first-child {
@@ -516,8 +541,15 @@
 }
 
 .peopleTimelineItem:last-child {
-  border-bottom: none;
   padding-bottom: 0;
+}
+
+.peopleTimelineItem:not(:last-child)::before {
+  bottom: calc(-1 * (var(--space-5) * 2 + var(--stock-person-rail-header)));
+}
+
+.peopleTimelineItem:last-child::before {
+  display: none;
 }
 
 .personTimelineItemLink {
@@ -525,7 +557,7 @@
   grid-template-columns: 4rem minmax(0, 1fr);
   grid-template-rows: auto auto;
   column-gap: var(--space-4);
-  row-gap: var(--space-2);
+  row-gap: 0;
   align-items: start;
   width: 100%;
   color: inherit;
@@ -547,13 +579,16 @@
   grid-column: 1;
   grid-row: 1;
   justify-self: center;
+  position: relative;
+  z-index: 1;
 }
 
 .personTimelineTime {
   grid-column: 1;
   grid-row: 2;
   justify-self: center;
-  align-self: center;
+  align-self: start;
+  margin-top: var(--stock-person-time-gap);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -598,7 +633,7 @@
   grid-column: 2;
   grid-row: 2;
   align-self: center;
-  margin: 0;
+  margin: var(--space-2) 0 0;
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--color-text-secondary);
