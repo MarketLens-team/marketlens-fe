@@ -23,6 +23,7 @@
 | `d18a64c` | 상세 가로 스텁을 `metaRow` 중앙 정렬·중앙 내부 스크롤 제거 |
 | `ac47f3b` | 맨 위로 버튼 종목 상세처럼 우측 하단 `fixed` |
 | `82cc87c` | 인물 트래커 → 상세 `statementId` 스크롤·초록 강조 (아래 §) |
+| _(연계 5/26)_ | [종목 타임라인·API·네비](./2026-05-26-feat-design-refresh-stock-person-integration.md) |
 
 ## 요약
 

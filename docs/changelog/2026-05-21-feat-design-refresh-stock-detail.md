@@ -23,6 +23,7 @@
 | `fc5ab81` | fix: 종목 상세 맨 위로 FAB·연관 종목 UI 조정 |
 | `f94ee82` | fix: 큰 화면 본문 너비·좌우 여백 조정 및 종목 상세 changelog |
 | `1851ed0` | style: 종목 상세 인물 발언 타임라인 높이·타이포 조정 |
+| _(이후 5/26)_ | [인물 타임라인 UI·API·포커스·네비](./2026-05-26-feat-design-refresh-stock-person-integration.md) (`ead8ffd`~`018d509`) |
 
 ## 요약
 
@@ -53,11 +54,12 @@
 
 | API | 용도 |
 |-----|------|
-| `GET /api/v1/persons/mentions/cursor` | 종목 코드·커서로 연관 발언 수집 (`fetchPersonStatementsForStockDetail`) |
+| ~~`GET /api/v1/persons/mentions/cursor`~~ | ~~`fetchPersonStatementsForStockDetail`~~ (5/26부터 **deprecated**) |
+| `GET /api/v1/stocks/{code}/related-person-statements` | 종목 연관 인물 발언 **5건** (`fetchStockRelatedPersonStatements`) — [5/26 changelog](./2026-05-26-feat-design-refresh-stock-person-integration.md) |
 | `GET /api/v1/stocks/{code}/related` | 연관 종목 (기존) |
 
-- `personClient.fetchPersonStatementsForStockDetail` — 커서 페이지를 돌며 연관 발언 **8건** 확보 시 중단
-- `stockMapper.mapStockPeopleTimeline` — 해당 종목 태그 필터, `statementSummary` → `summary`, 최대 8건
+- (구) `personClient.fetchPersonStatementsForStockDetail` — 커서 다회·최대 8건
+- (현) `stockClient.fetchStockRelatedPersonStatements` — OpenAPI `getRelatedPersonStatements`, `mapStockPeopleTimeline` limit 5
 
 #### 유틸 (신규·확장)
 
