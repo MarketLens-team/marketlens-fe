@@ -281,7 +281,10 @@ export async function fetchPersonSidebar(params?: FetchPersonMentionsParams): Pr
   )
 }
 
-/** 종목 상세 타임라인 — 커서로 연관 발언 충분히(또는 소진)까지 */
+/**
+ * @deprecated mock 전용. 실 API는 `fetchStockRelatedPersonStatements` (`GET …/related-person-statements`).
+ * 종목 상세 타임라인 — 커서로 연관 발언 충분히(또는 소진)까지
+ */
 export async function fetchPersonStatementsForStockDetail(stockCode: string): Promise<PersonStatementResponse[]> {
   const code = stockCode.trim()
   if (!code) return []

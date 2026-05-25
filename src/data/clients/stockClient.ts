@@ -7,6 +7,7 @@ import {
   mapStockDetailPage,
   mapStockPeopleTimeline,
 } from '../mappers/stockMapper'
+import type { PersonStatementResponse } from '../types/personApi'
 import { fetchPersonStatementsForStockDetail } from './personClient'
 import { fetchUnifiedSearch } from './searchClient'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
@@ -71,6 +72,30 @@ export interface FetchStockNewsFeedCursorParams {
 }
 
 const DEFAULT_NEWS_CURSOR_LIMIT = 20
+
+/** OpenAPI `getRelatedPersonStatements` — `GET /api/v1/stocks/{code}/related-person-statements` */
+const STOCK_RELATED_PERSON_STATEMENTS_LIMIT = 5
+
+export async function fetchStockRelatedPersonStatements(
+  stockCode: string,
+  limit = STOCK_RELATED_PERSON_STATEMENTS_LIMIT,
+): Promise<PersonStatementResponse[]> {
+  const code = stockCode.trim()
+  if (!code) return []
+
+  if (isMockDataSource()) {
+    await mockDelay(40)
+    const rows = await fetchPersonStatementsForStockDetail(code)
+    return rows.slice(0, limit)
+  }
+
+  const rows = await getApiData<PersonStatementResponse[]>(
+    stockPath(code, '/related-person-statements'),
+    '관련 인물 발언을 불러오지 못했습니다.',
+    { limit },
+  )
+  return rows ?? []
+}
 
 function mapNewsFeedItemResponseFromStockNews(
   items: StockDetail['recentNews'],
@@ -222,7 +247,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       stockPath(code, '/related'),
       '연관 종목을 불러오지 못했습니다.',
     ),
-    fetchPersonStatementsForStockDetail(code),
+    fetchStockRelatedPersonStatements(code),
   ])
 
   const relatedStocks = mapRelatedStocks(related, code)
@@ -243,7 +268,7 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
     { nextCursor: newsFeed.nextCursor, hasNext: newsFeed.hasNext },
     {
       relatedStocks: relatedWithPrices,
-      peopleTimeline: mapStockPeopleTimeline(mentions, code),
+      peopleTimeline: mapStockPeopleTimeline(mentions, code, STOCK_RELATED_PERSON_STATEMENTS_LIMIT),
     },
   )
 }

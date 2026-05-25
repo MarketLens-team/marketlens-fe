@@ -530,38 +530,42 @@ export function StockDetailContent({
                         className={styles.personTimelineItemLink}
                         aria-label={`${person.personName} 발언 상세`}
                       >
-                        <EntityAvatar
-                          className={styles.personTimelineAvatar}
-                          variant="person"
-                          size="md"
-                          name={person.personName}
-                          imageUrl={person.imageUrl}
-                        />
-                        <span
-                          className={clsx(
-                            styles.personTimelineTime,
-                            person.isFresh
-                              ? styles.personTimelineTimeFresh
-                              : styles.personTimelineTimeMuted,
-                          )}
-                        >
-                          {person.relativeLabel}
-                        </span>
-                        <p className={styles.personTimelineHeadline}>{person.summary}</p>
-                        <p className={styles.personTimelineMeta}>
-                          <span className={styles.personTimelineName}>{person.personName}</span>
-                          <span aria-hidden> · </span>
-                          <span>{person.role}</span>
+                        <div className={styles.personTimelineRail}>
+                          <EntityAvatar
+                            className={styles.personTimelineAvatar}
+                            variant="person"
+                            size="md"
+                            name={person.personName}
+                            imageUrl={person.imageUrl}
+                          />
                           <span
                             className={clsx(
-                              styles.personTimelineScore,
-                              styles.mono,
-                              pillClass(person.sentimentScore),
+                              styles.personTimelineTime,
+                              person.isFresh
+                                ? styles.personTimelineTimeFresh
+                                : styles.personTimelineTimeMuted,
                             )}
                           >
-                            {formatStockScore(person.sentimentScore)}
+                            {person.relativeLabel}
                           </span>
-                        </p>
+                        </div>
+                        <div className={styles.personTimelineBody}>
+                          <p className={styles.personTimelineHeadline}>{person.summary}</p>
+                          <p className={styles.personTimelineMeta}>
+                            <span className={styles.personTimelineName}>{person.personName}</span>
+                            <span aria-hidden> · </span>
+                            <span>{person.role}</span>
+                            <span
+                              className={clsx(
+                                styles.personTimelineScore,
+                                styles.mono,
+                                pillClass(person.sentimentScore),
+                              )}
+                            >
+                              {formatStockScore(person.sentimentScore)}
+                            </span>
+                          </p>
+                        </div>
                       </Link>
                     </li>
                   ))

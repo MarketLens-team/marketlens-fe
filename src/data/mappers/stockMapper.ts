@@ -169,7 +169,7 @@ const STOCK_PERSON_SUMMARY_MAX_LEN = 140
 export function mapStockPeopleTimeline(
   mentions: PersonStatementResponse[],
   stockCode: string,
-  limit = 8,
+  limit = 5,
 ): StockPersonTimelineItem[] {
   const target = normalizeStockCodeForMatch(stockCode)
   return mentions

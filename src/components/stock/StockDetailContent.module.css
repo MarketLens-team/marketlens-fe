@@ -504,13 +504,16 @@
   padding-bottom: var(--space-1);
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-border-strong) 70%, transparent) transparent;
-  /* md 아바타(2.5rem) 중앙 — 좌측 4rem 열 기준 */
-  --stock-person-timeline-rail: 2rem;
+  --stock-person-rail-width: 4rem;
+  /* md 아바타(2.5rem) 중앙 */
+  --stock-person-timeline-rail: calc(var(--stock-person-rail-width) / 2);
   --stock-person-avatar-size: 2.5rem;
   --stock-person-time-gap: var(--space-1);
-  --stock-person-time-line: calc(var(--font-size-sm) * var(--line-height-base));
+  --stock-person-time-line: calc(var(--font-size-base) * var(--line-height-base));
+  --stock-person-line-start-gap: 2px;
   --stock-person-rail-header: calc(
-    var(--stock-person-avatar-size) + var(--stock-person-time-gap) + var(--stock-person-time-line)
+    var(--stock-person-avatar-size) + var(--stock-person-time-gap) + var(--stock-person-time-line) +
+      var(--stock-person-line-start-gap)
   );
   --timeline-line: 2px;
   --timeline-line-color: var(--color-border-strong);
@@ -544,8 +547,18 @@
   padding-bottom: 0;
 }
 
-.peopleTimelineItem:not(:last-child)::before {
-  bottom: calc(-1 * (var(--space-5) * 2 + var(--stock-person-rail-header)));
+/* 항목 사이: 다음 카드 padding-top 구간만 연결 (아바타·시간 침범 없음) */
+.peopleTimelineItem:not(:first-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--stock-person-timeline-rail) - var(--timeline-line) / 2);
+  top: 0;
+  height: var(--space-5);
+  width: var(--timeline-line);
+  background: var(--timeline-line-color);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .peopleTimelineItem:last-child::before {
@@ -554,16 +567,34 @@
 
 .personTimelineItemLink {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-columns: var(--stock-person-rail-width) minmax(0, 1fr);
   column-gap: var(--space-4);
-  row-gap: 0;
   align-items: start;
   width: 100%;
   color: inherit;
   text-decoration: none;
   border-radius: var(--radius-sm);
   transition: color var(--duration-fast) ease;
+}
+
+.personTimelineRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--stock-person-time-gap);
+  width: var(--stock-person-rail-width);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background: var(--color-bg-card);
+}
+
+.personTimelineBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .personTimelineItemLink:focus {
@@ -576,23 +607,19 @@
 }
 
 .personTimelineAvatar {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: center;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
 .personTimelineTime {
-  grid-column: 1;
-  grid-row: 2;
-  justify-self: center;
-  align-self: start;
-  margin-top: var(--stock-person-time-gap);
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-base);
+  font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
 }
@@ -607,8 +634,6 @@
 }
 
 .personTimelineHeadline {
-  grid-column: 2;
-  grid-row: 1;
   margin: 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -630,10 +655,7 @@
 }
 
 .personTimelineMeta {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: center;
-  margin: var(--space-2) 0 0;
+  margin: 0;
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   color: var(--color-text-secondary);
