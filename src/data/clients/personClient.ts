@@ -3,7 +3,7 @@ import { appendNewsCursorParam } from '../../lib/encodeNewsCursor'
 import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
 import { api } from '../../services/api'
 import { mapPersonMentionsCursor, mergePersonTrackerPage } from '../mappers/personMapper'
-import { personStatementRelatesToStock } from '../mappers/stockMapper'
+import { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import { mockFrequentStockItems, mockPersonStatementsResponse, mockPersonTopResponse } from '../mocks/person.mock'
 import type { ApiEnvelope } from '../types/api'
 import type {

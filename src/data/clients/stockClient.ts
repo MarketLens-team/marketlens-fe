@@ -7,8 +7,9 @@ import {
   mapStockDetailPage,
   mapStockPeopleTimeline,
 } from '../mappers/stockMapper'
+import { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
+import { mockPersonStatementsResponse } from '../mocks/person.mock'
 import type { PersonStatementResponse } from '../types/personApi'
-import { fetchPersonStatementsForStockDetail } from './personClient'
 import { fetchUnifiedSearch } from './searchClient'
 import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
@@ -85,8 +86,9 @@ export async function fetchStockRelatedPersonStatements(
 
   if (isMockDataSource()) {
     await mockDelay(40)
-    const rows = await fetchPersonStatementsForStockDetail(code)
-    return rows.slice(0, limit)
+    return mockPersonStatementsResponse
+      .filter((row) => personStatementRelatesToStock(row, code))
+      .slice(0, limit)
   }
 
   const rows = await getApiData<PersonStatementResponse[]>(

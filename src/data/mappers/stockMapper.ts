@@ -1,8 +1,10 @@
 import { formatPersonTimelineTime } from '../../lib/formatRelativeTime'
 import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { truncateText } from '../../lib/truncateText'
-import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
+import { personStatementRelatesToStock as rowRelatesToStock } from '../../lib/personStatementStockMatch'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
+
+export { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import type { PersonStatementResponse } from '../types/personApi'
 import type {
   NewsFeedItemResponse,
@@ -133,21 +135,6 @@ export function mapNewsFeedItems(
   }))
 }
 
-/** `PersonStatementResponse[]` — 종목 연관 발언만 추림 (커서 API 수집 결과) */
-function mentionRelatesToStock(row: PersonStatementResponse, targetNormalized: string): boolean {
-  const tags = row.relatedStocks ?? []
-  if (tags.length === 0) return false
-  return tags.some((stock) => {
-    const raw = stock.stockCode ?? stock.code ?? ''
-    return normalizeStockCodeForMatch(raw) === targetNormalized
-  })
-}
-
-/** 종목 상세 등 — 발언이 해당 종목과 연관되는지 */
-export function personStatementRelatesToStock(row: PersonStatementResponse, stockCode: string): boolean {
-  return mentionRelatesToStock(row, normalizeStockCodeForMatch(stockCode))
-}
-
 /** OpenAPI `StockInfo.currentPrice` / `changeRate` → UI `StockPriceInfo` */
 export function mapStockPriceInfo(
   currentPrice: number | undefined,
@@ -171,9 +158,8 @@ export function mapStockPeopleTimeline(
   stockCode: string,
   limit = 5,
 ): StockPersonTimelineItem[] {
-  const target = normalizeStockCodeForMatch(stockCode)
   return mentions
-    .filter((row) => mentionRelatesToStock(row, target))
+    .filter((row) => rowRelatesToStock(row, stockCode))
     .slice(0, limit)
     .map((row) => {
       const { label, isFresh } = formatPersonTimelineTime(row.publishedAt)

@@ -1,3 +1,4 @@
+import { sanitizeClientErrorMessage } from '../lib/sanitizeClientErrorMessage'
 import { ERROR_CODE_MESSAGES } from './constants/errorCodes'
 
 export type ErrorPageVariant = '404' | '401' | '403' | '500' | 'network' | 'unknown'
@@ -93,7 +94,7 @@ export function appErrorPresetFromMessage(
   return {
     ...base,
     title: options?.title ?? base.title,
-    message,
+    message: sanitizeClientErrorMessage(message),
     ...(options?.omitHint ? { hint: undefined } : options?.hint !== undefined ? { hint: options.hint } : {}),
   }
 }
