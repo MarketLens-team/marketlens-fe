@@ -5,6 +5,7 @@ import AdminCrawlingPage from '../pages/AdminCrawlingPage'
 import AdminPage from '../pages/AdminPage'
 import AdminStocksPage from '../pages/AdminStocksPage'
 import BuzzAlertPage from '../pages/BuzzAlertPage'
+import NewsFeedPage from '../pages/NewsFeedPage'
 import DashboardPage from '../pages/DashboardPage'
 import DevActionButtonPage from '../pages/DevActionButtonPage'
 import DevPageLoadingPage from '../pages/DevPageLoadingPage'
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: '/person', element: <PersonTrackerPage /> },
       { path: '/person/:personId', element: <PersonDetailPage /> },
       { path: '/buzz', element: <BuzzAlertPage /> },
+      { path: '/news', element: <NewsFeedPage /> },
       {
         element: <PrivateRoute />,
         children: [

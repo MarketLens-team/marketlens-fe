@@ -17,6 +17,7 @@ import type {
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
 import type {
+  NewsRelatedStock,
   SentimentPolarity,
   StockDetail,
   StockMarketRow,
@@ -118,6 +119,18 @@ export function enrichRelatedStocksWithPrices(
   })
 }
 
+function mapNewsRelatedStocks(
+  rows: NewsFeedItemResponse['relatedStocks'],
+): NewsRelatedStock[] | undefined {
+  if (!rows?.length) return undefined
+  return rows.map((row) => ({
+    stockCode: row.stockCode,
+    stockName: row.stockName,
+    imageUrl: normalizeImageUrl(row.imageUrl),
+    relevanceScore: row.relevanceScore,
+  }))
+}
+
 export function mapNewsFeedItems(
   items: NewsFeedItemResponse[],
   highlightTerms?: string[],
@@ -134,6 +147,7 @@ export function mapNewsFeedItems(
     highlightTerms,
     imageUrl: normalizeImageUrl(item.imageUrl),
     url: item.originalLink || undefined,
+    relatedStocks: mapNewsRelatedStocks(item.relatedStocks),
   }))
 }
 

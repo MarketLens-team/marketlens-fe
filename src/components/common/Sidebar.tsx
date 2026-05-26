@@ -28,7 +28,7 @@ const navGroups = [
   },
   {
     title: 'ALERTS',
-    items: [{ label: '언급량 급등', to: '/buzz', end: true }],
+    items: [{ label: '전체 뉴스', to: '/news', end: true }],
   },
   {
     title: 'ADMIN',

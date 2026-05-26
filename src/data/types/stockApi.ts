@@ -79,6 +79,14 @@ export interface StockDirectoryResponse {
   }>
 }
 
+/** OpenAPI `NewsRelatedStock` — 기사별 관련 종목 태그 */
+export interface NewsRelatedStockResponse {
+  stockCode: string
+  stockName: string
+  imageUrl: string
+  relevanceScore: number
+}
+
 export interface NewsFeedItemResponse {
   id: number
   title: string
@@ -89,6 +97,7 @@ export interface NewsFeedItemResponse {
   imageUrl: string
   sentimentScore: number
   sentiment: string
+  relatedStocks?: NewsRelatedStockResponse[]
 }
 
 export interface NewsFeedResponse {

@@ -52,6 +52,14 @@ export interface StockSentimentBreakdown {
   finalScore: number
 }
 
+/** 전체 뉴스 피드 — 기사별 관련 종목 태그 */
+export interface NewsRelatedStock {
+  stockCode: string
+  stockName: string
+  imageUrl?: string | null
+  relevanceScore: number
+}
+
 export interface StockNewsItem {
   id: string
   title: string
@@ -67,6 +75,7 @@ export interface StockNewsItem {
   highlightTerms?: string[]
   imageUrl?: string | null
   url?: string
+  relatedStocks?: NewsRelatedStock[]
 }
 
 export interface StockRelatedStock {

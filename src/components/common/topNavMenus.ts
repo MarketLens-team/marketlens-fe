@@ -1,7 +1,7 @@
 export const TOP_MENUS = [
   { label: '홈', to: '/', end: true },
   { label: '종목', to: '/stock', end: false, matchStockSection: true },
-  { label: '언급량 급등', to: '/buzz', end: true },
+  { label: '전체 뉴스', to: '/news', end: true },
   { label: '인물 발언', to: '/person', end: true },
 ] as const
 
