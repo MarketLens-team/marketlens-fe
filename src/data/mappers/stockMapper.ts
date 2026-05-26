@@ -16,6 +16,8 @@ import type {
   StockPricesResponse,
   StockRankingItemResponse,
   StockRankingsResponse,
+  StockTodayNewsItemResponse,
+  StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
@@ -30,6 +32,8 @@ import type {
   StockOverviewRow,
   StockRankingItem,
   StockRankings,
+  StockTodayNews,
+  StockTodayNewsItem,
   StockNewsItem,
   StockPriceInfo,
   StockRelatedStock,
@@ -302,6 +306,29 @@ export function mapStockRankingsResponse(response: StockRankingsResponse): Stock
     topMentionCount: (response.topMentionCount ?? []).map(mapRankingItem),
     topSentimentScore: (response.topSentimentScore ?? []).map(mapRankingItem),
     topChangeRate: (response.topChangeRate ?? []).map(mapRankingItem),
+  }
+}
+
+function mapTodayNewsItem(item: StockTodayNewsItemResponse): StockTodayNewsItem {
+  return {
+    stockCode: item.stockCode,
+    stockName: item.stockName,
+    market: item.market,
+    sectorName: item.sectorName,
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    todayNewsCount: Math.max(0, item.todayNewsCount ?? 0),
+  }
+}
+
+/** `GET /api/v1/stocks/today-news` */
+export function mapStockTodayNewsResponse(response: StockTodayNewsResponse): StockTodayNews {
+  const items = (response.items ?? []).map(mapTodayNewsItem)
+  const summed = items.reduce((sum, row) => sum + row.todayNewsCount, 0)
+  return {
+    updatedAt: response.updatedAt,
+    totalTodayNewsCount:
+      response.totalTodayNewsCount > 0 ? response.totalTodayNewsCount : summed,
+    items,
   }
 }
 

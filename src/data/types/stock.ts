@@ -192,3 +192,19 @@ export interface StockRankings {
   topSentimentScore: StockRankingItem[]
   topChangeRate: StockRankingItem[]
 }
+
+/** 오늘 뉴스 건수 한 줄 — `GET /api/v1/stocks/today-news` */
+export interface StockTodayNewsItem {
+  stockCode: string
+  stockName: string
+  market: string
+  sectorName: string
+  imageUrl?: string | null
+  todayNewsCount: number
+}
+
+export interface StockTodayNews {
+  updatedAt: string
+  totalTodayNewsCount: number
+  items: StockTodayNewsItem[]
+}

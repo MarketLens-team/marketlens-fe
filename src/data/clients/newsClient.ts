@@ -25,6 +25,7 @@ export async function fetchNewsFeed(): Promise<NewsFeedItem[]> {
 }
 
 const ALL_FEED_PATH = '/api/v1/news/feed/all'
+const WATCHLIST_FEED_PATH = '/api/v1/news/feed/watchlist'
 const DEFAULT_NEWS_CURSOR_LIMIT = 20
 
 export interface FetchAllNewsFeedCursorParams {
@@ -106,31 +107,12 @@ function buildMockAllNewsFeedItems(): NewsFeedItemResponse[] {
   return items.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
 }
 
-/** OpenAPI `GET /api/v1/news/feed/all/cursor` */
-export async function fetchAllNewsFeedCursor(
-  params?: FetchAllNewsFeedCursorParams,
+async function fetchNewsFeedCursorPage(
+  basePath: string,
+  params: FetchAllNewsFeedCursorParams | undefined,
+  fallbackMessage: string,
 ): Promise<AllNewsFeedPage> {
   const limit = params?.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
-
-  if (isMockDataSource()) {
-    await mockDelay(100)
-    const all = buildMockAllNewsFeedItems()
-    const offset = parseMockNewsCursorOffset(params?.cursor)
-    let filtered = all
-    if (params?.sentiment && params.sentiment !== 'all') {
-      filtered = all.filter((item) => item.sentiment === params.sentiment)
-    }
-    const slice = filtered.slice(offset, offset + limit)
-    const nextOffset = offset + slice.length
-    const hasNext = nextOffset < filtered.length
-    return {
-      items: mapNewsFeedItems(slice),
-      pagination: {
-        nextCursor: hasNext ? buildMockNewsCursor(filtered, nextOffset) : null,
-        hasNext,
-      },
-    }
-  }
 
   const searchParams = new URLSearchParams()
   searchParams.set('limit', String(limit))
@@ -138,11 +120,11 @@ export async function fetchAllNewsFeedCursor(
   if (params?.cursor) appendNewsCursorParam(searchParams, params.cursor)
 
   const query = searchParams.toString()
-  const path = `${ALL_FEED_PATH}/cursor${query ? `?${query}` : ''}`
+  const path = `${basePath}/cursor${query ? `?${query}` : ''}`
 
   try {
     const { data } = await api.get<ApiEnvelope<NewsFeedCursorResponse>>(path)
-    const page = unwrapApiEnvelope(data, '전체 뉴스를 불러오지 못했습니다.')
+    const page = unwrapApiEnvelope(data, fallbackMessage)
     return {
       items: mapNewsFeedItems(page.items),
       pagination: {
@@ -151,6 +133,59 @@ export async function fetchAllNewsFeedCursor(
       },
     }
   } catch (error) {
-    throw new Error(getApiErrorMessage(error, '전체 뉴스를 불러오지 못했습니다.'))
+    throw new Error(getApiErrorMessage(error, fallbackMessage))
   }
+}
+
+function fetchMockNewsFeedCursorPage(
+  params: FetchAllNewsFeedCursorParams | undefined,
+  sourceItems: NewsFeedItemResponse[],
+): AllNewsFeedPage {
+  const limit = params?.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
+  const offset = parseMockNewsCursorOffset(params?.cursor)
+  let filtered = sourceItems
+  if (params?.sentiment && params.sentiment !== 'all') {
+    filtered = sourceItems.filter((item) => item.sentiment === params.sentiment)
+  }
+  const slice = filtered.slice(offset, offset + limit)
+  const nextOffset = offset + slice.length
+  const hasNext = nextOffset < filtered.length
+  return {
+    items: mapNewsFeedItems(slice),
+    pagination: {
+      nextCursor: hasNext ? buildMockNewsCursor(filtered, nextOffset) : null,
+      hasNext,
+    },
+  }
+}
+
+/** OpenAPI `GET /api/v1/news/feed/all/cursor` */
+export async function fetchAllNewsFeedCursor(
+  params?: FetchAllNewsFeedCursorParams,
+): Promise<AllNewsFeedPage> {
+  if (isMockDataSource()) {
+    await mockDelay(100)
+    return fetchMockNewsFeedCursorPage(params, buildMockAllNewsFeedItems())
+  }
+  return fetchNewsFeedCursorPage(ALL_FEED_PATH, params, '전체 뉴스를 불러오지 못했습니다.')
+}
+
+/** OpenAPI `GET /api/v1/news/feed/watchlist/cursor` */
+export async function fetchWatchlistNewsFeedCursor(
+  params?: FetchAllNewsFeedCursorParams,
+): Promise<AllNewsFeedPage> {
+  if (isMockDataSource()) {
+    await mockDelay(100)
+    const all = buildMockAllNewsFeedItems()
+    const watchlistCodes = new Set(['005930', '000660', '035420'])
+    const filtered = all.filter((item) =>
+      item.relatedStocks?.some((stock) => watchlistCodes.has(stock.stockCode)),
+    )
+    return fetchMockNewsFeedCursorPage(params, filtered)
+  }
+  return fetchNewsFeedCursorPage(
+    WATCHLIST_FEED_PATH,
+    params,
+    '관심종목 뉴스를 불러오지 못했습니다.',
+  )
 }

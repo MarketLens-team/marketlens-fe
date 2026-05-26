@@ -9,6 +9,7 @@ import {
   mapStockOverviewResponse,
   mapStockPeopleTimeline,
   mapStockRankingsResponse,
+  mapStockTodayNewsResponse,
 } from '../mappers/stockMapper'
 import { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import { mockPersonStatementsResponse } from '../mocks/person.mock'
@@ -29,6 +30,7 @@ import type {
   StockOverviewResponse,
   StockPricesResponse,
   StockRankingsResponse,
+  StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
@@ -39,6 +41,7 @@ import type {
   StockMarketRow,
   StockOverview,
   StockRankings,
+  StockTodayNews,
   StockSearchItem,
   TickerStockRow,
 } from '../types/stock'
@@ -48,6 +51,7 @@ import {
   buildMockStockOverview,
   buildMockStockRankings,
 } from '../mocks/stockOverview.mock'
+import { buildMockStockTodayNews } from '../mocks/stockTodayNews.mock'
 import { buildMockStockPricesForDirectory, buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
@@ -302,6 +306,19 @@ export async function fetchStockOverview(): Promise<StockOverview> {
     '종목 overview를 불러오지 못했습니다.',
   )
   return mapStockOverviewResponse(data)
+}
+
+/** OpenAPI `GET /api/v1/stocks/today-news` */
+export async function fetchStockTodayNews(): Promise<StockTodayNews> {
+  if (isMockDataSource()) {
+    await mockDelay(90)
+    return buildMockStockTodayNews()
+  }
+  const data = await getApiData<StockTodayNewsResponse>(
+    `${STOCKS_BASE}/today-news`,
+    '오늘 뉴스 순위를 불러오지 못했습니다.',
+  )
+  return mapStockTodayNewsResponse(data)
 }
 
 /** OpenAPI `GET /api/v1/stocks/rankings` */

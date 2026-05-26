@@ -211,3 +211,21 @@ export interface StockRankingsResponse {
   topSentimentScore: StockRankingItemResponse[]
   topChangeRate: StockRankingItemResponse[]
 }
+
+/** OpenAPI `Item` — `GET /api/v1/stocks/today-news` */
+export interface StockTodayNewsItemResponse {
+  stockCode: string
+  stockName: string
+  market: string
+  sectorCode: string
+  sectorName: string
+  imageUrl?: string
+  todayNewsCount: number
+}
+
+/** OpenAPI `StockTodayNewsResponse` — `GET /api/v1/stocks/today-news` */
+export interface StockTodayNewsResponse {
+  updatedAt: string
+  totalTodayNewsCount: number
+  items: StockTodayNewsItemResponse[]
+}
