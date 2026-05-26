@@ -127,3 +127,14 @@ export interface TickerStockRow {
   price: number
   changePercent: number
 }
+
+/** 전체 종목 시세 테이블 — `GET /api/v1/stocks/prices` + directory 병합 */
+export interface StockMarketRow {
+  code: string
+  name: string
+  market: string
+  sectorName: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+}

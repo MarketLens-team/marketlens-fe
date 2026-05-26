@@ -15,9 +15,11 @@ import type {
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
+import type { StockDirectory } from '../types/stockDirectory'
 import type {
   SentimentPolarity,
   StockDetail,
+  StockMarketRow,
   StockNewsItem,
   StockPriceInfo,
   StockRelatedStock,
@@ -225,6 +227,46 @@ export function mapStockDetailPage(
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
   }
+}
+
+/** directory + `GET /api/v1/stocks/prices` → 전체 종목 시세 테이블 */
+export function mapDirectoryToStockMarketRows(
+  directory: StockDirectory,
+  prices: StockPricesResponse,
+): StockMarketRow[] {
+  const priceByCode = new Map(prices.items.map((item) => [item.stockCode, item]))
+  const rows: StockMarketRow[] = []
+
+  for (const sector of directory.sectors) {
+    for (const stock of sector.stocks) {
+      const item = priceByCode.get(stock.code)
+      rows.push({
+        code: stock.code,
+        name: item?.stockName ?? stock.name,
+        market: item?.market ?? stock.market ?? '—',
+        sectorName: sector.sectorName,
+        imageUrl: normalizeImageUrl(item?.imageUrl) ?? null,
+        price: toFiniteNumber(item?.currentPrice),
+        changePercent: toFiniteNumber(item?.changeRate),
+      })
+    }
+  }
+
+  const knownCodes = new Set(rows.map((row) => row.code))
+  for (const item of prices.items) {
+    if (knownCodes.has(item.stockCode)) continue
+    rows.push({
+      code: item.stockCode,
+      name: item.stockName,
+      market: item.market ?? '—',
+      sectorName: '—',
+      imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+      price: toFiniteNumber(item.currentPrice),
+      changePercent: toFiniteNumber(item.changeRate),
+    })
+  }
+
+  return rows
 }
 
 /** `GET /api/v1/stocks/prices` → TickerBar 행 (지정 코드 순서 유지) */

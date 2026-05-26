@@ -3,6 +3,7 @@ import { api } from '../../services/api'
 import {
   mapNewsFeedItems,
   enrichRelatedStocksWithPrices,
+  mapDirectoryToStockMarketRows,
   mapRelatedStocks,
   mapStockDetailPage,
   mapStockPeopleTimeline,
@@ -29,10 +30,10 @@ import type {
   StockSummaryResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
-import type { StockDetail, StockSearchItem, TickerStockRow } from '../types/stock'
+import type { StockDetail, StockMarketRow, StockSearchItem, TickerStockRow } from '../types/stock'
 import { TICKER_STOCK_CODES } from '../constants/tickerStockCodes'
 import { mapStockPricesToTickerRows } from '../mappers/stockMapper'
-import { buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
+import { buildMockStockPricesForDirectory, buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
@@ -273,6 +274,21 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       peopleTimeline: mapStockPeopleTimeline(mentions, code, STOCK_RELATED_PERSON_STATEMENTS_LIMIT),
     },
   )
+}
+
+/** OpenAPI `GET /api/v1/stocks/prices` + directory — 전체 종목 시세 테이블 */
+export async function fetchStockMarketList(): Promise<StockMarketRow[]> {
+  const directory = await fetchStockDirectory()
+  if (isMockDataSource()) {
+    await mockDelay(120)
+    const prices = buildMockStockPricesForDirectory(directory)
+    return mapDirectoryToStockMarketRows(directory, prices)
+  }
+  const prices = await getApiData<StockPricesResponse>(
+    `${STOCKS_BASE}/prices`,
+    '종목 시세를 불러오지 못했습니다.',
+  )
+  return mapDirectoryToStockMarketRows(directory, prices)
 }
 
 /** OpenAPI `GET /api/v1/stocks/prices` — TickerBar 30종 */
