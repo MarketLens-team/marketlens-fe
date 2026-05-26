@@ -15,12 +15,14 @@ export default function StockDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const normalizedCode = stockCode?.trim() ?? ''
   const focusNewsId = searchParams.get('newsId')?.trim() || null
+  const scrollToFocusNews = searchParams.get('scrollToNews') !== '0'
   const { data, loading, error } = useStockDetail(stockCode)
 
   const clearFocusNews = useCallback(() => {
     if (!searchParams.has('newsId')) return
     const next = new URLSearchParams(searchParams)
     next.delete('newsId')
+    next.delete('scrollToNews')
     setSearchParams(next, { replace: true })
   }, [searchParams, setSearchParams])
 
@@ -51,6 +53,7 @@ export default function StockDetailPage() {
             key={data!.stock.code}
             data={data!}
             focusNewsId={focusNewsId}
+            scrollToFocusNews={scrollToFocusNews}
             onClearFocusNews={clearFocusNews}
           />
         ) : null}

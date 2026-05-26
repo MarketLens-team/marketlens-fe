@@ -1,18 +1,10 @@
-import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
-import { formatStockScore } from '../stock/stockScore'
 import { renderStockNewsTitle } from '../stock/stockNewsTitle'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import styles from './AllNewsListItem.module.css'
-
-function sentimentScoreClass(score: number) {
-  if (score > 0) return styles.scorePos
-  if (score < 0) return styles.scoreNeg
-  return styles.scoreNeu
-}
 
 export interface AllNewsListItemProps {
   item: StockNewsItem
@@ -36,9 +28,6 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
               ·
             </span>
             <span className={styles.source}>{item.source}</span>
-            <span className={clsx(styles.score, sentimentScoreClass(item.sentimentScore))}>
-              {formatStockScore(item.sentimentScore)}
-            </span>
           </div>
         </div>
         <h3 className={styles.title}>{renderStockNewsTitle(item.title, item.highlightTerms)}</h3>
@@ -49,7 +38,10 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
               <li key={stock.stockCode}>
                 <Link
                   className={styles.relatedStockLink}
-                  to={buildStockDetailPath(stock.stockCode)}
+                  to={buildStockDetailPath(stock.stockCode, {
+                    newsId: item.id,
+                    scrollToNews: false,
+                  })}
                   onClick={(event) => event.stopPropagation()}
                 >
                   <EntityAvatar

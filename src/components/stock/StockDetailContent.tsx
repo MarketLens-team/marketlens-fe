@@ -58,14 +58,17 @@ function filterNews(items: StockNewsItem[], filter: NewsFilter): StockNewsItem[]
 
 export interface StockDetailContentProps {
   data: StockDetail
-  /** 검색 등에서 진입 시 강조·스크롤할 뉴스 id */
+  /** 검색 등에서 진입 시 강조·(선택) 스크롤할 뉴스 id */
   focusNewsId?: string | null
+  /** `false`면 제목 초록 강조만, 스크롤 없음 (전체 뉴스 → 종목) */
+  scrollToFocusNews?: boolean
   onClearFocusNews?: () => void
 }
 
 export function StockDetailContent({
   data,
   focusNewsId = null,
+  scrollToFocusNews = true,
   onClearFocusNews,
 }: StockDetailContentProps) {
   const {
@@ -157,6 +160,11 @@ export function StockDetailContent({
     const hasTarget = displayNews.some((item) => item.id === focusNewsId)
     if (!hasTarget) return
 
+    if (!scrollToFocusNews) {
+      didScrollToNewsFocusRef.current = focusNewsId
+      return
+    }
+
     const frame = window.requestAnimationFrame(() => {
       const el = document.getElementById(`stock-news-${focusNewsId}`)
       if (!el) return
@@ -167,7 +175,7 @@ export function StockDetailContent({
       didScrollToNewsFocusRef.current = focusNewsId
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [focusNewsId, displayNews, loadingNewsFilter])
+  }, [focusNewsId, displayNews, loadingNewsFilter, scrollToFocusNews])
 
   useEffect(() => {
     if (!focusNewsId || !onClearFocusNews) return

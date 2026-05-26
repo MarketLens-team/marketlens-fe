@@ -87,25 +87,6 @@
   color: var(--color-text-secondary);
 }
 
-.score {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.scorePos {
-  color: var(--color-success);
-}
-
-.scoreNeg {
-  color: var(--color-danger);
-}
-
-.scoreNeu {
-  color: var(--color-text-secondary);
-}
-
 .title {
   margin: 0;
   font-size: var(--font-size-2xl);
