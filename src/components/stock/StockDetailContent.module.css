@@ -145,6 +145,10 @@
   color: var(--color-text-secondary);
 }
 
+.scoreNeutral {
+  color: var(--color-warning);
+}
+
 /* Middle grid */
 .middleGrid {
   display: grid;
@@ -715,6 +719,12 @@
 
 .pillNeu {
   color: var(--color-text-secondary);
+}
+
+.pillWarn {
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
 }
 
 /* Related stocks & people */

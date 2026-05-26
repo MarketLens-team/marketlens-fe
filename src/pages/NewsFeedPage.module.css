@@ -44,21 +44,6 @@
 .fabRail {
   grid-column: 3;
   grid-row: 1;
-  align-self: start;
-  position: sticky;
-  top: calc(
-    100vh - var(--layout-top-strip-height) - var(--layout-back-to-top-size) -
-      var(--layout-back-to-top-bottom) - var(--space-4)
-  );
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  min-height: var(--layout-back-to-top-size);
-  pointer-events: none;
-}
-
-.fabRail > * {
-  pointer-events: auto;
 }
 
 .tabs {
@@ -146,12 +131,4 @@
     max-width: 17.5rem;
   }
 
-  .fabRail {
-    position: fixed;
-    right: var(--main-pad-inline, var(--layout-main-pad-inline));
-    bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
-    width: var(--layout-back-to-top-size);
-    min-height: 0;
-    z-index: var(--z-dropdown);
-  }
 }

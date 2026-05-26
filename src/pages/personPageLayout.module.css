@@ -2,7 +2,11 @@
 
 .mainGrid {
   display: grid;
-  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr) minmax(14rem, 18rem);
+  grid-template-columns:
+    minmax(14rem, 18rem)
+    minmax(0, 1fr)
+    minmax(14rem, 18rem)
+    var(--layout-back-to-top-reserve);
   column-gap: var(--space-4);
   row-gap: 0;
   align-items: start;
@@ -12,12 +16,17 @@
 
 .mainGrid > .leftAside,
 .mainGrid > .feedCol,
-.mainGrid > .rightAside {
+.mainGrid > .rightAside,
+.mainGrid > .fabRail {
   grid-row: 1;
   align-self: start;
   min-width: 0;
   margin: 0;
   padding: 0;
+}
+
+.fabRail {
+  grid-column: 4;
 }
 
 .leftAside,
@@ -86,7 +95,11 @@
 
 @media (max-width: 1100px) {
   .mainGrid {
-    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr) minmax(11rem, 14rem);
+    grid-template-columns:
+      minmax(11rem, 14rem)
+      minmax(0, 1fr)
+      minmax(11rem, 14rem)
+      var(--layout-back-to-top-reserve);
     column-gap: var(--space-3);
   }
 }
@@ -98,8 +111,13 @@
 
   .mainGrid > .leftAside,
   .mainGrid > .feedCol,
-  .mainGrid > .rightAside {
+  .mainGrid > .rightAside,
+  .mainGrid > .fabRail {
     grid-row: auto;
+  }
+
+  .fabRail {
+    grid-column: 1;
   }
 
   .sideSticky {

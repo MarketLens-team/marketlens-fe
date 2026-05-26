@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { EmptyState } from '../components/common/EmptyState'
 import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
-import { BackToTopButton } from '../components/common/BackToTopButton'
+import { PageFabRail } from '../components/common/PageFabRail'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
@@ -142,9 +142,7 @@ export default function NewsFeedPage() {
             ) : null}
           </div>
 
-          <aside className={styles.fabRail} aria-label="페이지 탐색">
-            <BackToTopButton placement="inline" tooltipSide="left" />
-          </aside>
+          <PageFabRail className={styles.fabRail} />
         </div>
       </div>
     </Layout>

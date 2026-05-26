@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-/* 종목 상세 우측 컬럼 하단 (main 패딩 + bottomGrid 기준, 기본 레이아웃은 사이드바 없음) */
+/* 종목 상세 — 뉴스·인물 FAB 레일과 동일한 page-max 우측 정렬 */
 .wrapFixed {
   --main-inner: calc(100vw - 2 * var(--main-pad-inline, var(--layout-main-pad-inline)));
   --page-w: min(var(--layout-page-wide-cap, 120rem), var(--main-inner));
@@ -14,8 +14,8 @@
   bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-dropdown);
   left: calc(
-    var(--main-pad-inline, var(--layout-main-pad-inline)) + var(--page-w) - 8.25rem +
-      var(--back-to-top-offset-x, 0px)
+    var(--main-pad-inline, var(--layout-main-pad-inline)) + var(--page-w) -
+      calc(var(--layout-back-to-top-reserve) / 2) + var(--back-to-top-offset-x, 0px)
   );
   transform: translateX(-50%);
   pointer-events: none;

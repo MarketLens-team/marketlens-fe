@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 import { AppErrorPage } from '../components/common/AppErrorPage'
-import { BackToTopButton } from '../components/common/BackToTopButton'
+import { PageFabRail } from '../components/common/PageFabRail'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
@@ -122,10 +122,10 @@ export default function PersonTrackerPage() {
                 loading={stocksLoading || stocksRefreshing}
               />
             </aside>
+
+            {pageReady ? <PageFabRail className={gridStyles.fabRail} /> : null}
           </div>
         ) : null}
-
-        {pageReady ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
       </div>
     </Layout>
   )

@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
-import { BackToTopButton } from '../components/common/BackToTopButton'
+import { PageFabRail } from '../components/common/PageFabRail'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
@@ -212,10 +212,10 @@ export default function PersonDetailPage() {
                 loading={stocksLoading || stocksRefreshing}
               />
             </aside>
+
+            {pageReady ? <PageFabRail className={styles.fabRail} /> : null}
           </div>
         ) : null}
-
-        {pageReady ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
       </div>
     </Layout>
   )

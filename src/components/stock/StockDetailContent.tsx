@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
-import { Breadcrumb } from '../common/Breadcrumb'
 import { BackToTopButton } from '../common/BackToTopButton'
+import { Breadcrumb } from '../common/Breadcrumb'
 import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
 import { PillButton } from '../ui/PillButton'
@@ -32,16 +32,19 @@ type NewsFilter = 'all' | 'positive' | 'negative'
 /** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
 const RELATED_STOCKS_DISPLAY_MAX = 3
 
+/** stockSentimentZones 중립 구간(±20)과 동일 */
+const SENTIMENT_NEUTRAL_BAND = 20
+
 function scoreToneClass(score: number) {
-  if (score > 0) return styles.scoreUp
-  if (score < 0) return styles.scoreDown
-  return styles.scoreMuted
+  if (score > SENTIMENT_NEUTRAL_BAND) return styles.scoreUp
+  if (score < -SENTIMENT_NEUTRAL_BAND) return styles.scoreDown
+  return styles.scoreNeutral
 }
 
 function pillClass(score: number) {
-  if (score > 0) return styles.pillPos
-  if (score < 0) return styles.pillNeg
-  return styles.pillNeu
+  if (score > SENTIMENT_NEUTRAL_BAND) return styles.pillPos
+  if (score < -SENTIMENT_NEUTRAL_BAND) return styles.pillNeg
+  return styles.pillWarn
 }
 
 function barSegmentClass(polarity: SentimentPolarity) {
