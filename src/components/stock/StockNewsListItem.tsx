@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { memo } from 'react'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { formatStockScore, stockSentimentTone } from './stockScore'
@@ -17,7 +18,10 @@ export interface StockNewsListItemProps {
   highlighted?: boolean
 }
 
-export function StockNewsListItem({ item, highlighted = false }: StockNewsListItemProps) {
+export const StockNewsListItem = memo(function StockNewsListItem({
+  item,
+  highlighted = false,
+}: StockNewsListItemProps) {
   const timeBadge = formatNewsTimeBadge(item.publishedAt)
   const dateLabel = formatNewsDateLong(item.publishedAt)
   const body = (
@@ -53,7 +57,7 @@ export function StockNewsListItem({ item, highlighted = false }: StockNewsListIt
 
   if (item.url) {
     return (
-      <li id={`stock-news-${item.id}`} className={styles.item}>
+      <li id={`stock-news-${item.id}`} data-scroll-anchor-item className={styles.item}>
         <a className={linkClassName} href={item.url} target="_blank" rel="noopener noreferrer">
           {body}
         </a>
@@ -62,8 +66,8 @@ export function StockNewsListItem({ item, highlighted = false }: StockNewsListIt
   }
 
   return (
-    <li id={`stock-news-${item.id}`} className={styles.item}>
+    <li id={`stock-news-${item.id}`} data-scroll-anchor-item className={styles.item}>
       <div className={linkClassName}>{body}</div>
     </li>
   )
-}
+})

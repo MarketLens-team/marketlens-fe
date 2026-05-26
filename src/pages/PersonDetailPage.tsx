@@ -1,28 +1,28 @@
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { PageFabRail } from '../components/common/PageFabRail'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
-import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
-import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import { formatPersonRole } from '../components/person/personDisplay'
 import { Breadcrumb } from '../components/common/Breadcrumb'
 import { buildPersonTrackerPath } from '../lib/buildPersonRoute'
 import { isPersonDetailPageLoading } from '../lib/personPageLoading'
 import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
 import { EntityAvatar } from '../components/ui/EntityAvatar'
-import { personProfileFromMention } from '../data/mappers/personMapper'
 import type { PersonMentionsRange } from '../data/types/person'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../data/types/anchoredFeed'
 import { usePersonDetail } from '../hooks/usePersonDetail'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonMentionCount } from '../hooks/usePersonMentionCount'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
+import { useStablePersonProfile } from '../hooks/useStablePersonProfile'
+import { PersonDetailLeftSidebar, PersonDetailRightSidebar } from './PersonDetailSidebars'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonDetailPage.module.css'
 
@@ -44,7 +44,6 @@ export default function PersonDetailPage() {
 
   const {
     data: feed,
-    loading: feedLoading,
     isInitialLoading: feedInitialLoading,
     error: feedError,
     feedMode,
@@ -56,27 +55,22 @@ export default function PersonDetailPage() {
     loadMore,
     loadingMore,
     aroundError,
+    anchoredWarmComplete,
   } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE, focusStatementId)
-  const {
-    data: topPersons,
-    loading: topLoading,
-    refreshing: topRefreshing,
-  } = usePersonTopMentioned(topRange)
-  const {
-    data: frequentStocks,
-    loading: stocksLoading,
-    refreshing: stocksRefreshing,
-  } = usePersonFrequentStocks(stocksRange, personId ?? undefined)
-  const {
-    data: mentionCount,
-    loading: mentionCountLoading,
-    refreshing: mentionCountRefreshing,
-  } = usePersonMentionCount(personId ?? 0, PERSON_DETAIL_FEED_RANGE)
+  const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
+  const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(
+    stocksRange,
+    personId ?? undefined,
+  )
+  const { data: mentionCount, loading: mentionCountLoading } = usePersonMentionCount(
+    personId ?? 0,
+    PERSON_DETAIL_FEED_RANGE,
+  )
 
-  const profile = useMemo(() => {
-    const first = feed?.mentions[0]
-    return first ? personProfileFromMention(first) : null
-  }, [feed?.mentions])
+  const profile = useStablePersonProfile(personId ?? 0, feed?.mentions)
+  const topSidebarInitialLoading = topLoading && topPersons == null
+  const stocksSidebarInitialLoading = stocksLoading && frequentStocks == null
+  const profileMetaInitialLoading = mentionCountLoading && mentionCount == null
 
   const pageLoading = isPersonDetailPageLoading({
     feedError,
@@ -91,28 +85,28 @@ export default function PersonDetailPage() {
 
   const pageReady = !pageLoading && feed != null
 
-  const { isStatementFocused, focusScrollSettled } = usePersonStatementFocus(feed?.mentions ?? [], {
-    loading: feedInitialLoading || loadingAround,
+  const focusFeedReady = anchoredWarmComplete && !loadingAround
+
+  const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
+    loading: feedInitialLoading || !focusFeedReady,
   })
 
+  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+
   const topSentinelRef = useInfiniteScroll({
-    enabled:
-      feedMode === 'anchored' &&
-      Boolean(feed?.mentions.length) &&
-      personId != null &&
-      !loadingAround &&
-      focusScrollSettled,
+    enabled: feedMode === 'anchored' && Boolean(feed?.mentions.length) && personId != null && focusFeedReady,
     hasMore: hasMoreUp,
     loading: loadingNewer,
     direction: 'up',
-    requireUserScrollUp: true,
+    rootMargin: anchoredEdgeMargin,
     onLoadMore: () => void loadNewer(),
   })
 
   const bottomSentinelRef = useInfiniteScroll({
-    enabled: Boolean(feed?.mentions.length) && personId != null && !loadingAround,
+    enabled: Boolean(feed?.mentions.length) && personId != null && focusFeedReady,
     hasMore: hasMoreDown,
     loading: loadingMore,
+    rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
     onLoadMore: () => void loadMore(),
   })
 
@@ -153,21 +147,19 @@ export default function PersonDetailPage() {
 
         {pageReady ? (
           <div className={styles.detailGrid}>
-            <div className={styles.detailLeftSticky}>
-              <PersonTop5Panel
-                items={topPersons ?? []}
-                range={topRange}
-                onRangeChange={setTopRange}
-                loading={topLoading || topRefreshing}
-              />
-            </div>
+            <PersonDetailLeftSidebar
+              items={topPersons ?? []}
+              range={topRange}
+              onRangeChange={setTopRange}
+              showInitialLoading={topSidebarInitialLoading}
+            />
 
             <div className={styles.detailFeedCol}>
               <div className={styles.profileTimeline}>
                 <header
                   className={clsx(
                     styles.profileHeader,
-                    (mentionCountLoading || mentionCountRefreshing) && styles.profileHeaderRefreshing,
+                    profileMetaInitialLoading && styles.profileHeaderRefreshing,
                   )}
                 >
                   {profile ? (
@@ -192,19 +184,33 @@ export default function PersonDetailPage() {
                   </div>
                 </header>
 
-                <div className={styles.feedBody}>
+                <div
+                  className={clsx(
+                    styles.feedBody,
+                    loadingAround && focusStatementId && styles.feedBodyAnchoring,
+                  )}
+                >
                   {aroundError ? (
                     <p className={styles.feedError} role="alert">
                       {aroundError}
                     </p>
                   ) : null}
                   {loadingAround && focusStatementId ? (
+                    <div className={styles.feedAnchorSpinner} aria-busy="true">
+                      <FeedLoadingSpinner />
+                    </div>
+                  ) : null}
+                  {feed.mentions.length === 0 && loadingAround && focusStatementId ? (
                     <div className={styles.feedAroundLoading} aria-busy="true">
                       <FeedLoadingSpinner />
                     </div>
                   ) : (
                     <ul
-                      className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
+                      className={clsx(
+                        gridStyles.feedList,
+                        feedInitialLoading && styles.feedDimmed,
+                      )}
+                      data-anchored-feed-list
                       aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
                     >
                       {feedMode === 'anchored' && hasMoreUp ? (
@@ -216,6 +222,7 @@ export default function PersonDetailPage() {
                         <li
                           key={mention.id}
                           id={`person-statement-${mention.id}`}
+                          data-scroll-anchor-item
                           className={gridStyles.timelineItemDetail}
                         >
                           <PersonStatementCard
@@ -233,25 +240,25 @@ export default function PersonDetailPage() {
                   ) : null}
 
                   {hasMoreDown ? (
-                    <div ref={bottomSentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                    <div className={styles.feedScrollFoot} aria-busy={loadingMore || undefined}>
+                      <div ref={bottomSentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                      {loadingMore ? <FeedLoadingSpinner label="발언 더 불러오는 중" /> : null}
+                    </div>
                   ) : null}
                 </div>
               </div>
             </div>
 
-            <aside className={styles.detailRightPanel}>
-              <PersonFrequentStocksPanel
-                items={frequentStocks ?? []}
-                title="함께 언급된 종목"
-                range={stocksRange}
-                onRangeChange={setStocksRange}
-                loading={stocksLoading || stocksRefreshing}
-              />
-            </aside>
-
-            {pageReady ? <PageFabRail className={styles.fabRail} /> : null}
+            <PersonDetailRightSidebar
+              items={frequentStocks ?? []}
+              range={stocksRange}
+              onRangeChange={setStocksRange}
+              showInitialLoading={stocksSidebarInitialLoading}
+            />
           </div>
         ) : null}
+
+        {pageReady ? <PageFabRail /> : null}
       </div>
     </Layout>
   )

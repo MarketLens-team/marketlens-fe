@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { AiSummaryText } from '../common/AiSummaryText'
@@ -27,7 +28,7 @@ interface PersonStatementCardProps {
   highlighted?: boolean
 }
 
-export function PersonStatementCard({
+export const PersonStatementCard = memo(function PersonStatementCard({
   mention,
   variant = 'full',
   highlighted = false,
@@ -111,4 +112,4 @@ export function PersonStatementCard({
       </Link>
     </article>
   )
-}
+})

@@ -694,6 +694,26 @@
   list-style: none;
   margin: 0;
   padding: 0 var(--space-6) var(--space-4);
+  overflow-anchor: auto;
+}
+
+.newsListAnchoring {
+  position: relative;
+}
+
+.newsListAnchoring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-bg-card) 45%, transparent);
+}
+
+.newsScrollHead,
+.newsScrollFoot,
+.newsSentinel {
+  overflow-anchor: none;
 }
 
 .scorePill {
@@ -857,6 +877,18 @@
 .newsScrollFoot {
   position: relative;
   list-style: none;
+}
+
+.newsScrollFoot {
+  min-height: 3.5rem;
+}
+
+.newsLoadMoreSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  pointer-events: none;
 }
 
 .newsSentinel {

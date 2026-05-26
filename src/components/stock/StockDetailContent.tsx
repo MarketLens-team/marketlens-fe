@@ -14,7 +14,9 @@ import {
   fetchStockNewsFeedNewer,
   fetchStockNewsFeedOlder,
 } from '../../data/clients/stockClient'
+import { ANCHORED_FEED_PAGE_LIMIT } from '../../data/types/anchoredFeed'
 import type { NewsFeedAroundResponse } from '../../data/types/stockApi'
+import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../../data/types/anchoredFeed'
 import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
@@ -26,9 +28,9 @@ import type {
 } from '../../data/types/stock'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
+import { StockDetailPeoplePanel } from './StockDetailPeoplePanel'
 import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
-import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { buildStockListPath } from '../../lib/buildStockRoute'
 import { scrollStockNewsItemIntoView } from '../../lib/newsFeedFocus'
 import { formatPercent, formatPrice, formatStockScore, stockSentimentTone } from './stockScore'
@@ -100,7 +102,6 @@ export function StockDetailContent({
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
   const didScrollToNewsFocusRef = useRef<string | null>(null)
-  const [focusNewsScrollSettled, setFocusNewsScrollSettled] = useState(() => !focusNewsId)
   const useApiNewsFilter = !isMockDataSource()
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
 
@@ -120,7 +121,7 @@ export function StockDetailContent({
   const fetchNewsAround = useCallback(
     async (newsId: string) => {
       const page = await fetchStockNewsFeedAround(stock.code, newsId, {
-        limit: 20,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
         sentiment: newsSentimentParam,
       })
       return mapStockNewsAroundPage(page)
@@ -131,7 +132,7 @@ export function StockDetailContent({
   const fetchNewsNewer = useCallback(
     async (cursor: string) => {
       const page = await fetchStockNewsFeedNewer(stock.code, {
-        limit: 20,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
         cursor,
         sentiment: newsSentimentParam,
       })
@@ -143,7 +144,7 @@ export function StockDetailContent({
   const fetchNewsOlder = useCallback(
     async (cursor: string) => {
       const page = await fetchStockNewsFeedOlder(stock.code, {
-        limit: 20,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
         cursor,
         sentiment: newsSentimentParam,
       })
@@ -160,6 +161,7 @@ export function StockDetailContent({
     loadingNewer: loadingNewerNews,
     loadingOlder: loadingOlderNews,
     aroundError: anchoredNewsError,
+    anchoredWarmComplete,
     hasMoreDown,
     hasMoreUp,
     loadNewer: loadNewerNews,
@@ -176,6 +178,8 @@ export function StockDetailContent({
     fetchNewer: fetchNewsNewer,
     fetchOlder: fetchNewsOlder,
   })
+
+  const focusNewsFeedReady = anchoredWarmComplete && !loadingAnchoredNews
 
   useEffect(() => {
     setNewsFilter('all')
@@ -232,14 +236,10 @@ export function StockDetailContent({
   )
 
   useEffect(() => {
-    if (!focusNewsId) {
-      setFocusNewsScrollSettled(true)
-      return
-    }
+    if (!focusNewsId) return
     setNewsFilter('all')
     skipNewsFilterFetchRef.current = true
     didScrollToNewsFocusRef.current = null
-    setFocusNewsScrollSettled(false)
   }, [focusNewsId, stock.code])
 
   useEffect(() => {
@@ -301,7 +301,7 @@ export function StockDetailContent({
   ])
 
   useEffect(() => {
-    if (!focusNewsId || loadingNewsFilter || loadingAnchoredNews || !scrollToFocusNews) return
+    if (!focusNewsId || loadingNewsFilter || !focusNewsFeedReady || !scrollToFocusNews) return
     if (didScrollToNewsFocusRef.current === focusNewsId) return
 
     const hasTarget = displayNews.some(
@@ -317,7 +317,6 @@ export function StockDetailContent({
       if (cancelled) return
       if (scrollStockNewsItemIntoView(focusNewsId)) {
         didScrollToNewsFocusRef.current = focusNewsId
-        setFocusNewsScrollSettled(true)
         return
       }
       if (triesLeft > 0) {
@@ -334,7 +333,7 @@ export function StockDetailContent({
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [focusNewsId, displayNews, loadingNewsFilter, loadingAnchoredNews, scrollToFocusNews])
+  }, [focusNewsId, displayNews, loadingNewsFilter, focusNewsFeedReady, scrollToFocusNews])
 
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
@@ -360,16 +359,14 @@ export function StockDetailContent({
 
   const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
 
+  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+
   const newsTopSentinelRef = useInfiniteScroll({
-    enabled:
-      feedMode === 'anchored' &&
-      displayNews.length > 0 &&
-      !loadingAnchoredNews &&
-      focusNewsScrollSettled,
+    enabled: feedMode === 'anchored' && displayNews.length > 0 && focusNewsFeedReady,
     hasMore: hasMoreUp,
     loading: loadingNewerNews,
     direction: 'up',
-    requireUserScrollUp: true,
+    rootMargin: anchoredEdgeMargin,
     onLoadMore: () => {
       setLoadMoreError(null)
       void loadNewerNews().catch((e) => {
@@ -379,9 +376,10 @@ export function StockDetailContent({
   })
 
   const newsSentinelRef = useInfiniteScroll({
-    enabled: displayNews.length > 0 && !loadingAnchoredNews,
+    enabled: displayNews.length > 0 && focusNewsFeedReady,
     hasMore: hasMoreDown,
     loading: loadingMoreDown,
+    rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
     onLoadMore: () => void loadMoreNews(),
   })
 
@@ -617,12 +615,12 @@ export function StockDetailContent({
               ))}
             </div>
           </div>
-          {loadingNewsFilter || loadingAnchoredNews ? (
+          {loadingNewsFilter || (loadingAnchoredNews && focusNewsId && displayNews.length === 0) ? (
             <div className={styles.newsFilterLoading} aria-busy="true">
               <FeedLoadingSpinner />
             </div>
           ) : null}
-          {!loadingNewsFilter && !loadingAnchoredNews && displayNews.length === 0 ? (
+          {!loadingNewsFilter && displayNews.length === 0 && !loadingAnchoredNews ? (
             <EmptyState
               className={styles.emptyNews}
               title="뉴스가 없어요"
@@ -630,12 +628,17 @@ export function StockDetailContent({
               hint="전체 탭에서 다시 확인해 보세요."
             />
           ) : null}
-          {!loadingNewsFilter && !loadingAnchoredNews && displayNews.length > 0 ? (
-            <ul className={styles.newsList}>
+          {!loadingNewsFilter && displayNews.length > 0 ? (
+            <ul
+              className={clsx(
+                styles.newsList,
+                loadingAnchoredNews && focusNewsId && styles.newsListAnchoring,
+              )}
+              data-anchored-feed-list={feedMode === 'anchored' ? true : undefined}
+            >
               {feedMode === 'anchored' && hasMoreUp ? (
                 <li className={styles.newsScrollHead} aria-hidden>
                   <div ref={newsTopSentinelRef} className={styles.newsSentinel} />
-                  {loadingNewerNews ? <FeedLoadingSpinner /> : null}
                 </li>
               ) : null}
               {displayNews.map((item) => (
@@ -649,10 +652,12 @@ export function StockDetailContent({
               ))}
             </ul>
           ) : null}
-          {hasMoreDown && !loadingNewsFilter && !loadingAnchoredNews ? (
-            <div className={styles.newsScrollFoot}>
+          {hasMoreDown && !loadingNewsFilter ? (
+            <div className={styles.newsScrollFoot} aria-busy={loadingMoreDown || undefined}>
               <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
-              {loadingMoreDown ? <FeedLoadingSpinner /> : null}
+              <div className={styles.newsLoadMoreSlot} aria-hidden={!loadingMoreDown}>
+                {loadingMoreDown ? <FeedLoadingSpinner label="뉴스 더 불러오는 중" /> : null}
+              </div>
             </div>
           ) : null}
           {loadMoreError || anchoredNewsError ? (
@@ -662,76 +667,7 @@ export function StockDetailContent({
           ) : null}
         </section>
 
-        <div className={styles.rightStack}>
-          <section
-            className={clsx(styles.panel, styles.peoplePanel)}
-            aria-labelledby="stock-people-title"
-          >
-            <div className={styles.peoplePanelBody}>
-              <h2 id="stock-people-title" className={styles.peoplePanelTitle}>
-                최신 인물 발언 타임라인
-              </h2>
-              <ul className={styles.peopleTimelineList}>
-                {peopleTimeline.length === 0 ? (
-                  <li className={styles.peopleTimelineItem}>
-                    <EmptyState
-                      className={styles.emptyPeople}
-                      title="발언이 없어요"
-                      message="이 종목과 연결된 인물 발언이 아직 없습니다."
-                    />
-                  </li>
-                ) : (
-                  peopleTimeline.map((person) => (
-                    <li key={person.id} className={styles.peopleTimelineItem}>
-                      <Link
-                        to={buildPersonDetailPath(person.personId, { statementId: person.id })}
-                        className={styles.personTimelineItemLink}
-                        aria-label={`${person.personName} 발언 상세`}
-                      >
-                        <div className={styles.personTimelineRail}>
-                          <EntityAvatar
-                            className={styles.personTimelineAvatar}
-                            variant="person"
-                            size="md"
-                            name={person.personName}
-                            imageUrl={person.imageUrl}
-                          />
-                          <span
-                            className={clsx(
-                              styles.personTimelineTime,
-                              person.isFresh
-                                ? styles.personTimelineTimeFresh
-                                : styles.personTimelineTimeMuted,
-                            )}
-                          >
-                            {person.relativeLabel}
-                          </span>
-                        </div>
-                        <div className={styles.personTimelineBody}>
-                          <p className={styles.personTimelineHeadline}>{person.summary}</p>
-                          <p className={styles.personTimelineMeta}>
-                            <span className={styles.personTimelineName}>{person.personName}</span>
-                            <span aria-hidden> · </span>
-                            <span>{person.role}</span>
-                            <span
-                              className={clsx(
-                                styles.personTimelineScore,
-                                styles.mono,
-                                pillClass(person.sentimentScore),
-                              )}
-                            >
-                              {formatStockScore(person.sentimentScore)}
-                            </span>
-                          </p>
-                        </div>
-                      </Link>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          </section>
-        </div>
+        <StockDetailPeoplePanel peopleTimeline={peopleTimeline} pillClass={pillClass} />
       </div>
 
       <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />

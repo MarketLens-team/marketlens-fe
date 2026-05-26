@@ -4,8 +4,10 @@ const SCROLL_ROOT_SELECTOR = 'main[data-scroll-root]'
 
 /** 하단 무한 스크롤: 루트 뷰포트 아래 240px 전에 로드 트리거 */
 const DEFAULT_ROOT_MARGIN_DOWN = '0px 0px 240px 0px'
-/** 상단 무한 스크롤: 루트 뷰포트 위 240px 전에 로드 트리거 */
-const DEFAULT_ROOT_MARGIN_UP = '240px 0px 0px 0px'
+/** 상단: 끝에 닿기 전 살짝 미리 로드 */
+const DEFAULT_ROOT_MARGIN_UP = '120px 0px 0px 0px'
+/** 연속 트리거 방지 — 빠른 스크롤 시 레이아웃 튐 완화 */
+const DEFAULT_LOAD_COOLDOWN_MS = 400
 
 export function getLayoutScrollRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>(SCROLL_ROOT_SELECTOR)
@@ -20,12 +22,14 @@ interface UseInfiniteScrollOptions {
   /** `down`(기본): 하단 더보기 · `up`: 상단 더보기(anchored newer) */
   direction?: 'down' | 'up'
   /**
-   * `up` 전용 — 마운트 직후 센티넬 교차로 자동 로드하지 않음.
-   * 사용자가 스크롤 루트에서 위로 스크롤한 뒤에만 트리거.
+   * `up` 전용 — 프로그램 스크롤(포커스 점프)과 구분해
+   * 사용자 휠·터치로 위로 스크롤한 뒤에만 트리거.
    */
   requireUserScrollUp?: boolean
   /** 기본값: Layout `main[data-scroll-root]`. 인물 상세 등 내부 스크롤 영역에 지정 */
   scrollRootSelector?: string
+  /** 연속 loadMore 호출 최소 간격(ms) */
+  loadCooldownMs?: number
 }
 
 export function useInfiniteScroll({
@@ -37,13 +41,16 @@ export function useInfiniteScroll({
   direction = 'down',
   requireUserScrollUp = false,
   scrollRootSelector,
+  loadCooldownMs = DEFAULT_LOAD_COOLDOWN_MS,
 }: UseInfiniteScrollOptions) {
   const resolvedRootMargin =
     rootMargin ?? (direction === 'up' ? DEFAULT_ROOT_MARGIN_UP : DEFAULT_ROOT_MARGIN_DOWN)
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null)
   const onLoadMoreRef = useRef(onLoadMore)
   const userScrolledUpRef = useRef(false)
-  const lastScrollTopRef = useRef(0)
+  const awaitingSentinelExitRef = useRef(false)
+  const lastLoadStartedAtRef = useRef(0)
+  const touchStartYRef = useRef(0)
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
@@ -51,8 +58,16 @@ export function useInfiniteScroll({
 
   useEffect(() => {
     userScrolledUpRef.current = false
-    lastScrollTopRef.current = 0
+    awaitingSentinelExitRef.current = false
+    lastLoadStartedAtRef.current = 0
+    touchStartYRef.current = 0
   }, [enabled, requireUserScrollUp, direction])
+
+  useEffect(() => {
+    if (!loading) {
+      awaitingSentinelExitRef.current = false
+    }
+  }, [loading])
 
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     setSentinelEl(node)
@@ -66,18 +81,27 @@ export function useInfiniteScroll({
       : getLayoutScrollRoot()
     if (!root) return
 
-    lastScrollTopRef.current = root.scrollTop
-
-    const onScroll = () => {
-      const scrollTop = root.scrollTop
-      if (scrollTop < lastScrollTopRef.current - 8) {
-        userScrolledUpRef.current = true
-      }
-      lastScrollTopRef.current = scrollTop
+    const onWheel = (event: WheelEvent) => {
+      if (event.deltaY < 0) userScrolledUpRef.current = true
     }
 
-    root.addEventListener('scroll', onScroll, { passive: true })
-    return () => root.removeEventListener('scroll', onScroll)
+    const onTouchStart = (event: TouchEvent) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? 0
+    }
+
+    const onTouchMove = (event: TouchEvent) => {
+      const y = event.touches[0]?.clientY ?? 0
+      if (y > touchStartYRef.current + 12) userScrolledUpRef.current = true
+    }
+
+    root.addEventListener('wheel', onWheel, { passive: true })
+    root.addEventListener('touchstart', onTouchStart, { passive: true })
+    root.addEventListener('touchmove', onTouchMove, { passive: true })
+    return () => {
+      root.removeEventListener('wheel', onWheel)
+      root.removeEventListener('touchstart', onTouchStart)
+      root.removeEventListener('touchmove', onTouchMove)
+    }
   }, [enabled, requireUserScrollUp, direction, scrollRootSelector])
 
   useEffect(() => {
@@ -89,9 +113,20 @@ export function useInfiniteScroll({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries[0]?.isIntersecting) return
+        const intersecting = entries[0]?.isIntersecting ?? false
+        if (!intersecting) {
+          awaitingSentinelExitRef.current = false
+          return
+        }
+        if (awaitingSentinelExitRef.current) return
         if (!hasMore || loading) return
         if (requireUserScrollUp && direction === 'up' && !userScrolledUpRef.current) return
+
+        const now = Date.now()
+        if (now - lastLoadStartedAtRef.current < loadCooldownMs) return
+
+        awaitingSentinelExitRef.current = true
+        lastLoadStartedAtRef.current = now
         onLoadMoreRef.current()
       },
       { root, rootMargin: resolvedRootMargin, threshold: 0 },
@@ -108,6 +143,7 @@ export function useInfiniteScroll({
     sentinelEl,
     requireUserScrollUp,
     direction,
+    loadCooldownMs,
   ])
 
   return sentinelRef

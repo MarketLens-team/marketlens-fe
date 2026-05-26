@@ -1,24 +1,24 @@
-import clsx from 'clsx'
 import { BackToTopButton } from './BackToTopButton'
-import styles from './PageFabRail.module.css'
 
 interface PageFabRailProps {
   className?: string
   stockDetailMarker?: boolean
+  scrollRootSelector?: string
 }
 
-/** 뉴스·인물·종목 공통 — 우측 FAB 레일에 맨 위로 버튼 */
-export function PageFabRail({ className, stockDetailMarker }: PageFabRailProps) {
+/** 맨 위로 — 종목 상세와 동일하게 viewport 고정 (그리드 sticky 사용 안 함) */
+export function PageFabRail({
+  className,
+  stockDetailMarker,
+  scrollRootSelector,
+}: PageFabRailProps) {
   return (
-    <aside
-      className={clsx(styles.rail, styles.railMobileFixed, className)}
-      aria-label="페이지 탐색"
-    >
-      <BackToTopButton
-        placement="inline"
-        tooltipSide="left"
-        stockDetailMarker={stockDetailMarker}
-      />
-    </aside>
+    <BackToTopButton
+      placement="fixed"
+      tooltipSide="left"
+      className={className}
+      stockDetailMarker={stockDetailMarker}
+      scrollRootSelector={scrollRootSelector}
+    />
   )
 }

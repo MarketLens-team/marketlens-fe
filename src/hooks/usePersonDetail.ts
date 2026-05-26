@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import {
   fetchPersonMentionsAround,
   fetchPersonMentionsCursorByPersonId,
@@ -7,6 +7,7 @@ import {
   fetchPersonMentionsOlder,
 } from '../data/clients/personClient'
 import { mapPersonMentionsAround, mapPersonStatement } from '../data/mappers/personMapper'
+import { ANCHORED_FEED_PAGE_LIMIT } from '../data/types/anchoredFeed'
 import type { PersonMentionsFeedData, PersonMentionsRange } from '../data/types/person'
 import { useAnchoredFeed } from './useAnchoredFeed'
 import { useAsyncData } from './useAsyncData'
@@ -45,7 +46,7 @@ export function usePersonDetail(
     async (statementId: string) => {
       const page = await fetchPersonMentionsAround(personId, statementId, {
         range: feedRange,
-        limit: PERSON_FEED_PAGE_LIMIT,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
       })
       const mapped = mapPersonMentionsAround(page)
       return { items: mapped.mentions, pagination: mapped.anchoredPagination }
@@ -58,7 +59,7 @@ export function usePersonDetail(
       const page = await fetchPersonMentionsNewer(personId, {
         cursor,
         range: feedRange,
-        limit: PERSON_FEED_PAGE_LIMIT,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
       })
       const mapped = mapPersonMentionsAround(page)
       return { items: mapped.mentions, pagination: mapped.anchoredPagination }
@@ -71,7 +72,7 @@ export function usePersonDetail(
       const page = await fetchPersonMentionsOlder(personId, {
         cursor,
         range: feedRange,
-        limit: PERSON_FEED_PAGE_LIMIT,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
       })
       const mapped = mapPersonMentionsAround(page)
       return { items: mapped.mentions, pagination: mapped.anchoredPagination }
@@ -87,6 +88,7 @@ export function usePersonDetail(
     loadingNewer,
     loadingOlder,
     aroundError,
+    anchoredWarmComplete,
     hasMoreDown,
     hasMoreUp,
     loadNewer,
@@ -112,28 +114,35 @@ export function usePersonDetail(
     }
   }, [asyncResult.data, mentionItems, latestPagination, feedMode])
 
+  const [loadingLatestMore, setLoadingLatestMore] = useState(false)
+
   const loadMore = useCallback(async () => {
     if (feedMode === 'anchored') {
       await loadOlder()
       return
     }
 
-    if (!latestPagination.hasNext || !latestPagination.nextCursor || loadingOlder) return
+    if (!latestPagination.hasNext || !latestPagination.nextCursor || loadingLatestMore) return
 
-    const chunk = await fetchPersonMentionsCursorByPersonId(personId, {
-      cursor: latestPagination.nextCursor,
-      limit: PERSON_FEED_PAGE_LIMIT,
-      range: feedRange,
-    })
-    appendLatestItems(chunk.items.map(mapPersonStatement), {
-      nextCursor: chunk.nextCursor ?? null,
-      hasNext: chunk.hasNext ?? false,
-    })
+    setLoadingLatestMore(true)
+    try {
+      const chunk = await fetchPersonMentionsCursorByPersonId(personId, {
+        cursor: latestPagination.nextCursor,
+        limit: PERSON_FEED_PAGE_LIMIT,
+        range: feedRange,
+      })
+      appendLatestItems(chunk.items.map(mapPersonStatement), {
+        nextCursor: chunk.nextCursor ?? null,
+        hasNext: chunk.hasNext ?? false,
+      })
+    } finally {
+      setLoadingLatestMore(false)
+    }
   }, [
     feedMode,
     loadOlder,
     latestPagination,
-    loadingOlder,
+    loadingLatestMore,
     personId,
     feedRange,
     appendLatestItems,
@@ -151,7 +160,8 @@ export function usePersonDetail(
     loadingNewer,
     loadNewer,
     loadMore,
-    loadingMore: loadingOlder,
+    loadingMore: feedMode === 'anchored' ? loadingOlder : loadingLatestMore,
     aroundError,
+    anchoredWarmComplete,
   }
 }

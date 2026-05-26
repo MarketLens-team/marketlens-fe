@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { getLayoutScrollRoot } from './useInfiniteScroll'
 
 interface MentionWithId {
   id: string
@@ -12,7 +13,7 @@ function personStatementElementId(statementId: string) {
   return `person-statement-${statementId}`
 }
 
-/** Layout `.main[data-scroll-root]` 기준으로 발언 카드로 스크롤 */
+/** 피드 전용 스크롤 또는 Layout main 기준으로 발언 카드로 스크롤 */
 function scrollPersonStatementIntoView(
   statementId: string,
   behavior: ScrollBehavior = 'instant',
@@ -20,7 +21,7 @@ function scrollPersonStatementIntoView(
   const el = document.getElementById(personStatementElementId(statementId))
   if (!el) return false
 
-  const scrollRoot = document.querySelector<HTMLElement>('[data-scroll-root]')
+  const scrollRoot = getLayoutScrollRoot()
   if (scrollRoot) {
     const rootRect = scrollRoot.getBoundingClientRect()
     const elRect = el.getBoundingClientRect()

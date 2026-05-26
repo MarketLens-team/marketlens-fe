@@ -3,10 +3,9 @@ import { useState } from 'react'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { PageFabRail } from '../components/common/PageFabRail'
 import { Layout } from '../components/common/Layout'
+import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
 import { PageFetchError } from '../components/common/PageFetchError'
-import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
-import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import type { PersonMentionsRange } from '../data/types/person'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { isPersonTrackerPageLoading } from '../lib/personPageLoading'
@@ -15,6 +14,7 @@ import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonTopMentioned } from '../hooks/usePersonTopMentioned'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { usePersonTracker } from '../hooks/usePersonTracker'
+import { PersonTrackerLeftSidebar, PersonTrackerRightSidebar } from './PersonDetailSidebars'
 import gridStyles from './personPageLayout.module.css'
 import styles from './PersonTrackerPage.module.css'
 
@@ -25,22 +25,15 @@ export default function PersonTrackerPage() {
 
   const {
     data: feed,
-    loading: feedLoading,
     isInitialLoading: feedInitialLoading,
     error: feedError,
     loadMoreMentions,
     loadingMoreMentions,
   } = usePersonTracker(feedRange)
-  const {
-    data: topPersons,
-    loading: topLoading,
-    refreshing: topRefreshing,
-  } = usePersonTopMentioned(topRange)
-  const {
-    data: frequentStocks,
-    loading: stocksLoading,
-    refreshing: stocksRefreshing,
-  } = usePersonFrequentStocks(stocksRange)
+  const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
+  const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(stocksRange)
+  const topSidebarInitialLoading = topLoading && topPersons == null
+  const stocksSidebarInitialLoading = stocksLoading && frequentStocks == null
 
   const pageLoading = isPersonTrackerPageLoading({
     feedError,
@@ -79,21 +72,20 @@ export default function PersonTrackerPage() {
 
         {pageReady ? (
           <div className={gridStyles.mainGrid}>
-            <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
-              <PersonTop5Panel
-                items={topPersons ?? []}
-                range={topRange}
-                onRangeChange={setTopRange}
-                loading={topLoading || topRefreshing}
-              />
-            </aside>
+            <PersonTrackerLeftSidebar
+              items={topPersons ?? []}
+              range={topRange}
+              onRangeChange={setTopRange}
+              showInitialLoading={topSidebarInitialLoading}
+            />
 
             <div className={gridStyles.feedCol}>
-              <ul className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}>
+              <ul className={clsx(gridStyles.feedList, feedInitialLoading && styles.feedDimmed)}>
                 {feed.mentions.map((mention) => (
                   <li
                     key={mention.id}
                     id={`person-statement-${mention.id}`}
+                    data-scroll-anchor-item
                     className={gridStyles.timelineItem}
                   >
                     <PersonStatementCard
@@ -107,22 +99,25 @@ export default function PersonTrackerPage() {
                 <p className={styles.empty}>표시할 인물 발언이 없습니다</p>
               ) : null}
               {infiniteEnabled ? (
-                <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                <div className={styles.feedScrollFoot} aria-busy={loadingMoreMentions || undefined}>
+                  <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                  {loadingMoreMentions ? (
+                    <FeedLoadingSpinner label="발언 더 불러오는 중" />
+                  ) : null}
+                </div>
               ) : null}
             </div>
 
-            <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
-              <PersonFrequentStocksPanel
-                items={frequentStocks ?? []}
-                range={stocksRange}
-                onRangeChange={setStocksRange}
-                loading={stocksLoading || stocksRefreshing}
-              />
-            </aside>
-
-            {pageReady ? <PageFabRail className={gridStyles.fabRail} /> : null}
+            <PersonTrackerRightSidebar
+              items={frequentStocks ?? []}
+              range={stocksRange}
+              onRangeChange={setStocksRange}
+              showInitialLoading={stocksSidebarInitialLoading}
+            />
           </div>
         ) : null}
+
+        {pageReady ? <PageFabRail /> : null}
       </div>
     </Layout>
   )

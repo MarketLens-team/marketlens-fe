@@ -142,8 +142,8 @@ export default function NewsFeedPage() {
             ) : null}
           </div>
 
-          <PageFabRail className={styles.fabRail} />
         </div>
+        <PageFabRail />
       </div>
     </Layout>
   )
