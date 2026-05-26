@@ -52,24 +52,23 @@ export default function NewsFeedPage() {
         <PageHeader
           title="전체 뉴스"
           description="시장 전반 뉴스를 감성 점수와 관련 종목 태그와 함께 확인합니다."
+          actions={
+            <div className={styles.filterGroup} role="group" aria-label="뉴스 감성 필터">
+              {FILTERS.map(({ key, label }) => (
+                <PillButton
+                  key={key}
+                  variant="secondary"
+                  compact
+                  active={filter === key}
+                  aria-pressed={filter === key}
+                  onClick={() => setFilter(key)}
+                >
+                  {label}
+                </PillButton>
+              ))}
+            </div>
+          }
         />
-
-        <div className={styles.toolbar}>
-          <div className={styles.filterGroup} role="group" aria-label="뉴스 감성 필터">
-            {FILTERS.map(({ key, label }) => (
-              <PillButton
-                key={key}
-                variant="secondary"
-                compact
-                active={filter === key}
-                aria-pressed={filter === key}
-                onClick={() => setFilter(key)}
-              >
-                {label}
-              </PillButton>
-            ))}
-          </div>
-        </div>
 
         {error ? (
           <PageFetchError title="전체 뉴스를 불러오지 못했어요" message={error} />

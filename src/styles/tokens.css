@@ -76,6 +76,8 @@
   /* 본문: .main 안에서는 100%로 채움. 초광폭만 --layout-page-wide-cap 으로 상한 */
   --layout-page-wide-cap: 120rem;
   --layout-page-max: min(var(--layout-page-wide-cap), 100%);
+  /* 긴 본문·뉴스 피드 — 초광폭에서 시선 이동 거리 제한 (~50rem ≈ 800px) */
+  --layout-page-read-max: 50rem;
   --layout-sidebar-width: 196px; /* Layout .sidebar */
   --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
   --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
