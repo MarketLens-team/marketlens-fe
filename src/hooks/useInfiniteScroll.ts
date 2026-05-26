@@ -63,12 +63,6 @@ export function useInfiniteScroll({
     touchStartYRef.current = 0
   }, [enabled, requireUserScrollUp, direction])
 
-  useEffect(() => {
-    if (!loading) {
-      awaitingSentinelExitRef.current = false
-    }
-  }, [loading])
-
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     setSentinelEl(node)
   }, [])
@@ -125,8 +119,10 @@ export function useInfiniteScroll({
         const now = Date.now()
         if (now - lastLoadStartedAtRef.current < loadCooldownMs) return
 
-        awaitingSentinelExitRef.current = true
         lastLoadStartedAtRef.current = now
+        if (direction === 'up') {
+          awaitingSentinelExitRef.current = true
+        }
         onLoadMoreRef.current()
       },
       { root, rootMargin: resolvedRootMargin, threshold: 0 },

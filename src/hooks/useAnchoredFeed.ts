@@ -8,7 +8,7 @@ import {
   type FeedMode,
 } from '../data/types/anchoredFeed'
 import { shouldWarmAnchoredViewport } from '../lib/anchoredFeedMeasure'
-import { mergeFeedItemsById } from '../lib/mergeFeedItems'
+import { mergeFeedItemsById, mergeFeedItemsWithCount } from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
   schedulePrependScrollRestore,
@@ -138,16 +138,21 @@ export function useAnchoredFeed<TItem extends { id: string }>({
         return 0
       }
 
-      setItems((prev) => mergeFeedItemsById(prev, page.items, 'prepend'))
+      let added = 0
+      setItems((prev) => {
+        const merged = mergeFeedItemsWithCount(prev, page.items, 'prepend')
+        added = merged.added
+        return merged.items
+      })
       setAnchoredPagination(page.pagination)
       anchoredPaginationRef.current = page.pagination
 
       const scrollRoot = getLayoutScrollRoot()
-      if (scrollRoot && scrollSnapshot) {
+      if (scrollRoot && scrollSnapshot && added > 0) {
         schedulePrependScrollRestore(scrollRoot, scrollSnapshot)
       }
 
-      return page.items.length
+      return added
     },
     [],
   )
@@ -160,17 +165,24 @@ export function useAnchoredFeed<TItem extends { id: string }>({
       return 0
     }
 
-    setItems((prev) => mergeFeedItemsById(prev, page.items, 'append'))
+    let added = 0
+    setItems((prev) => {
+      const merged = mergeFeedItemsWithCount(prev, page.items, 'append')
+      added = merged.added
+      return merged.items
+    })
     setAnchoredPagination(page.pagination)
     anchoredPaginationRef.current = page.pagination
 
     if (!page.pagination.hasOlder) {
       lastOlderCursorFetchedRef.current = page.pagination.olderCursor
+    } else if (added === 0) {
+      lastOlderCursorFetchedRef.current = page.pagination.olderCursor ?? null
     } else {
       lastOlderCursorFetchedRef.current = null
     }
 
-    return page.items.length
+    return added
   }, [])
 
   const prefetchNewerPages = useCallback(
@@ -366,6 +378,7 @@ export function useAnchoredFeed<TItem extends { id: string }>({
       const page = await fetchNewerRef.current(cursor)
       const batchSize = applyNewerPage(page, scrollSnapshot)
       if (
+        batchSize > 0 &&
         shouldPrefetchNextPage(batchSize, pageLimit, anchoredPaginationRef.current.hasNewer)
       ) {
         await prefetchNewerPages(anchoredPaginationRef.current, null)
@@ -389,6 +402,7 @@ export function useAnchoredFeed<TItem extends { id: string }>({
       const page = await fetchOlderRef.current(cursor)
       const batchSize = applyOlderPage(page)
       if (
+        batchSize > 0 &&
         shouldPrefetchNextPage(batchSize, pageLimit, anchoredPaginationRef.current.hasOlder)
       ) {
         await prefetchOlderPages(anchoredPaginationRef.current)
