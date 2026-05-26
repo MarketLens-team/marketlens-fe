@@ -5,17 +5,21 @@ import {
   type AnchoredFeedPagination,
   type FeedMode,
 } from '../data/types/anchoredFeed'
-import { anchoredCursorsEqual } from '../lib/anchoredFeedCursor'
+import {
+  alignNewerEdgeToListTop,
+  anchoredCursorsEqual,
+} from '../lib/anchoredFeedCursor'
 import {
   mergeAnchoredFeedItemsWithCount,
   mergeFeedItemsById,
+  sortFeedItemsByPublishedAtDesc,
 } from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
   schedulePrependScrollRestore,
   type PrependScrollSnapshot,
 } from '../lib/preserveScrollOnPrepend'
-import { getLayoutScrollRoot } from './useInfiniteScroll'
+import { resolveScrollRoot } from './useInfiniteScroll'
 
 /** newer 스피너가 너무 짧게 깜빡이지 않도록 최소 표시 시간 */
 const ANCHORED_NEWER_LOAD_MIN_MS = 320
@@ -48,6 +52,8 @@ interface UseAnchoredFeedOptions<TItem> {
   fetchAround: (anchorId: string) => Promise<AnchoredFeedPage<TItem>>
   fetchNewer: (cursor: string) => Promise<AnchoredFeedPage<TItem>>
   fetchOlder: (cursor: string) => Promise<AnchoredFeedPage<TItem>>
+  /** prepend 스크롤 복원·newer 캡처용 (기본: Layout main) */
+  scrollRootSelector?: string
 }
 
 function toAnchoredPagination(newer: AnchoredEdge, older: AnchoredEdge): AnchoredFeedPagination {
@@ -73,6 +79,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   fetchAround,
   fetchNewer,
   fetchOlder,
+  scrollRootSelector,
 }: UseAnchoredFeedOptions<TItem>) {
   const [items, setItems] = useState(initialItems)
   const [feedMode, setFeedMode] = useState<FeedMode>('latest')
@@ -216,9 +223,11 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       }
 
       let added = 0
+      let nextItems: TItem[] = []
       setItems((prev) => {
         const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'prepend')
         added = merged.added
+        nextItems = merged.items
         return merged.items
       })
 
@@ -227,6 +236,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         hasMore: page.pagination.hasNewer,
         cursor: page.pagination.hasNewer ? page.pagination.newerCursor : null,
       }
+
+      newerEdge = alignNewerEdgeToListTop(nextItems, newerEdge)
 
       const stuckAtSameCursor =
         added === 0 &&
@@ -242,14 +253,18 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       const pagination = syncAnchoredPaginationFromEdges()
       markCursorConsumed('newer', requestedCursor, pagination, added)
 
-      const scrollRoot = getLayoutScrollRoot()
+      if (added > 0) {
+        lastOlderCursorFetchedRef.current = null
+      }
+
+      const scrollRoot = resolveScrollRoot(scrollRootSelector)
       if (scrollRoot && scrollSnapshot && added > 0) {
         schedulePrependScrollRestore(scrollRoot, scrollSnapshot)
       }
 
       return added
     },
-    [markCursorConsumed, syncAnchoredPaginationFromEdges],
+    [markCursorConsumed, scrollRootSelector, syncAnchoredPaginationFromEdges],
   )
 
   const applyOlderPage = useCallback(
@@ -262,17 +277,21 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       }
 
       let added = 0
+      let nextItems: TItem[] = []
       setItems((prev) => {
         const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'append')
         added = merged.added
+        nextItems = merged.items
         return merged.items
       })
 
-      // older 응답: older edge만 갱신, newerEdgeRef는 유지
+      // older 응답: older edge만 갱신, newerEdgeRef는 목록 최상단과 맞춤
       let olderEdge: AnchoredEdge = {
         hasMore: page.pagination.hasOlder,
         cursor: page.pagination.hasOlder ? page.pagination.olderCursor : null,
       }
+
+      newerEdgeRef.current = alignNewerEdgeToListTop(nextItems, newerEdgeRef.current)
 
       const stuckAtSameCursor =
         added === 0 &&
@@ -287,6 +306,10 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       olderEdgeRef.current = olderEdge
       const pagination = syncAnchoredPaginationFromEdges()
       markCursorConsumed('older', requestedCursor, pagination, added)
+
+      if (added > 0) {
+        lastNewerCursorFetchedRef.current = null
+      }
 
       return added
     },
@@ -309,11 +332,12 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         const page = await fetchAroundRef.current(anchorId)
         if (aroundRequestRef.current !== requestId) return
 
-        setItems(page.items)
-        newerEdgeRef.current = {
+        const sortedItems = sortFeedItemsByPublishedAtDesc(page.items)
+        setItems(sortedItems)
+        newerEdgeRef.current = alignNewerEdgeToListTop(sortedItems, {
           hasMore: page.pagination.hasNewer,
           cursor: page.pagination.newerCursor,
-        }
+        })
         olderEdgeRef.current = {
           hasMore: page.pagination.hasOlder,
           cursor: page.pagination.olderCursor,
@@ -358,7 +382,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     loadNewerInFlightRef.current = true
     setLoadingNewer(true)
     const startedAt = Date.now()
-    const scrollRoot = getLayoutScrollRoot()
+    const scrollRoot = resolveScrollRoot(scrollRootSelector)
     const scrollSnapshot = scrollRoot ? capturePrependScrollSnapshot(scrollRoot) : null
 
     try {
@@ -374,7 +398,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       loadNewerInFlightRef.current = false
       setLoadingNewer(false)
     }
-  }, [applyNewerPage])
+  }, [applyNewerPage, scrollRootSelector])
 
   const loadOlder = useCallback(async () => {
     const pagination = anchoredPaginationRef.current

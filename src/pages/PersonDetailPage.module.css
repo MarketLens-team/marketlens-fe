@@ -81,6 +81,13 @@
   z-index: 0;
 }
 
+.profileBlock {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  background: var(--color-bg-section);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border-default) 65%, transparent);
+}
+
 .detailRightPanel {
   grid-column: 3;
 }
@@ -120,16 +127,6 @@
   display: flex;
   justify-content: center;
   padding: var(--space-8) 0;
-}
-
-.profileStickyBlock {
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  margin-bottom: var(--space-3);
-  padding-bottom: var(--space-2);
-  background: var(--color-bg-section);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border-default) 65%, transparent);
 }
 
 .profileHeader {

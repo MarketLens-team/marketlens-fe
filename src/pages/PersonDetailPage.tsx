@@ -162,7 +162,7 @@ export default function PersonDetailPage() {
 
             <div className={styles.detailFeedCol}>
               <div className={styles.profileTimeline}>
-                <div className={styles.profileStickyBlock}>
+                <div className={styles.profileBlock}>
                   <header
                     className={clsx(
                       styles.profileHeader,

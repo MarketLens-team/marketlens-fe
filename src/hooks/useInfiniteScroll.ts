@@ -13,6 +13,12 @@ export function getLayoutScrollRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>(SCROLL_ROOT_SELECTOR)
 }
 
+export function resolveScrollRoot(scrollRootSelector?: string): HTMLElement | null {
+  const q = scrollRootSelector?.trim()
+  if (q) return document.querySelector<HTMLElement>(q)
+  return getLayoutScrollRoot()
+}
+
 function parseRootMarginPx(rootMargin: string, edge: 'top' | 'bottom'): number {
   const parts = rootMargin.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return 0
@@ -87,11 +93,7 @@ export function useInfiniteScroll({
     wasLoadingRef.current = false
   }, [enabled, requireUserScrollUp, direction])
 
-  const resolveRoot = useCallback(() => {
-    return scrollRootSelector
-      ? document.querySelector<HTMLElement>(scrollRootSelector)
-      : getLayoutScrollRoot()
-  }, [scrollRootSelector])
+  const resolveRoot = useCallback(() => resolveScrollRoot(scrollRootSelector), [scrollRootSelector])
 
   const tryLoadMore = useCallback(() => {
     if (!enabled || !hasMore || loading) return false

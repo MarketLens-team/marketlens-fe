@@ -9,6 +9,11 @@ export function anchoredCursorItemId(cursor: string | null | undefined): string 
   return id.length > 0 ? id : null
 }
 
+/** API 커서 문자열 생성 — `publishedAt|id` */
+export function buildAnchoredItemCursor(item: { id: string; publishedAt: string }): string {
+  return `${item.publishedAt}|${item.id}`
+}
+
 /** 타임스탬프 문자열 차이는 무시하고 같은 항목 id면 동일 커서로 봄 */
 export function anchoredCursorsEqual(a: string | null, b: string | null): boolean {
   if (!a || !b) return a === b
@@ -22,6 +27,23 @@ export function anchoredCursorsEqual(a: string | null, b: string | null): boolea
  * newer/older 한 방향 응답 적용 시 반대쪽 페이지네이션은 유지.
  * (BE는 newer=첫 항목·older=마지막 항목 커서를 주지만, 단방향 응답이 반대 edge를 덮지 않게 방어)
  */
+interface AnchoredEdgeLike {
+  hasMore: boolean
+  cursor: string | null
+}
+
+/** 병합·정렬 후 목록 최상단과 newer 커서 id가 어긋나면 보정 (older 후 newer 재요청 시 중복 페이지 방지) */
+export function alignNewerEdgeToListTop<T extends { id: string; publishedAt: string }>(
+  items: T[],
+  edge: AnchoredEdgeLike,
+): AnchoredEdgeLike {
+  if (!edge.hasMore || items.length === 0) return edge
+  const newest = items[0]
+  const edgeId = anchoredCursorItemId(edge.cursor)
+  if (!edgeId || edgeId === newest.id) return edge
+  return { hasMore: edge.hasMore, cursor: buildAnchoredItemCursor(newest) }
+}
+
 export function mergeAnchoredPaginationForDirection(
   prev: AnchoredFeedPagination,
   incoming: AnchoredFeedPagination,
