@@ -2,15 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchAllNewsFeedCursor } from '../data/clients/newsClient'
 import type { StockNewsItem, StockNewsPagination } from '../data/types/stock'
 
-export type AllNewsSentimentFilter = 'all' | 'positive' | 'negative'
-
 const EMPTY_PAGINATION: StockNewsPagination = {
   nextCursor: null,
   hasNext: false,
 }
 
 export function useAllNewsFeed() {
-  const [filter, setFilter] = useState<AllNewsSentimentFilter>('all')
   const [items, setItems] = useState<StockNewsItem[]>([])
   const [pagination, setPagination] = useState<StockNewsPagination>(EMPTY_PAGINATION)
   const [loading, setLoading] = useState(true)
@@ -18,8 +15,6 @@ export function useAllNewsFeed() {
   const [error, setError] = useState<string | null>(null)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const requestIdRef = useRef(0)
-
-  const sentimentParam = filter === 'all' ? undefined : filter
 
   useEffect(() => {
     const requestId = ++requestIdRef.current
@@ -30,10 +25,7 @@ export function useAllNewsFeed() {
       setError(null)
       setLoadMoreError(null)
       try {
-        const page = await fetchAllNewsFeedCursor({
-          limit: 20,
-          sentiment: sentimentParam,
-        })
+        const page = await fetchAllNewsFeedCursor({ limit: 20 })
         if (cancelled || requestId !== requestIdRef.current) return
         setItems(page.items)
         setPagination(page.pagination)
@@ -53,7 +45,7 @@ export function useAllNewsFeed() {
     return () => {
       cancelled = true
     }
-  }, [sentimentParam])
+  }, [])
 
   const loadMore = useCallback(async () => {
     if (!pagination.hasNext || !pagination.nextCursor || loadingMore) return
@@ -63,7 +55,6 @@ export function useAllNewsFeed() {
       const page = await fetchAllNewsFeedCursor({
         limit: 20,
         cursor: pagination.nextCursor,
-        sentiment: sentimentParam,
       })
       setItems((prev) => {
         const seen = new Set(prev.map((item) => item.id))
@@ -76,11 +67,9 @@ export function useAllNewsFeed() {
     } finally {
       setLoadingMore(false)
     }
-  }, [loadingMore, pagination.hasNext, pagination.nextCursor, sentimentParam])
+  }, [loadingMore, pagination.hasNext, pagination.nextCursor])
 
   return {
-    filter,
-    setFilter,
     items,
     pagination,
     loading,

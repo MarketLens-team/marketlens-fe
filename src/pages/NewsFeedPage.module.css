@@ -8,12 +8,6 @@
   padding-bottom: var(--space-8);
 }
 
-.filterGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
 .feed {
   min-width: 0;
 }

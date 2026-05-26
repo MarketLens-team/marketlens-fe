@@ -4,33 +4,15 @@ import { EmptyState } from '../components/common/EmptyState'
 import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
-import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
 import { AllNewsListItem } from '../components/news/AllNewsListItem'
-import { PillButton } from '../components/ui/PillButton'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
-import { useAllNewsFeed, type AllNewsSentimentFilter } from '../hooks/useAllNewsFeed'
+import { useAllNewsFeed } from '../hooks/useAllNewsFeed'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import styles from './NewsFeedPage.module.css'
 
-const FILTERS: { key: AllNewsSentimentFilter; label: string }[] = [
-  { key: 'all', label: '전체' },
-  { key: 'positive', label: '긍정' },
-  { key: 'negative', label: '부정' },
-]
-
 export default function NewsFeedPage() {
-  const {
-    filter,
-    setFilter,
-    items,
-    pagination,
-    loading,
-    loadingMore,
-    error,
-    loadMoreError,
-    loadMore,
-  } = useAllNewsFeed()
+  const { items, pagination, loading, loadingMore, error, loadMoreError, loadMore } = useAllNewsFeed()
 
   const newsSentinelRef = useInfiniteScroll({
     enabled: !loading && items.length > 0,
@@ -49,27 +31,6 @@ export default function NewsFeedPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <PageHeader
-          title="전체 뉴스"
-          description="시장 전반 뉴스를 감성 점수와 관련 종목 태그와 함께 확인합니다."
-          actions={
-            <div className={styles.filterGroup} role="group" aria-label="뉴스 감성 필터">
-              {FILTERS.map(({ key, label }) => (
-                <PillButton
-                  key={key}
-                  variant="secondary"
-                  compact
-                  active={filter === key}
-                  aria-pressed={filter === key}
-                  onClick={() => setFilter(key)}
-                >
-                  {label}
-                </PillButton>
-              ))}
-            </div>
-          }
-        />
-
         {error ? (
           <PageFetchError title="전체 뉴스를 불러오지 못했어요" message={error} />
         ) : null}
@@ -86,8 +47,8 @@ export default function NewsFeedPage() {
           <EmptyState
             className={styles.empty}
             title="뉴스가 없어요"
-            message="선택한 감성 필터에 맞는 기사가 없습니다."
-            hint="전체 탭에서 다시 확인해 보세요."
+            message="표시할 기사가 없습니다."
+            hint="잠시 후 다시 확인해 보세요."
           />
         ) : null}
 
