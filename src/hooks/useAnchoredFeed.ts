@@ -610,6 +610,16 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   /** around 로딩이 끝나면 anchored·latest(폴백) 모두 스크롤 로드 가능 */
   const anchoredReady = !anchoredEnabled || !anchorId || !loadingAround
 
+  const cancelAroundLoad = useCallback(() => {
+    aroundRequestRef.current += 1
+    setLoadingAround(false)
+    setAnchoredLoadingUi(null)
+    setLoadingNewer(false)
+    setLoadingOlder(false)
+    anchoredLoadInFlightRef.current = false
+    pendingAnchoredLoadRef.current = null
+  }, [])
+
   return {
     items,
     feedMode,
@@ -628,5 +638,6 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     resetToLatest,
     replaceLatestItems,
     appendLatestItems,
+    cancelAroundLoad,
   }
 }

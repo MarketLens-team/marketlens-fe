@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
@@ -62,6 +62,8 @@ export default function PersonDetailPage() {
     loadMoreError,
     aroundError,
     anchoredWarmComplete,
+    resetToLatestFeed,
+    resettingToLatest,
   } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE, focusStatementId)
 
   const showOlderLoader =
@@ -98,9 +100,23 @@ export default function PersonDetailPage() {
 
   const focusFeedReady = anchoredWarmComplete
 
+  const [skipFocusAutoScroll, setSkipFocusAutoScroll] = useState(false)
+
+  useEffect(() => {
+    setSkipFocusAutoScroll(false)
+  }, [focusStatementId])
+
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
-    loading: feedInitialLoading || !focusFeedReady,
+    loading: feedInitialLoading || !focusFeedReady || resettingToLatest,
+    skipAutoScroll: skipFocusAutoScroll,
   })
+
+  const handleBackToTop = useCallback(() => {
+    if (focusStatementId) {
+      setSkipFocusAutoScroll(true)
+      void resetToLatestFeed()
+    }
+  }, [focusStatementId, resetToLatestFeed])
 
   const topSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
@@ -300,7 +316,7 @@ export default function PersonDetailPage() {
           </div>
         ) : null}
 
-        {pageReady ? <PageFabRail alwaysVisible /> : null}
+        {pageReady ? <PageFabRail alwaysVisible onBackToTop={handleBackToTop} /> : null}
       </div>
     </Layout>
   )

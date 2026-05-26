@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   fetchPersonMentionsAround,
   fetchPersonMentionsCursorByPersonId,
@@ -19,6 +19,17 @@ export function usePersonDetail(
   feedRange: PersonMentionsRange,
   focusStatementId: string | null = null,
 ) {
+  const [suppressAnchored, setSuppressAnchored] = useState(false)
+  const [latestOverride, setLatestOverride] = useState<PersonMentionsFeedData | null>(null)
+  const [resettingToLatest, setResettingToLatest] = useState(false)
+
+  useEffect(() => {
+    setSuppressAnchored(false)
+    setLatestOverride(null)
+  }, [focusStatementId, personId, feedRange])
+
+  const useAnchoredAround = Boolean(focusStatementId) && !suppressAnchored
+
   const factory = useCallback(
     () => fetchPersonMentionsFeedPage(personId, { range: feedRange, limit: PERSON_FEED_PAGE_LIMIT }),
     [personId, feedRange],
@@ -30,7 +41,7 @@ export function usePersonDetail(
     minLoadingMs: 0,
   })
 
-  const initialFeed = asyncResult.data
+  const initialFeed = latestOverride ?? asyncResult.data
   const initialMentions = useMemo(
     () => initialFeed?.mentions ?? [],
     [initialFeed?.mentions],
@@ -96,25 +107,27 @@ export function usePersonDetail(
     loadNewer,
     loadOlder,
     appendLatestItems,
+    replaceLatestItems,
+    cancelAroundLoad,
   } = useAnchoredFeed({
     scopeKey: `${personId}:${feedRange}`,
-    anchorId: focusStatementId,
+    anchorId: useAnchoredAround ? focusStatementId : null,
     initialItems: initialMentions,
     initialLatestPagination: initialPagination,
-    anchoredEnabled: Boolean(focusStatementId),
+    anchoredEnabled: useAnchoredAround,
     fetchAround,
     fetchNewer,
     fetchOlder,
   })
 
   const displayData = useMemo<PersonMentionsFeedData | null>(() => {
-    if (!asyncResult.data && mentionItems.length === 0) return null
+    if (!asyncResult.data && !latestOverride && mentionItems.length === 0) return null
     return {
       mentions: mentionItems,
       mentionsNextCursor: latestPagination.nextCursor,
       mentionsHasNext: feedMode === 'latest' && latestPagination.hasNext,
     }
-  }, [asyncResult.data, mentionItems, latestPagination, feedMode])
+  }, [asyncResult.data, latestOverride, mentionItems, latestPagination, feedMode])
 
   const [loadingLatestMore, setLoadingLatestMore] = useState(false)
 
@@ -166,6 +179,30 @@ export function usePersonDetail(
     appendLatestItems,
   ])
 
+  const resetToLatestFeed = useCallback(async () => {
+    if (!focusStatementId) return
+
+    cancelAroundLoad()
+    setResettingToLatest(true)
+    setLoadMoreError(null)
+    try {
+      const page = await fetchPersonMentionsFeedPage(personId, {
+        range: feedRange,
+        limit: PERSON_FEED_PAGE_LIMIT,
+      })
+      setLatestOverride(page)
+      replaceLatestItems(page.mentions, {
+        nextCursor: page.mentionsNextCursor ?? null,
+        hasNext: page.mentionsHasNext ?? false,
+      })
+      setSuppressAnchored(true)
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '발언 목록을 새로고침하지 못했습니다.')
+    } finally {
+      setResettingToLatest(false)
+    }
+  }, [focusStatementId, cancelAroundLoad, personId, feedRange, replaceLatestItems])
+
   return {
     data: displayData,
     loading: asyncResult.loading || asyncResult.refreshing,
@@ -183,5 +220,7 @@ export function usePersonDetail(
     loadingMore: feedMode === 'anchored' ? loadingOlder : loadingLatestMore,
     aroundError,
     anchoredWarmComplete,
+    resetToLatestFeed,
+    resettingToLatest,
   }
 }

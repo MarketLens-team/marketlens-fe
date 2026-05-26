@@ -6,6 +6,7 @@ interface PageFabRailProps {
   scrollRootSelector?: string
   /** 인물 페이지 — 스크롤 위치와 무관하게 항상 표시 */
   alwaysVisible?: boolean
+  onBackToTop?: () => void | Promise<void>
 }
 
 /**
@@ -17,6 +18,7 @@ export function PageFabRail({
   stockDetailMarker,
   scrollRootSelector,
   alwaysVisible = false,
+  onBackToTop,
 }: PageFabRailProps) {
   return (
     <BackToTopButton
@@ -26,6 +28,7 @@ export function PageFabRail({
       stockDetailMarker={stockDetailMarker}
       scrollRootSelector={scrollRootSelector}
       visibility={alwaysVisible ? 'always' : 'on-scroll'}
+      onBackToTop={onBackToTop}
     />
   )
 }

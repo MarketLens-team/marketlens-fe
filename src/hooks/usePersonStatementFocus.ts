@@ -42,6 +42,8 @@ interface UsePersonStatementFocusOptions {
   /** 초기 피드·around 로딩 중이면 스크롤 보류 */
   loading?: boolean
   scrollRootSelector?: string
+  /** 맨 위로 등 — 포커스 발언으로 자동 스크롤하지 않음 (초록 강조만 유지) */
+  skipAutoScroll?: boolean
 }
 
 /** 검색·트래커 `?statementId=` — 해당 발언까지 로드·스크롤·초록 강조 (클릭해도 쿼리 유지 → anchored 피드 유지) */
@@ -53,6 +55,7 @@ export function usePersonStatementFocus(
   const focusStatementId = searchParams.get('statementId')?.trim() || null
   const loading = options?.loading ?? false
   const scrollRootSelector = options?.scrollRootSelector
+  const skipAutoScroll = options?.skipAutoScroll ?? false
   /** 포커스 대상으로 초기 스크롤 1회만 — 이후 무한 스크롤은 사용자 제어 */
   const didScrollToFocusRef = useRef<string | null>(null)
   const [focusScrollSettled, setFocusScrollSettled] = useState(() => !focusStatementId)
@@ -68,6 +71,7 @@ export function usePersonStatementFocus(
   }, [focusStatementId])
 
   useEffect(() => {
+    if (skipAutoScroll) return
     if (!focusStatementId || loading || !hasTarget) return
     if (didScrollToFocusRef.current === focusStatementId) return
 
@@ -96,7 +100,7 @@ export function usePersonStatementFocus(
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [focusStatementId, mentions, loading, hasTarget, scrollRootSelector])
+  }, [focusStatementId, mentions, loading, hasTarget, scrollRootSelector, skipAutoScroll])
 
   const isStatementFocused = useCallback(
     (statementId: string) =>

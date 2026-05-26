@@ -23,6 +23,8 @@ interface BackToTopButtonProps {
    * `on-scroll`(기본) — 스크롤 후에만 표시
    */
   visibility?: 'always' | 'on-scroll'
+  /** 스크롤 맨 위 이동과 함께 실행 (예: anchored 피드 → cursor 최신순 리셋) */
+  onBackToTop?: () => void | Promise<void>
 }
 
 function resolveScrollRoot(scrollRootSelector?: string): HTMLElement | null {
@@ -38,6 +40,7 @@ export function BackToTopButton({
   scrollRootSelector,
   stockDetailMarker = false,
   visibility = 'on-scroll',
+  onBackToTop,
 }: BackToTopButtonProps) {
   const [visible, setVisible] = useState(visibility === 'always')
 
@@ -66,7 +69,8 @@ export function BackToTopButton({
 
   const scrollToTop = useCallback(() => {
     resolveScrollRoot(scrollRootSelector)?.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [scrollRootSelector])
+    void onBackToTop?.()
+  }, [scrollRootSelector, onBackToTop])
 
   if (!visible) return null
 
