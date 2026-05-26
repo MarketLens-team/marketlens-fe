@@ -1,19 +1,25 @@
+import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
+import { newsFeedItemElementId } from '../../lib/newsFeedFocus'
+import { useNavigateToStockFromNewsFeed } from '../../hooks/useNavigateToStockFromNewsFeed'
 import { renderStockNewsTitle } from '../stock/stockNewsTitle'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import styles from './AllNewsListItem.module.css'
 
 export interface AllNewsListItemProps {
   item: StockNewsItem
+  highlighted?: boolean
 }
 
-export function AllNewsListItem({ item }: AllNewsListItemProps) {
+export function AllNewsListItem({ item, highlighted = false }: AllNewsListItemProps) {
+  const navigateToStockFromNews = useNavigateToStockFromNewsFeed()
   const timeBadge = formatNewsTimeBadge(item.publishedAt)
   const dateLabel = formatNewsDateLong(item.publishedAt)
   const relatedStocks = item.relatedStocks ?? []
+  const rowClassName = clsx(styles.link, highlighted && styles.linkFocused)
 
   const body = (
     <>
@@ -42,7 +48,11 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
                     newsId: item.id,
                     scrollToNews: false,
                   })}
-                  onClick={(event) => event.stopPropagation()}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    navigateToStockFromNews(stock.stockCode, item.id)
+                  }}
                 >
                   <EntityAvatar
                     variant="stock"
@@ -67,8 +77,8 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
 
   if (item.url) {
     return (
-      <li className={styles.item}>
-        <a className={styles.link} href={item.url} target="_blank" rel="noopener noreferrer">
+      <li id={newsFeedItemElementId(item.id)} className={styles.item}>
+        <a className={rowClassName} href={item.url} target="_blank" rel="noopener noreferrer">
           {body}
         </a>
       </li>
@@ -76,8 +86,8 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
   }
 
   return (
-    <li className={styles.item}>
-      <div className={styles.link}>{body}</div>
+    <li id={newsFeedItemElementId(item.id)} className={styles.item}>
+      <div className={rowClassName}>{body}</div>
     </li>
   )
 }

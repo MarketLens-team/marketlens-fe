@@ -35,6 +35,15 @@
   color: var(--color-primary);
 }
 
+.linkFocused .title {
+  color: var(--color-success);
+}
+
+.linkFocused:hover .title,
+.linkFocused:focus-visible .title {
+  color: var(--color-success);
+}
+
 .body {
   min-width: 0;
 }

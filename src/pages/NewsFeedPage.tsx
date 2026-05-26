@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { EmptyState } from '../components/common/EmptyState'
 import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
+import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
@@ -11,6 +12,7 @@ import { NewsFeedModeTabs } from '../components/news/NewsFeedModeTabs'
 import { StockTodayNewsSidebar } from '../components/news/StockTodayNewsSidebar'
 import { DashboardLoginPrompt } from '../components/dashboard/DashboardLoginPrompt'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
+import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
@@ -21,6 +23,13 @@ export default function NewsFeedPage() {
   const todayNews = useTodayNewsStocks()
   const { items, pagination, loading, loadingMore, error, loadMoreError, loadMore, needsLogin } =
     useNewsFeedPage(mode)
+
+  const { isNewsFocused } = useNewsFeedFocus(items, {
+    loading: loading && items.length === 0,
+    hasMore: pagination.hasNext,
+    loadingMore,
+    onLoadMore: loadMore,
+  })
 
   const newsSentinelRef = useInfiniteScroll({
     enabled: !loading && !needsLogin && items.length > 0,
@@ -97,7 +106,11 @@ export default function NewsFeedPage() {
               <section className={styles.feed} aria-label="뉴스 목록">
                 <ul className={styles.list}>
                   {items.map((item) => (
-                    <AllNewsListItem key={item.id} item={item} />
+                    <AllNewsListItem
+                      key={item.id}
+                      item={item}
+                      highlighted={isNewsFocused(item.id)}
+                    />
                   ))}
                 </ul>
                 {pagination.hasNext ? (
@@ -114,6 +127,10 @@ export default function NewsFeedPage() {
               </section>
             ) : null}
           </div>
+
+          <aside className={styles.fabRail} aria-label="페이지 탐색">
+            <BackToTopButton placement="inline" tooltipSide="left" />
+          </aside>
         </div>
       </div>
     </Layout>

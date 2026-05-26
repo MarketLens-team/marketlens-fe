@@ -2,13 +2,16 @@
   width: 100%;
   max-width: var(--layout-page-max);
   margin: 0 auto;
-  padding-bottom: var(--space-8);
+  padding-bottom: var(--layout-back-to-top-reserve);
 }
 
-/* 인물 발언 페이지(personPageLayout)와 동일 — 좌 패널 + 피드 2열, 가운데 정렬 없음 */
+/* 좌 사이드바 · 피드 · 우측 FAB 레일(CMC형 빈 여백) */
 .layout {
   display: grid;
-  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  grid-template-columns:
+    minmax(14rem, 18rem)
+    minmax(0, 1fr)
+    var(--layout-back-to-top-reserve);
   column-gap: var(--space-4);
   row-gap: var(--space-5);
   align-items: start;
@@ -17,6 +20,7 @@
 }
 
 .sidebar {
+  grid-column: 1;
   grid-row: 1;
   min-width: 0;
   position: sticky;
@@ -29,11 +33,32 @@
 }
 
 .main {
+  grid-column: 2;
   grid-row: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.fabRail {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  position: sticky;
+  top: calc(
+    100vh - var(--layout-top-strip-height) - var(--layout-back-to-top-size) -
+      var(--layout-back-to-top-bottom) - var(--space-4)
+  );
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--layout-back-to-top-size);
+  pointer-events: none;
+}
+
+.fabRail > * {
+  pointer-events: auto;
 }
 
 .tabs {
@@ -92,7 +117,10 @@
 
 @media (max-width: 1100px) {
   .layout {
-    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+    grid-template-columns:
+      minmax(11rem, 14rem)
+      minmax(0, 1fr)
+      var(--layout-back-to-top-reserve);
     column-gap: var(--space-3);
   }
 }
@@ -103,7 +131,9 @@
   }
 
   .sidebar,
-  .main {
+  .main,
+  .fabRail {
+    grid-column: 1;
     grid-row: auto;
   }
 
@@ -114,5 +144,14 @@
     padding-right: 0;
     width: 100%;
     max-width: 17.5rem;
+  }
+
+  .fabRail {
+    position: fixed;
+    right: var(--main-pad-inline, var(--layout-main-pad-inline));
+    bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
+    width: var(--layout-back-to-top-size);
+    min-height: 0;
+    z-index: var(--z-dropdown);
   }
 }
