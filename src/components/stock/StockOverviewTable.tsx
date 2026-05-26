@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
-import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import type { StockOverviewRow } from '../../data/types/stock'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
@@ -21,7 +20,6 @@ export type StockOverviewSortKey =
 
 interface StockOverviewTableProps {
   rows: StockOverviewRow[]
-  currentNewsCount: number
   sortKey: StockOverviewSortKey
   sortDesc: boolean
   onSortChange: (key: StockOverviewSortKey) => void
@@ -67,7 +65,6 @@ function formatMentionChangeRate(value: number): string {
 
 export function StockOverviewTable({
   rows,
-  currentNewsCount,
   sortKey,
   sortDesc,
   onSortChange,
@@ -80,12 +77,6 @@ export function StockOverviewTable({
 
   return (
     <section className={styles.section} aria-label="전체 종목 목록">
-      <CardSectionHeader
-        title="전체 종목"
-        subtitle={`24시간 뉴스 언급 합계 ${currentNewsCount.toLocaleString('ko-KR')}건`}
-        variant="embedded"
-        className={styles.sectionHead}
-      />
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>

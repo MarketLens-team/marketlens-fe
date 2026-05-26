@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
-import { PageHeader } from '../components/common/PageHeader'
 import skeleton from '../components/common/Skeleton.module.css'
 import {
   rankingCategoryToSortKey,
@@ -52,8 +51,6 @@ export default function StockListPage() {
 
   const rows = data?.overview.stocks
   const rankings = data?.rankings
-  const currentNewsCount = data?.overview.currentNewsCount ?? 0
-
   const sectorOptions = useMemo(() => {
     const base = rows ?? []
     const names = [...new Set(base.map((row) => row.sectorName).filter(Boolean))].sort((a, b) =>
@@ -98,11 +95,6 @@ export default function StockListPage() {
   return (
     <Layout>
       <div className={styles.page}>
-        <PageHeader
-          title="전체 종목"
-          description="시세·언급량·감성을 한눈에 보고 종목 상세로 이동합니다."
-        />
-
         {error ? (
           <PageFetchError title="종목 데이터를 불러오지 못했어요" message={error.message} />
         ) : null}
@@ -148,7 +140,6 @@ export default function StockListPage() {
           <div id="stock-overview-table">
             <StockOverviewTable
               rows={sortedRows}
-              currentNewsCount={currentNewsCount}
               sortKey={sortKey}
               sortDesc={sortDesc}
               onSortChange={handleSortChange}
