@@ -1,14 +1,15 @@
 import clsx from 'clsx'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
-import { formatStockScore } from './stockScore'
+import { formatStockScore, stockSentimentTone } from './stockScore'
 import { renderStockNewsTitle } from './stockNewsTitle'
 import styles from './StockNewsListItem.module.css'
 
 function sentimentScoreClass(score: number) {
-  if (score > 0) return styles.scorePos
-  if (score < 0) return styles.scoreNeg
-  return styles.scoreNeu
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.scorePos
+  if (tone === 'negative') return styles.scoreNeg
+  return styles.scoreWarn
 }
 
 export interface StockNewsListItemProps {

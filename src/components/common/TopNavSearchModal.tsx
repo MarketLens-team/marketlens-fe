@@ -30,7 +30,7 @@ import {
   resolveSearchNewsStockRoute,
   type SearchNewsStockContext,
 } from '../../lib/resolveSearchNewsRoute'
-import { formatStockScore } from '../stock/stockScore'
+import { formatStockScore, stockSentimentTone } from '../stock/stockScore'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Modal } from '../ui/Modal'
@@ -108,9 +108,10 @@ function formatMentionCount(count: number) {
 type NewsWithContext = SearchNewsPreview & { stockLabel?: string; rowKey: string }
 
 function searchNewsSentimentClass(score: number) {
-  if (score > 0) return styles.newsSentimentPos
-  if (score < 0) return styles.newsSentimentNeg
-  return styles.newsSentimentNeu
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.newsSentimentPos
+  if (tone === 'negative') return styles.newsSentimentNeg
+  return styles.newsSentimentWarn
 }
 
 function mapSearchNewsRows(

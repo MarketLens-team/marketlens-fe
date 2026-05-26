@@ -369,6 +369,10 @@ li[data-search-nav-selected='true'] .newsRowCard .newsTitle {
   color: var(--color-text-muted);
 }
 
+.newsSentimentWarn {
+  color: var(--color-warning);
+}
+
 .newsTitle {
   margin: 0;
   font-size: var(--font-size-base);

@@ -24,7 +24,7 @@ import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { buildStockListPath } from '../../lib/buildStockRoute'
-import { formatPercent, formatPrice, formatStockScore } from './stockScore'
+import { formatPercent, formatPrice, formatStockScore, stockSentimentTone } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
 type NewsFilter = 'all' | 'positive' | 'negative'
@@ -32,18 +32,17 @@ type NewsFilter = 'all' | 'positive' | 'negative'
 /** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
 const RELATED_STOCKS_DISPLAY_MAX = 3
 
-/** stockSentimentZones 중립 구간(±20)과 동일 */
-const SENTIMENT_NEUTRAL_BAND = 20
-
 function scoreToneClass(score: number) {
-  if (score > SENTIMENT_NEUTRAL_BAND) return styles.scoreUp
-  if (score < -SENTIMENT_NEUTRAL_BAND) return styles.scoreDown
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.scoreUp
+  if (tone === 'negative') return styles.scoreDown
   return styles.scoreNeutral
 }
 
 function pillClass(score: number) {
-  if (score > SENTIMENT_NEUTRAL_BAND) return styles.pillPos
-  if (score < -SENTIMENT_NEUTRAL_BAND) return styles.pillNeg
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.pillPos
+  if (tone === 'negative') return styles.pillNeg
   return styles.pillWarn
 }
 
