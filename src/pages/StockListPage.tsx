@@ -44,6 +44,14 @@ function sortRows(
       if (aNull && bNull) return 0
       return (a.mentionChangeRate24h! - b.mentionChangeRate24h!) * dir
     }
+    if (sortKey === 'sentimentDelta') {
+      const aNull = a.sentimentDelta24h === null
+      const bNull = b.sentimentDelta24h === null
+      if (aNull && !bNull) return 1
+      if (!aNull && bNull) return -1
+      if (aNull && bNull) return 0
+      return (a.sentimentDelta24h! - b.sentimentDelta24h!) * dir
+    }
     return (a.sentimentScore24h - b.sentimentScore24h) * dir
   })
 }

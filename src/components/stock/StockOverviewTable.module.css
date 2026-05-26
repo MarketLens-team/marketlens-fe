@@ -164,6 +164,11 @@
   color: var(--color-text-secondary);
 }
 
+.deltaMuted {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
 .empty {
   padding: var(--space-8) var(--space-4);
   text-align: center;

@@ -8,6 +8,7 @@ import {
   formatStockScore,
 } from '../buzz/buzzSurgeScore'
 import { formatPercent, formatPrice } from './stockScore'
+import { formatSentimentDelta24h } from './sentimentDelta'
 import styles from './StockOverviewTable.module.css'
 
 export type StockOverviewSortKey =
@@ -17,6 +18,7 @@ export type StockOverviewSortKey =
   | 'mention'
   | 'mentionChange'
   | 'sentiment'
+  | 'sentimentDelta'
 
 interface StockOverviewTableProps {
   rows: StockOverviewRow[]
@@ -130,12 +132,20 @@ export function StockOverviewTable({
                   onClick={() => onSortChange('sentiment')}
                 />
               </th>
+              <th scope="col" className={styles.colNum}>
+                <SortButton
+                  label="감성 변화"
+                  active={sortKey === 'sentimentDelta'}
+                  desc={sortDesc}
+                  onClick={() => onSortChange('sentimentDelta')}
+                />
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.empty}>
+                <td colSpan={7} className={styles.empty}>
                   표시할 종목이 없습니다.
                 </td>
               </tr>
@@ -145,6 +155,7 @@ export function StockOverviewTable({
               const hasPrice = row.price > 0
               const mentionUp = row.mentionChangeRate24h != null && row.mentionChangeRate24h >= 0
               const sentKey = buzzSentimentClass(row.sentimentScore24h)
+              const delta = formatSentimentDelta24h(row.sentimentDelta24h)
               return (
                 <tr
                   key={row.code}
@@ -205,6 +216,17 @@ export function StockOverviewTable({
                     <span className={clsx(styles.mono, styles.sentScore, SENTIMENT_CLASS[sentKey])}>
                       {formatStockScore(row.sentimentScore24h)}
                     </span>
+                  </td>
+                  <td
+                    className={clsx(
+                      styles.mono,
+                      delta.tone === 'up' && styles.up,
+                      delta.tone === 'down' && styles.down,
+                      delta.tone === null && styles.deltaMuted,
+                    )}
+                    title={delta.title}
+                  >
+                    {delta.text}
                   </td>
                 </tr>
               )

@@ -161,7 +161,7 @@ export interface StockOverviewRow {
   mentionCount24h: number
   mentionChangeRate24h: number | null
   sentimentScore24h: number
-  sentimentDelta24h?: number | null
+  sentimentDelta24h: number | null
 }
 
 export interface StockOverview {
