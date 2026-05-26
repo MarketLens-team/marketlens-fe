@@ -32,7 +32,7 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
         </div>
         <h3 className={styles.title}>{renderStockNewsTitle(item.title, item.highlightTerms)}</h3>
         {item.description ? <p className={styles.description}>{item.description}</p> : null}
-        {relatedStocks.length > 0 ? (
+        <div className={styles.relatedStocksRow}>
           <ul className={styles.relatedStocks} aria-label="관련 종목">
             {relatedStocks.map((stock) => (
               <li key={stock.stockCode}>
@@ -55,7 +55,7 @@ export function AllNewsListItem({ item }: AllNewsListItemProps) {
               </li>
             ))}
           </ul>
-        ) : null}
+        </div>
       </div>
       {item.imageUrl ? (
         <img className={styles.thumb} src={item.imageUrl} alt="" width={120} height={80} loading="lazy" />
