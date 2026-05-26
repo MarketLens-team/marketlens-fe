@@ -104,7 +104,6 @@ export default function StockListPage() {
             <div className={clsx(skeleton.block, styles.skeletonCard)} />
             <div className={clsx(skeleton.block, styles.skeletonCard)} />
             <div className={clsx(skeleton.block, styles.skeletonCard)} />
-            <div className={clsx(skeleton.block, styles.skeletonCard)} />
           </div>
         ) : null}
 

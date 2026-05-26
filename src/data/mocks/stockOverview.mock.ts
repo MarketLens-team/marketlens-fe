@@ -56,11 +56,13 @@ function topBy<T>(items: T[], selector: (item: T) => number, limit = 5): T[] {
 export function buildMockStockRankingsResponse(): StockRankingsResponse {
   const overview = buildMockStockOverviewResponse()
 
+  const currentNewsCount = overview.currentNewsCount
+
   return {
+    currentNewsCount,
     topMentionCount: topBy(overview.items, (row) => row.mentionCount24h ?? 0),
     topSentimentScore: topBy(overview.items, (row) => row.sentimentScore24h ?? 0),
     topChangeRate: topBy(overview.items, (row) => row.changeRate ?? 0),
-    topCurrentPrice: topBy(overview.items, (row) => row.currentPrice ?? 0),
   }
 }
 

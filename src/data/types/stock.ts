@@ -184,11 +184,9 @@ export type StockRankingCategory =
   | 'topMentionCount'
   | 'topSentimentScore'
   | 'topChangeRate'
-  | 'topCurrentPrice'
 
 export interface StockRankings {
   topMentionCount: StockRankingItem[]
   topSentimentScore: StockRankingItem[]
   topChangeRate: StockRankingItem[]
-  topCurrentPrice: StockRankingItem[]
 }

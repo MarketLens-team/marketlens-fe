@@ -15,7 +15,6 @@ const CARD_CONFIG: RankingCardConfig[] = [
   { category: 'topMentionCount', title: '언급량 TOP', metric: 'mention' },
   { category: 'topSentimentScore', title: '감성 TOP', metric: 'sentiment' },
   { category: 'topChangeRate', title: '급등 TOP', metric: 'change' },
-  { category: 'topCurrentPrice', title: '시세 TOP', metric: 'price' },
 ]
 
 interface StockRankingCardsProps {
@@ -41,7 +40,7 @@ export function StockRankingCards({ rankings, onMoreClick }: StockRankingCardsPr
 
 export function rankingCategoryToSortKey(
   category: StockRankingCategory,
-): 'mention' | 'sentiment' | 'change' | 'price' {
+): 'mention' | 'sentiment' | 'change' {
   const config = CARD_CONFIG.find((item) => item.category === category)
   return config?.metric ?? 'mention'
 }

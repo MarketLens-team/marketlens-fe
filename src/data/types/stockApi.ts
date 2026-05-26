@@ -202,8 +202,9 @@ export interface StockRankingItemResponse {
 
 /** OpenAPI `StockRankingsResponse` — `GET /api/v1/stocks/rankings` */
 export interface StockRankingsResponse {
+  updatedAt?: string
+  currentNewsCount?: number
   topMentionCount: StockRankingItemResponse[]
   topSentimentScore: StockRankingItemResponse[]
   topChangeRate: StockRankingItemResponse[]
-  topCurrentPrice: StockRankingItemResponse[]
 }

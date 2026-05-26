@@ -299,7 +299,6 @@ export function mapStockRankingsResponse(response: StockRankingsResponse): Stock
     topMentionCount: (response.topMentionCount ?? []).map(mapRankingItem),
     topSentimentScore: (response.topSentimentScore ?? []).map(mapRankingItem),
     topChangeRate: (response.topChangeRate ?? []).map(mapRankingItem),
-    topCurrentPrice: (response.topCurrentPrice ?? []).map(mapRankingItem),
   }
 }
 

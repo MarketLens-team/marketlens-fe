@@ -12,7 +12,7 @@ import {
 import { formatPercent, formatPrice } from './stockScore'
 import styles from './StockRankingCard.module.css'
 
-export type StockRankingMetric = 'mention' | 'sentiment' | 'change' | 'price'
+export type StockRankingMetric = 'mention' | 'sentiment' | 'change'
 
 interface StockRankingCardProps {
   title: string
@@ -62,18 +62,10 @@ function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric)
     }
   }
 
-  if (metric === 'change') {
-    return {
-      primary: hasPrice ? formatPercent(item.changePercent) : '—',
-      secondary: hasPrice ? formatPrice(item.price) : null,
-      primaryTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
-    }
-  }
-
   return {
-    primary: hasPrice ? formatPrice(item.price) : '—',
-    secondary: hasPrice ? formatPercent(item.changePercent) : null,
-    secondaryTone: priceUp ? 'up' : 'down',
+    primary: hasPrice ? formatPercent(item.changePercent) : '—',
+    secondary: hasPrice ? formatPrice(item.price) : null,
+    primaryTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
   }
 }
 
