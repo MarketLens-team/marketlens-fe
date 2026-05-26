@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   fetchAllNewsFeedCursor,
   fetchWatchlistNewsFeedCursor,
 } from '../data/clients/newsClient'
+import {
+  clearNewsFeedConsumedMemory,
+  clearNewsFeedLiveSnapshot,
+  consumeNewsFeedSession,
+  registerNewsFeedLiveSnapshot,
+  type NewsFeedMode,
+} from '../lib/newsFeedSession'
+
+export type { NewsFeedMode }
 import type { StockNewsItem, StockNewsPagination } from '../data/types/stock'
 import { useAuthStore } from '../store/authStore'
 
@@ -11,9 +21,9 @@ const EMPTY_PAGINATION: StockNewsPagination = {
   hasNext: false,
 }
 
-export type NewsFeedMode = 'all' | 'watchlist'
-
 export function useNewsFeedPage(mode: NewsFeedMode) {
+  const [searchParams] = useSearchParams()
+  const focusNewsId = searchParams.get('newsId')?.trim() || null
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const [items, setItems] = useState<StockNewsItem[]>([])
   const [pagination, setPagination] = useState<StockNewsPagination>(EMPTY_PAGINATION)
@@ -21,9 +31,36 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
+  const [restoredScrollTop, setRestoredScrollTop] = useState<number | null>(null)
   const requestIdRef = useRef(0)
+  const restoredOnceRef = useRef(false)
 
   const needsLogin = mode === 'watchlist' && !isLoggedIn
+
+  useEffect(() => {
+    if (needsLogin) {
+      clearNewsFeedLiveSnapshot()
+      return
+    }
+    registerNewsFeedLiveSnapshot({ mode, items, pagination })
+  }, [needsLogin, mode, items, pagination])
+
+  useEffect(() => {
+    return () => {
+      clearNewsFeedLiveSnapshot()
+    }
+  }, [])
+
+  useEffect(() => {
+    restoredOnceRef.current = false
+    clearNewsFeedConsumedMemory()
+  }, [mode])
+
+  useEffect(() => {
+    if (!focusNewsId) {
+      clearNewsFeedConsumedMemory()
+    }
+  }, [focusNewsId])
 
   useEffect(() => {
     const requestId = ++requestIdRef.current
@@ -35,10 +72,26 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
         setPagination(EMPTY_PAGINATION)
         setError(null)
         setLoadMoreError(null)
+        setRestoredScrollTop(null)
         setLoading(false)
         return
       }
 
+      if (!restoredOnceRef.current) {
+        const session = consumeNewsFeedSession(focusNewsId, mode)
+        if (session) {
+          restoredOnceRef.current = true
+          setItems(session.items)
+          setPagination(session.pagination)
+          setRestoredScrollTop(session.scrollTop)
+          setError(null)
+          setLoadMoreError(null)
+          setLoading(false)
+          return
+        }
+      }
+
+      setRestoredScrollTop(null)
       setLoading(true)
       setError(null)
       setLoadMoreError(null)
@@ -69,7 +122,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     return () => {
       cancelled = true
     }
-  }, [mode, needsLogin])
+  }, [mode, needsLogin, focusNewsId])
 
   const loadMore = useCallback(async () => {
     if (needsLogin || !pagination.hasNext || !pagination.nextCursor || loadingMore) return
@@ -110,5 +163,6 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     loadMoreError,
     loadMore,
     needsLogin,
+    restoredScrollTop,
   }
 }

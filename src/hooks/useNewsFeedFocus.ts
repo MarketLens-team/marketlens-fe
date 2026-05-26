@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { getLayoutScrollRoot } from './useInfiniteScroll'
 import { newsFeedItemElementId, scrollNewsFeedItemIntoView } from '../lib/newsFeedFocus'
 
 interface NewsFeedItemWithId {
@@ -15,9 +16,11 @@ interface UseNewsFeedFocusOptions {
   hasMore?: boolean
   loadingMore?: boolean
   onLoadMore?: () => void | Promise<void>
+  /** sessionStorage 복원 시 저장된 scrollTop — cursor 연쇄 로드 대신 사용 */
+  restoredScrollTop?: number | null
 }
 
-/** `/news?newsId=` — 종목 상세에서 뒤로 왔을 때 해당 기사까지 로드·스크롤·초록 강조 */
+/** `/news?newsId=` — 종목 상세에서 뒤로 왔을 때 해당 기사 강조·위치 복원 */
 export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsFeedFocusOptions) {
   const [searchParams, setSearchParams] = useSearchParams()
   const focusNewsId = searchParams.get('newsId')?.trim() || null
@@ -25,8 +28,10 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   const hasMore = options?.hasMore ?? false
   const loadingMore = options?.loadingMore ?? false
   const onLoadMore = options?.onLoadMore
+  const restoredScrollTop = options?.restoredScrollTop
   const loadAttemptsRef = useRef(0)
   const didScrollToFocusRef = useRef<string | null>(null)
+  const didRestoreScrollRef = useRef(false)
 
   const clearFocusNews = useCallback(() => {
     if (!searchParams.has('newsId')) return
@@ -40,17 +45,42 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   useEffect(() => {
     loadAttemptsRef.current = 0
     didScrollToFocusRef.current = null
+    didRestoreScrollRef.current = false
   }, [focusNewsId])
 
   useEffect(() => {
+    if (restoredScrollTop == null || didRestoreScrollRef.current) return
+    if (loading) return
+
+    const root = getLayoutScrollRoot()
+    if (!root) return
+
+    didRestoreScrollRef.current = true
+    root.scrollTo({ top: Math.max(0, restoredScrollTop), behavior: 'instant' })
+    if (focusNewsId) {
+      didScrollToFocusRef.current = focusNewsId
+    }
+  }, [restoredScrollTop, loading, focusNewsId])
+
+  useEffect(() => {
+    if (restoredScrollTop != null) return
     if (!focusNewsId || loading || hasTarget) return
     if (!hasMore || !onLoadMore || loadAttemptsRef.current >= MAX_AUTO_LOAD_ATTEMPTS) return
     if (loadingMore) return
     loadAttemptsRef.current += 1
     void onLoadMore()
-  }, [focusNewsId, loading, loadingMore, hasTarget, hasMore, onLoadMore])
+  }, [
+    restoredScrollTop,
+    focusNewsId,
+    loading,
+    loadingMore,
+    hasTarget,
+    hasMore,
+    onLoadMore,
+  ])
 
   useEffect(() => {
+    if (restoredScrollTop != null) return
     if (!focusNewsId || loading || !hasTarget) return
     if (didScrollToFocusRef.current === focusNewsId) return
 
@@ -78,7 +108,7 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [focusNewsId, items, loading, hasTarget])
+  }, [restoredScrollTop, focusNewsId, items, loading, hasTarget])
 
   useEffect(() => {
     if (!focusNewsId) return

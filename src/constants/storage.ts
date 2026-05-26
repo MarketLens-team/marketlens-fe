@@ -8,3 +8,5 @@ export const PREF_THEME_KEY = 'marketlens_pref_theme'
 export const PREF_LANGUAGE_KEY = 'marketlens_pref_language'
 export const PREF_CURRENCY_KEY = 'marketlens_pref_currency'
 export const PREF_AI_ASSISTANT_KEY = 'marketlens_pref_ai_assistant'
+/** `/news` → 종목 상세 뒤로가기 시 피드·스크롤 복원 */
+export const NEWS_FEED_SESSION_KEY = 'marketlens_news_feed_session'

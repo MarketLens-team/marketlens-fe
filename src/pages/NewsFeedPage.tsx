@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { EmptyState } from '../components/common/EmptyState'
 import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
@@ -12,6 +13,7 @@ import { NewsFeedModeTabs } from '../components/news/NewsFeedModeTabs'
 import { StockTodayNewsSidebar } from '../components/news/StockTodayNewsSidebar'
 import { DashboardLoginPrompt } from '../components/dashboard/DashboardLoginPrompt'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
+import { readNewsFeedSessionModeHint } from '../lib/newsFeedSession'
 import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
@@ -19,16 +21,28 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import styles from './NewsFeedPage.module.css'
 
 export default function NewsFeedPage() {
-  const [mode, setMode] = useState<NewsFeedMode>('all')
+  const [searchParams] = useSearchParams()
+  const sessionModeHint = useMemo(() => readNewsFeedSessionModeHint(), [searchParams])
+  const [mode, setMode] = useState<NewsFeedMode>(() => sessionModeHint ?? 'all')
   const todayNews = useTodayNewsStocks()
-  const { items, pagination, loading, loadingMore, error, loadMoreError, loadMore, needsLogin } =
-    useNewsFeedPage(mode)
+  const {
+    items,
+    pagination,
+    loading,
+    loadingMore,
+    error,
+    loadMoreError,
+    loadMore,
+    needsLogin,
+    restoredScrollTop,
+  } = useNewsFeedPage(mode)
 
   const { isNewsFocused } = useNewsFeedFocus(items, {
     loading: loading && items.length === 0,
     hasMore: pagination.hasNext,
     loadingMore,
     onLoadMore: loadMore,
+    restoredScrollTop,
   })
 
   const newsSentinelRef = useInfiniteScroll({
