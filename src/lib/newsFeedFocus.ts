@@ -16,10 +16,10 @@ export function scrollNewsFeedItemIntoView(newsId: string): boolean {
       scrollRoot.scrollTop +
       (elRect.top - rootRect.top) -
       Math.max(0, (scrollRoot.clientHeight - elRect.height) / 2)
-    scrollRoot.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
+    scrollRoot.scrollTo({ top: Math.max(0, targetTop), behavior: 'instant' })
     return true
   }
 
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el.scrollIntoView({ behavior: 'instant', block: 'center' })
   return true
 }
