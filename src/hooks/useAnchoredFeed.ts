@@ -17,6 +17,9 @@ import {
 } from '../lib/preserveScrollOnPrepend'
 import { getLayoutScrollRoot } from './useInfiniteScroll'
 
+/** newer 스피너가 너무 짧게 깜빡이지 않도록 최소 표시 시간 */
+const ANCHORED_NEWER_LOAD_MIN_MS = 320
+
 interface LatestPagination {
   nextCursor: string | null
   hasNext: boolean
@@ -185,6 +188,15 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         return
       }
 
+      if (
+        requestedCursor != null &&
+        nextCursor != null &&
+        !anchoredCursorsEqual(requestedCursor, nextCursor)
+      ) {
+        ref.current = null
+        return
+      }
+
       ref.current = requestedCursor
     },
     [],
@@ -345,6 +357,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
     loadNewerInFlightRef.current = true
     setLoadingNewer(true)
+    const startedAt = Date.now()
     const scrollRoot = getLayoutScrollRoot()
     const scrollSnapshot = scrollRoot ? capturePrependScrollSnapshot(scrollRoot) : null
 
@@ -352,6 +365,12 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       const page = await fetchNewerRef.current(cursor)
       applyNewerPage(page, scrollSnapshot, cursor)
     } finally {
+      const remain = ANCHORED_NEWER_LOAD_MIN_MS - (Date.now() - startedAt)
+      if (remain > 0) {
+        await new Promise<void>((resolve) => {
+          window.setTimeout(resolve, remain)
+        })
+      }
       loadNewerInFlightRef.current = false
       setLoadingNewer(false)
     }

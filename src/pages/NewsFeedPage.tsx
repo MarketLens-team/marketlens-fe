@@ -14,7 +14,10 @@ import { StockTodayNewsSidebar } from '../components/news/StockTodayNewsSidebar'
 import { DashboardLoginPrompt } from '../components/dashboard/DashboardLoginPrompt'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { readNewsFeedSessionModeHint } from '../lib/newsFeedSession'
-import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../data/types/anchoredFeed'
+import {
+  ANCHORED_SCROLL_PREFETCH_EDGE_PX,
+  ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
+} from '../data/types/anchoredFeed'
 import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
@@ -52,14 +55,16 @@ export default function NewsFeedPage() {
     restoredScrollTop,
   })
 
-  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+  const newsTopSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
   const newsTopSentinelRef = useInfiniteScroll({
     enabled: feedMode === 'anchored' && items.length > 0 && !needsLogin && feedReady,
     hasMore: hasMoreUp,
     loading: loadingNewer,
     direction: 'up',
-    rootMargin: anchoredEdgeMargin,
+    rootMargin: newsTopSentinelMargin,
+    requireUserScrollUp: true,
+    loadCooldownMs: 400,
     onLoadMore: () => void loadNewer(),
   })
 

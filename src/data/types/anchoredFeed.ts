@@ -34,8 +34,11 @@ export const ANCHORED_FEED_PAGE_LIMIT = 20
 /** 응답이 limit 미만일 때 같은 방향 연속 prefetch 상한 */
 export const ANCHORED_FEED_MAX_PREFETCH_PAGES = 3
 
-/** IntersectionObserver rootMargin — 과도하면 빠른 스크롤 시 연속 로드·튐 유발 */
+/** IntersectionObserver rootMargin (아래 older) — 과도하면 연속 로드·튐 유발 */
 export const ANCHORED_SCROLL_PREFETCH_EDGE_PX = 280
+
+/** IntersectionObserver rootMargin (위 newer) — 크면 상단에서 자동 연속 로드 */
+export const ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX = 64
 
 /** around 직후 목록 높이 ≥ 뷰포트 × 배수 될 때까지 양방향 워밍 */
 export const ANCHORED_WARM_VIEWPORT_RATIO = 2

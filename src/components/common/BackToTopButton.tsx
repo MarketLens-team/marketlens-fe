@@ -6,6 +6,7 @@ import { IconCircleButton } from '../ui/IconCircleButton'
 import styles from './BackToTopButton.module.css'
 
 const SHOW_AFTER_PX = 200
+const HIDE_BELOW_PX = 120
 
 interface BackToTopButtonProps {
   /** inline: 부모 안 / fixed: 화면 하단 우측 컬럼 */
@@ -17,6 +18,11 @@ interface BackToTopButtonProps {
   scrollRootSelector?: string
   /** 종목 상세 타임라인 겹침 측정용 마커 */
   stockDetailMarker?: boolean
+  /**
+   * `always` — 인물 그리드 FAB 레일(4열) 등 전용 슬롯에서 항상 표시
+   * `on-scroll`(기본) — 스크롤 후에만 표시
+   */
+  visibility?: 'always' | 'on-scroll'
 }
 
 function resolveScrollRoot(scrollRootSelector?: string): HTMLElement | null {
@@ -31,21 +37,32 @@ export function BackToTopButton({
   className,
   scrollRootSelector,
   stockDetailMarker = false,
+  visibility = 'on-scroll',
 }: BackToTopButtonProps) {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(visibility === 'always')
 
   useEffect(() => {
+    if (visibility === 'always') {
+      setVisible(true)
+      return
+    }
+
     const root = resolveScrollRoot(scrollRootSelector)
     if (!root) return
 
     const onScroll = () => {
-      setVisible(root.scrollTop > SHOW_AFTER_PX)
+      const top = root.scrollTop
+      setVisible((prev) => {
+        if (top > SHOW_AFTER_PX) return true
+        if (top < HIDE_BELOW_PX) return false
+        return prev
+      })
     }
 
     onScroll()
     root.addEventListener('scroll', onScroll, { passive: true })
     return () => root.removeEventListener('scroll', onScroll)
-  }, [scrollRootSelector])
+  }, [scrollRootSelector, visibility])
 
   const scrollToTop = useCallback(() => {
     resolveScrollRoot(scrollRootSelector)?.scrollTo({ top: 0, behavior: 'smooth' })

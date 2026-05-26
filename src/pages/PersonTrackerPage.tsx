@@ -114,10 +114,12 @@ export default function PersonTrackerPage() {
               onRangeChange={setStocksRange}
               showInitialLoading={stocksSidebarInitialLoading}
             />
+
+            <div className={gridStyles.fabRail} aria-hidden />
           </div>
         ) : null}
 
-        {pageReady ? <PageFabRail /> : null}
+        {pageReady ? <PageFabRail alwaysVisible /> : null}
       </div>
     </Layout>
   )

@@ -16,7 +16,10 @@ import {
 } from '../../data/clients/stockClient'
 import { ANCHORED_FEED_PAGE_LIMIT } from '../../data/types/anchoredFeed'
 import type { NewsFeedAroundResponse } from '../../data/types/stockApi'
-import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../../data/types/anchoredFeed'
+import {
+  ANCHORED_SCROLL_PREFETCH_EDGE_PX,
+  ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
+} from '../../data/types/anchoredFeed'
 import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
@@ -359,14 +362,16 @@ export function StockDetailContent({
 
   const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
 
-  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+  const newsTopSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
   const newsTopSentinelRef = useInfiniteScroll({
     enabled: feedMode === 'anchored' && displayNews.length > 0 && focusNewsFeedReady,
     hasMore: hasMoreUp,
     loading: loadingNewerNews,
     direction: 'up',
-    rootMargin: anchoredEdgeMargin,
+    rootMargin: newsTopSentinelMargin,
+    requireUserScrollUp: true,
+    loadCooldownMs: 400,
     onLoadMore: () => {
       setLoadMoreError(null)
       void loadNewerNews().catch((e) => {

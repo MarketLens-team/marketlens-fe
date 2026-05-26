@@ -4,9 +4,9 @@ const SCROLL_ROOT_SELECTOR = 'main[data-scroll-root]'
 
 /** 하단 무한 스크롤: 루트 뷰포트 아래 240px 전에 로드 트리거 */
 const DEFAULT_ROOT_MARGIN_DOWN = '0px 0px 240px 0px'
-/** 상단: 끝에 닿기 전 살짝 미리 로드 */
-const DEFAULT_ROOT_MARGIN_UP = '120px 0px 0px 0px'
-/** 연속 트리거 방지 — 빠른 스크롤 시 레이아웃 튐 완화 */
+/** 상단 newer — 과도한 prefetch 방지 */
+const DEFAULT_ROOT_MARGIN_UP = '64px 0px 0px 0px'
+/** 연속 트리거 방지 */
 const DEFAULT_LOAD_COOLDOWN_MS = 400
 
 export function getLayoutScrollRoot(): HTMLElement | null {
@@ -46,15 +46,13 @@ interface UseInfiniteScrollOptions {
   onLoadMore: () => void
   rootMargin?: string
   /** `down`(기본): 하단 더보기 · `up`: 상단 더보기(anchored newer) */
-  direction?: 'down' | 'up'
+  direction?: 'up' | 'down'
   /**
-   * `up` 전용 — 프로그램 스크롤(포커스 점프)과 구분해
-   * 사용자 휠·터치로 위로 스크롤한 뒤에만 트리거.
+   * `up` 전용 — 사용자가 위로 스크롤하는 동작이 있을 때만 로드.
+   * prepend·포커스 점프만으로는 트리거하지 않음.
    */
   requireUserScrollUp?: boolean
-  /** 기본값: Layout `main[data-scroll-root]`. 인물 상세 등 내부 스크롤 영역에 지정 */
   scrollRootSelector?: string
-  /** 연속 loadMore 호출 최소 간격(ms) */
   loadCooldownMs?: number
 }
 
@@ -77,7 +75,6 @@ export function useInfiniteScroll({
   const lastLoadStartedAtRef = useRef(0)
   const touchStartYRef = useRef(0)
   const wasLoadingRef = useRef(false)
-  const postLoadRetryDoneRef = useRef(false)
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
@@ -88,12 +85,13 @@ export function useInfiniteScroll({
     lastLoadStartedAtRef.current = 0
     touchStartYRef.current = 0
     wasLoadingRef.current = false
-    postLoadRetryDoneRef.current = false
   }, [enabled, requireUserScrollUp, direction])
 
-  useEffect(() => {
-    if (loading) postLoadRetryDoneRef.current = false
-  }, [loading])
+  const resolveRoot = useCallback(() => {
+    return scrollRootSelector
+      ? document.querySelector<HTMLElement>(scrollRootSelector)
+      : getLayoutScrollRoot()
+  }, [scrollRootSelector])
 
   const tryLoadMore = useCallback(() => {
     if (!enabled || !hasMore || loading) return false
@@ -103,24 +101,35 @@ export function useInfiniteScroll({
     if (now - lastLoadStartedAtRef.current < loadCooldownMs) return false
 
     lastLoadStartedAtRef.current = now
+    if (direction === 'up') {
+      userScrolledUpRef.current = false
+    }
     onLoadMoreRef.current()
     return true
   }, [enabled, hasMore, loading, requireUserScrollUp, direction, loadCooldownMs])
+
+  /** up: 위로 스크롤 + 센티넬이 상단 존에 있을 때만 (연속 위 스크롤 시 페이지마다 로드) */
+  const attemptUpLoad = useCallback(() => {
+    if (direction !== 'up' || !sentinelEl) return false
+    const root = resolveRoot()
+    if (!isSentinelInLoadZone(sentinelEl, root, resolvedRootMargin, 'up')) return false
+    return tryLoadMore()
+  }, [direction, sentinelEl, resolveRoot, resolvedRootMargin, tryLoadMore])
 
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     setSentinelEl(node)
   }, [])
 
   useEffect(() => {
-    if (!enabled || !requireUserScrollUp || direction !== 'up') return
+    if (!enabled || direction !== 'up' || !requireUserScrollUp) return
 
-    const root = scrollRootSelector
-      ? document.querySelector<HTMLElement>(scrollRootSelector)
-      : getLayoutScrollRoot()
+    const root = resolveRoot()
     if (!root) return
 
     const onWheel = (event: WheelEvent) => {
-      if (event.deltaY < 0) userScrolledUpRef.current = true
+      if (event.deltaY >= 0) return
+      userScrolledUpRef.current = true
+      attemptUpLoad()
     }
 
     const onTouchStart = (event: TouchEvent) => {
@@ -129,7 +138,9 @@ export function useInfiniteScroll({
 
     const onTouchMove = (event: TouchEvent) => {
       const y = event.touches[0]?.clientY ?? 0
-      if (y > touchStartYRef.current + 12) userScrolledUpRef.current = true
+      if (y <= touchStartYRef.current + 12) return
+      userScrolledUpRef.current = true
+      attemptUpLoad()
     }
 
     root.addEventListener('wheel', onWheel, { passive: true })
@@ -140,18 +151,20 @@ export function useInfiniteScroll({
       root.removeEventListener('touchstart', onTouchStart)
       root.removeEventListener('touchmove', onTouchMove)
     }
-  }, [enabled, requireUserScrollUp, direction, scrollRootSelector])
+  }, [enabled, requireUserScrollUp, direction, resolveRoot, attemptUpLoad])
 
   useEffect(() => {
     if (!enabled || !sentinelEl) return
 
-    const root = scrollRootSelector
-      ? document.querySelector<HTMLElement>(scrollRootSelector)
-      : getLayoutScrollRoot()
+    const root = resolveRoot()
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting) return
+        if (direction === 'up') {
+          tryLoadMore()
+          return
+        }
         tryLoadMore()
       },
       { root, rootMargin: resolvedRootMargin, threshold: 0 },
@@ -159,31 +172,21 @@ export function useInfiniteScroll({
 
     observer.observe(sentinelEl)
     return () => observer.disconnect()
-  }, [
-    enabled,
-    resolvedRootMargin,
-    scrollRootSelector,
-    sentinelEl,
-    tryLoadMore,
-  ])
+  }, [enabled, resolvedRootMargin, resolveRoot, sentinelEl, tryLoadMore, direction])
 
-  /** IO가 재발화되지 않을 때 — 로드 1회 끝난 뒤 센티넬이 여전히 보이면 한 번만 재시도 */
+  /** down 전용 — 로드 후 센티넬이 여전히 보이면 1회 재시도 */
   useEffect(() => {
+    if (direction === 'up') return
+
     const wasLoading = wasLoadingRef.current
     wasLoadingRef.current = loading
 
-    if (!wasLoading || loading || !enabled || !sentinelEl || !hasMore || postLoadRetryDoneRef.current) {
-      return
-    }
+    if (!wasLoading || loading || !enabled || !sentinelEl || !hasMore) return
 
-    const root = scrollRootSelector
-      ? document.querySelector<HTMLElement>(scrollRootSelector)
-      : getLayoutScrollRoot()
+    const root = resolveRoot()
 
     const rafId = requestAnimationFrame(() => {
-      if (postLoadRetryDoneRef.current) return
       if (!isSentinelInLoadZone(sentinelEl, root, resolvedRootMargin, direction)) return
-      postLoadRetryDoneRef.current = true
       tryLoadMore()
     })
 
@@ -193,7 +196,7 @@ export function useInfiniteScroll({
     enabled,
     sentinelEl,
     hasMore,
-    scrollRootSelector,
+    resolveRoot,
     resolvedRootMargin,
     direction,
     tryLoadMore,

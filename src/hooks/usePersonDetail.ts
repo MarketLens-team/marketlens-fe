@@ -117,9 +117,25 @@ export function usePersonDetail(
 
   const [loadingLatestMore, setLoadingLatestMore] = useState(false)
 
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
+
+  const loadNewerWithError = useCallback(async () => {
+    setLoadMoreError(null)
+    try {
+      await loadNewer()
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '발언을 더 불러오지 못했습니다.')
+    }
+  }, [loadNewer])
+
   const loadMore = useCallback(async () => {
     if (feedMode === 'anchored') {
-      await loadOlder()
+      setLoadMoreError(null)
+      try {
+        await loadOlder()
+      } catch (e) {
+        setLoadMoreError(e instanceof Error ? e.message : '발언을 더 불러오지 못했습니다.')
+      }
       return
     }
 
@@ -159,8 +175,9 @@ export function usePersonDetail(
     hasMoreDown,
     loadingAround,
     loadingNewer,
-    loadNewer,
+    loadNewer: loadNewerWithError,
     loadMore,
+    loadMoreError,
     loadingMore: feedMode === 'anchored' ? loadingOlder : loadingLatestMore,
     aroundError,
     anchoredWarmComplete,

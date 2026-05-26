@@ -16,7 +16,10 @@ import { EntityAvatar } from '../components/ui/EntityAvatar'
 import type { PersonMentionsRange } from '../data/types/person'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
-import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../data/types/anchoredFeed'
+import {
+  ANCHORED_SCROLL_PREFETCH_EDGE_PX,
+  ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
+} from '../data/types/anchoredFeed'
 import { usePersonDetail } from '../hooks/usePersonDetail'
 import { usePersonFrequentStocks } from '../hooks/usePersonFrequentStocks'
 import { usePersonMentionCount } from '../hooks/usePersonMentionCount'
@@ -54,6 +57,7 @@ export default function PersonDetailPage() {
     loadNewer,
     loadMore,
     loadingMore,
+    loadMoreError,
     aroundError,
     anchoredWarmComplete,
   } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE, focusStatementId)
@@ -91,14 +95,16 @@ export default function PersonDetailPage() {
     loading: feedInitialLoading || !focusFeedReady,
   })
 
-  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+  const topSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
   const topSentinelRef = useInfiniteScroll({
     enabled: feedMode === 'anchored' && Boolean(feed?.mentions.length) && personId != null && focusFeedReady,
     hasMore: hasMoreUp,
     loading: loadingNewer,
     direction: 'up',
-    rootMargin: anchoredEdgeMargin,
+    rootMargin: topSentinelMargin,
+    requireUserScrollUp: true,
+    loadCooldownMs: 400,
     onLoadMore: () => void loadNewer(),
   })
 
@@ -156,33 +162,45 @@ export default function PersonDetailPage() {
 
             <div className={styles.detailFeedCol}>
               <div className={styles.profileTimeline}>
-                <header
-                  className={clsx(
-                    styles.profileHeader,
-                    profileMetaInitialLoading && styles.profileHeaderRefreshing,
-                  )}
-                >
-                  {profile ? (
-                    <EntityAvatar
-                      variant="person"
-                      size="lg"
-                      name={profile.personName}
-                      imageUrl={profile.imageUrl}
-                      className={styles.profileAvatar}
-                    />
-                  ) : null}
-                  <div className={styles.profileText}>
-                    <h1 className={styles.profileName}>{profile?.personName ?? `인물 #${personId}`}</h1>
+                <div className={styles.profileStickyBlock}>
+                  <header
+                    className={clsx(
+                      styles.profileHeader,
+                      profileMetaInitialLoading && styles.profileHeaderRefreshing,
+                    )}
+                  >
                     {profile ? (
-                      <p className={styles.profileRole}>
-                        {formatPersonRole(profile.organizationName, profile.role)}
-                      </p>
+                      <EntityAvatar
+                        variant="person"
+                        size="lg"
+                        name={profile.personName}
+                        imageUrl={profile.imageUrl}
+                        className={styles.profileAvatar}
+                      />
                     ) : null}
-                    {mentionCount != null ? (
-                      <p className={styles.profileMeta}>오늘 언급 {mentionCount}건</p>
-                    ) : null}
-                  </div>
-                </header>
+                    <div className={styles.profileText}>
+                      <h1 className={styles.profileName}>{profile?.personName ?? `인물 #${personId}`}</h1>
+                      {profile ? (
+                        <p className={styles.profileRole}>
+                          {formatPersonRole(profile.organizationName, profile.role)}
+                        </p>
+                      ) : null}
+                      {mentionCount != null ? (
+                        <p className={styles.profileMeta}>오늘 언급 {mentionCount}건</p>
+                      ) : null}
+                    </div>
+                  </header>
+
+                  {feedMode === 'anchored' && hasMoreUp && loadingNewer ? (
+                    <div
+                      className={styles.feedNewerSlot}
+                      aria-busy="true"
+                      aria-live="polite"
+                    >
+                      <FeedLoadingSpinner label="이전 발언 불러오는 중" />
+                    </div>
+                  ) : null}
+                </div>
 
                 <div
                   className={clsx(
@@ -242,8 +260,16 @@ export default function PersonDetailPage() {
                   {hasMoreDown ? (
                     <div className={styles.feedScrollFoot} aria-busy={loadingMore || undefined}>
                       <div ref={bottomSentinelRef} className={styles.infiniteSentinel} aria-hidden />
-                      {loadingMore ? <FeedLoadingSpinner label="발언 더 불러오는 중" /> : null}
+                      <div className={styles.feedLoadMoreSlot} aria-hidden={!loadingMore}>
+                        {loadingMore ? <FeedLoadingSpinner label="발언 더 불러오는 중" /> : null}
+                      </div>
                     </div>
+                  ) : null}
+
+                  {loadMoreError ? (
+                    <p className={styles.feedError} role="alert">
+                      {loadMoreError}
+                    </p>
                   ) : null}
                 </div>
               </div>
@@ -255,10 +281,12 @@ export default function PersonDetailPage() {
               onRangeChange={setStocksRange}
               showInitialLoading={stocksSidebarInitialLoading}
             />
+
+            <div className={gridStyles.fabRail} aria-hidden />
           </div>
         ) : null}
 
-        {pageReady ? <PageFabRail /> : null}
+        {pageReady ? <PageFabRail alwaysVisible /> : null}
       </div>
     </Layout>
   )
