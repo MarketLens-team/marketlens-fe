@@ -6,13 +6,13 @@ import { AppErrorPage } from '../components/common/AppErrorPage'
 import { BackToTopButton } from '../components/common/BackToTopButton'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
-import skeleton from '../components/common/Skeleton.module.css'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import { formatPersonRole } from '../components/person/personDisplay'
 import { Breadcrumb } from '../components/common/Breadcrumb'
 import { buildPersonTrackerPath } from '../lib/buildPersonRoute'
+import { isPersonDetailPageLoading } from '../lib/personPageLoading'
 import { EntityAvatar } from '../components/ui/EntityAvatar'
 import { personProfileFromMention } from '../data/mappers/personMapper'
 import type { PersonMentionsRange } from '../data/types/person'
@@ -68,6 +68,19 @@ export default function PersonDetailPage() {
     return first ? personProfileFromMention(first) : null
   }, [feed?.mentions])
 
+  const pageLoading = isPersonDetailPageLoading({
+    feedError,
+    feedInitialLoading,
+    topLoading,
+    topPersons,
+    stocksLoading,
+    frequentStocks,
+    mentionCountLoading,
+    mentionCount,
+  })
+
+  const pageReady = !pageLoading && feed != null
+
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
     loading: feedInitialLoading,
     hasMore: Boolean(feed?.mentionsHasNext),
@@ -99,46 +112,26 @@ export default function PersonDetailPage() {
     )
   }
 
-  const showInitialSkeleton = feedInitialLoading && !feedError
-  const breadcrumbCurrentLabel = profile?.personName ?? (feed ? `인물 #${personId}` : '…')
+  const breadcrumbCurrentLabel = profile?.personName ?? (pageReady ? `인물 #${personId}` : '…')
 
   return (
     <Layout>
-      <div className={styles.page}>
-        <Breadcrumb
-          className={styles.breadcrumb}
-          items={[
-            { label: '인물 발언', to: buildPersonTrackerPath() },
-            { label: breadcrumbCurrentLabel, current: true },
-          ]}
-        />
+      <div className={styles.page} aria-busy={pageLoading || undefined}>
+        {pageReady ? (
+          <Breadcrumb
+            className={styles.breadcrumb}
+            items={[
+              { label: '인물 발언', to: buildPersonTrackerPath() },
+              { label: breadcrumbCurrentLabel, current: true },
+            ]}
+          />
+        ) : null}
 
         {feedError ? (
           <PageFetchError title="인물 발언을 불러오지 못했어요" message={feedError.message} />
         ) : null}
 
-        {showInitialSkeleton ? (
-          <div className={styles.detailGrid} aria-busy="true" aria-label="인물 발언 로딩">
-            <div className={styles.detailLeftSticky}>
-              <div className={clsx(skeleton.block, styles.skeletonAside)} />
-            </div>
-            <div className={styles.detailFeedCol}>
-              <div className={styles.profileTimeline}>
-              <div className={clsx(skeleton.block, styles.skeletonProfile)} />
-              <div className={styles.feedBody}>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className={clsx(skeleton.block, styles.skeletonCard)} />
-                ))}
-              </div>
-              </div>
-            </div>
-            <aside className={styles.detailRightPanel}>
-              <div className={clsx(skeleton.block, styles.skeletonAside)} />
-            </aside>
-          </div>
-        ) : null}
-
-        {feed ? (
+        {pageReady ? (
           <div className={styles.detailGrid}>
             <div className={styles.detailLeftSticky}>
               <PersonTop5Panel
@@ -180,33 +173,33 @@ export default function PersonDetailPage() {
                 </header>
 
                 <div className={styles.feedBody}>
-                <ul
-                  className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
-                  aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
-                >
-                  {feed.mentions.map((mention) => (
-                    <li
-                      key={mention.id}
-                      id={`person-statement-${mention.id}`}
-                      className={gridStyles.timelineItemDetail}
-                    >
-                      <PersonStatementCard
-                        mention={mention}
-                        variant="detailFeed"
-                        highlighted={isStatementFocused(mention.id)}
-                      />
-                    </li>
-                  ))}
-                </ul>
+                  <ul
+                    className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
+                    aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
+                  >
+                    {feed.mentions.map((mention) => (
+                      <li
+                        key={mention.id}
+                        id={`person-statement-${mention.id}`}
+                        className={gridStyles.timelineItemDetail}
+                      >
+                        <PersonStatementCard
+                          mention={mention}
+                          variant="detailFeed"
+                          highlighted={isStatementFocused(mention.id)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
 
-                {feed.mentions.length === 0 ? (
-                  <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
-                ) : null}
+                  {feed.mentions.length === 0 ? (
+                    <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
+                  ) : null}
 
-                {infiniteEnabled ? (
-                  <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
-                ) : null}
-              </div>
+                  {infiniteEnabled ? (
+                    <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                  ) : null}
+                </div>
               </div>
             </div>
 
@@ -222,7 +215,7 @@ export default function PersonDetailPage() {
           </div>
         ) : null}
 
-        {feed ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
+        {pageReady ? <BackToTopButton placement="fixed" tooltipSide="left" /> : null}
       </div>
     </Layout>
   )

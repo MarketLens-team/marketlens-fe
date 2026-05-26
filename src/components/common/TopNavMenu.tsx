@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { prefetchPersonTracker } from '../../lib/personTrackerPrefetch'
 import { TOP_MENUS, isTopNavActive } from './topNavMenus'
 import styles from './TopNavMenu.module.css'
 
@@ -71,8 +72,9 @@ export function TopNavMenu() {
     setHoverVisible(false)
   }
 
-  const handleItemMouseEnter = (label: string) => {
+  const handleItemMouseEnter = (label: string, to: string) => {
     setHoverLabel(label)
+    if (to === '/person') prefetchPersonTracker()
     if (label === activeLabel) {
       setHoverVisible(false)
       return
@@ -112,7 +114,7 @@ export function TopNavMenu() {
             end={menu.end}
             className={clsx(styles.menuItem, active && styles.menuItemActive)}
             aria-current={active ? 'page' : undefined}
-            onMouseEnter={() => handleItemMouseEnter(menu.label)}
+            onMouseEnter={() => handleItemMouseEnter(menu.label, menu.to)}
           >
             {menu.label}
           </NavLink>

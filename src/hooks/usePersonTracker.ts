@@ -5,13 +5,24 @@ import {
 } from '../data/clients/personClient'
 import { mergePersonMentionsFeedPage } from '../data/mappers/personMapper'
 import type { PersonMentionsFeedData, PersonMentionsRange } from '../data/types/person'
+import {
+  peekPersonTrackerFeedCache,
+  setPersonTrackerFeedCache,
+} from '../lib/personTrackerPrefetch'
 import { useAsyncData } from './useAsyncData'
 
 export function usePersonTracker(feedRange: PersonMentionsRange) {
-  const factory = useCallback(() => fetchPersonTrackerFeedPage({ range: feedRange }), [feedRange])
+  const factory = useCallback(async () => {
+    const cached = peekPersonTrackerFeedCache(feedRange)
+    if (cached) return cached
+    const next = await fetchPersonTrackerFeedPage({ range: feedRange })
+    setPersonTrackerFeedCache(feedRange, next)
+    return next
+  }, [feedRange])
   const asyncResult = useAsyncData<PersonMentionsFeedData>(factory, {
     keepPreviousData: true,
     minLoadingMs: 0,
+    initialData: peekPersonTrackerFeedCache(feedRange),
   })
   const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMoreMentions, setLoadingMoreMentions] = useState(false)

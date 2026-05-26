@@ -22,13 +22,3 @@
   font-size: var(--font-size-sm);
 }
 
-.skeletonCard {
-  height: 14rem;
-  border-radius: var(--radius-md);
-}
-
-.skeletonAside {
-  height: 14rem;
-  border-radius: var(--radius-md);
-}
-

@@ -6,6 +6,8 @@
   column-gap: var(--space-4);
   row-gap: 0;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .mainGrid > .leftAside,
