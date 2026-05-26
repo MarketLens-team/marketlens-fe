@@ -14,6 +14,7 @@ import { StockTodayNewsSidebar } from '../components/news/StockTodayNewsSidebar'
 import { DashboardLoginPrompt } from '../components/dashboard/DashboardLoginPrompt'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { readNewsFeedSessionModeHint } from '../lib/newsFeedSession'
+import { ANCHORED_SCROLL_PREFETCH_EDGE_PX } from '../data/types/anchoredFeed'
 import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
@@ -27,29 +28,47 @@ export default function NewsFeedPage() {
   const todayNews = useTodayNewsStocks()
   const {
     items,
+    feedMode,
     pagination,
     loading,
     loadingMore,
+    loadingNewer,
     error,
     loadMoreError,
     loadMore,
+    loadNewer,
     needsLogin,
     restoredScrollTop,
+    feedReady,
+    hasMoreDown,
+    hasMoreUp,
   } = useNewsFeedPage(mode)
 
   const { isNewsFocused } = useNewsFeedFocus(items, {
     loading: loading && items.length === 0,
-    hasMore: pagination.hasNext,
-    loadingMore,
-    onLoadMore: loadMore,
+    hasMore: feedMode === 'latest' && pagination.hasNext,
+    loadingMore: feedMode === 'latest' ? loadingMore : undefined,
+    onLoadMore: feedMode === 'latest' ? loadMore : undefined,
     restoredScrollTop,
   })
 
+  const anchoredEdgeMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px 0px 0px`
+
+  const newsTopSentinelRef = useInfiniteScroll({
+    enabled: feedMode === 'anchored' && items.length > 0 && !needsLogin && feedReady,
+    hasMore: hasMoreUp,
+    loading: loadingNewer,
+    direction: 'up',
+    rootMargin: anchoredEdgeMargin,
+    onLoadMore: () => void loadNewer(),
+  })
+
   const newsSentinelRef = useInfiniteScroll({
-    enabled: !loading && !needsLogin && items.length > 0,
-    hasMore: pagination.hasNext,
+    enabled: !loading && !needsLogin && items.length > 0 && feedReady,
+    hasMore: hasMoreDown,
     loading: loadingMore,
-    onLoadMore: loadMore,
+    rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
+    onLoadMore: () => void loadMore(),
   })
 
   const httpFullscreenPreset = error ? fullscreenPresetFromAppError(new Error(error)) : null
@@ -118,7 +137,12 @@ export default function NewsFeedPage() {
 
             {!loading && !needsLogin && items.length > 0 ? (
               <section className={styles.feed} aria-label="뉴스 목록">
-                <ul className={styles.list}>
+                <ul className={styles.list} data-anchored-feed-list>
+                  {feedMode === 'anchored' && hasMoreUp ? (
+                    <li className={styles.scrollHead} aria-hidden>
+                      <div ref={newsTopSentinelRef} className={styles.sentinel} />
+                    </li>
+                  ) : null}
                   {items.map((item) => (
                     <AllNewsListItem
                       key={item.id}
@@ -127,10 +151,10 @@ export default function NewsFeedPage() {
                     />
                   ))}
                 </ul>
-                {pagination.hasNext ? (
-                  <div className={styles.scrollFoot}>
+                {hasMoreDown ? (
+                  <div className={styles.scrollFoot} aria-busy={loadingMore || undefined}>
                     <div ref={newsSentinelRef} className={styles.sentinel} aria-hidden />
-                    {loadingMore ? <FeedLoadingSpinner /> : null}
+                    {loadingMore ? <FeedLoadingSpinner label="뉴스 더 불러오는 중" /> : null}
                   </div>
                 ) : null}
                 {loadMoreError ? (

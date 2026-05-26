@@ -19,7 +19,8 @@
 
 | 파일 | 내용 |
 |------|------|
-| `useAnchoredFeed.ts` | warm/prefetch 제거 — `around` 후 스크롤 시에만 1페이지씩 로드. API `pagination` 신뢰. 방향별 `mergeAnchoredPaginationForDirection`. 커서 id 기준 중복·stuck 처리. |
+| `useAnchoredFeed.ts` | warm/prefetch 제거. newer/older **edge ref 분리**(한 방향 로드가 반대 커서 덮어쓰지 않음). 커서 id 기준 중복·stuck 처리. |
+| `newsClient.ts` | 전체 뉴스 anchored `GET /api/v1/news/feed/around|newer|older` (`/all/around` 아님) |
 | `anchoredFeedCursor.ts` | BE 보정용 `buildAnchoredItemCursor` / `correctOlder*` 제거. `anchoredCursorsEqual`·merge만 유지. |
 | `useInfiniteScroll.ts` | 로드 종료 후 센티널이 보이면 **1회** 재시도 (무한 연쇄 제거). |
 | `usePersonStatementFocus.ts` | `pointerdown`으로 `statementId` 쿼리 해제 제거 — 초록 강조·anchored 유지. |

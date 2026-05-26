@@ -9,7 +9,7 @@
 | 브랜치 | `feat/design-refresh` |
 | 작업일 | 2026-05-26 |
 | FE 커밋 | `7ae000a` · `2afe363` · `83fc962` · `03f4444` · (관련 종목 칩 스타일) |
-| BE API | `GET /api/v1/news/feed/all` · `.../all/cursor` — `NewsFeedItemResponse.relatedStocks[]` |
+| BE API | 목록 `.../all/cursor` · anchored `.../feed/around/{newsId}` · `.../feed/newer` · `.../feed/older` (`/all/around` 아님) |
 
 ## 요약
 
@@ -50,9 +50,19 @@
 | `/news` 기사 행 | 원문 새 탭만, 피드 내 포커스·스크롤 없음 |
 | 관련 종목 칩 | `relatedStocksRow` 최소 높이, 기본 `border`+`bg-elevated` 항상 표시, 호버 시 `--interactive-ring-*` (`ringChip` composes는 transparent가 이겨 제거) |
 
+## 후속 — anchored 피드 (`?newsId=`)
+
+| 파일 | 내용 |
+|------|------|
+| `newsClient.ts` | `fetchAllNewsFeedAround` / `Newer` / `Older`, watchlist 동형 |
+| `useNewsFeedPage.ts` | `useAnchoredFeed` — `?newsId=` 시 around, 상·하단 newer/older |
+| `NewsFeedPage.tsx` | 상·하단 센티넬, 초록 강조 유지(클릭 시 쿼리 해제 없음) |
+| `useNewsFeedFocus.ts` | session 복원·latest 모드 cursor 연쇄만 유지 |
+
 ## Notes
 
 - 초광폭 모니터: 대시보드·테이블은 `--layout-page-wide-cap`(120rem), 뉴스 피드만 읽기 폭 토큰으로 좁힘.
+- BE 커서: `newerCursor` = 배치 첫 항목, `olderCursor` = 배치 마지막 항목 ([anchored 피드 fix](./2026-05-26-fix-anchored-feed-pagination.md)).
 
 ## 확인
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getLayoutScrollRoot } from './useInfiniteScroll'
-import { newsFeedItemElementId, scrollNewsFeedItemIntoView } from '../lib/newsFeedFocus'
+import { scrollNewsFeedItemIntoView } from '../lib/newsFeedFocus'
 
 interface NewsFeedItemWithId {
   id: string
@@ -12,16 +12,17 @@ const SCROLL_RETRY_MS = 80
 
 interface UseNewsFeedFocusOptions {
   loading?: boolean
+  /** cursor(latest) 모드에서만 — anchored는 around로 대상 로드 */
   hasMore?: boolean
   loadingMore?: boolean
   onLoadMore?: () => void | Promise<void>
-  /** sessionStorage 복원 시 저장된 scrollTop — cursor 연쇄 로드 대신 사용 */
+  /** sessionStorage 복원 시 저장된 scrollTop */
   restoredScrollTop?: number | null
 }
 
-/** `/news?newsId=` — 종목 상세에서 뒤로 왔을 때 해당 기사 강조·위치 복원 */
+/** `/news?newsId=` — 종목 상세에서 복귀 시 해당 기사 강조·위치 복원 (클릭해도 쿼리 유지) */
 export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsFeedFocusOptions) {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const focusNewsId = searchParams.get('newsId')?.trim() || null
   const loading = options?.loading ?? false
   const hasMore = options?.hasMore ?? false
@@ -30,13 +31,6 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   const restoredScrollTop = options?.restoredScrollTop
   const didScrollToFocusRef = useRef<string | null>(null)
   const didRestoreScrollRef = useRef(false)
-
-  const clearFocusNews = useCallback(() => {
-    if (!searchParams.has('newsId')) return
-    const next = new URLSearchParams(searchParams)
-    next.delete('newsId')
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
 
   const hasTarget = Boolean(focusNewsId && items.some((item) => item.id === focusNewsId))
 
@@ -106,25 +100,10 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
     }
   }, [restoredScrollTop, focusNewsId, items, loading, hasTarget])
 
-  useEffect(() => {
-    if (!focusNewsId) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const focusedEl = document.getElementById(newsFeedItemElementId(focusNewsId))
-      if (focusedEl?.contains(target)) return
-      clearFocusNews()
-    }
-
-    document.addEventListener('pointerdown', onPointerDown, true)
-    return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [focusNewsId, clearFocusNews])
-
   const isNewsFocused = useCallback(
     (newsId: string) => focusNewsId === newsId,
     [focusNewsId],
   )
 
-  return { focusNewsId, clearFocusNews, isNewsFocused }
+  return { focusNewsId, isNewsFocused }
 }

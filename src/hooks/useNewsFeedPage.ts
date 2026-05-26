@@ -1,9 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
+  fetchAllNewsFeedAround,
   fetchAllNewsFeedCursor,
+  fetchAllNewsFeedNewer,
+  fetchAllNewsFeedOlder,
+  fetchWatchlistNewsFeedAround,
   fetchWatchlistNewsFeedCursor,
+  fetchWatchlistNewsFeedNewer,
+  fetchWatchlistNewsFeedOlder,
 } from '../data/clients/newsClient'
+import { mapNewsFeedItems } from '../data/mappers/stockMapper'
+import type { NewsFeedAroundResponse } from '../data/types/stockApi'
+import type { AnchoredFeedPagination } from '../data/types/anchoredFeed'
+import { ANCHORED_FEED_PAGE_LIMIT } from '../data/types/anchoredFeed'
+import type { StockNewsItem, StockNewsPagination } from '../data/types/stock'
 import {
   clearNewsFeedConsumedMemory,
   clearNewsFeedLiveSnapshot,
@@ -11,24 +22,37 @@ import {
   registerNewsFeedLiveSnapshot,
   type NewsFeedMode,
 } from '../lib/newsFeedSession'
+import { useAuthStore } from '../store/authStore'
+import { useAnchoredFeed } from './useAnchoredFeed'
 
 export type { NewsFeedMode }
-import type { StockNewsItem, StockNewsPagination } from '../data/types/stock'
-import { useAuthStore } from '../store/authStore'
 
 const EMPTY_PAGINATION: StockNewsPagination = {
   nextCursor: null,
   hasNext: false,
 }
 
+type FeedBootstrap = 'pending' | 'session' | 'anchored' | 'cursor'
+
+function mapNewsFeedAroundPage(page: NewsFeedAroundResponse) {
+  return {
+    items: mapNewsFeedItems(page.items),
+    pagination: {
+      newerCursor: page.newerCursor ?? null,
+      hasNewer: page.hasNewer ?? false,
+      olderCursor: page.olderCursor ?? null,
+      hasOlder: page.hasOlder ?? false,
+    } satisfies AnchoredFeedPagination,
+  }
+}
+
 export function useNewsFeedPage(mode: NewsFeedMode) {
   const [searchParams] = useSearchParams()
   const focusNewsId = searchParams.get('newsId')?.trim() || null
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
-  const [items, setItems] = useState<StockNewsItem[]>([])
-  const [pagination, setPagination] = useState<StockNewsPagination>(EMPTY_PAGINATION)
+  const [bootstrap, setBootstrap] = useState<FeedBootstrap>('pending')
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const [loadingLatestMore, setLoadingLatestMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [restoredScrollTop, setRestoredScrollTop] = useState<number | null>(null)
@@ -38,6 +62,65 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   focusNewsIdRef.current = focusNewsId
 
   const needsLogin = mode === 'watchlist' && !isLoggedIn
+
+  const fetchAround = useCallback(
+    async (newsId: string) => {
+      const page =
+        mode === 'watchlist'
+          ? await fetchWatchlistNewsFeedAround(newsId, { limit: ANCHORED_FEED_PAGE_LIMIT })
+          : await fetchAllNewsFeedAround(newsId, { limit: ANCHORED_FEED_PAGE_LIMIT })
+      return mapNewsFeedAroundPage(page)
+    },
+    [mode],
+  )
+
+  const fetchNewer = useCallback(
+    async (cursor: string) => {
+      const page =
+        mode === 'watchlist'
+          ? await fetchWatchlistNewsFeedNewer({ cursor, limit: ANCHORED_FEED_PAGE_LIMIT })
+          : await fetchAllNewsFeedNewer({ cursor, limit: ANCHORED_FEED_PAGE_LIMIT })
+      return mapNewsFeedAroundPage(page)
+    },
+    [mode],
+  )
+
+  const fetchOlder = useCallback(
+    async (cursor: string) => {
+      const page =
+        mode === 'watchlist'
+          ? await fetchWatchlistNewsFeedOlder({ cursor, limit: ANCHORED_FEED_PAGE_LIMIT })
+          : await fetchAllNewsFeedOlder({ cursor, limit: ANCHORED_FEED_PAGE_LIMIT })
+      return mapNewsFeedAroundPage(page)
+    },
+    [mode],
+  )
+
+  const {
+    items,
+    feedMode,
+    latestPagination: pagination,
+    loadingAround,
+    loadingNewer,
+    loadingOlder,
+    aroundError,
+    anchoredWarmComplete,
+    hasMoreDown,
+    hasMoreUp,
+    loadNewer,
+    loadOlder,
+    replaceLatestItems,
+    appendLatestItems,
+  } = useAnchoredFeed<StockNewsItem>({
+    scopeKey: mode,
+    anchorId: bootstrap === 'anchored' ? focusNewsId : null,
+    initialItems: [],
+    initialLatestPagination: EMPTY_PAGINATION,
+    anchoredEnabled: bootstrap === 'anchored',
+    fetchAround,
+    fetchNewer,
+    fetchOlder,
+  })
 
   useEffect(() => {
     if (needsLogin) {
@@ -56,6 +139,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   useEffect(() => {
     restoredOnceRef.current = false
     clearNewsFeedConsumedMemory()
+    setBootstrap('pending')
   }, [mode])
 
   useEffect(() => {
@@ -70,11 +154,11 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
 
     const run = async () => {
       if (needsLogin) {
-        setItems([])
-        setPagination(EMPTY_PAGINATION)
+        replaceLatestItems([], EMPTY_PAGINATION)
         setError(null)
         setLoadMoreError(null)
         setRestoredScrollTop(null)
+        setBootstrap('cursor')
         setLoading(false)
         return
       }
@@ -83,27 +167,34 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
         const session = consumeNewsFeedSession(focusNewsIdRef.current, mode)
         if (session) {
           restoredOnceRef.current = true
-          setItems(session.items)
-          setPagination(session.pagination)
+          replaceLatestItems(session.items, session.pagination)
           setRestoredScrollTop(session.scrollTop)
           setError(null)
           setLoadMoreError(null)
+          setBootstrap('session')
           setLoading(false)
           return
         }
       }
 
       setRestoredScrollTop(null)
-      setLoading(true)
       setError(null)
       setLoadMoreError(null)
+
+      if (focusNewsIdRef.current) {
+        setBootstrap('anchored')
+        setLoading(false)
+        return
+      }
+
+      setBootstrap('cursor')
+      setLoading(true)
       try {
         const fetchPage =
           mode === 'watchlist' ? fetchWatchlistNewsFeedCursor : fetchAllNewsFeedCursor
-        const page = await fetchPage({ limit: 20 })
+        const page = await fetchPage({ limit: ANCHORED_FEED_PAGE_LIMIT })
         if (cancelled || requestId !== requestIdRef.current) return
-        setItems(page.items)
-        setPagination(page.pagination)
+        replaceLatestItems(page.items, page.pagination)
       } catch (e) {
         if (cancelled || requestId !== requestIdRef.current) return
         const fallback =
@@ -111,8 +202,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
             ? '관심종목 뉴스를 불러오지 못했습니다.'
             : '전체 뉴스를 불러오지 못했습니다.'
         setError(e instanceof Error ? e.message : fallback)
-        setItems([])
-        setPagination(EMPTY_PAGINATION)
+        replaceLatestItems([], EMPTY_PAGINATION)
       } finally {
         if (!cancelled && requestId === requestIdRef.current) {
           setLoading(false)
@@ -124,25 +214,38 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     return () => {
       cancelled = true
     }
-  }, [mode, needsLogin])
+  }, [mode, needsLogin, focusNewsId, replaceLatestItems])
 
   const loadMore = useCallback(async () => {
-    if (needsLogin || !pagination.hasNext || !pagination.nextCursor || loadingMore) return
-    setLoadingMore(true)
+    if (needsLogin) return
+
+    if (feedMode === 'anchored') {
+      setLoadMoreError(null)
+      try {
+        await loadOlder()
+      } catch (e) {
+        setLoadMoreError(
+          e instanceof Error
+            ? e.message
+            : mode === 'watchlist'
+              ? '관심종목 뉴스를 더 불러오지 못했습니다.'
+              : '뉴스를 더 불러오지 못했습니다.',
+        )
+      }
+      return
+    }
+
+    if (!pagination.hasNext || !pagination.nextCursor || loadingLatestMore) return
+    setLoadingLatestMore(true)
     setLoadMoreError(null)
     try {
       const fetchPage =
         mode === 'watchlist' ? fetchWatchlistNewsFeedCursor : fetchAllNewsFeedCursor
       const page = await fetchPage({
-        limit: 20,
+        limit: ANCHORED_FEED_PAGE_LIMIT,
         cursor: pagination.nextCursor,
       })
-      setItems((prev) => {
-        const seen = new Set(prev.map((item) => item.id))
-        const next = page.items.filter((item) => !seen.has(item.id))
-        return [...prev, ...next]
-      })
-      setPagination(page.pagination)
+      appendLatestItems(page.items, page.pagination)
     } catch (e) {
       setLoadMoreError(
         e instanceof Error
@@ -152,19 +255,40 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
             : '뉴스를 더 불러오지 못했습니다.',
       )
     } finally {
-      setLoadingMore(false)
+      setLoadingLatestMore(false)
     }
-  }, [loadingMore, mode, needsLogin, pagination.hasNext, pagination.nextCursor])
+  }, [
+    needsLogin,
+    feedMode,
+    loadOlder,
+    pagination,
+    loadingLatestMore,
+    mode,
+    appendLatestItems,
+  ])
+
+  const feedError = error ?? (bootstrap === 'anchored' ? aroundError : null)
+  const feedReady = bootstrap !== 'anchored' || (anchoredWarmComplete && !loadingAround)
+  const loadingMore = feedMode === 'anchored' ? loadingOlder : loadingLatestMore
+  const hasMore = feedMode === 'anchored' ? hasMoreDown : pagination.hasNext
 
   return {
     items,
+    feedMode,
     pagination,
-    loading,
+    loading: loading || (bootstrap === 'anchored' && loadingAround && items.length === 0),
     loadingMore,
-    error,
+    loadingAround,
+    loadingNewer,
+    error: feedError,
     loadMoreError,
     loadMore,
+    loadNewer,
     needsLogin,
     restoredScrollTop,
+    feedReady,
+    hasMore,
+    hasMoreDown,
+    hasMoreUp,
   }
 }
