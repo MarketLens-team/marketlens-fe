@@ -95,7 +95,9 @@ function filterMockStatementsForParams(params?: FetchPersonMentionsParams): Pers
     const t = normalizeStockCodeForMatch(params.stockCode)
     rows = rows.filter((r) => personStatementRelatesToStock(r, t))
   }
-  return rows
+  return [...rows].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  )
 }
 
 /** Mock 전용 커서 `o:{startIndex}` */

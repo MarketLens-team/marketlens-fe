@@ -79,6 +79,23 @@ export function mapFrequentStockList(
   return mentionsFallback ? aggregateFrequentStocks(mentionsFallback) : []
 }
 
+function publishedAtMs(mention: PersonMention): number {
+  const t = Date.parse(mention.publishedAt)
+  return Number.isFinite(t) ? t : 0
+}
+
+/** 커서 페이지 합친 뒤 최신순·중복 제거 */
+export function normalizePersonMentionsList(mentions: PersonMention[]): PersonMention[] {
+  const seen = new Set<string>()
+  const unique: PersonMention[] = []
+  for (const mention of mentions) {
+    if (seen.has(mention.id)) continue
+    seen.add(mention.id)
+    unique.push(mention)
+  }
+  return unique.sort((a, b) => publishedAtMs(b) - publishedAtMs(a))
+}
+
 export function aggregateFrequentStocks(mentions: PersonMention[], limit = 12): PersonFrequentStock[] {
   const counts = new Map<string, PersonFrequentStock>()
 
@@ -109,7 +126,7 @@ export function mapPersonTrackerPage(
 }
 
 export function mapPersonMentionsCursor(page: PersonMentionCursorResponse) {
-  const mappedMentions = page.items.map(mapPersonStatement)
+  const mappedMentions = normalizePersonMentionsList(page.items.map(mapPersonStatement))
   return {
     mentions: mappedMentions,
     mentionsNextCursor: page.nextCursor ?? null,
@@ -163,9 +180,12 @@ export function mergePersonMentionsFeedPage(
   newStatements: PersonStatementResponse[],
   cursorMeta: { nextCursor: string | null; hasNext: boolean },
 ): PersonMentionsFeedData {
-  const more = newStatements.map(mapPersonStatement)
+  const merged = normalizePersonMentionsList([
+    ...prev.mentions,
+    ...newStatements.map(mapPersonStatement),
+  ])
   return {
-    mentions: [...prev.mentions, ...more],
+    mentions: merged,
     mentionsNextCursor: cursorMeta.nextCursor,
     mentionsHasNext: cursorMeta.hasNext,
   }
@@ -177,8 +197,10 @@ export function mergePersonTrackerMentionsPage(
   newStatements: PersonStatementResponse[],
   cursorMeta: { nextCursor: string | null; hasNext: boolean },
 ): PersonTrackerPageData {
-  const more = newStatements.map(mapPersonStatement)
-  const mergedMentions = [...prev.mentions, ...more]
+  const mergedMentions = normalizePersonMentionsList([
+    ...prev.mentions,
+    ...newStatements.map(mapPersonStatement),
+  ])
   return {
     ...prev,
     mentions: mergedMentions,

@@ -87,6 +87,7 @@ export function StockDetailContent({
   const [interested, setInterested] = useState(watchlistInterested)
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
+  const didScrollToNewsFocusRef = useRef<string | null>(null)
   const useApiNewsFilter = !isMockDataSource()
 
   useEffect(() => {
@@ -147,18 +148,23 @@ export function StockDetailContent({
     if (!focusNewsId) return
     setNewsFilter('all')
     skipNewsFilterFetchRef.current = true
+    didScrollToNewsFocusRef.current = null
   }, [focusNewsId, stock.code])
 
   useEffect(() => {
     if (!focusNewsId || loadingNewsFilter) return
+    if (didScrollToNewsFocusRef.current === focusNewsId) return
     const hasTarget = displayNews.some((item) => item.id === focusNewsId)
     if (!hasTarget) return
 
     const frame = window.requestAnimationFrame(() => {
-      document.getElementById(`stock-news-${focusNewsId}`)?.scrollIntoView({
+      const el = document.getElementById(`stock-news-${focusNewsId}`)
+      if (!el) return
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       })
+      didScrollToNewsFocusRef.current = focusNewsId
     })
     return () => window.cancelAnimationFrame(frame)
   }, [focusNewsId, displayNews, loadingNewsFilter])

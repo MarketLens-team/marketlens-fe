@@ -54,6 +54,8 @@ export function usePersonStatementFocus(
   const loadingMore = options?.loadingMore ?? false
   const onLoadMore = options?.onLoadMore
   const loadAttemptsRef = useRef(0)
+  /** 포커스 대상으로 초기 스크롤 1회만 — 이후 무한 스크롤은 사용자 제어 */
+  const didScrollToFocusRef = useRef<string | null>(null)
 
   const clearFocusStatement = useCallback(() => {
     if (!searchParams.has('statementId')) return
@@ -68,17 +70,20 @@ export function usePersonStatementFocus(
 
   useEffect(() => {
     loadAttemptsRef.current = 0
+    didScrollToFocusRef.current = null
   }, [focusStatementId])
 
   useEffect(() => {
-    if (!focusStatementId || loading || loadingMore || hasTarget) return
+    if (!focusStatementId || loading || hasTarget) return
     if (!hasMore || !onLoadMore || loadAttemptsRef.current >= MAX_AUTO_LOAD_ATTEMPTS) return
+    if (loadingMore) return
     loadAttemptsRef.current += 1
     void onLoadMore()
   }, [focusStatementId, loading, loadingMore, hasTarget, hasMore, onLoadMore])
 
   useEffect(() => {
     if (!focusStatementId || loading || !hasTarget) return
+    if (didScrollToFocusRef.current === focusStatementId) return
 
     let cancelled = false
     let timeoutId: number | undefined
@@ -86,7 +91,10 @@ export function usePersonStatementFocus(
 
     const attemptScroll = (triesLeft: number) => {
       if (cancelled) return
-      if (scrollPersonStatementIntoView(focusStatementId)) return
+      if (scrollPersonStatementIntoView(focusStatementId)) {
+        didScrollToFocusRef.current = focusStatementId
+        return
+      }
       if (triesLeft > 0) {
         timeoutId = window.setTimeout(() => attemptScroll(triesLeft - 1), SCROLL_RETRY_MS)
       }

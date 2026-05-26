@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   fetchPersonStatementsCursor,
   fetchPersonTrackerFeedPage,
@@ -15,6 +15,7 @@ export function usePersonTracker(feedRange: PersonMentionsRange) {
   })
   const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMoreMentions, setLoadingMoreMentions] = useState(false)
+  const loadMoreInFlightRef = useRef(false)
 
   useEffect(() => {
     if (asyncResult.data) setViewData(asyncResult.data)
@@ -25,12 +26,16 @@ export function usePersonTracker(feedRange: PersonMentionsRange) {
     : (viewData ?? asyncResult.data)
 
   const loadMoreMentions = useCallback(async () => {
+    if (loadMoreInFlightRef.current) return
     const base = displayData
-    if (!base?.mentionsHasNext || !base.mentionsNextCursor || loadingMoreMentions) return
+    if (!base?.mentionsHasNext || !base.mentionsNextCursor) return
+
+    const cursorUsed = base.mentionsNextCursor
+    loadMoreInFlightRef.current = true
     setLoadingMoreMentions(true)
     try {
       const chunk = await fetchPersonStatementsCursor({
-        cursor: base.mentionsNextCursor,
+        cursor: cursorUsed,
         limit: 50,
         range: feedRange,
       })
@@ -43,9 +48,10 @@ export function usePersonTracker(feedRange: PersonMentionsRange) {
         })
       })
     } finally {
+      loadMoreInFlightRef.current = false
       setLoadingMoreMentions(false)
     }
-  }, [displayData, loadingMoreMentions, asyncResult.data, feedRange])
+  }, [displayData, asyncResult.data, feedRange])
 
   return {
     data: displayData,

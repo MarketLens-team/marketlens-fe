@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchPersonMentionsFeedPage, fetchPersonMentionsCursorByPersonId } from '../data/clients/personClient'
 import { mergePersonMentionsFeedPage } from '../data/mappers/personMapper'
 import type { PersonMentionsFeedData, PersonMentionsRange } from '../data/types/person'
@@ -18,6 +18,7 @@ export function usePersonDetail(personId: number, feedRange: PersonMentionsRange
   })
   const [viewData, setViewData] = useState<PersonMentionsFeedData | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
+  const loadMoreInFlightRef = useRef(false)
 
   useEffect(() => {
     if (asyncResult.data) setViewData(asyncResult.data)
@@ -28,12 +29,16 @@ export function usePersonDetail(personId: number, feedRange: PersonMentionsRange
     : (viewData ?? asyncResult.data)
 
   const loadMore = useCallback(async () => {
+    if (loadMoreInFlightRef.current) return
     const base = displayData
-    if (!base?.mentionsHasNext || !base.mentionsNextCursor || loadingMore) return
+    if (!base?.mentionsHasNext || !base.mentionsNextCursor) return
+
+    const cursorUsed = base.mentionsNextCursor
+    loadMoreInFlightRef.current = true
     setLoadingMore(true)
     try {
       const chunk = await fetchPersonMentionsCursorByPersonId(personId, {
-        cursor: base.mentionsNextCursor,
+        cursor: cursorUsed,
         limit: PERSON_FEED_PAGE_LIMIT,
         range: feedRange,
       })
@@ -46,9 +51,10 @@ export function usePersonDetail(personId: number, feedRange: PersonMentionsRange
         })
       })
     } finally {
+      loadMoreInFlightRef.current = false
       setLoadingMore(false)
     }
-  }, [displayData, loadingMore, asyncResult.data, personId, feedRange])
+  }, [displayData, asyncResult.data, personId, feedRange])
 
   return {
     data: displayData,
