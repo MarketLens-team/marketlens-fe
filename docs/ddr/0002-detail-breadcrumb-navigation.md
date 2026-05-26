@@ -26,6 +26,17 @@
 4. 인물 상세의 **좌열 ‹ 버튼·offset 정렬 해크**는 제거한다. 3열 그리드는 브레드크럼 아래에서 동일 `padding-top` 없이 정렬한다.
 5. 상단 **종목** 탭·사이드바 **종목 검색** 진입점은 **`/stock`(목록)** 으로 통일한다. 목록·상세 모두 “종목” 탭 active.
 
+## 색·타이포 (2026-05-26)
+
+| 요소 | 토큰 | 의도 |
+|------|------|------|
+| 부모 링크 | `--color-text-primary` | 경로 안내 — 본문과 같은 흰색 |
+| 부모 호버·focus | `--color-primary` | 상단 탭 active·`PillButton` primary와 동일 — 클릭 가능 |
+| 현재 페이지 | `--color-primary` + lg/semibold | 지금 보는 리소스 강조 |
+| 구분자 `/` | `--color-text-muted` | 계층만 구분, 시선은 링크·현재에 |
+
+구현: `src/components/common/Breadcrumb.module.css` · 상세: [changelog/2026-05-26-style-breadcrumb-colors.md](../changelog/2026-05-26-style-breadcrumb-colors.md)
+
 ## 왜 ‹ 대신 브레드크럼인가
 
 | ‹ (이전) | 브레드크럼 (이후) |

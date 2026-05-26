@@ -23,16 +23,19 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   text-decoration: none;
   transition: color var(--duration-fast) ease;
 }
 
-.link:hover {
-  color: var(--color-text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--color-primary);
+  }
 }
 
 .link:focus-visible {
+  color: var(--color-primary);
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
@@ -42,7 +45,7 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
-  color: var(--color-text-primary);
+  color: var(--color-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
