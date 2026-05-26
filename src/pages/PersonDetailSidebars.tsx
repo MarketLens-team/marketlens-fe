@@ -3,7 +3,6 @@ import { memo } from 'react'
 import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentStocksPanel'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import type { PersonFrequentStock, PersonMentionsRange, PersonTopItem } from '../data/types/person'
-import detailStyles from './PersonDetailPage.module.css'
 import gridStyles from './personPageLayout.module.css'
 
 interface PersonDetailLeftSidebarProps {
@@ -27,14 +26,14 @@ export const PersonDetailLeftSidebar = memo(function PersonDetailLeftSidebar({
   showInitialLoading,
 }: PersonDetailLeftSidebarProps) {
   return (
-    <div className={detailStyles.detailLeftSticky}>
+    <aside className={clsx(gridStyles.leftAside, gridStyles.sideSticky)}>
       <PersonTop5Panel
         items={items}
         range={range}
         onRangeChange={onRangeChange}
         loading={showInitialLoading}
       />
-    </div>
+    </aside>
   )
 })
 
@@ -45,7 +44,7 @@ export const PersonDetailRightSidebar = memo(function PersonDetailRightSidebar({
   showInitialLoading,
 }: PersonDetailRightSidebarProps) {
   return (
-    <aside className={detailStyles.detailRightPanel}>
+    <aside className={clsx(gridStyles.rightAside, gridStyles.sideSticky)}>
       <PersonFrequentStocksPanel
         items={items}
         title="함께 언급된 종목"

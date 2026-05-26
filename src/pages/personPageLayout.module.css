@@ -1,12 +1,12 @@
 /* 인물 발언 목록·상세 공통 3열 그리드 — 종목 상세와 동일: Layout main 스크롤 + sticky 사이드 */
 
+/* 3열 — FAB는 그리드 밖 fixed(PageFabRail). 4열 fabRail 은 우측만 넓어져 비대칭 */
 .mainGrid {
   display: grid;
   grid-template-columns:
     minmax(14rem, 18rem)
     minmax(0, 1fr)
-    minmax(14rem, 18rem)
-    var(--layout-back-to-top-reserve);
+    minmax(14rem, 18rem);
   column-gap: var(--space-4);
   row-gap: 0;
   align-items: start;
@@ -16,8 +16,8 @@
 
 .mainGrid > .leftAside,
 .mainGrid > .feedCol,
-.mainGrid > .rightAside,
-.mainGrid > .fabRail {
+.mainGrid > .detailFeedCol,
+.mainGrid > .rightAside {
   grid-row: 1;
   align-self: start;
   min-width: 0;
@@ -25,8 +25,17 @@
   padding: 0;
 }
 
-.fabRail {
-  grid-column: 4;
+.mainGrid > .leftAside {
+  grid-column: 1;
+}
+
+.mainGrid > .feedCol,
+.mainGrid > .detailFeedCol {
+  grid-column: 2;
+}
+
+.mainGrid > .rightAside {
+  grid-column: 3;
 }
 
 .leftAside,
@@ -104,8 +113,7 @@
     grid-template-columns:
       minmax(11rem, 14rem)
       minmax(0, 1fr)
-      minmax(11rem, 14rem)
-      var(--layout-back-to-top-reserve);
+      minmax(11rem, 14rem);
     column-gap: var(--space-3);
   }
 }
@@ -117,13 +125,10 @@
 
   .mainGrid > .leftAside,
   .mainGrid > .feedCol,
-  .mainGrid > .rightAside,
-  .mainGrid > .fabRail {
-    grid-row: auto;
-  }
-
-  .fabRail {
+  .mainGrid > .detailFeedCol,
+  .mainGrid > .rightAside {
     grid-column: 1;
+    grid-row: auto;
   }
 
   .sideSticky {

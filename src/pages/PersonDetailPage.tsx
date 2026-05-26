@@ -161,8 +161,7 @@ export default function PersonDetailPage() {
         ) : null}
 
         {pageReady ? (
-          <div className={styles.detailGrid}>
-            <div className={clsx(styles.detailSideSpacer, styles.detailSideSpacerStart)} aria-hidden />
+          <div className={gridStyles.mainGrid}>
             <PersonDetailLeftSidebar
               items={topPersons ?? []}
               range={topRange}
@@ -299,7 +298,6 @@ export default function PersonDetailPage() {
               showInitialLoading={stocksSidebarInitialLoading}
             />
 
-            <div className={clsx(styles.detailSideSpacer, styles.detailSideSpacerEnd)} aria-hidden />
           </div>
         ) : null}
 

@@ -115,7 +115,6 @@ export default function PersonTrackerPage() {
               showInitialLoading={stocksSidebarInitialLoading}
             />
 
-            <div className={gridStyles.fabRail} aria-hidden />
           </div>
         ) : null}
 
