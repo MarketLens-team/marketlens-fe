@@ -30,31 +30,57 @@ const SENTIMENT_CLASS = {
   neu: styles.sentNeu,
 } as const
 
-function formatMetricValue(item: StockRankingItem, metric: StockRankingMetric): string {
-  if (metric === 'mention') {
-    return item.mentionCount24h.toLocaleString('ko-KR')
-  }
-  if (metric === 'sentiment') {
-    return formatStockScore(item.sentimentScore24h)
-  }
-  if (metric === 'price') {
-    return item.price > 0 ? formatPrice(item.price) : '—'
-  }
-  return item.price > 0 ? formatPercent(item.changePercent) : '—'
+interface RankingRowValues {
+  primary: string
+  secondary: string | null
+  primaryTone?: 'up' | 'down' | 'sentiment'
+  secondaryTone?: 'up' | 'down'
+  sentimentKey?: keyof typeof SENTIMENT_CLASS
 }
 
-function metricToneClass(item: StockRankingItem, metric: StockRankingMetric): string | undefined {
-  if (metric === 'sentiment') {
-    return SENTIMENT_CLASS[buzzSentimentClass(item.sentimentScore24h)]
-  }
-  if (metric === 'change') {
-    if (item.price <= 0) return undefined
-    return item.changePercent >= 0 ? styles.valueUp : styles.valueDown
-  }
+function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric): RankingRowValues {
+  const hasPrice = item.price > 0
+  const priceUp = item.changePercent >= 0
+  const mentionUp = item.mentionChangeRate24h >= 0
+
   if (metric === 'mention') {
-    if (item.mentionChangeRate24h === 0) return undefined
-    return item.mentionChangeRate24h >= 0 ? styles.valueUp : styles.valueDown
+    return {
+      primary: item.mentionCount24h.toLocaleString('ko-KR'),
+      secondary: formatPercent(item.mentionChangeRate24h),
+      secondaryTone: mentionUp ? 'up' : 'down',
+    }
   }
+
+  if (metric === 'sentiment') {
+    const sentKey = buzzSentimentClass(item.sentimentScore24h)
+    return {
+      primary: formatStockScore(item.sentimentScore24h),
+      secondary: hasPrice ? formatPercent(item.changePercent) : null,
+      primaryTone: 'sentiment',
+      sentimentKey: sentKey,
+      secondaryTone: priceUp ? 'up' : 'down',
+    }
+  }
+
+  if (metric === 'change') {
+    return {
+      primary: hasPrice ? formatPercent(item.changePercent) : '—',
+      secondary: hasPrice ? formatPrice(item.price) : null,
+      primaryTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
+    }
+  }
+
+  return {
+    primary: hasPrice ? formatPrice(item.price) : '—',
+    secondary: hasPrice ? formatPercent(item.changePercent) : null,
+    secondaryTone: priceUp ? 'up' : 'down',
+  }
+}
+
+function toneClass(tone?: 'up' | 'down' | 'sentiment', sentimentKey?: keyof typeof SENTIMENT_CLASS) {
+  if (tone === 'sentiment' && sentimentKey) return SENTIMENT_CLASS[sentimentKey]
+  if (tone === 'up') return styles.valueUp
+  if (tone === 'down') return styles.valueDown
   return undefined
 }
 
@@ -74,8 +100,7 @@ export function StockRankingCard({ title, items, metric, onMoreClick }: StockRan
       </div>
       <ol className={styles.list}>
         {preview.map((item, index) => {
-          const hasPrice = item.price > 0
-          const priceUp = item.changePercent >= 0
+          const values = getRankingRowValues(item, metric)
           return (
             <li key={item.code}>
               <Link to={buildStockDetailPath(item.code)} className={styles.item}>
@@ -91,27 +116,22 @@ export function StockRankingCard({ title, items, metric, onMoreClick }: StockRan
                   <span className={styles.code}>{item.code}</span>
                 </span>
                 <span className={styles.values}>
-                  <span className={clsx(styles.metric, metricToneClass(item, metric))}>
-                    {formatMetricValue(item, metric)}
+                  <span
+                    className={clsx(
+                      styles.valuePrimary,
+                      toneClass(values.primaryTone, values.sentimentKey),
+                    )}
+                  >
+                    {values.primary}
                   </span>
-                  {hasPrice && metric !== 'price' ? (
+                  {values.secondary ? (
                     <span
                       className={clsx(
-                        styles.change,
-                        priceUp ? styles.valueUp : styles.valueDown,
+                        styles.valueSecondary,
+                        toneClass(values.secondaryTone),
                       )}
                     >
-                      {formatPercent(item.changePercent)}
-                    </span>
-                  ) : null}
-                  {metric === 'price' && hasPrice ? (
-                    <span
-                      className={clsx(
-                        styles.change,
-                        priceUp ? styles.valueUp : styles.valueDown,
-                      )}
-                    >
-                      {formatPercent(item.changePercent)}
+                      {values.secondary}
                     </span>
                   ) : null}
                 </span>
