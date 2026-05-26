@@ -8,7 +8,7 @@
 |------|------|
 | 브랜치 | `feat/design-refresh` |
 | 작업일 | 2026-05-26 |
-| FE 커밋 | `b3e6bd8` · `85dd069` · (워치리스트 부제목 제거·문서) |
+| FE 커밋 | `b3e6bd8` · `85dd069` · `7e0ac37` |
 
 ## 요약
 
@@ -24,7 +24,7 @@
 |------|------|
 | `b3e6bd8` | 카드 chevron 제거, `radius-lg`, `PageHeader` 제거, 스켈레톤 카드 radius |
 | `85dd069` | `DashboardLoginPrompt` · `useAuthStore` 기반 포트폴리오·워치리스트 분기 |
-| — | 워치리스트 `CardSectionHeader` subtitle 제거 |
+| `7e0ac37` | 워치리스트 `CardSectionHeader` subtitle 제거 · changelog |
 
 ## UI 컴포넌트
 
