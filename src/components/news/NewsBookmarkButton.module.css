@@ -25,9 +25,9 @@
 }
 
 .btnActive {
-  color: var(--color-primary);
-  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border-default));
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-elevated));
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 50%, var(--color-border-default));
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-bg-elevated));
 }
 
 .icon {
@@ -37,14 +37,14 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover:not(:disabled) {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    box-shadow: var(--interactive-ring-hover);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 40%, transparent);
   }
 }
 
 .btn:focus-visible {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--interactive-ring-focus);
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 55%, transparent);
 }
