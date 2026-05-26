@@ -42,24 +42,17 @@ interface UsePersonStatementFocusOptions {
   loading?: boolean
 }
 
-/** 검색·트래커 `?statementId=` — 해당 발언까지 로드·스크롤·초록 강조, 바깥 클릭 시 쿼리 해제 */
+/** 검색·트래커 `?statementId=` — 해당 발언까지 로드·스크롤·초록 강조 (클릭해도 쿼리 유지 → anchored 피드 유지) */
 export function usePersonStatementFocus(
   mentions: MentionWithId[],
   options?: UsePersonStatementFocusOptions,
 ) {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const focusStatementId = searchParams.get('statementId')?.trim() || null
   const loading = options?.loading ?? false
   /** 포커스 대상으로 초기 스크롤 1회만 — 이후 무한 스크롤은 사용자 제어 */
   const didScrollToFocusRef = useRef<string | null>(null)
   const [focusScrollSettled, setFocusScrollSettled] = useState(() => !focusStatementId)
-
-  const clearFocusStatement = useCallback(() => {
-    if (!searchParams.has('statementId')) return
-    const next = new URLSearchParams(searchParams)
-    next.delete('statementId')
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
 
   const hasTarget = Boolean(
     focusStatementId &&
@@ -102,26 +95,11 @@ export function usePersonStatementFocus(
     }
   }, [focusStatementId, mentions, loading, hasTarget])
 
-  useEffect(() => {
-    if (!focusStatementId) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const focusedEl = document.getElementById(personStatementElementId(focusStatementId))
-      if (focusedEl?.contains(target)) return
-      clearFocusStatement()
-    }
-
-    document.addEventListener('pointerdown', onPointerDown, true)
-    return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [focusStatementId, clearFocusStatement])
-
   const isStatementFocused = useCallback(
     (statementId: string) =>
       focusStatementId != null && String(focusStatementId) === String(statementId),
     [focusStatementId],
   )
 
-  return { focusStatementId, clearFocusStatement, isStatementFocused, focusScrollSettled }
+  return { focusStatementId, isStatementFocused, focusScrollSettled }
 }

@@ -13,6 +13,32 @@ export function getLayoutScrollRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>(SCROLL_ROOT_SELECTOR)
 }
 
+function parseRootMarginPx(rootMargin: string, edge: 'top' | 'bottom'): number {
+  const parts = rootMargin.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 0
+  const index = parts.length === 4 ? (edge === 'top' ? 0 : 2) : 0
+  const value = parseFloat(parts[index] ?? '0')
+  return Number.isFinite(value) ? value : 0
+}
+
+function isSentinelInLoadZone(
+  sentinel: HTMLElement,
+  root: HTMLElement | null,
+  rootMargin: string,
+  direction: 'up' | 'down',
+): boolean {
+  const rect = sentinel.getBoundingClientRect()
+  const rootRect = (root ?? document.documentElement).getBoundingClientRect()
+
+  if (direction === 'down') {
+    const margin = parseRootMarginPx(rootMargin, 'bottom')
+    return rect.top <= rootRect.bottom + margin
+  }
+
+  const margin = parseRootMarginPx(rootMargin, 'top')
+  return rect.bottom >= rootRect.top - margin
+}
+
 interface UseInfiniteScrollOptions {
   enabled: boolean
   hasMore: boolean
@@ -48,9 +74,10 @@ export function useInfiniteScroll({
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null)
   const onLoadMoreRef = useRef(onLoadMore)
   const userScrolledUpRef = useRef(false)
-  const awaitingSentinelExitRef = useRef(false)
   const lastLoadStartedAtRef = useRef(0)
   const touchStartYRef = useRef(0)
+  const wasLoadingRef = useRef(false)
+  const postLoadRetryDoneRef = useRef(false)
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
@@ -58,10 +85,27 @@ export function useInfiniteScroll({
 
   useEffect(() => {
     userScrolledUpRef.current = false
-    awaitingSentinelExitRef.current = false
     lastLoadStartedAtRef.current = 0
     touchStartYRef.current = 0
+    wasLoadingRef.current = false
+    postLoadRetryDoneRef.current = false
   }, [enabled, requireUserScrollUp, direction])
+
+  useEffect(() => {
+    if (loading) postLoadRetryDoneRef.current = false
+  }, [loading])
+
+  const tryLoadMore = useCallback(() => {
+    if (!enabled || !hasMore || loading) return false
+    if (requireUserScrollUp && direction === 'up' && !userScrolledUpRef.current) return false
+
+    const now = Date.now()
+    if (now - lastLoadStartedAtRef.current < loadCooldownMs) return false
+
+    lastLoadStartedAtRef.current = now
+    onLoadMoreRef.current()
+    return true
+  }, [enabled, hasMore, loading, requireUserScrollUp, direction, loadCooldownMs])
 
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     setSentinelEl(node)
@@ -107,23 +151,8 @@ export function useInfiniteScroll({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const intersecting = entries[0]?.isIntersecting ?? false
-        if (!intersecting) {
-          awaitingSentinelExitRef.current = false
-          return
-        }
-        if (awaitingSentinelExitRef.current) return
-        if (!hasMore || loading) return
-        if (requireUserScrollUp && direction === 'up' && !userScrolledUpRef.current) return
-
-        const now = Date.now()
-        if (now - lastLoadStartedAtRef.current < loadCooldownMs) return
-
-        lastLoadStartedAtRef.current = now
-        if (direction === 'up') {
-          awaitingSentinelExitRef.current = true
-        }
-        onLoadMoreRef.current()
+        if (!entries[0]?.isIntersecting) return
+        tryLoadMore()
       },
       { root, rootMargin: resolvedRootMargin, threshold: 0 },
     )
@@ -132,14 +161,42 @@ export function useInfiniteScroll({
     return () => observer.disconnect()
   }, [
     enabled,
-    hasMore,
-    loading,
     resolvedRootMargin,
     scrollRootSelector,
     sentinelEl,
-    requireUserScrollUp,
+    tryLoadMore,
+  ])
+
+  /** IO가 재발화되지 않을 때 — 로드 1회 끝난 뒤 센티넬이 여전히 보이면 한 번만 재시도 */
+  useEffect(() => {
+    const wasLoading = wasLoadingRef.current
+    wasLoadingRef.current = loading
+
+    if (!wasLoading || loading || !enabled || !sentinelEl || !hasMore || postLoadRetryDoneRef.current) {
+      return
+    }
+
+    const root = scrollRootSelector
+      ? document.querySelector<HTMLElement>(scrollRootSelector)
+      : getLayoutScrollRoot()
+
+    const rafId = requestAnimationFrame(() => {
+      if (postLoadRetryDoneRef.current) return
+      if (!isSentinelInLoadZone(sentinelEl, root, resolvedRootMargin, direction)) return
+      postLoadRetryDoneRef.current = true
+      tryLoadMore()
+    })
+
+    return () => cancelAnimationFrame(rafId)
+  }, [
+    loading,
+    enabled,
+    sentinelEl,
+    hasMore,
+    scrollRootSelector,
+    resolvedRootMargin,
     direction,
-    loadCooldownMs,
+    tryLoadMore,
   ])
 
   return sentinelRef

@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  ANCHORED_FEED_MAX_PREFETCH_PAGES,
   ANCHORED_FEED_PAGE_LIMIT,
-  ANCHORED_WARM_MAX_ROUNDS,
   EMPTY_ANCHORED_PAGINATION,
   type AnchoredFeedPagination,
   type FeedMode,
 } from '../data/types/anchoredFeed'
-import { correctOlderPaginationFromItems } from '../lib/anchoredFeedCursor'
-import { shouldWarmAnchoredViewport } from '../lib/anchoredFeedMeasure'
+import { anchoredCursorsEqual, mergeAnchoredPaginationForDirection } from '../lib/anchoredFeedCursor'
 import { mergeFeedItemsById, mergeFeedItemsWithCount } from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
@@ -41,17 +38,13 @@ interface UseAnchoredFeedOptions<TItem> {
   fetchOlder: (cursor: string) => Promise<AnchoredFeedPage<TItem>>
 }
 
-function shouldPrefetchNextPage(batchSize: number, pageLimit: number, hasMore: boolean) {
-  return batchSize > 0 && batchSize < pageLimit && hasMore
-}
-
 export function useAnchoredFeed<TItem extends { id: string; publishedAt: string }>({
   scopeKey,
   anchorId,
   initialItems,
   initialLatestPagination,
   anchoredEnabled = true,
-  pageLimit = ANCHORED_FEED_PAGE_LIMIT,
+  pageLimit: _pageLimit = ANCHORED_FEED_PAGE_LIMIT, // API limit — 호출부와 시그니처 유지
   fetchAround,
   fetchNewer,
   fetchOlder,
@@ -65,12 +58,12 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   const [loadingNewer, setLoadingNewer] = useState(false)
   const [loadingOlder, setLoadingOlder] = useState(false)
   const [aroundError, setAroundError] = useState<string | null>(null)
-  const [anchoredWarmComplete, setAnchoredWarmComplete] = useState(() => !anchoredEnabled)
 
   const aroundRequestRef = useRef(0)
   const feedModeRef = useRef<FeedMode>('latest')
   const loadNewerInFlightRef = useRef(false)
   const loadOlderInFlightRef = useRef(false)
+  /** 방금 소비한 커서 — 같은 커서로 중복 요청만 막음 (성공 후 null로 풀지 않음) */
   const lastNewerCursorFetchedRef = useRef<string | null>(null)
   const lastOlderCursorFetchedRef = useRef<string | null>(null)
   const initialSnapshotRef = useRef({ items: initialItems, pagination: initialLatestPagination })
@@ -130,12 +123,51 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     resetToLatest,
   ])
 
+  const markCursorConsumed = useCallback(
+    (
+      direction: 'newer' | 'older',
+      requestedCursor: string | null,
+      pagination: AnchoredFeedPagination,
+      added: number,
+    ) => {
+      const ref = direction === 'newer' ? lastNewerCursorFetchedRef : lastOlderCursorFetchedRef
+      const hasMore = direction === 'newer' ? pagination.hasNewer : pagination.hasOlder
+      const nextCursor = direction === 'newer' ? pagination.newerCursor : pagination.olderCursor
+
+      if (!hasMore) {
+        ref.current = nextCursor
+        return
+      }
+
+      if (
+        added > 0 &&
+        requestedCursor != null &&
+        nextCursor != null &&
+        !anchoredCursorsEqual(requestedCursor, nextCursor)
+      ) {
+        ref.current = null
+        return
+      }
+
+      ref.current = requestedCursor
+    },
+    [],
+  )
+
   const applyNewerPage = useCallback(
-    (page: AnchoredFeedPage<TItem>, scrollSnapshot: PrependScrollSnapshot | null) => {
+    (
+      page: AnchoredFeedPage<TItem>,
+      scrollSnapshot: PrependScrollSnapshot | null,
+      requestedCursor: string | null = null,
+    ) => {
+      const prevPagination = anchoredPaginationRef.current
+
       if (page.items.length === 0) {
-        const nextPagination = { ...page.pagination, hasNewer: false, newerCursor: null }
-        setAnchoredPagination(nextPagination)
-        anchoredPaginationRef.current = nextPagination
+        const nextPagination = mergeAnchoredPaginationForDirection(prevPagination, page.pagination, 'newer')
+        const clearedNewer = { ...nextPagination, hasNewer: false, newerCursor: null }
+        setAnchoredPagination(clearedNewer)
+        anchoredPaginationRef.current = clearedNewer
+        markCursorConsumed('newer', requestedCursor, clearedNewer, 0)
         return 0
       }
 
@@ -145,8 +177,21 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         added = merged.added
         return merged.items
       })
-      setAnchoredPagination(page.pagination)
-      anchoredPaginationRef.current = page.pagination
+
+      let pagination = mergeAnchoredPaginationForDirection(prevPagination, page.pagination, 'newer')
+
+      const stuckAtSameCursor =
+        added === 0 &&
+        requestedCursor != null &&
+        anchoredCursorsEqual(pagination.newerCursor, requestedCursor)
+
+      if (stuckAtSameCursor) {
+        pagination = { ...pagination, hasNewer: false, newerCursor: null }
+      }
+
+      setAnchoredPagination(pagination)
+      anchoredPaginationRef.current = pagination
+      markCursorConsumed('newer', requestedCursor, pagination, added)
 
       const scrollRoot = getLayoutScrollRoot()
       if (scrollRoot && scrollSnapshot && added > 0) {
@@ -155,181 +200,55 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       return added
     },
-    [],
+    [markCursorConsumed],
   )
 
-  const applyOlderPage = useCallback((page: AnchoredFeedPage<TItem>, requestedCursor: string | null = null) => {
-    if (page.items.length === 0) {
-      const nextPagination = { ...page.pagination, hasOlder: false, olderCursor: null }
-      setAnchoredPagination(nextPagination)
-      anchoredPaginationRef.current = nextPagination
-      return 0
-    }
+  const applyOlderPage = useCallback(
+    (page: AnchoredFeedPage<TItem>, requestedCursor: string | null = null) => {
+      const prevPagination = anchoredPaginationRef.current
 
-    let added = 0
-    setItems((prev) => {
-      const merged = mergeFeedItemsWithCount(prev, page.items, 'append')
-      added = merged.added
-      return merged.items
-    })
-
-    let pagination = correctOlderPaginationFromItems(page.items, page.pagination)
-
-    const stuckAtSameCursor =
-      added === 0 &&
-      requestedCursor != null &&
-      pagination.olderCursor != null &&
-      pagination.olderCursor === requestedCursor
-
-    if (stuckAtSameCursor) {
-      pagination = { ...pagination, hasOlder: false, olderCursor: null }
-    }
-
-    setAnchoredPagination(pagination)
-    anchoredPaginationRef.current = pagination
-
-    if (!pagination.hasOlder) {
-      lastOlderCursorFetchedRef.current = pagination.olderCursor
-    } else if (added === 0) {
-      lastOlderCursorFetchedRef.current = requestedCursor ?? pagination.olderCursor
-    } else {
-      lastOlderCursorFetchedRef.current = null
-    }
-
-    return added
-  }, [])
-
-  const prefetchNewerPages = useCallback(
-    async (startPagination: AnchoredFeedPagination, scrollSnapshot: PrependScrollSnapshot | null) => {
-      let pagination = startPagination
-      let pagesLoaded = 0
-      let lastBatchSize = pageLimit
-
-      while (
-        pagesLoaded < ANCHORED_FEED_MAX_PREFETCH_PAGES &&
-        shouldPrefetchNextPage(lastBatchSize, pageLimit, pagination.hasNewer) &&
-        pagination.newerCursor
-      ) {
-        const cursor = pagination.newerCursor
-        if (lastNewerCursorFetchedRef.current === cursor) break
-        lastNewerCursorFetchedRef.current = cursor
-
-        const page = await fetchNewerRef.current(cursor)
-        lastBatchSize = applyNewerPage(page, pagesLoaded === 0 ? scrollSnapshot : null)
-        pagination = anchoredPaginationRef.current
-        pagesLoaded += 1
-
-        if (lastBatchSize === 0) break
+      if (page.items.length === 0) {
+        const nextPagination = mergeAnchoredPaginationForDirection(prevPagination, page.pagination, 'older')
+        const clearedOlder = { ...nextPagination, hasOlder: false, olderCursor: null }
+        setAnchoredPagination(clearedOlder)
+        anchoredPaginationRef.current = clearedOlder
+        markCursorConsumed('older', requestedCursor, clearedOlder, 0)
+        return 0
       }
+
+      let added = 0
+      setItems((prev) => {
+        const merged = mergeFeedItemsWithCount(prev, page.items, 'append')
+        added = merged.added
+        return merged.items
+      })
+
+      let pagination = mergeAnchoredPaginationForDirection(prevPagination, page.pagination, 'older')
+
+      const stuckAtSameCursor =
+        added === 0 &&
+        requestedCursor != null &&
+        anchoredCursorsEqual(pagination.olderCursor, requestedCursor)
+
+      if (stuckAtSameCursor) {
+        pagination = { ...pagination, hasOlder: false, olderCursor: null }
+      }
+
+      setAnchoredPagination(pagination)
+      anchoredPaginationRef.current = pagination
+      markCursorConsumed('older', requestedCursor, pagination, added)
+
+      return added
     },
-    [applyNewerPage, pageLimit],
-  )
-
-  const prefetchOlderPages = useCallback(
-    async (startPagination: AnchoredFeedPagination) => {
-      let pagination = startPagination
-      let pagesLoaded = 0
-      let lastBatchSize = pageLimit
-
-      while (
-        pagesLoaded < ANCHORED_FEED_MAX_PREFETCH_PAGES &&
-        shouldPrefetchNextPage(lastBatchSize, pageLimit, pagination.hasOlder) &&
-        pagination.olderCursor
-      ) {
-        const cursor = pagination.olderCursor
-        if (lastOlderCursorFetchedRef.current === cursor) break
-        lastOlderCursorFetchedRef.current = cursor
-
-        const page = await fetchOlderRef.current(cursor)
-        lastBatchSize = applyOlderPage(page, cursor)
-        pagination = anchoredPaginationRef.current
-        pagesLoaded += 1
-
-        if (lastBatchSize === 0) break
-      }
-    },
-    [applyOlderPage, pageLimit],
-  )
-
-  /** around 직후 — newer/older 첫 페이지를 병렬로 받아 적용 */
-  const warmBothSidesOnce = useCallback(
-    async (pagination: AnchoredFeedPagination) => {
-      const newerCursor = pagination.hasNewer ? pagination.newerCursor : null
-      const olderCursor = pagination.hasOlder ? pagination.olderCursor : null
-      if (!newerCursor && !olderCursor) return
-
-      const [newerPage, olderPage] = await Promise.all([
-        newerCursor && lastNewerCursorFetchedRef.current !== newerCursor
-          ? fetchNewerRef.current(newerCursor).then((page) => {
-              lastNewerCursorFetchedRef.current = newerCursor
-              return page
-            })
-          : Promise.resolve(null),
-        olderCursor && lastOlderCursorFetchedRef.current !== olderCursor
-          ? fetchOlderRef.current(olderCursor).then((page) => {
-              lastOlderCursorFetchedRef.current = olderCursor
-              return page
-            })
-          : Promise.resolve(null),
-      ])
-
-      if (newerPage) applyNewerPage(newerPage, null)
-      if (olderPage) applyOlderPage(olderPage)
-    },
-    [applyNewerPage, applyOlderPage],
-  )
-
-  /** 뷰포트 2배 채울 때까지 양방향 워밍 (빠른 스크롤 대비) */
-  const warmAnchoredViewport = useCallback(async () => {
-    for (let round = 0; round < ANCHORED_WARM_MAX_ROUNDS; round += 1) {
-      if (!shouldWarmAnchoredViewport()) break
-
-      let pagination = anchoredPaginationRef.current
-      let progressed = false
-
-      if (pagination.hasNewer && pagination.newerCursor) {
-        await prefetchNewerPages(pagination, null)
-        progressed = true
-        pagination = anchoredPaginationRef.current
-      }
-      if (pagination.hasOlder && pagination.olderCursor) {
-        await prefetchOlderPages(pagination)
-        progressed = true
-      }
-
-      if (!progressed) break
-    }
-  }, [prefetchNewerPages, prefetchOlderPages])
-
-  const warmAfterAround = useCallback(
-    async (page: AnchoredFeedPage<TItem>) => {
-      const aroundBatchSize = page.items.length
-      await warmBothSidesOnce(page.pagination)
-
-      if (shouldPrefetchNextPage(aroundBatchSize, pageLimit, anchoredPaginationRef.current.hasNewer)) {
-        await prefetchNewerPages(anchoredPaginationRef.current, null)
-      }
-      if (
-        shouldPrefetchNextPage(aroundBatchSize, pageLimit, anchoredPaginationRef.current.hasOlder)
-      ) {
-        await prefetchOlderPages(anchoredPaginationRef.current)
-      }
-
-      await warmAnchoredViewport()
-    },
-    [warmBothSidesOnce, warmAnchoredViewport, pageLimit, prefetchNewerPages, prefetchOlderPages],
+    [markCursorConsumed],
   )
 
   useEffect(() => {
-    if (!anchorId || !anchoredEnabled) {
-      setAnchoredWarmComplete(true)
-      return
-    }
+    if (!anchorId || !anchoredEnabled) return
 
     const requestId = ++aroundRequestRef.current
     lastNewerCursorFetchedRef.current = null
     lastOlderCursorFetchedRef.current = null
-    setAnchoredWarmComplete(false)
     setLoadingAround(true)
     setAroundError(null)
     setFeedMode('anchored')
@@ -341,23 +260,20 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         if (aroundRequestRef.current !== requestId) return
 
         setItems(page.items)
-        const aroundPagination = correctOlderPaginationFromItems(page.items, page.pagination)
+        const aroundPagination = page.pagination
         setAnchoredPagination(aroundPagination)
         anchoredPaginationRef.current = aroundPagination
-
-        await warmAfterAround(page)
       } catch (e) {
         if (aroundRequestRef.current !== requestId) return
-        setAroundError(e instanceof Error ? e.message : '피드를 불러지지 못했습니다.')
+        setAroundError(e instanceof Error ? e.message : '피드를 불러오지 못했습니다.')
         resetToLatest(initialSnapshotRef.current.items, initialSnapshotRef.current.pagination)
       } finally {
         if (aroundRequestRef.current === requestId) {
           setLoadingAround(false)
-          setAnchoredWarmComplete(true)
         }
       }
     })()
-  }, [anchorId, anchoredEnabled, warmAfterAround, resetToLatest])
+  }, [anchorId, anchoredEnabled, resetToLatest])
 
   useEffect(() => {
     if (anchorId || !anchoredEnabled) return
@@ -381,7 +297,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     const pagination = anchoredPaginationRef.current
     if (feedModeRef.current !== 'anchored' || !pagination.hasNewer || !pagination.newerCursor) return
     const cursor = pagination.newerCursor
-    if (loadNewerInFlightRef.current || lastNewerCursorFetchedRef.current === cursor) return
+    if (loadNewerInFlightRef.current || anchoredCursorsEqual(lastNewerCursorFetchedRef.current, cursor)) return
 
     loadNewerInFlightRef.current = true
     setLoadingNewer(true)
@@ -389,48 +305,37 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     const scrollSnapshot = scrollRoot ? capturePrependScrollSnapshot(scrollRoot) : null
 
     try {
-      lastNewerCursorFetchedRef.current = cursor
       const page = await fetchNewerRef.current(cursor)
-      const batchSize = applyNewerPage(page, scrollSnapshot)
-      if (
-        batchSize > 0 &&
-        shouldPrefetchNextPage(batchSize, pageLimit, anchoredPaginationRef.current.hasNewer)
-      ) {
-        await prefetchNewerPages(anchoredPaginationRef.current, null)
-      }
+      applyNewerPage(page, scrollSnapshot, cursor)
     } finally {
       loadNewerInFlightRef.current = false
       setLoadingNewer(false)
     }
-  }, [applyNewerPage, pageLimit, prefetchNewerPages])
+  }, [applyNewerPage])
 
   const loadOlder = useCallback(async () => {
     const pagination = anchoredPaginationRef.current
     if (feedModeRef.current !== 'anchored' || !pagination.hasOlder || !pagination.olderCursor) return
     const cursor = pagination.olderCursor
-    if (loadOlderInFlightRef.current || lastOlderCursorFetchedRef.current === cursor) return
+    if (loadOlderInFlightRef.current || anchoredCursorsEqual(lastOlderCursorFetchedRef.current, cursor)) return
 
     loadOlderInFlightRef.current = true
-    lastOlderCursorFetchedRef.current = cursor
     setLoadingOlder(true)
     try {
       const page = await fetchOlderRef.current(cursor)
-      const batchSize = applyOlderPage(page, cursor)
-      if (
-        batchSize > 0 &&
-        shouldPrefetchNextPage(batchSize, pageLimit, anchoredPaginationRef.current.hasOlder)
-      ) {
-        await prefetchOlderPages(anchoredPaginationRef.current)
-      }
+      applyOlderPage(page, cursor)
     } finally {
       loadOlderInFlightRef.current = false
       setLoadingOlder(false)
     }
-  }, [applyOlderPage, pageLimit, prefetchOlderPages])
+  }, [applyOlderPage])
 
   const hasMoreDown =
     feedMode === 'anchored' ? anchoredPagination.hasOlder : latestPagination.hasNext
   const hasMoreUp = feedMode === 'anchored' && anchoredPagination.hasNewer
+
+  /** around만 로드 — 예전 warm/prefetch 제거, 스크롤 시에만 newer/older */
+  const anchoredReady = !anchoredEnabled || !anchorId || (!loadingAround && feedMode === 'anchored')
 
   return {
     items,
@@ -441,7 +346,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     loadingNewer,
     loadingOlder,
     aroundError,
-    anchoredWarmComplete,
+    anchoredWarmComplete: anchoredReady,
     hasMoreDown,
     hasMoreUp,
     loadNewer,
