@@ -10,7 +10,11 @@ import type {
   NewsFeedItemResponse,
   RelatedStocksResponse,
   StockDetailResponse,
+  StockOverviewItemResponse,
+  StockOverviewResponse,
   StockPricesResponse,
+  StockRankingItemResponse,
+  StockRankingsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
@@ -21,6 +25,10 @@ import type {
   SentimentPolarity,
   StockDetail,
   StockMarketRow,
+  StockOverview,
+  StockOverviewRow,
+  StockRankingItem,
+  StockRankings,
   StockNewsItem,
   StockPriceInfo,
   StockRelatedStock,
@@ -240,6 +248,58 @@ export function mapStockDetailPage(
     },
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
+  }
+}
+
+function mapOverviewItem(item: StockOverviewItemResponse): StockOverviewRow {
+  return {
+    code: item.stockCode,
+    name: item.stockName,
+    market: item.market ?? '—',
+    sectorCode: item.sectorCode ?? '',
+    sectorName: item.sectorName ?? '—',
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    price: toFiniteNumber(item.currentPrice),
+    changePercent: toFiniteNumber(item.changeRate),
+    mentionCount24h: toFiniteNumber(item.mentionCount24h),
+    mentionChangeRate24h: toFiniteNumber(item.mentionChangeRate24h),
+    sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
+  }
+}
+
+function mapRankingItem(item: StockRankingItemResponse): StockRankingItem {
+  return {
+    code: item.stockCode,
+    name: item.stockName,
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    price: toFiniteNumber(item.currentPrice),
+    changePercent: toFiniteNumber(item.changeRate),
+    mentionCount24h: toFiniteNumber(item.mentionCount24h),
+    mentionChangeRate24h: toFiniteNumber(item.mentionChangeRate24h),
+    sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
+  }
+}
+
+/** `GET /api/v1/stocks/overview` */
+export function mapStockOverviewResponse(response: StockOverviewResponse): StockOverview {
+  const stocks = (response.stocks ?? []).map(mapOverviewItem)
+  const summedMentions = stocks.reduce((sum, row) => sum + row.mentionCount24h, 0)
+  const currentNewsCount =
+    response.currentNewsCount > 0 ? response.currentNewsCount : summedMentions
+
+  return {
+    currentNewsCount,
+    stocks,
+  }
+}
+
+/** `GET /api/v1/stocks/rankings` */
+export function mapStockRankingsResponse(response: StockRankingsResponse): StockRankings {
+  return {
+    topMentionCount: (response.topMentionCount ?? []).map(mapRankingItem),
+    topSentimentScore: (response.topSentimentScore ?? []).map(mapRankingItem),
+    topChangeRate: (response.topChangeRate ?? []).map(mapRankingItem),
+    topCurrentPrice: (response.topCurrentPrice ?? []).map(mapRankingItem),
   }
 }
 

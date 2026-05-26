@@ -165,3 +165,44 @@ export interface StockBuzzSurgeResponse {
   topSentiment: BuzzSurgeTopSentimentResponse
   items: StockBuzzSurgeItemResponse[]
 }
+
+/** OpenAPI `StockOverviewItem` — `GET /api/v1/stocks/overview` */
+export interface StockOverviewItemResponse {
+  stockCode: string
+  stockName: string
+  market: string
+  sectorCode: string
+  sectorName: string
+  imageUrl?: string
+  currentPrice?: number
+  changeRate?: number
+  mentionCount24h?: number
+  mentionChangeRate24h?: number
+  sentimentScore24h?: number
+}
+
+/** OpenAPI `StockOverviewResponse` — `GET /api/v1/stocks/overview` */
+export interface StockOverviewResponse {
+  currentNewsCount: number
+  stocks: StockOverviewItemResponse[]
+}
+
+/** OpenAPI `StockRankingItem` — `GET /api/v1/stocks/rankings` */
+export interface StockRankingItemResponse {
+  stockCode: string
+  stockName: string
+  imageUrl?: string
+  currentPrice?: number
+  changeRate?: number
+  mentionCount24h?: number
+  mentionChangeRate24h?: number
+  sentimentScore24h?: number
+}
+
+/** OpenAPI `StockRankingsResponse` — `GET /api/v1/stocks/rankings` */
+export interface StockRankingsResponse {
+  topMentionCount: StockRankingItemResponse[]
+  topSentimentScore: StockRankingItemResponse[]
+  topChangeRate: StockRankingItemResponse[]
+  topCurrentPrice: StockRankingItemResponse[]
+}

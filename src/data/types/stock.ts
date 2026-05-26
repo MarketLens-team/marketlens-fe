@@ -147,3 +147,48 @@ export interface StockMarketRow {
   price: number
   changePercent: number
 }
+
+/** 전체 종목 overview — `GET /api/v1/stocks/overview` */
+export interface StockOverviewRow {
+  code: string
+  name: string
+  market: string
+  sectorCode: string
+  sectorName: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+  mentionCount24h: number
+  mentionChangeRate24h: number
+  sentimentScore24h: number
+}
+
+export interface StockOverview {
+  currentNewsCount: number
+  stocks: StockOverviewRow[]
+}
+
+/** 랭킹 카드 한 줄 — `GET /api/v1/stocks/rankings` */
+export interface StockRankingItem {
+  code: string
+  name: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+  mentionCount24h: number
+  mentionChangeRate24h: number
+  sentimentScore24h: number
+}
+
+export type StockRankingCategory =
+  | 'topMentionCount'
+  | 'topSentimentScore'
+  | 'topChangeRate'
+  | 'topCurrentPrice'
+
+export interface StockRankings {
+  topMentionCount: StockRankingItem[]
+  topSentimentScore: StockRankingItem[]
+  topChangeRate: StockRankingItem[]
+  topCurrentPrice: StockRankingItem[]
+}

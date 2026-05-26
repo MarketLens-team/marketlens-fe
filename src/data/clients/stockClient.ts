@@ -6,7 +6,9 @@ import {
   mapDirectoryToStockMarketRows,
   mapRelatedStocks,
   mapStockDetailPage,
+  mapStockOverviewResponse,
   mapStockPeopleTimeline,
+  mapStockRankingsResponse,
 } from '../mappers/stockMapper'
 import { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import { mockPersonStatementsResponse } from '../mocks/person.mock'
@@ -24,15 +26,28 @@ import type {
   StockBuzzSurgeResponse,
   StockDetailResponse,
   StockDirectoryResponse,
+  StockOverviewResponse,
   StockPricesResponse,
+  StockRankingsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
-import type { StockDetail, StockMarketRow, StockSearchItem, TickerStockRow } from '../types/stock'
+import type {
+  StockDetail,
+  StockMarketRow,
+  StockOverview,
+  StockRankings,
+  StockSearchItem,
+  TickerStockRow,
+} from '../types/stock'
 import { TICKER_STOCK_CODES } from '../constants/tickerStockCodes'
 import { mapStockPricesToTickerRows } from '../mappers/stockMapper'
+import {
+  buildMockStockOverview,
+  buildMockStockRankings,
+} from '../mocks/stockOverview.mock'
 import { buildMockStockPricesForDirectory, buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
@@ -274,6 +289,32 @@ export async function fetchStockDetail(stockCode: string, recordedAt?: string): 
       peopleTimeline: mapStockPeopleTimeline(mentions, code, STOCK_RELATED_PERSON_STATEMENTS_LIMIT),
     },
   )
+}
+
+/** OpenAPI `GET /api/v1/stocks/overview` */
+export async function fetchStockOverview(): Promise<StockOverview> {
+  if (isMockDataSource()) {
+    await mockDelay(140)
+    return buildMockStockOverview()
+  }
+  const data = await getApiData<StockOverviewResponse>(
+    `${STOCKS_BASE}/overview`,
+    '종목 overview를 불러오지 못했습니다.',
+  )
+  return mapStockOverviewResponse(data)
+}
+
+/** OpenAPI `GET /api/v1/stocks/rankings` */
+export async function fetchStockRankings(): Promise<StockRankings> {
+  if (isMockDataSource()) {
+    await mockDelay(100)
+    return buildMockStockRankings()
+  }
+  const data = await getApiData<StockRankingsResponse>(
+    `${STOCKS_BASE}/rankings`,
+    '종목 랭킹을 불러오지 못했습니다.',
+  )
+  return mapStockRankingsResponse(data)
 }
 
 /** OpenAPI `GET /api/v1/stocks/prices` + directory — 전체 종목 시세 테이블 */
