@@ -18,8 +18,6 @@ import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useStockListPageData } from '../hooks/useStockListPageData'
 import styles from './StockListPage.module.css'
 
-type MarketFilter = 'all' | 'KOSPI' | 'KOSDAQ'
-
 function sortRows(
   rows: StockOverviewRow[],
   sortKey: StockOverviewSortKey,
@@ -45,8 +43,6 @@ function sortRows(
 
 export default function StockListPage() {
   const { data, loading, error, refreshing } = useStockListPageData()
-  const [query, setQuery] = useState('')
-  const [marketFilter, setMarketFilter] = useState<MarketFilter>('all')
   const [sectorFilter, setSectorFilter] = useState('all')
   const [sortKey, setSortKey] = useState<StockOverviewSortKey>('mention')
   const [sortDesc, setSortDesc] = useState(true)
@@ -63,22 +59,11 @@ export default function StockListPage() {
     return ['all', ...names]
   }, [rows])
 
-  const normalizedQuery = query.trim().toLowerCase()
-
   const filteredRows = useMemo(() => {
     const base = rows ?? []
-    return base.filter((row) => {
-      if (marketFilter !== 'all' && row.market !== marketFilter) return false
-      if (sectorFilter !== 'all' && row.sectorName !== sectorFilter) return false
-      if (!normalizedQuery) return true
-      return (
-        row.name.toLowerCase().includes(normalizedQuery) ||
-        row.code.toLowerCase().includes(normalizedQuery) ||
-        row.sectorName.toLowerCase().includes(normalizedQuery) ||
-        row.market.toLowerCase().includes(normalizedQuery)
-      )
-    })
-  }, [rows, normalizedQuery, marketFilter, sectorFilter])
+    if (sectorFilter === 'all') return base
+    return base.filter((row) => row.sectorName === sectorFilter)
+  }, [rows, sectorFilter])
 
   const sortedRows = useMemo(
     () => sortRows(filteredRows, sortKey, sortDesc),
@@ -129,36 +114,6 @@ export default function StockListPage() {
         ) : null}
 
         {rankings ? <StockRankingCards rankings={rankings} onMoreClick={handleRankingMore} /> : null}
-
-        <div className={styles.filters}>
-          <div className={styles.marketTabs} role="tablist" aria-label="시장 필터">
-            {(['all', 'KOSPI', 'KOSDAQ'] as const).map((market) => (
-              <button
-                key={market}
-                type="button"
-                role="tab"
-                aria-selected={marketFilter === market}
-                className={clsx(styles.marketTab, marketFilter === market && styles.marketTabActive)}
-                onClick={() => setMarketFilter(market)}
-              >
-                {market === 'all' ? '전체' : market}
-              </button>
-            ))}
-          </div>
-
-          <label className={styles.searchWrap}>
-            <span className={styles.searchIcon} aria-hidden>
-              ⌕
-            </span>
-            <input
-              type="search"
-              className={styles.searchInput}
-              placeholder="종목명·코드 검색"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-        </div>
 
         {sectorOptions.length > 1 ? (
           <div className={styles.sectorRow} role="group" aria-label="섹터 필터">

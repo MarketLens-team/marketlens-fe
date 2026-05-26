@@ -46,7 +46,7 @@ export function buildMockStockOverviewResponse(): StockOverviewResponse {
 
   const currentNewsCount = stocks.reduce((sum, row) => sum + (row.mentionCount24h ?? 0), 0)
 
-  return { currentNewsCount, stocks }
+  return { currentNewsCount, items: stocks }
 }
 
 function topBy<T>(items: T[], selector: (item: T) => number, limit = 5): T[] {
@@ -57,10 +57,10 @@ export function buildMockStockRankingsResponse(): StockRankingsResponse {
   const overview = buildMockStockOverviewResponse()
 
   return {
-    topMentionCount: topBy(overview.stocks, (row) => row.mentionCount24h ?? 0),
-    topSentimentScore: topBy(overview.stocks, (row) => row.sentimentScore24h ?? 0),
-    topChangeRate: topBy(overview.stocks, (row) => row.changeRate ?? 0),
-    topCurrentPrice: topBy(overview.stocks, (row) => row.currentPrice ?? 0),
+    topMentionCount: topBy(overview.items, (row) => row.mentionCount24h ?? 0),
+    topSentimentScore: topBy(overview.items, (row) => row.sentimentScore24h ?? 0),
+    topChangeRate: topBy(overview.items, (row) => row.changeRate ?? 0),
+    topCurrentPrice: topBy(overview.items, (row) => row.currentPrice ?? 0),
   }
 }
 

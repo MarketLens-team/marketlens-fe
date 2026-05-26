@@ -282,7 +282,7 @@ function mapRankingItem(item: StockRankingItemResponse): StockRankingItem {
 
 /** `GET /api/v1/stocks/overview` */
 export function mapStockOverviewResponse(response: StockOverviewResponse): StockOverview {
-  const stocks = (response.stocks ?? []).map(mapOverviewItem)
+  const stocks = (response.items ?? []).map(mapOverviewItem)
   const summedMentions = stocks.reduce((sum, row) => sum + row.mentionCount24h, 0)
   const currentNewsCount =
     response.currentNewsCount > 0 ? response.currentNewsCount : summedMentions

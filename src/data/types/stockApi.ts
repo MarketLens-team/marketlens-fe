@@ -183,8 +183,9 @@ export interface StockOverviewItemResponse {
 
 /** OpenAPI `StockOverviewResponse` — `GET /api/v1/stocks/overview` */
 export interface StockOverviewResponse {
+  updatedAt?: string
   currentNewsCount: number
-  stocks: StockOverviewItemResponse[]
+  items: StockOverviewItemResponse[]
 }
 
 /** OpenAPI `StockRankingItem` — `GET /api/v1/stocks/rankings` */

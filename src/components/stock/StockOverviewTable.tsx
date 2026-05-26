@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import type { StockOverviewRow } from '../../data/types/stock'
@@ -74,14 +73,13 @@ export function StockOverviewTable({
   }
 
   return (
-    <Card padding="none" className={styles.card}>
-      <div className={styles.sectionHead}>
-        <CardSectionHeader
-          title="전체 종목"
-          subtitle={`24시간 뉴스 언급 합계 ${currentNewsCount.toLocaleString('ko-KR')}건`}
-          variant="embedded"
-        />
-      </div>
+    <section className={styles.section} aria-label="전체 종목 목록">
+      <CardSectionHeader
+        title="전체 종목"
+        subtitle={`24시간 뉴스 언급 합계 ${currentNewsCount.toLocaleString('ko-KR')}건`}
+        variant="embedded"
+        className={styles.sectionHead}
+      />
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
@@ -126,15 +124,12 @@ export function StockOverviewTable({
                   onClick={() => onSortChange('sentiment')}
                 />
               </th>
-              <th scope="col" className={styles.colSector}>
-                섹터
-              </th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className={styles.empty}>
+                <td colSpan={5} className={styles.empty}>
                   표시할 종목이 없습니다.
                 </td>
               </tr>
@@ -205,13 +200,12 @@ export function StockOverviewTable({
                       {formatStockScore(row.sentimentScore24h)}
                     </span>
                   </td>
-                  <td className={styles.sector}>{row.sectorName}</td>
                 </tr>
               )
             })}
           </tbody>
         </table>
       </div>
-    </Card>
+    </section>
   )
 }
