@@ -8,7 +8,7 @@
 |------|------|
 | 브랜치 | `feat/design-refresh` |
 | 작업일 | 2026-05-26 |
-| FE 커밋 | `de5ef2d` · `378be41` · `de1204f` · `7b42253` · `b8cb7a2` · `abe4581` · `80496a9` · `fd9f26b` |
+| FE 커밋 | `de5ef2d` · `378be41` · `de1204f` · `7b42253` · `b8cb7a2` · `abe4581` · `80496a9` · `16cd131` |
 | BE API | `GET /api/v1/stocks/overview` · `GET /api/v1/stocks/rankings` |
 | 선행 | [2026-05-26-feat-stock-market-list.md](./2026-05-26-feat-stock-market-list.md) (초안) · [DDR-0002](../ddr/0002-detail-breadcrumb-navigation.md) |
 
@@ -66,7 +66,7 @@
 | `b8cb7a2` | 랭킹 카드 표시 일관성·숫자 가독성·`ringRow` |
 | `abe4581` | 시세 TOP 카드 제거 (openapi 3종만) |
 | `80496a9` | 랭킹 일렬 레이아웃·`sentimentDelta24h` null 처리·`toNullableNumber` |
-| `fd9f26b` | 테이블 **감성 변화** 컬럼·페이지 여백 레이아웃 기본값 복원·changelog 갱신 |
+| `16cd131` | 테이블 **감성 변화** 컬럼·페이지 여백 레이아웃 기본값 복원·changelog 갱신 |
 
 ## Notes
 
