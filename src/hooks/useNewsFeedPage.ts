@@ -60,8 +60,13 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   const restoredOnceRef = useRef(false)
   const focusNewsIdRef = useRef(focusNewsId)
   focusNewsIdRef.current = focusNewsId
+  const [suppressAnchored, setSuppressAnchored] = useState(false)
+  const suppressAnchoredRef = useRef(false)
+  suppressAnchoredRef.current = suppressAnchored
+  const [resettingToLatest, setResettingToLatest] = useState(false)
 
   const needsLogin = mode === 'watchlist' && !isLoggedIn
+  const useAnchoredBootstrap = bootstrap === 'anchored' && !suppressAnchored
 
   const fetchAround = useCallback(
     async (newsId: string) => {
@@ -111,12 +116,13 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     loadOlder,
     replaceLatestItems,
     appendLatestItems,
+    cancelAroundLoad,
   } = useAnchoredFeed<StockNewsItem>({
     scopeKey: mode,
-    anchorId: bootstrap === 'anchored' ? focusNewsId : null,
+    anchorId: useAnchoredBootstrap ? focusNewsId : null,
     initialItems: [],
     initialLatestPagination: EMPTY_PAGINATION,
-    anchoredEnabled: bootstrap === 'anchored',
+    anchoredEnabled: useAnchoredBootstrap,
     fetchAround,
     fetchNewer,
     fetchOlder,
@@ -139,10 +145,12 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   useEffect(() => {
     restoredOnceRef.current = false
     clearNewsFeedConsumedMemory()
+    setSuppressAnchored(false)
     setBootstrap('pending')
   }, [mode])
 
   useEffect(() => {
+    setSuppressAnchored(false)
     if (!focusNewsId) {
       clearNewsFeedConsumedMemory()
     }
@@ -181,7 +189,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
       setError(null)
       setLoadMoreError(null)
 
-      if (focusNewsIdRef.current) {
+      if (focusNewsIdRef.current && !suppressAnchoredRef.current) {
         setBootstrap('anchored')
         setLoading(false)
         return
@@ -267,8 +275,34 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     appendLatestItems,
   ])
 
-  const feedError = error ?? (bootstrap === 'anchored' ? aroundError : null)
-  const feedReady = bootstrap !== 'anchored' || (anchoredWarmComplete && !loadingAround)
+  const resetToLatestFeed = useCallback(async () => {
+    if (!focusNewsId || needsLogin) return
+
+    cancelAroundLoad()
+    setResettingToLatest(true)
+    setSuppressAnchored(true)
+    setBootstrap('cursor')
+    setLoadMoreError(null)
+    setRestoredScrollTop(null)
+    try {
+      const fetchPage =
+        mode === 'watchlist' ? fetchWatchlistNewsFeedCursor : fetchAllNewsFeedCursor
+      const page = await fetchPage({ limit: ANCHORED_FEED_PAGE_LIMIT })
+      replaceLatestItems(page.items, page.pagination)
+    } catch (e) {
+      const fallback =
+        mode === 'watchlist'
+          ? '관심종목 뉴스 목록을 새로고침하지 못했습니다.'
+          : '뉴스 목록을 새로고침하지 못했습니다.'
+      setLoadMoreError(e instanceof Error ? e.message : fallback)
+    } finally {
+      setResettingToLatest(false)
+    }
+  }, [focusNewsId, needsLogin, cancelAroundLoad, mode, replaceLatestItems])
+
+  const feedError = error ?? (useAnchoredBootstrap ? aroundError : null)
+  const feedReady =
+    !useAnchoredBootstrap || (anchoredWarmComplete && !loadingAround && !resettingToLatest)
   const loadingMore = feedMode === 'anchored' ? loadingOlder : loadingLatestMore
   const hasMore = feedMode === 'anchored' ? hasMoreDown : pagination.hasNext
 
@@ -276,7 +310,10 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     items,
     feedMode,
     pagination,
-    loading: loading || (bootstrap === 'anchored' && loadingAround && items.length === 0),
+    loading:
+      loading ||
+      (useAnchoredBootstrap && loadingAround && items.length === 0) ||
+      resettingToLatest,
     loadingMore,
     loadingAround,
     loadingNewer,
@@ -290,5 +327,8 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     hasMore,
     hasMoreDown,
     hasMoreUp,
+    focusNewsId,
+    resetToLatestFeed,
+    resettingToLatest,
   }
 }

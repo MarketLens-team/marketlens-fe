@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useState, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { EmptyState } from '../components/common/EmptyState'
@@ -46,15 +46,32 @@ export default function NewsFeedPage() {
     feedReady,
     hasMoreDown,
     hasMoreUp,
+    focusNewsId,
+    resetToLatestFeed,
+    resettingToLatest,
   } = useNewsFeedPage(mode)
 
+  const [skipFocusScroll, setSkipFocusScroll] = useState(false)
+
+  useEffect(() => {
+    setSkipFocusScroll(false)
+  }, [focusNewsId])
+
   const { isNewsFocused } = useNewsFeedFocus(items, {
-    loading: loading && items.length === 0,
+    loading: (loading && items.length === 0) || resettingToLatest,
     hasMore: feedMode === 'latest' && pagination.hasNext,
     loadingMore: feedMode === 'latest' ? loadingMore : undefined,
     onLoadMore: feedMode === 'latest' ? loadMore : undefined,
     restoredScrollTop,
+    skipAutoScroll: skipFocusScroll,
   })
+
+  const handleBackToTop = useCallback(() => {
+    if (focusNewsId) {
+      setSkipFocusScroll(true)
+      void resetToLatestFeed()
+    }
+  }, [focusNewsId, resetToLatestFeed])
 
   const newsTopSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
@@ -175,7 +192,7 @@ export default function NewsFeedPage() {
           </div>
 
         </div>
-        <PageFabRail />
+        <PageFabRail onBackToTop={handleBackToTop} />
       </div>
     </Layout>
   )

@@ -18,6 +18,8 @@ interface UseNewsFeedFocusOptions {
   onLoadMore?: () => void | Promise<void>
   /** sessionStorage 복원 시 저장된 scrollTop */
   restoredScrollTop?: number | null
+  /** 맨 위로 등 — 포커스 기사로 자동 스크롤하지 않음 (초록 강조만 유지) */
+  skipAutoScroll?: boolean
 }
 
 /** `/news?newsId=` — 종목 상세에서 복귀 시 해당 기사 강조·위치 복원 (클릭해도 쿼리 유지) */
@@ -29,6 +31,7 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   const loadingMore = options?.loadingMore ?? false
   const onLoadMore = options?.onLoadMore
   const restoredScrollTop = options?.restoredScrollTop
+  const skipAutoScroll = options?.skipAutoScroll ?? false
   const didScrollToFocusRef = useRef<string | null>(null)
   const didRestoreScrollRef = useRef(false)
 
@@ -70,6 +73,7 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   ])
 
   useEffect(() => {
+    if (skipAutoScroll) return
     if (restoredScrollTop != null) return
     if (!focusNewsId || loading || !hasTarget) return
     if (didScrollToFocusRef.current === focusNewsId) return
@@ -98,7 +102,7 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [restoredScrollTop, focusNewsId, items, loading, hasTarget])
+  }, [restoredScrollTop, focusNewsId, items, loading, hasTarget, skipAutoScroll])
 
   const isNewsFocused = useCallback(
     (newsId: string) => focusNewsId === newsId,

@@ -106,8 +106,18 @@ export function StockDetailContent({
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
   const didScrollToNewsFocusRef = useRef<string | null>(null)
+  const [suppressAnchored, setSuppressAnchored] = useState(false)
+  const [latestNewsOverride, setLatestNewsOverride] = useState<{
+    items: StockNewsItem[]
+    pagination: { nextCursor: string | null; hasNext: boolean }
+  } | null>(null)
+  const [resettingToLatest, setResettingToLatest] = useState(false)
+  const [skipFocusScroll, setSkipFocusScroll] = useState(false)
   const useApiNewsFilter = !isMockDataSource()
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
+  const useAnchoredAround = Boolean(focusNewsId) && !suppressAnchored
+  const initialNewsItems = latestNewsOverride?.items ?? recentNews
+  const initialNewsPagination = latestNewsOverride?.pagination ?? newsPagination
 
   const mapStockNewsAroundPage = useCallback(
     (page: NewsFeedAroundResponse) => ({
@@ -172,18 +182,26 @@ export function StockDetailContent({
     loadOlder: loadOlderNews,
     replaceLatestItems,
     appendLatestItems,
+    cancelAroundLoad,
   } = useAnchoredFeed<StockNewsItem>({
     scopeKey: stock.code,
-    anchorId: focusNewsId,
-    initialItems: recentNews,
-    initialLatestPagination: newsPagination,
-    anchoredEnabled: Boolean(focusNewsId),
+    anchorId: useAnchoredAround ? focusNewsId : null,
+    initialItems: initialNewsItems,
+    initialLatestPagination: initialNewsPagination,
+    anchoredEnabled: useAnchoredAround,
     fetchAround: fetchNewsAround,
     fetchNewer: fetchNewsNewer,
     fetchOlder: fetchNewsOlder,
   })
 
-  const focusNewsFeedReady = anchoredWarmComplete && !loadingAnchoredNews
+  const focusNewsFeedReady =
+    anchoredWarmComplete && !loadingAnchoredNews && !resettingToLatest
+
+  useEffect(() => {
+    setSuppressAnchored(false)
+    setLatestNewsOverride(null)
+    setSkipFocusScroll(false)
+  }, [focusNewsId, stock.code])
 
   useEffect(() => {
     setNewsFilter('all')
@@ -193,6 +211,47 @@ export function StockDetailContent({
     setLoadMoreError(null)
     skipNewsFilterFetchRef.current = true
   }, [stock.code, recentNews, newsPagination, focusNewsId, replaceLatestItems])
+
+  const resetToLatestNewsFeed = useCallback(async () => {
+    if (!focusNewsId) return
+
+    cancelAroundLoad()
+    setResettingToLatest(true)
+    setLoadMoreError(null)
+    try {
+      const page = await fetchStockNewsFeedCursor(stock.code, {
+        limit: 20,
+        sentiment: newsSentimentParam,
+      })
+      const items = mapNewsFeedItems(page.items, [stock.name, stock.code])
+      const pagination = {
+        nextCursor: page.nextCursor ?? null,
+        hasNext: page.hasNext ?? false,
+      }
+      setLatestNewsOverride({ items, pagination })
+      replaceLatestItems(items, pagination)
+      setSuppressAnchored(true)
+      skipNewsFilterFetchRef.current = true
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '뉴스 목록을 새로고침하지 못했습니다.')
+    } finally {
+      setResettingToLatest(false)
+    }
+  }, [
+    focusNewsId,
+    cancelAroundLoad,
+    stock.code,
+    stock.name,
+    newsSentimentParam,
+    replaceLatestItems,
+  ])
+
+  const handleBackToTop = useCallback(() => {
+    if (focusNewsId) {
+      setSkipFocusScroll(true)
+      void resetToLatestNewsFeed()
+    }
+  }, [focusNewsId, resetToLatestNewsFeed])
 
   useEffect(() => {
     setInterested(watchlistInterested)
@@ -252,6 +311,7 @@ export function StockDetailContent({
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
+      if (target.closest('[data-stock-back-to-top]')) return
       const focusedEl = document.getElementById(`stock-news-${focusNewsId}`)
       if (focusedEl?.contains(target)) return
       onClearFocusNews()
@@ -305,6 +365,7 @@ export function StockDetailContent({
   ])
 
   useEffect(() => {
+    if (skipFocusScroll) return
     if (!focusNewsId || loadingNewsFilter || !focusNewsFeedReady || !scrollToFocusNews) return
     if (didScrollToNewsFocusRef.current === focusNewsId) return
 
@@ -337,7 +398,14 @@ export function StockDetailContent({
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [focusNewsId, displayNews, loadingNewsFilter, focusNewsFeedReady, scrollToFocusNews])
+  }, [
+    focusNewsId,
+    displayNews,
+    loadingNewsFilter,
+    focusNewsFeedReady,
+    scrollToFocusNews,
+    skipFocusScroll,
+  ])
 
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
@@ -678,7 +746,12 @@ export function StockDetailContent({
         <StockDetailPeoplePanel peopleTimeline={peopleTimeline} pillClass={pillClass} />
       </div>
 
-      <BackToTopButton placement="fixed" tooltipSide="left" stockDetailMarker />
+      <BackToTopButton
+        placement="fixed"
+        tooltipSide="left"
+        stockDetailMarker
+        onBackToTop={handleBackToTop}
+      />
     </div>
   )
 }
