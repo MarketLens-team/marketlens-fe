@@ -199,7 +199,14 @@ export default function PersonDetailPage() {
                       ) : null}
                     </div>
                   </header>
+                </div>
 
+                <div
+                  className={clsx(
+                    styles.feedBody,
+                    loadingAround && focusStatementId && styles.feedBodyAnchoring,
+                  )}
+                >
                   {showNewerLoader ? (
                     <div
                       className={styles.feedNewerSlot}
@@ -209,14 +216,6 @@ export default function PersonDetailPage() {
                       <FeedLoadingSpinner label="이전 발언 불러오는 중" />
                     </div>
                   ) : null}
-                </div>
-
-                <div
-                  className={clsx(
-                    styles.feedBody,
-                    loadingAround && focusStatementId && styles.feedBodyAnchoring,
-                  )}
-                >
                   {aroundError ? (
                     <p className={styles.feedError} role="alert">
                       {aroundError}
