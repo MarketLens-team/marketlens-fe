@@ -7,6 +7,7 @@ import {
   type AnchoredFeedPagination,
   type FeedMode,
 } from '../data/types/anchoredFeed'
+import { correctOlderPaginationFromItems } from '../lib/anchoredFeedCursor'
 import { shouldWarmAnchoredViewport } from '../lib/anchoredFeedMeasure'
 import { mergeFeedItemsById, mergeFeedItemsWithCount } from '../lib/mergeFeedItems'
 import {
@@ -44,7 +45,7 @@ function shouldPrefetchNextPage(batchSize: number, pageLimit: number, hasMore: b
   return batchSize > 0 && batchSize < pageLimit && hasMore
 }
 
-export function useAnchoredFeed<TItem extends { id: string }>({
+export function useAnchoredFeed<TItem extends { id: string; publishedAt: string }>({
   scopeKey,
   anchorId,
   initialItems,
@@ -157,7 +158,7 @@ export function useAnchoredFeed<TItem extends { id: string }>({
     [],
   )
 
-  const applyOlderPage = useCallback((page: AnchoredFeedPage<TItem>) => {
+  const applyOlderPage = useCallback((page: AnchoredFeedPage<TItem>, requestedCursor: string | null = null) => {
     if (page.items.length === 0) {
       const nextPagination = { ...page.pagination, hasOlder: false, olderCursor: null }
       setAnchoredPagination(nextPagination)
@@ -171,13 +172,26 @@ export function useAnchoredFeed<TItem extends { id: string }>({
       added = merged.added
       return merged.items
     })
-    setAnchoredPagination(page.pagination)
-    anchoredPaginationRef.current = page.pagination
 
-    if (!page.pagination.hasOlder) {
-      lastOlderCursorFetchedRef.current = page.pagination.olderCursor
+    let pagination = correctOlderPaginationFromItems(page.items, page.pagination)
+
+    const stuckAtSameCursor =
+      added === 0 &&
+      requestedCursor != null &&
+      pagination.olderCursor != null &&
+      pagination.olderCursor === requestedCursor
+
+    if (stuckAtSameCursor) {
+      pagination = { ...pagination, hasOlder: false, olderCursor: null }
+    }
+
+    setAnchoredPagination(pagination)
+    anchoredPaginationRef.current = pagination
+
+    if (!pagination.hasOlder) {
+      lastOlderCursorFetchedRef.current = pagination.olderCursor
     } else if (added === 0) {
-      lastOlderCursorFetchedRef.current = page.pagination.olderCursor ?? null
+      lastOlderCursorFetchedRef.current = requestedCursor ?? pagination.olderCursor
     } else {
       lastOlderCursorFetchedRef.current = null
     }
@@ -227,7 +241,7 @@ export function useAnchoredFeed<TItem extends { id: string }>({
         lastOlderCursorFetchedRef.current = cursor
 
         const page = await fetchOlderRef.current(cursor)
-        lastBatchSize = applyOlderPage(page)
+        lastBatchSize = applyOlderPage(page, cursor)
         pagination = anchoredPaginationRef.current
         pagesLoaded += 1
 
@@ -327,8 +341,9 @@ export function useAnchoredFeed<TItem extends { id: string }>({
         if (aroundRequestRef.current !== requestId) return
 
         setItems(page.items)
-        setAnchoredPagination(page.pagination)
-        anchoredPaginationRef.current = page.pagination
+        const aroundPagination = correctOlderPaginationFromItems(page.items, page.pagination)
+        setAnchoredPagination(aroundPagination)
+        anchoredPaginationRef.current = aroundPagination
 
         await warmAfterAround(page)
       } catch (e) {
@@ -400,7 +415,7 @@ export function useAnchoredFeed<TItem extends { id: string }>({
     setLoadingOlder(true)
     try {
       const page = await fetchOlderRef.current(cursor)
-      const batchSize = applyOlderPage(page)
+      const batchSize = applyOlderPage(page, cursor)
       if (
         batchSize > 0 &&
         shouldPrefetchNextPage(batchSize, pageLimit, anchoredPaginationRef.current.hasOlder)
