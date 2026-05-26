@@ -44,10 +44,7 @@ export function AllNewsListItem({ item, highlighted = false }: AllNewsListItemPr
               <li key={stock.stockCode}>
                 <Link
                   className={styles.relatedStockLink}
-                  to={buildStockDetailPath(stock.stockCode, {
-                    newsId: item.id,
-                    scrollToNews: false,
-                  })}
+                  to={buildStockDetailPath(stock.stockCode, { newsId: item.id })}
                   onClick={(event) => {
                     event.preventDefault()
                     event.stopPropagation()

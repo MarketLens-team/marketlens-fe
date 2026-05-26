@@ -24,6 +24,7 @@ import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
 import { buildStockListPath } from '../../lib/buildStockRoute'
+import { scrollStockNewsItemIntoView } from '../../lib/newsFeedFocus'
 import { formatPercent, formatPrice, formatStockScore, stockSentimentTone } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
@@ -31,6 +32,8 @@ type NewsFilter = 'all' | 'positive' | 'negative'
 
 /** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
 const RELATED_STOCKS_DISPLAY_MAX = 3
+const NEWS_FOCUS_SCROLL_RETRIES = 10
+const NEWS_FOCUS_SCROLL_RETRY_MS = 80
 
 function scoreToneClass(score: number) {
   const tone = stockSentimentTone(score)
@@ -157,29 +160,6 @@ export function StockDetailContent({
   }, [focusNewsId, stock.code])
 
   useEffect(() => {
-    if (!focusNewsId || loadingNewsFilter) return
-    if (didScrollToNewsFocusRef.current === focusNewsId) return
-    const hasTarget = displayNews.some((item) => item.id === focusNewsId)
-    if (!hasTarget) return
-
-    if (!scrollToFocusNews) {
-      didScrollToNewsFocusRef.current = focusNewsId
-      return
-    }
-
-    const frame = window.requestAnimationFrame(() => {
-      const el = document.getElementById(`stock-news-${focusNewsId}`)
-      if (!el) return
-      el.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-      didScrollToNewsFocusRef.current = focusNewsId
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [focusNewsId, displayNews, loadingNewsFilter, scrollToFocusNews])
-
-  useEffect(() => {
     if (!focusNewsId || !onClearFocusNews) return
 
     const onPointerDown = (event: PointerEvent) => {
@@ -228,6 +208,52 @@ export function StockDetailContent({
     newsSentimentParam,
     stock.code,
     stock.name,
+  ])
+
+  useEffect(() => {
+    if (!focusNewsId || loadingNewsFilter || !scrollToFocusNews) return
+    if (didScrollToNewsFocusRef.current === focusNewsId) return
+
+    const hasTarget = displayNews.some((item) => item.id === focusNewsId)
+    if (!hasTarget && pagination.hasNext && !loadingMoreNews) {
+      void loadMoreNews()
+      return
+    }
+
+    if (!hasTarget) return
+
+    let cancelled = false
+    let timeoutId: number | undefined
+    let rafId = 0
+
+    const attemptScroll = (triesLeft: number) => {
+      if (cancelled) return
+      if (scrollStockNewsItemIntoView(focusNewsId)) {
+        didScrollToNewsFocusRef.current = focusNewsId
+        return
+      }
+      if (triesLeft > 0) {
+        timeoutId = window.setTimeout(() => attemptScroll(triesLeft - 1), NEWS_FOCUS_SCROLL_RETRY_MS)
+      }
+    }
+
+    rafId = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => attemptScroll(NEWS_FOCUS_SCROLL_RETRIES))
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      if (timeoutId != null) window.clearTimeout(timeoutId)
+    }
+  }, [
+    focusNewsId,
+    displayNews,
+    loadingNewsFilter,
+    scrollToFocusNews,
+    pagination.hasNext,
+    loadingMoreNews,
+    loadMoreNews,
   ])
 
   const toggleWatchlist = useCallback(async () => {

@@ -17,12 +17,7 @@ export function useNavigateToStockFromNewsFeed() {
       /* setSearchParams는 /news를 재렌더해 consume이 즉시 실행되므로 replaceState만 사용 */
       window.history.replaceState(window.history.state, '', returnPath)
 
-      navigate(
-        buildStockDetailPath(stockCode, {
-          newsId,
-          scrollToNews: false,
-        }),
-      )
+      navigate(buildStockDetailPath(stockCode, { newsId }))
     },
     [navigate],
   )

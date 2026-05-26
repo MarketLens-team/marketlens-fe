@@ -34,6 +34,8 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   const [restoredScrollTop, setRestoredScrollTop] = useState<number | null>(null)
   const requestIdRef = useRef(0)
   const restoredOnceRef = useRef(false)
+  const focusNewsIdRef = useRef(focusNewsId)
+  focusNewsIdRef.current = focusNewsId
 
   const needsLogin = mode === 'watchlist' && !isLoggedIn
 
@@ -78,7 +80,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
       }
 
       if (!restoredOnceRef.current) {
-        const session = consumeNewsFeedSession(focusNewsId, mode)
+        const session = consumeNewsFeedSession(focusNewsIdRef.current, mode)
         if (session) {
           restoredOnceRef.current = true
           setItems(session.items)
@@ -122,7 +124,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     return () => {
       cancelled = true
     }
-  }, [mode, needsLogin, focusNewsId])
+  }, [mode, needsLogin])
 
   const loadMore = useCallback(async () => {
     if (needsLogin || !pagination.hasNext || !pagination.nextCursor || loadingMore) return

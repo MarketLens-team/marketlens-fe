@@ -7,7 +7,6 @@ interface NewsFeedItemWithId {
   id: string
 }
 
-const MAX_AUTO_LOAD_ATTEMPTS = 12
 const SCROLL_RETRY_COUNT = 10
 const SCROLL_RETRY_MS = 80
 
@@ -29,7 +28,6 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   const loadingMore = options?.loadingMore ?? false
   const onLoadMore = options?.onLoadMore
   const restoredScrollTop = options?.restoredScrollTop
-  const loadAttemptsRef = useRef(0)
   const didScrollToFocusRef = useRef<string | null>(null)
   const didRestoreScrollRef = useRef(false)
 
@@ -43,7 +41,6 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   const hasTarget = Boolean(focusNewsId && items.some((item) => item.id === focusNewsId))
 
   useEffect(() => {
-    loadAttemptsRef.current = 0
     didScrollToFocusRef.current = null
     didRestoreScrollRef.current = false
   }, [focusNewsId])
@@ -65,9 +62,8 @@ export function useNewsFeedFocus(items: NewsFeedItemWithId[], options?: UseNewsF
   useEffect(() => {
     if (restoredScrollTop != null) return
     if (!focusNewsId || loading || hasTarget) return
-    if (!hasMore || !onLoadMore || loadAttemptsRef.current >= MAX_AUTO_LOAD_ATTEMPTS) return
+    if (!hasMore || !onLoadMore) return
     if (loadingMore) return
-    loadAttemptsRef.current += 1
     void onLoadMore()
   }, [
     restoredScrollTop,
