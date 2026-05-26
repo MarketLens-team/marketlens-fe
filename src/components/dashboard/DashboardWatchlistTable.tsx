@@ -32,11 +32,7 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
 
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
-      <CardSectionHeader
-        title="내 관심 종목 워치리스트"
-        subtitle="현재가 · 감성 · 언급량"
-        variant="embedded"
-      />
+      <CardSectionHeader title="내 관심 종목 워치리스트" variant="embedded" />
       {!isLoggedIn ? (
         <DashboardLoginPrompt
           className={styles.loginPrompt}
