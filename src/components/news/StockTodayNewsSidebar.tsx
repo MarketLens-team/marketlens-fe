@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
@@ -20,11 +20,6 @@ interface StockTodayNewsSidebarProps {
   className?: string
 }
 
-function barWidthPercent(count: number, maxCount: number): number {
-  if (maxCount <= 0 || count <= 0) return 0
-  return Math.max(6, Math.round((count / maxCount) * 100))
-}
-
 export function StockTodayNewsSidebar({
   items,
   loading,
@@ -34,12 +29,9 @@ export function StockTodayNewsSidebar({
   const [expanded, setExpanded] = useState(false)
   const visibleCount = expanded ? EXPANDED_VISIBLE_COUNT : DEFAULT_VISIBLE_COUNT
   const visibleItems = items.slice(0, visibleCount)
-  const canExpand = !expanded && items.length > DEFAULT_VISIBLE_COUNT
-
-  const maxCount = useMemo(
-    () => visibleItems.reduce((max, item) => Math.max(max, item.todayNewsCount), 0),
-    [visibleItems],
-  )
+  const canToggle = items.length > DEFAULT_VISIBLE_COUNT
+  const showExpand = canToggle && !expanded
+  const showCollapse = canToggle && expanded
 
   return (
     <aside className={clsx(styles.aside, className)} aria-label="오늘 뉴스 많은 종목">
@@ -63,47 +55,54 @@ export function StockTodayNewsSidebar({
               <p className={styles.empty}>오늘 등록된 뉴스가 없습니다.</p>
             ) : (
               <ol className={styles.list}>
-                {visibleItems.map((item, index) => {
-                  const width = barWidthPercent(item.todayNewsCount, maxCount)
-                  return (
-                    <li key={item.stockCode}>
-                      <Link
-                        to={buildStockDetailPath(item.stockCode)}
-                        className={styles.item}
-                        title={`${item.stockName} 오늘 뉴스 ${item.todayNewsCount}건`}
-                      >
-                        <span className={styles.rank} aria-hidden>
-                          {index + 1}
-                        </span>
+                {visibleItems.map((item, index) => (
+                  <li key={item.stockCode}>
+                    <Link
+                      to={buildStockDetailPath(item.stockCode)}
+                      className={styles.item}
+                      title={`${item.stockName} 오늘 뉴스 ${item.todayNewsCount}건`}
+                    >
+                      <span className={styles.rank} aria-hidden>
+                        {index + 1}
+                      </span>
+                      <span className={styles.lead}>
                         <EntityAvatar
                           variant="stock"
                           size="sm"
                           name={item.stockName}
                           imageUrl={item.imageUrl}
-                          className={styles.avatar}
                         />
                         <span className={styles.name}>{item.stockName}</span>
-                        <span className={styles.barTrack} aria-hidden>
-                          <span className={styles.barFill} style={{ width: `${width}%` }} />
-                        </span>
-                        <span className={styles.count}>
-                          {item.todayNewsCount.toLocaleString('ko-KR')}
-                          <span className={styles.countUnit}>건</span>
-                        </span>
-                      </Link>
-                    </li>
-                  )
-                })}
+                      </span>
+                      <span className={styles.count}>
+                        {item.todayNewsCount.toLocaleString('ko-KR')}
+                        <span className={styles.countUnit}>건</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
               </ol>
             )}
-            {canExpand ? (
+            {showExpand ? (
               <button
                 type="button"
-                className={styles.moreBtn}
+                className={styles.toggleBtn}
                 onClick={() => setExpanded(true)}
+                aria-expanded={false}
               >
                 더보기
                 <span aria-hidden>›</span>
+              </button>
+            ) : null}
+            {showCollapse ? (
+              <button
+                type="button"
+                className={styles.toggleBtn}
+                onClick={() => setExpanded(false)}
+                aria-expanded
+              >
+                접기
+                <span aria-hidden>‹</span>
               </button>
             ) : null}
           </>
