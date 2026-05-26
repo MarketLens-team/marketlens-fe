@@ -13,7 +13,9 @@
 
 .detailGrid {
   display: grid;
+  /* 좌·우 FAB 레일 폭 동일 — 우측 사이드바가 왼쪽과 같은 바깥 여백 */
   grid-template-columns:
+    var(--layout-back-to-top-reserve)
     minmax(14rem, 18rem)
     minmax(0, 1fr)
     minmax(14rem, 18rem)
@@ -25,18 +27,22 @@
   min-width: 0;
 }
 
+.detailSideSpacer {
+  grid-row: 1;
+  min-width: 0;
+}
+
+.detailSideSpacerStart {
+  grid-column: 1;
+}
+
 .detailGrid > .detailLeftSticky,
 .detailGrid > .detailFeedCol,
 .detailGrid > .detailRightPanel,
-.detailGrid > .fabRail {
-  grid-row: 1;
+.detailGrid > .detailSideSpacer {
   align-self: start;
   min-width: 0;
   margin: 0;
-}
-
-.fabRail {
-  grid-column: 4;
 }
 
 .detailLeftSticky,
@@ -51,11 +57,11 @@
 }
 
 .detailLeftSticky {
-  grid-column: 1;
+  grid-column: 2;
 }
 
 .detailFeedCol {
-  grid-column: 2;
+  grid-column: 3;
   min-width: 0;
   --person-timeline-rail: 1.75rem;
   --timeline-line: 2px;
@@ -89,7 +95,11 @@
 }
 
 .detailRightPanel {
-  grid-column: 3;
+  grid-column: 4;
+}
+
+.detailSideSpacerEnd {
+  grid-column: 5;
 }
 
 .feedDimmed {
@@ -226,6 +236,7 @@
 @media (max-width: 1100px) {
   .detailGrid {
     grid-template-columns:
+      var(--layout-back-to-top-reserve)
       minmax(11rem, 14rem)
       minmax(0, 1fr)
       minmax(11rem, 14rem)
@@ -239,10 +250,13 @@
     grid-template-columns: 1fr;
   }
 
+  .detailSideSpacer {
+    display: none;
+  }
+
   .detailGrid > .detailLeftSticky,
   .detailGrid > .detailFeedCol,
-  .detailGrid > .detailRightPanel,
-  .detailGrid > .fabRail {
+  .detailGrid > .detailRightPanel {
     grid-column: 1;
     grid-row: auto;
   }

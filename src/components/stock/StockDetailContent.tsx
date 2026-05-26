@@ -17,6 +17,7 @@ import {
 import { ANCHORED_FEED_PAGE_LIMIT } from '../../data/types/anchoredFeed'
 import type { NewsFeedAroundResponse } from '../../data/types/stockApi'
 import {
+  ANCHORED_INFINITE_SCROLL_COOLDOWN_MS,
   ANCHORED_SCROLL_PREFETCH_EDGE_PX,
   ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
 } from '../../data/types/anchoredFeed'
@@ -371,7 +372,7 @@ export function StockDetailContent({
     direction: 'up',
     rootMargin: newsTopSentinelMargin,
     requireUserScrollUp: true,
-    loadCooldownMs: 400,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
     onLoadMore: () => {
       setLoadMoreError(null)
       void loadNewerNews().catch((e) => {
@@ -385,6 +386,8 @@ export function StockDetailContent({
     hasMore: hasMoreDown,
     loading: loadingMoreDown,
     rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
+    disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMoreNews(),
   })
 

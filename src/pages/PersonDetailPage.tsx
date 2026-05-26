@@ -17,6 +17,7 @@ import type { PersonMentionsRange } from '../data/types/person'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import {
+  ANCHORED_INFINITE_SCROLL_COOLDOWN_MS,
   ANCHORED_SCROLL_PREFETCH_EDGE_PX,
   ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
 } from '../data/types/anchoredFeed'
@@ -57,10 +58,16 @@ export default function PersonDetailPage() {
     loadNewer,
     loadMore,
     loadingMore,
+    anchoredLoadingUi,
     loadMoreError,
     aroundError,
     anchoredWarmComplete,
   } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE, focusStatementId)
+
+  const showOlderLoader =
+    feedMode === 'anchored' && (loadingMore || anchoredLoadingUi === 'older')
+  const showNewerLoader =
+    feedMode === 'anchored' && (loadingNewer || anchoredLoadingUi === 'newer')
   const { data: topPersons, loading: topLoading } = usePersonTopMentioned(topRange)
   const { data: frequentStocks, loading: stocksLoading } = usePersonFrequentStocks(
     stocksRange,
@@ -100,19 +107,21 @@ export default function PersonDetailPage() {
   const topSentinelRef = useInfiniteScroll({
     enabled: feedMode === 'anchored' && Boolean(feed?.mentions.length) && personId != null && focusFeedReady,
     hasMore: hasMoreUp,
-    loading: loadingNewer,
+    loading: showNewerLoader,
     direction: 'up',
     rootMargin: topSentinelMargin,
     requireUserScrollUp: true,
-    loadCooldownMs: 400,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
     onLoadMore: () => void loadNewer(),
   })
 
   const bottomSentinelRef = useInfiniteScroll({
     enabled: Boolean(feed?.mentions.length) && personId != null && focusFeedReady,
     hasMore: hasMoreDown,
-    loading: loadingMore,
+    loading: showOlderLoader,
     rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
+    disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMore(),
   })
 
@@ -153,6 +162,7 @@ export default function PersonDetailPage() {
 
         {pageReady ? (
           <div className={styles.detailGrid}>
+            <div className={clsx(styles.detailSideSpacer, styles.detailSideSpacerStart)} aria-hidden />
             <PersonDetailLeftSidebar
               items={topPersons ?? []}
               range={topRange}
@@ -191,7 +201,7 @@ export default function PersonDetailPage() {
                     </div>
                   </header>
 
-                  {feedMode === 'anchored' && hasMoreUp && loadingNewer ? (
+                  {showNewerLoader ? (
                     <div
                       className={styles.feedNewerSlot}
                       aria-busy="true"
@@ -257,12 +267,19 @@ export default function PersonDetailPage() {
                     <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
                   ) : null}
 
-                  {hasMoreDown ? (
-                    <div className={styles.feedScrollFoot} aria-busy={loadingMore || undefined}>
+                  {hasMoreDown || showOlderLoader ? (
+                    <div
+                      className={styles.feedScrollFoot}
+                      role={showOlderLoader ? 'status' : undefined}
+                      aria-live={showOlderLoader ? 'polite' : undefined}
+                      aria-busy={showOlderLoader || undefined}
+                    >
                       <div ref={bottomSentinelRef} className={styles.infiniteSentinel} aria-hidden />
-                      <div className={styles.feedLoadMoreSlot} aria-hidden={!loadingMore}>
-                        {loadingMore ? <FeedLoadingSpinner label="발언 더 불러오는 중" /> : null}
-                      </div>
+                      {showOlderLoader || loadingMore ? (
+                        <div className={styles.feedLoadMoreSlot}>
+                          <FeedLoadingSpinner label="발언 더 불러오는 중" />
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -282,7 +299,7 @@ export default function PersonDetailPage() {
               showInitialLoading={stocksSidebarInitialLoading}
             />
 
-            <div className={gridStyles.fabRail} aria-hidden />
+            <div className={clsx(styles.detailSideSpacer, styles.detailSideSpacerEnd)} aria-hidden />
           </div>
         ) : null}
 

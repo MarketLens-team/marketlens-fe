@@ -32,6 +32,67 @@ interface AnchoredEdgeLike {
   cursor: string | null
 }
 
+function publishedAtMs(value: string): number {
+  const ms = Date.parse(value)
+  return Number.isFinite(ms) ? ms : 0
+}
+
+/** 배치 안에서 publishedAt 기준 가장 최신 항목 */
+export function newestItemInBatch<T extends { id: string; publishedAt: string }>(
+  items: T[],
+): T | null {
+  if (items.length === 0) return null
+  return items.reduce((best, item) =>
+    publishedAtMs(item.publishedAt) > publishedAtMs(best.publishedAt) ? item : best,
+  )
+}
+
+/** 배치 안에서 publishedAt 기준 가장 오래된 항목 */
+export function oldestItemInBatch<T extends { id: string; publishedAt: string }>(
+  items: T[],
+): T | null {
+  if (items.length === 0) return null
+  return items.reduce((best, item) =>
+    publishedAtMs(item.publishedAt) < publishedAtMs(best.publishedAt) ? item : best,
+  )
+}
+
+/** newer 응답 — BE가 배치 첫 항목이 아닌 id를 줄 때 배치 최신으로 보정 */
+export function resolveNewerEdgeFromPage<T extends { id: string; publishedAt: string }>(
+  pageItems: T[],
+  pagination: { hasNewer: boolean; newerCursor: string | null },
+): AnchoredEdgeLike {
+  if (!pagination.hasNewer) return { hasMore: false, cursor: null }
+  const newest = newestItemInBatch(pageItems)
+  if (!newest) {
+    return { hasMore: true, cursor: pagination.newerCursor }
+  }
+  const batchCursor = buildAnchoredItemCursor(newest)
+  const apiId = anchoredCursorItemId(pagination.newerCursor)
+  if (apiId && apiId !== newest.id) {
+    return { hasMore: true, cursor: batchCursor }
+  }
+  return { hasMore: true, cursor: pagination.newerCursor ?? batchCursor }
+}
+
+/** older 응답 — BE가 배치 최신 id를 olderCursor로 줄 때 배치 최하단(가장 오래된)으로 보정 */
+export function resolveOlderEdgeFromPage<T extends { id: string; publishedAt: string }>(
+  pageItems: T[],
+  pagination: { hasOlder: boolean; olderCursor: string | null },
+): AnchoredEdgeLike {
+  if (!pagination.hasOlder) return { hasMore: false, cursor: null }
+  const oldest = oldestItemInBatch(pageItems)
+  if (!oldest) {
+    return { hasMore: true, cursor: pagination.olderCursor }
+  }
+  const batchCursor = buildAnchoredItemCursor(oldest)
+  const apiId = anchoredCursorItemId(pagination.olderCursor)
+  if (apiId && apiId !== oldest.id) {
+    return { hasMore: true, cursor: batchCursor }
+  }
+  return { hasMore: true, cursor: pagination.olderCursor ?? batchCursor }
+}
+
 /** 병합·정렬 후 목록 최상단과 newer 커서 id가 어긋나면 보정 (older 후 newer 재요청 시 중복 페이지 방지) */
 export function alignNewerEdgeToListTop<T extends { id: string; publishedAt: string }>(
   items: T[],
@@ -42,6 +103,18 @@ export function alignNewerEdgeToListTop<T extends { id: string; publishedAt: str
   const edgeId = anchoredCursorItemId(edge.cursor)
   if (!edgeId || edgeId === newest.id) return edge
   return { hasMore: edge.hasMore, cursor: buildAnchoredItemCursor(newest) }
+}
+
+/** 병합·정렬 후 목록 최하단과 older 커서 id가 어긋나면 보정 */
+export function alignOlderEdgeToListBottom<T extends { id: string; publishedAt: string }>(
+  items: T[],
+  edge: AnchoredEdgeLike,
+): AnchoredEdgeLike {
+  if (!edge.hasMore || items.length === 0) return edge
+  const oldest = items[items.length - 1]
+  const edgeId = anchoredCursorItemId(edge.cursor)
+  if (!edgeId || edgeId === oldest.id) return edge
+  return { hasMore: edge.hasMore, cursor: buildAnchoredItemCursor(oldest) }
 }
 
 export function mergeAnchoredPaginationForDirection(

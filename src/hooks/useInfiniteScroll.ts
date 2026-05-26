@@ -8,6 +8,10 @@ const DEFAULT_ROOT_MARGIN_DOWN = '0px 0px 240px 0px'
 const DEFAULT_ROOT_MARGIN_UP = '64px 0px 0px 0px'
 /** 연속 트리거 방지 */
 const DEFAULT_LOAD_COOLDOWN_MS = 400
+/** 빠른 휠/터치 시 newer 연속 호출 완화 */
+const SCROLL_UP_ATTEMPT_THROTTLE_MS = 120
+/** 로드 직후 센티넬 재시도 — 스크롤 관성·레이아웃 안정 대기 */
+const POST_LOAD_RETRY_DELAY_MS = 150
 
 export function getLayoutScrollRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>(SCROLL_ROOT_SELECTOR)
@@ -60,6 +64,8 @@ interface UseInfiniteScrollOptions {
   requireUserScrollUp?: boolean
   scrollRootSelector?: string
   loadCooldownMs?: number
+  /** true면 로드 직후 센티넬 자동 재시도 안 함 (anchored 빠른 스크롤) */
+  disablePostLoadRetry?: boolean
 }
 
 export function useInfiniteScroll({
@@ -72,6 +78,7 @@ export function useInfiniteScroll({
   requireUserScrollUp = false,
   scrollRootSelector,
   loadCooldownMs = DEFAULT_LOAD_COOLDOWN_MS,
+  disablePostLoadRetry = false,
 }: UseInfiniteScrollOptions) {
   const resolvedRootMargin =
     rootMargin ?? (direction === 'up' ? DEFAULT_ROOT_MARGIN_UP : DEFAULT_ROOT_MARGIN_DOWN)
@@ -79,8 +86,12 @@ export function useInfiniteScroll({
   const onLoadMoreRef = useRef(onLoadMore)
   const userScrolledUpRef = useRef(false)
   const lastLoadStartedAtRef = useRef(0)
+  const lastScrollUpAttemptAtRef = useRef(0)
   const touchStartYRef = useRef(0)
   const wasLoadingRef = useRef(false)
+  const loadingRef = useRef(loading)
+
+  loadingRef.current = loading
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
@@ -96,7 +107,8 @@ export function useInfiniteScroll({
   const resolveRoot = useCallback(() => resolveScrollRoot(scrollRootSelector), [scrollRootSelector])
 
   const tryLoadMore = useCallback(() => {
-    if (!enabled || !hasMore || loading) return false
+    if (!enabled || !hasMore) return false
+    if (loading || loadingRef.current) return false
     if (requireUserScrollUp && direction === 'up' && !userScrolledUpRef.current) return false
 
     const now = Date.now()
@@ -113,6 +125,9 @@ export function useInfiniteScroll({
   /** up: 위로 스크롤 + 센티넬이 상단 존에 있을 때만 (연속 위 스크롤 시 페이지마다 로드) */
   const attemptUpLoad = useCallback(() => {
     if (direction !== 'up' || !sentinelEl) return false
+    const now = Date.now()
+    if (now - lastScrollUpAttemptAtRef.current < SCROLL_UP_ATTEMPT_THROTTLE_MS) return false
+    lastScrollUpAttemptAtRef.current = now
     const root = resolveRoot()
     if (!isSentinelInLoadZone(sentinelEl, root, resolvedRootMargin, 'up')) return false
     return tryLoadMore()
@@ -178,7 +193,7 @@ export function useInfiniteScroll({
 
   /** down 전용 — 로드 후 센티넬이 여전히 보이면 1회 재시도 */
   useEffect(() => {
-    if (direction === 'up') return
+    if (direction === 'up' || disablePostLoadRetry) return
 
     const wasLoading = wasLoadingRef.current
     wasLoadingRef.current = loading
@@ -187,12 +202,13 @@ export function useInfiniteScroll({
 
     const root = resolveRoot()
 
-    const rafId = requestAnimationFrame(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (loadingRef.current) return
       if (!isSentinelInLoadZone(sentinelEl, root, resolvedRootMargin, direction)) return
       tryLoadMore()
-    })
+    }, POST_LOAD_RETRY_DELAY_MS)
 
-    return () => cancelAnimationFrame(rafId)
+    return () => window.clearTimeout(timeoutId)
   }, [
     loading,
     enabled,
@@ -202,6 +218,7 @@ export function useInfiniteScroll({
     resolvedRootMargin,
     direction,
     tryLoadMore,
+    disablePostLoadRetry,
   ])
 
   return sentinelRef

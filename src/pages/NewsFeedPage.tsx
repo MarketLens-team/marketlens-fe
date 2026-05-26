@@ -15,6 +15,7 @@ import { DashboardLoginPrompt } from '../components/dashboard/DashboardLoginProm
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { readNewsFeedSessionModeHint } from '../lib/newsFeedSession'
 import {
+  ANCHORED_INFINITE_SCROLL_COOLDOWN_MS,
   ANCHORED_SCROLL_PREFETCH_EDGE_PX,
   ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
 } from '../data/types/anchoredFeed'
@@ -64,7 +65,7 @@ export default function NewsFeedPage() {
     direction: 'up',
     rootMargin: newsTopSentinelMargin,
     requireUserScrollUp: true,
-    loadCooldownMs: 400,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
     onLoadMore: () => void loadNewer(),
   })
 
@@ -73,6 +74,8 @@ export default function NewsFeedPage() {
     hasMore: hasMoreDown,
     loading: loadingMore,
     rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
+    disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMore(),
   })
 
