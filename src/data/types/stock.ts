@@ -159,8 +159,9 @@ export interface StockOverviewRow {
   price: number
   changePercent: number
   mentionCount24h: number
-  mentionChangeRate24h: number
+  mentionChangeRate24h: number | null
   sentimentScore24h: number
+  sentimentDelta24h?: number | null
 }
 
 export interface StockOverview {
@@ -176,8 +177,9 @@ export interface StockRankingItem {
   price: number
   changePercent: number
   mentionCount24h: number
-  mentionChangeRate24h: number
+  mentionChangeRate24h: number | null
   sentimentScore24h: number
+  sentimentDelta24h: number | null
 }
 
 export type StockRankingCategory =

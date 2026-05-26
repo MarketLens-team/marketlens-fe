@@ -58,7 +58,8 @@ const SENTIMENT_CLASS = {
   neu: styles.sentNeu,
 } as const
 
-function formatMentionChangeRate(value: number): string {
+function formatMentionChangeRate(value: number | null): string {
+  if (value === null) return '—'
   if (value === 0) return '0%'
   return formatPercent(value)
 }
@@ -142,7 +143,7 @@ export function StockOverviewTable({
             {rows.map((row) => {
               const priceUp = row.changePercent >= 0
               const hasPrice = row.price > 0
-              const mentionUp = row.mentionChangeRate24h >= 0
+              const mentionUp = row.mentionChangeRate24h != null && row.mentionChangeRate24h >= 0
               const sentKey = buzzSentimentClass(row.sentimentScore24h)
               return (
                 <tr
@@ -193,7 +194,9 @@ export function StockOverviewTable({
                   <td
                     className={clsx(
                       styles.mono,
-                      row.mentionChangeRate24h !== 0 && (mentionUp ? styles.up : styles.down),
+                      row.mentionChangeRate24h != null &&
+                        row.mentionChangeRate24h !== 0 &&
+                        (mentionUp ? styles.up : styles.down),
                     )}
                   >
                     {formatMentionChangeRate(row.mentionChangeRate24h)}

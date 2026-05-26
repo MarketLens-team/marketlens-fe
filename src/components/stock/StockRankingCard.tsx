@@ -10,6 +10,7 @@ import {
   formatStockScore,
 } from '../buzz/buzzSurgeScore'
 import { formatPercent, formatPrice } from './stockScore'
+import { formatSentimentDelta24h } from './sentimentDelta'
 import styles from './StockRankingCard.module.css'
 
 export type StockRankingMetric = 'mention' | 'sentiment' | 'change'
@@ -31,49 +32,62 @@ const SENTIMENT_CLASS = {
 } as const
 
 interface RankingRowValues {
-  primary: string
-  secondary: string | null
-  primaryTone?: 'up' | 'down' | 'sentiment'
-  secondaryTone?: 'up' | 'down'
-  sentimentKey?: keyof typeof SENTIMENT_CLASS
+  center: string
+  centerTone?: 'up' | 'down' | 'sentiment'
+  centerSentimentKey?: keyof typeof SENTIMENT_CLASS
+  trailing: string
+  trailingTone?: 'up' | 'down' | null
+  trailingTitle?: string
+}
+
+function formatMentionChangeRate(value: number | null): { text: string; tone?: 'up' | 'down' } {
+  if (value === null) return { text: '—' }
+  if (value === 0) return { text: '0%' }
+  return {
+    text: formatPercent(value),
+    tone: value > 0 ? 'up' : 'down',
+  }
 }
 
 function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric): RankingRowValues {
   const hasPrice = item.price > 0
   const priceUp = item.changePercent >= 0
-  const mentionUp = item.mentionChangeRate24h >= 0
 
   if (metric === 'mention') {
+    const mention = formatMentionChangeRate(item.mentionChangeRate24h)
     return {
-      primary: item.mentionCount24h.toLocaleString('ko-KR'),
-      secondary: formatPercent(item.mentionChangeRate24h),
-      secondaryTone: mentionUp ? 'up' : 'down',
+      center: item.mentionCount24h.toLocaleString('ko-KR'),
+      trailing: mention.text,
+      trailingTone: mention.tone ?? null,
     }
   }
 
   if (metric === 'sentiment') {
     const sentKey = buzzSentimentClass(item.sentimentScore24h)
+    const delta = formatSentimentDelta24h(item.sentimentDelta24h)
     return {
-      primary: formatStockScore(item.sentimentScore24h),
-      secondary: hasPrice ? formatPercent(item.changePercent) : null,
-      primaryTone: 'sentiment',
-      sentimentKey: sentKey,
-      secondaryTone: priceUp ? 'up' : 'down',
+      center: formatStockScore(item.sentimentScore24h),
+      centerTone: 'sentiment',
+      centerSentimentKey: sentKey,
+      trailing: delta.text,
+      trailingTone: delta.tone,
+      trailingTitle: delta.title,
     }
   }
 
   return {
-    primary: hasPrice ? formatPercent(item.changePercent) : '—',
-    secondary: hasPrice ? formatPrice(item.price) : null,
-    primaryTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
+    center: hasPrice ? formatPercent(item.changePercent) : '—',
+    centerTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
+    trailing: hasPrice ? formatPrice(item.price) : '—',
+    trailingTone: null,
   }
 }
 
-function toneClass(tone?: 'up' | 'down' | 'sentiment', sentimentKey?: keyof typeof SENTIMENT_CLASS) {
-  if (tone === 'sentiment' && sentimentKey) return SENTIMENT_CLASS[sentimentKey]
+function toneClass(tone?: 'up' | 'down' | null, sentimentKey?: keyof typeof SENTIMENT_CLASS) {
+  if (sentimentKey) return SENTIMENT_CLASS[sentimentKey]
   if (tone === 'up') return styles.valueUp
   if (tone === 'down') return styles.valueDown
-  return undefined
+  return styles.valueMuted
 }
 
 export function StockRankingCard({ title, items, metric, onMoreClick }: StockRankingCardProps) {
@@ -91,41 +105,37 @@ export function StockRankingCard({ title, items, metric, onMoreClick }: StockRan
         ) : null}
       </div>
       <ol className={styles.list}>
-        {preview.map((item, index) => {
+        {preview.map((item) => {
           const values = getRankingRowValues(item, metric)
           return (
             <li key={item.code}>
-              <Link to={buildStockDetailPath(item.code)} className={styles.item}>
-                <span className={styles.rank}>{index + 1}</span>
+              <Link
+                to={buildStockDetailPath(item.code)}
+                className={styles.item}
+                title={values.trailingTitle}
+              >
                 <EntityAvatar
                   variant="stock"
                   size="sm"
                   name={item.name}
                   imageUrl={item.imageUrl}
                 />
-                <span className={styles.body}>
-                  <span className={styles.symbol}>{item.name}</span>
-                  <span className={styles.code}>{item.code}</span>
+                <span className={styles.symbol}>{item.name}</span>
+                <span
+                  className={clsx(
+                    styles.center,
+                    values.centerTone === 'sentiment'
+                      ? toneClass(null, values.centerSentimentKey)
+                      : toneClass(values.centerTone),
+                  )}
+                >
+                  {values.center}
                 </span>
-                <span className={styles.values}>
-                  <span
-                    className={clsx(
-                      styles.valuePrimary,
-                      toneClass(values.primaryTone, values.sentimentKey),
-                    )}
-                  >
-                    {values.primary}
-                  </span>
-                  {values.secondary ? (
-                    <span
-                      className={clsx(
-                        styles.valueSecondary,
-                        toneClass(values.secondaryTone),
-                      )}
-                    >
-                      {values.secondary}
-                    </span>
-                  ) : null}
+                <span
+                  className={clsx(styles.trailing, toneClass(values.trailingTone))}
+                  title={values.trailingTitle}
+                >
+                  {values.trailing}
                 </span>
               </Link>
             </li>

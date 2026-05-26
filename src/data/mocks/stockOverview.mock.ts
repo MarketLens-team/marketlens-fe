@@ -6,19 +6,22 @@ import { mockStockDetails } from './stock.mock'
 
 function mockMentionMetrics(index: number): {
   mentionCount24h: number
-  mentionChangeRate24h: number
+  mentionChangeRate24h: number | null
   sentimentScore24h: number
+  sentimentDelta24h: number | null
 } {
   const detail = mockStockDetails[Object.keys(mockStockDetails)[index % 5]]
   const baseMention = 12 + (index % 17) * 3
-  const mentionChange = ((index % 9) - 4) * 4.2
+  const mentionChange = index % 6 === 0 ? null : ((index % 9) - 4) * 4.2
   const sentiment =
     detail?.stock.sentimentScore ?? ((index % 7) - 3) * 8 + (index % 3) * 2
+  const sentimentDelta = index % 4 === 0 ? null : ((index % 5) - 2) * 6
 
   return {
     mentionCount24h: baseMention,
     mentionChangeRate24h: mentionChange,
     sentimentScore24h: sentiment,
+    sentimentDelta24h: sentimentDelta,
   }
 }
 

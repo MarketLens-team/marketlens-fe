@@ -37,7 +37,12 @@ function sortRows(
       return (a.mentionCount24h - b.mentionCount24h) * dir
     }
     if (sortKey === 'mentionChange') {
-      return (a.mentionChangeRate24h - b.mentionChangeRate24h) * dir
+      const aNull = a.mentionChangeRate24h === null
+      const bNull = b.mentionChangeRate24h === null
+      if (aNull && !bNull) return 1
+      if (!aNull && bNull) return -1
+      if (aNull && bNull) return 0
+      return (a.mentionChangeRate24h! - b.mentionChangeRate24h!) * dir
     }
     return (a.sentimentScore24h - b.sentimentScore24h) * dir
   })

@@ -177,8 +177,9 @@ export interface StockOverviewItemResponse {
   currentPrice?: number
   changeRate?: number
   mentionCount24h?: number
-  mentionChangeRate24h?: number
+  mentionChangeRate24h?: number | null
   sentimentScore24h?: number
+  sentimentDelta24h?: number | null
 }
 
 /** OpenAPI `StockOverviewResponse` — `GET /api/v1/stocks/overview` */
@@ -188,7 +189,7 @@ export interface StockOverviewResponse {
   items: StockOverviewItemResponse[]
 }
 
-/** OpenAPI `StockRankingItem` — `GET /api/v1/stocks/rankings` */
+/** OpenAPI `RankingItem` — `GET /api/v1/stocks/rankings` */
 export interface StockRankingItemResponse {
   stockCode: string
   stockName: string
@@ -196,8 +197,10 @@ export interface StockRankingItemResponse {
   currentPrice?: number
   changeRate?: number
   mentionCount24h?: number
-  mentionChangeRate24h?: number
+  mentionChangeRate24h?: number | null
   sentimentScore24h?: number
+  /** null = 비교 기간 데이터 부족으로 델타 계산 불가 */
+  sentimentDelta24h?: number | null
 }
 
 /** OpenAPI `StockRankingsResponse` — `GET /api/v1/stocks/rankings` */
