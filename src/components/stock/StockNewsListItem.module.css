@@ -43,6 +43,10 @@
   color: var(--color-primary);
 }
 
+.linkFocusedFromSearch:focus-visible .title {
+  color: var(--color-success);
+}
+
 .body {
   min-width: 0;
 }

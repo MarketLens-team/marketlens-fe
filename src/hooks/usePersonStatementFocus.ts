@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 interface MentionWithId {
@@ -13,7 +13,10 @@ function personStatementElementId(statementId: string) {
 }
 
 /** Layout `.main[data-scroll-root]` 기준으로 발언 카드로 스크롤 */
-function scrollPersonStatementIntoView(statementId: string): boolean {
+function scrollPersonStatementIntoView(
+  statementId: string,
+  behavior: ScrollBehavior = 'instant',
+): boolean {
   const el = document.getElementById(personStatementElementId(statementId))
   if (!el) return false
 
@@ -25,11 +28,11 @@ function scrollPersonStatementIntoView(statementId: string): boolean {
       scrollRoot.scrollTop +
       (elRect.top - rootRect.top) -
       Math.max(0, (scrollRoot.clientHeight - elRect.height) / 2)
-    scrollRoot.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
+    scrollRoot.scrollTo({ top: Math.max(0, targetTop), behavior })
     return true
   }
 
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el.scrollIntoView({ behavior, block: 'center' })
   return true
 }
 
@@ -48,6 +51,7 @@ export function usePersonStatementFocus(
   const loading = options?.loading ?? false
   /** 포커스 대상으로 초기 스크롤 1회만 — 이후 무한 스크롤은 사용자 제어 */
   const didScrollToFocusRef = useRef<string | null>(null)
+  const [focusScrollSettled, setFocusScrollSettled] = useState(() => !focusStatementId)
 
   const clearFocusStatement = useCallback(() => {
     if (!searchParams.has('statementId')) return
@@ -57,11 +61,13 @@ export function usePersonStatementFocus(
   }, [searchParams, setSearchParams])
 
   const hasTarget = Boolean(
-    focusStatementId && mentions.some((item) => item.id === focusStatementId),
+    focusStatementId &&
+      mentions.some((item) => String(item.id) === String(focusStatementId)),
   )
 
   useEffect(() => {
     didScrollToFocusRef.current = null
+    setFocusScrollSettled(!focusStatementId)
   }, [focusStatementId])
 
   useEffect(() => {
@@ -74,8 +80,9 @@ export function usePersonStatementFocus(
 
     const attemptScroll = (triesLeft: number) => {
       if (cancelled) return
-      if (scrollPersonStatementIntoView(focusStatementId)) {
+      if (scrollPersonStatementIntoView(focusStatementId, 'instant')) {
         didScrollToFocusRef.current = focusStatementId
+        setFocusScrollSettled(true)
         return
       }
       if (triesLeft > 0) {
@@ -110,9 +117,10 @@ export function usePersonStatementFocus(
   }, [focusStatementId, clearFocusStatement])
 
   const isStatementFocused = useCallback(
-    (statementId: string) => focusStatementId === statementId,
+    (statementId: string) =>
+      focusStatementId != null && String(focusStatementId) === String(statementId),
     [focusStatementId],
   )
 
-  return { focusStatementId, clearFocusStatement, isStatementFocused }
+  return { focusStatementId, clearFocusStatement, isStatementFocused, focusScrollSettled }
 }

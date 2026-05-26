@@ -19,6 +19,11 @@ interface UseInfiniteScrollOptions {
   rootMargin?: string
   /** `down`(기본): 하단 더보기 · `up`: 상단 더보기(anchored newer) */
   direction?: 'down' | 'up'
+  /**
+   * `up` 전용 — 마운트 직후 센티넬 교차로 자동 로드하지 않음.
+   * 사용자가 스크롤 루트에서 위로 스크롤한 뒤에만 트리거.
+   */
+  requireUserScrollUp?: boolean
   /** 기본값: Layout `main[data-scroll-root]`. 인물 상세 등 내부 스크롤 영역에 지정 */
   scrollRootSelector?: string
 }
@@ -30,20 +35,50 @@ export function useInfiniteScroll({
   onLoadMore,
   rootMargin,
   direction = 'down',
+  requireUserScrollUp = false,
   scrollRootSelector,
 }: UseInfiniteScrollOptions) {
   const resolvedRootMargin =
     rootMargin ?? (direction === 'up' ? DEFAULT_ROOT_MARGIN_UP : DEFAULT_ROOT_MARGIN_DOWN)
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null)
   const onLoadMoreRef = useRef(onLoadMore)
+  const userScrolledUpRef = useRef(false)
+  const lastScrollTopRef = useRef(0)
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
   }, [onLoadMore])
 
+  useEffect(() => {
+    userScrolledUpRef.current = false
+    lastScrollTopRef.current = 0
+  }, [enabled, requireUserScrollUp, direction])
+
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     setSentinelEl(node)
   }, [])
+
+  useEffect(() => {
+    if (!enabled || !requireUserScrollUp || direction !== 'up') return
+
+    const root = scrollRootSelector
+      ? document.querySelector<HTMLElement>(scrollRootSelector)
+      : getLayoutScrollRoot()
+    if (!root) return
+
+    lastScrollTopRef.current = root.scrollTop
+
+    const onScroll = () => {
+      const scrollTop = root.scrollTop
+      if (scrollTop < lastScrollTopRef.current - 8) {
+        userScrolledUpRef.current = true
+      }
+      lastScrollTopRef.current = scrollTop
+    }
+
+    root.addEventListener('scroll', onScroll, { passive: true })
+    return () => root.removeEventListener('scroll', onScroll)
+  }, [enabled, requireUserScrollUp, direction, scrollRootSelector])
 
   useEffect(() => {
     if (!enabled || !sentinelEl) return
@@ -56,6 +91,7 @@ export function useInfiniteScroll({
       (entries) => {
         if (!entries[0]?.isIntersecting) return
         if (!hasMore || loading) return
+        if (requireUserScrollUp && direction === 'up' && !userScrolledUpRef.current) return
         onLoadMoreRef.current()
       },
       { root, rootMargin: resolvedRootMargin, threshold: 0 },
@@ -63,7 +99,16 @@ export function useInfiniteScroll({
 
     observer.observe(sentinelEl)
     return () => observer.disconnect()
-  }, [enabled, hasMore, loading, resolvedRootMargin, scrollRootSelector, sentinelEl])
+  }, [
+    enabled,
+    hasMore,
+    loading,
+    resolvedRootMargin,
+    scrollRootSelector,
+    sentinelEl,
+    requireUserScrollUp,
+    direction,
+  ])
 
   return sentinelRef
 }

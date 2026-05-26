@@ -100,6 +100,7 @@ export function StockDetailContent({
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
   const didScrollToNewsFocusRef = useRef<string | null>(null)
+  const [focusNewsScrollSettled, setFocusNewsScrollSettled] = useState(() => !focusNewsId)
   const useApiNewsFilter = !isMockDataSource()
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
 
@@ -231,10 +232,14 @@ export function StockDetailContent({
   )
 
   useEffect(() => {
-    if (!focusNewsId) return
+    if (!focusNewsId) {
+      setFocusNewsScrollSettled(true)
+      return
+    }
     setNewsFilter('all')
     skipNewsFilterFetchRef.current = true
     didScrollToNewsFocusRef.current = null
+    setFocusNewsScrollSettled(false)
   }, [focusNewsId, stock.code])
 
   useEffect(() => {
@@ -299,7 +304,9 @@ export function StockDetailContent({
     if (!focusNewsId || loadingNewsFilter || loadingAnchoredNews || !scrollToFocusNews) return
     if (didScrollToNewsFocusRef.current === focusNewsId) return
 
-    const hasTarget = displayNews.some((item) => item.id === focusNewsId)
+    const hasTarget = displayNews.some(
+      (item) => focusNewsId != null && String(item.id) === String(focusNewsId),
+    )
     if (!hasTarget) return
 
     let cancelled = false
@@ -310,6 +317,7 @@ export function StockDetailContent({
       if (cancelled) return
       if (scrollStockNewsItemIntoView(focusNewsId)) {
         didScrollToNewsFocusRef.current = focusNewsId
+        setFocusNewsScrollSettled(true)
         return
       }
       if (triesLeft > 0) {
@@ -353,10 +361,15 @@ export function StockDetailContent({
   const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
 
   const newsTopSentinelRef = useInfiniteScroll({
-    enabled: feedMode === 'anchored' && displayNews.length > 0 && !loadingAnchoredNews,
+    enabled:
+      feedMode === 'anchored' &&
+      displayNews.length > 0 &&
+      !loadingAnchoredNews &&
+      focusNewsScrollSettled,
     hasMore: hasMoreUp,
     loading: loadingNewerNews,
     direction: 'up',
+    requireUserScrollUp: true,
     onLoadMore: () => {
       setLoadMoreError(null)
       void loadNewerNews().catch((e) => {
@@ -629,7 +642,9 @@ export function StockDetailContent({
                 <StockNewsListItem
                   key={item.id}
                   item={item}
-                  highlighted={focusNewsId === item.id}
+                  highlighted={
+                    focusNewsId != null && String(focusNewsId) === String(item.id)
+                  }
                 />
               ))}
             </ul>

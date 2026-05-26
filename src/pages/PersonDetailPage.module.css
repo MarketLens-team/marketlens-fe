@@ -96,6 +96,12 @@
   min-width: 0;
 }
 
+.feedAroundLoading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-8) 0;
+}
+
 .profileHeader {
   display: flex;
   align-items: flex-start;

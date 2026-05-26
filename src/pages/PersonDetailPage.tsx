@@ -13,6 +13,7 @@ import { formatPersonRole } from '../components/person/personDisplay'
 import { Breadcrumb } from '../components/common/Breadcrumb'
 import { buildPersonTrackerPath } from '../lib/buildPersonRoute'
 import { isPersonDetailPageLoading } from '../lib/personPageLoading'
+import { FeedLoadingSpinner } from '../components/common/FeedLoadingSpinner'
 import { EntityAvatar } from '../components/ui/EntityAvatar'
 import { personProfileFromMention } from '../data/mappers/personMapper'
 import type { PersonMentionsRange } from '../data/types/person'
@@ -90,7 +91,7 @@ export default function PersonDetailPage() {
 
   const pageReady = !pageLoading && feed != null
 
-  const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
+  const { isStatementFocused, focusScrollSettled } = usePersonStatementFocus(feed?.mentions ?? [], {
     loading: feedInitialLoading || loadingAround,
   })
 
@@ -99,10 +100,12 @@ export default function PersonDetailPage() {
       feedMode === 'anchored' &&
       Boolean(feed?.mentions.length) &&
       personId != null &&
-      !loadingAround,
+      !loadingAround &&
+      focusScrollSettled,
     hasMore: hasMoreUp,
     loading: loadingNewer,
     direction: 'up',
+    requireUserScrollUp: true,
     onLoadMore: () => void loadNewer(),
   })
 
@@ -195,32 +198,35 @@ export default function PersonDetailPage() {
                       {aroundError}
                     </p>
                   ) : null}
-                  <ul
-                    className={clsx(
-                      gridStyles.feedList,
-                      (feedLoading || loadingAround) && styles.feedDimmed,
-                    )}
-                    aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
-                  >
-                    {feedMode === 'anchored' && hasMoreUp ? (
-                      <li className={styles.feedScrollHead} aria-hidden>
-                        <div ref={topSentinelRef} className={styles.infiniteSentinel} />
-                      </li>
-                    ) : null}
-                    {feed.mentions.map((mention) => (
-                      <li
-                        key={mention.id}
-                        id={`person-statement-${mention.id}`}
-                        className={gridStyles.timelineItemDetail}
-                      >
-                        <PersonStatementCard
-                          mention={mention}
-                          variant="detailFeed"
-                          highlighted={isStatementFocused(mention.id)}
-                        />
-                      </li>
-                    ))}
-                  </ul>
+                  {loadingAround && focusStatementId ? (
+                    <div className={styles.feedAroundLoading} aria-busy="true">
+                      <FeedLoadingSpinner />
+                    </div>
+                  ) : (
+                    <ul
+                      className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
+                      aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
+                    >
+                      {feedMode === 'anchored' && hasMoreUp ? (
+                        <li className={styles.feedScrollHead} aria-hidden>
+                          <div ref={topSentinelRef} className={styles.infiniteSentinel} />
+                        </li>
+                      ) : null}
+                      {feed.mentions.map((mention) => (
+                        <li
+                          key={mention.id}
+                          id={`person-statement-${mention.id}`}
+                          className={gridStyles.timelineItemDetail}
+                        >
+                          <PersonStatementCard
+                            mention={mention}
+                            variant="detailFeed"
+                            highlighted={isStatementFocused(mention.id)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
                   {feed.mentions.length === 0 ? (
                     <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
