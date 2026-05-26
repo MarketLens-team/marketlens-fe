@@ -196,7 +196,7 @@ export default function NewsFeedPage() {
                       showBookmark={mode === 'all'}
                       bookmarked={isBookmarked(item.id)}
                       bookmarkPending={isBookmarkPending(item.id)}
-                      onBookmarkToggle={() => void toggleBookmark(item.id)}
+                      onBookmarkToggle={() => void toggleBookmark(item.id, { type: 'ALL_NEWS' })}
                     />
                   ))}
                 </ul>

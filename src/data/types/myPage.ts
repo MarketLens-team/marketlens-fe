@@ -1,4 +1,5 @@
 import type { AlertSettings } from './member'
+import type { NewsBookmarkContextType } from './bookmark'
 import type { SentimentPolarity } from './stock'
 
 export const MY_PAGE_WATCHLIST_MAX = 10
@@ -13,6 +14,9 @@ export interface MyPageBookmarkItem {
   imageUrl?: string | null
   sentimentScore: number
   sentiment: SentimentPolarity
+  contextType: NewsBookmarkContextType
+  contextStockCode?: string | null
+  contextStockName?: string | null
 }
 
 export interface MyPageWatchlistRow {

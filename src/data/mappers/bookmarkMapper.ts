@@ -1,6 +1,7 @@
 import type { NewsBookmarkDto } from '../types/bookmark'
 import type { MyPageBookmarkItem } from '../types/myPage'
 import type { SentimentPolarity } from '../types/stock'
+import { normalizeBookmarkContextType } from '../../lib/bookmarkNavigation'
 
 function parseSentimentPolarity(sentiment: string): SentimentPolarity {
   const normalized = sentiment.trim().toLowerCase()
@@ -20,6 +21,9 @@ export function mapNewsBookmarkDto(dto: NewsBookmarkDto): MyPageBookmarkItem {
     imageUrl: dto.imageUrl ?? null,
     sentimentScore: dto.sentimentScore,
     sentiment: parseSentimentPolarity(dto.sentimentLabel),
+    contextType: normalizeBookmarkContextType(dto.contextType),
+    contextStockCode: dto.contextStockCode ?? null,
+    contextStockName: dto.contextStockName ?? null,
   }
 }
 

@@ -6,7 +6,7 @@ import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EmptyState } from '../common/EmptyState'
 import { formatStockScore } from '../stock/stockScore'
 import type { MyPageBookmarkItem } from '../../data/types/myPage'
-import { buildNewsFeedPath } from '../../lib/buildNewsFeedRoute'
+import { buildBookmarkItemPath, formatBookmarkContextLabel } from '../../lib/bookmarkNavigation'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import styles from './MyPageBookmarkList.module.css'
 
@@ -47,17 +47,16 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
         <EmptyState
           className={styles.empty}
           title="저장한 뉴스가 없어요"
-          message="전체 뉴스에서 ☆ 버튼으로 기사를 저장해 보세요."
-          hint="/news 피드에서 즐겨찾기를 추가할 수 있어요."
+          message="전체 뉴스나 종목 상세 뉴스에서 ☆ 버튼으로 기사를 저장해 보세요."
+          hint="저장한 위치(전체 뉴스·종목 뉴스)에 따라 다시 열어줍니다."
         />
       ) : (
         <ul className={styles.list}>
           {items.map((item) => {
             const sentKey = buzzSentimentClass(item.sentimentScore)
-            const feedPath = buildNewsFeedPath({ newsId: item.id })
-            const titleNode = (
-              <h3 className={styles.title}>{item.title}</h3>
-            )
+            const itemPath = buildBookmarkItemPath(item)
+            const contextLabel = formatBookmarkContextLabel(item)
+            const titleNode = <h3 className={styles.title}>{item.title}</h3>
 
             return (
               <li key={item.id} className={styles.item}>
@@ -70,9 +69,10 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
                     </span>
                     <span className={styles.source}>{item.source}</span>
                   </div>
-                  <Link className={styles.titleLink} to={feedPath}>
+                  <Link className={styles.titleLink} to={itemPath}>
                     {titleNode}
                   </Link>
+                  <p className={styles.contextLabel}>{contextLabel}</p>
                   <p className={styles.savedAt}>저장 {formatBookmarkedAt(item.bookmarkedAt)}</p>
                   <span
                     className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
@@ -82,7 +82,7 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
                   </span>
                 </div>
                 {item.imageUrl ? (
-                  <Link className={styles.thumbLink} to={feedPath} aria-hidden tabIndex={-1}>
+                  <Link className={styles.thumbLink} to={itemPath} aria-hidden tabIndex={-1}>
                     <img className={styles.thumb} src={item.imageUrl} alt="" loading="lazy" />
                   </Link>
                 ) : (

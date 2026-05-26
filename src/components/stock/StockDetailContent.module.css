@@ -897,6 +897,12 @@
   pointer-events: none;
 }
 
+.newsBookmarkError {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
 .loadMoreError {
   margin: var(--space-3) var(--space-6) 0;
   font-size: var(--font-size-sm);

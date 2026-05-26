@@ -22,6 +22,7 @@ import {
   ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
 } from '../../data/types/anchoredFeed'
 import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
+import { useNewsBookmarks } from '../../hooks/useNewsBookmarks'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
@@ -113,6 +114,12 @@ export function StockDetailContent({
   } | null>(null)
   const [resettingToLatest, setResettingToLatest] = useState(false)
   const [skipFocusScroll, setSkipFocusScroll] = useState(false)
+  const {
+    isBookmarked,
+    isBookmarkPending,
+    toggleBookmark,
+    loadError: bookmarkLoadError,
+  } = useNewsBookmarks()
   const useApiNewsFilter = !isMockDataSource()
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
   const useAnchoredAround = Boolean(focusNewsId) && !suppressAnchored
@@ -696,6 +703,11 @@ export function StockDetailContent({
               <FeedLoadingSpinner />
             </div>
           ) : null}
+          {bookmarkLoadError ? (
+            <p className={styles.newsBookmarkError} role="status">
+              {bookmarkLoadError}
+            </p>
+          ) : null}
           {!loadingNewsFilter && displayNews.length === 0 && !loadingAnchoredNews ? (
             <EmptyState
               className={styles.emptyNews}
@@ -723,6 +735,12 @@ export function StockDetailContent({
                   item={item}
                   highlighted={
                     focusNewsId != null && String(focusNewsId) === String(item.id)
+                  }
+                  showBookmark
+                  bookmarked={isBookmarked(item.id)}
+                  bookmarkPending={isBookmarkPending(item.id)}
+                  onBookmarkToggle={() =>
+                    void toggleBookmark(item.id, { type: 'STOCK', stockCode: stock.code })
                   }
                 />
               ))}

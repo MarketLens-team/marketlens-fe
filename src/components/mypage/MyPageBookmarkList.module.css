@@ -110,8 +110,15 @@
   }
 }
 
-.savedAt {
+.contextLabel {
   margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-warning);
+}
+
+.savedAt {
+  margin: var(--space-1) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }

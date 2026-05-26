@@ -6,6 +6,7 @@ import {
   removeNewsBookmark,
 } from '../data/clients/bookmarkClient'
 import type { ApiEnvelope } from '../data/types/api'
+import type { NewsBookmarkSaveContext } from '../data/types/bookmark'
 import { getApiErrorMessage } from '../data/util/apiError'
 import { useAuthModalStore } from '../store/authModalStore'
 import { useAuthStore } from '../store/authStore'
@@ -66,7 +67,7 @@ export function useNewsBookmarks() {
   )
 
   const toggleBookmark = useCallback(
-    async (newsId: string) => {
+    async (newsId: string, context: NewsBookmarkSaveContext) => {
       if (!isLoggedIn) {
         openAuthModal('login')
         return
@@ -88,7 +89,7 @@ export function useNewsBookmarks() {
         if (wasBookmarked) {
           await removeNewsBookmark(newsId)
         } else {
-          await addNewsBookmark(newsId)
+          await addNewsBookmark(newsId, context)
         }
       } catch (error) {
         const code = extractApiErrorCode(error)

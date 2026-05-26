@@ -13,10 +13,11 @@
 
 ## 요약
 
-- **전체 뉴스** (`/news`, `mode=all`) — 행 메타에 ☆/★ 토글 · 로그인 시 `GET /bookmarks`로 ID Set 동기화
-- **비로그인** — ☆ 클릭 시 `useAuthModalStore.open('login')`
-- **마이페이지** (`/mypage`) — 「저장한 뉴스」 카드 · 제목·썸네일 클릭 → `/news?newsId=` anchored · × 해제
-- **피드 응답** — `NewsFeedItemResponse`에 `bookmarked` 필드 없음 → 클라이언트 Set + 토글 API
+- **전체 뉴스** (`/news`, `mode=all`) — ☆ 토글 · 저장 시 `contextType=ALL_NEWS`
+- **종목 상세 뉴스** — ☆ 토글 · 저장 시 `contextType=STOCK` + `contextStockCode`
+- **비로그인** — ☆ 클릭 시 로그인 모달
+- **마이페이지** — 저장 맥락 라벨(전체/종목명) · 클릭 시 맥락별 anchored 이동
+- **피드 응답** — `bookmarked` 필드 없음 → `GET /bookmarks` ID Set + POST 쿼리 컨텍스트
 
 ## Added
 
@@ -29,6 +30,7 @@
 | `components/news/NewsBookmarkButton.tsx` | ☆/★ 버튼 |
 | `components/mypage/MyPageBookmarkList.tsx` | 마이페이지 저장 목록 |
 | `lib/buildNewsFeedRoute.ts` | `buildNewsFeedPath({ newsId })` → `/news?newsId=` |
+| `lib/bookmarkNavigation.ts` | 맥락 라벨 · `buildBookmarkItemPath` (ALL_NEWS→`/news`, STOCK→`/stock/:code?newsId=`) |
 
 ## Changed
 
@@ -36,28 +38,44 @@
 |------|------|
 | `components/news/AllNewsListItem.tsx` | 북마크 props · 행 전체 `<a>` 제거(버튼·`<a>` 중첩 방지) · 제목·썸네일만 원문 링크 |
 | `pages/NewsFeedPage.tsx` | `useNewsBookmarks` 연동 · `?newsId=` 시 탭 `all` 고정(`resolveInitialNewsFeedMode`) |
-| `components/mypage/MyPageBookmarkList.tsx` | 외부 원문 대신 `buildNewsFeedPath` 내부 이동 |
+| `components/mypage/MyPageBookmarkList.tsx` | 맥락 라벨 · 맥락별 내부 이동 |
+| `components/stock/StockNewsListItem.tsx` | 북마크 버튼 · 행 `<a>` 중첩 제거 |
+| `components/stock/StockDetailContent.tsx` | 종목 뉴스 탭 `STOCK` 컨텍스트 토글 |
+| `data/clients/bookmarkClient.ts` | POST `contextType` · `contextStockCode` 쿼리 |
+| `hooks/useNewsBookmarks.ts` | `toggleBookmark(id, context)` |
 | `pages/MyPage.tsx` | 저장한 뉴스 섹션 · 해제 후 목록 갱신 |
 | `data/types/myPage.ts` | `MyPageBookmarkItem` |
 | `data/constants/errorCodes.ts` | `B001` · `B002` |
+
+## 저장 컨텍스트 (BE)
+
+| 저장 위치 | `contextType` | `contextStockCode` |
+|-----------|---------------|-------------------|
+| 전체 뉴스 피드 | `ALL_NEWS` | `null` |
+| 종목 상세 뉴스 탭 | `STOCK` | 종목 코드 |
+
+`PERSON` 등은 미도입(과설계 방지).
 
 ## API 매핑
 
 | API 필드 | UI |
 |----------|-----|
 | `newsArticleId` | 피드 `item.id` (string) |
+| `contextType` · `contextStockCode` · `contextStockName` | 마이페이지 라벨·이동 경로 |
 | `publisherName` | `source` |
-| `originalLink` | `url` |
+| `originalLink` | (미사용 — 피드/종목 anchored 이동) |
 | `sentimentLabel` | `sentiment` |
 
 ## 확인
 
 - [ ] 로그인 — `/news` 전체 탭에서 ☆ → ★ · 재클릭 해제
 - [ ] 비로그인 — ☆ 클릭 → 로그인 모달
-- [ ] `/mypage` — 저장 목록 표시 · 기사 클릭 → `/news?newsId=` around·초록 강조 · × 해제
+- [ ] `/news` · `/stock/:code` — ☆ 저장 시 각각 ALL_NEWS / STOCK 쿼리
+- [ ] `/mypage` — 「전체 뉴스에서 저장」/「{종목명} 뉴스에서 저장」 · 클릭 시 맥락별 anchored
 - [ ] `B001` 중복 추가 · `B002` 없는 삭제 시 UI Set 정합
 
 ## Notes
 
-- 관심종목 뉴스 탭·종목 상세 뉴스 행에는 미적용(1차 범위: 전체 뉴스 + 마이페이지).
+- 관심종목 뉴스 탭에는 미적용.
+- 활성 북마크 색: `--color-warning`(노란 ★).
 - mock: `bookmarkClient` 목록 빈 배열 · 토글은 메모리 Set.
