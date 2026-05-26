@@ -83,4 +83,4 @@
 
 ### 후속 (같은 스레드, 실험 범위 밖)
 
-사용자 컨펌: `VITE_USE_MOCK_DATA=false`, 증상 **(a) 스크롤해도 더 안 붙음** → FE `useInfiniteScroll` 센티넬·`rootMargin` 수정. 기술 내용은 issues §6 참고.
+사용자 컨펌: `VITE_USE_MOCK_DATA=false`, 증상 **(a)** → [fix changelog](../changelog/2026-05-26-fix-stock-news-pagination.md) · [issues §8](../issues/2026-05-26-stock-news-pagination.md#8-해결)

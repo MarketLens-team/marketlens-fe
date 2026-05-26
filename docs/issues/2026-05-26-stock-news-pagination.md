@@ -2,12 +2,12 @@
 
 | 항목 | 내용 |
 |------|------|
-| 상태 | fix in progress |
+| 상태 | fixed |
 | 범위 | FE (mock/API 분기), 필요 시 BE 확인 |
 | 관련 커밋 | `6f9ab8a`, `77ddadd`, `22ca4f1`, `84131dd`, `4f147f9` |
 | 작성일 | 2026-05-26 |
 | GitHub # | (등록 후 기입) |
-| fix changelog | (수정 후 `docs/changelog/YYYY-MM-DD-fix-stock-news-pagination.md` 링크) |
+| fix changelog | [2026-05-26-fix-stock-news-pagination.md](../changelog/2026-05-26-fix-stock-news-pagination.md) |
 | Prompt experiment | [탐색 범위 vs 컨펌 후](../prompt-experiments/2026-05-26-stock-news-pagination-scope.md) |
 
 ---
@@ -151,23 +151,21 @@ const useApiNewsFilter = !isMockDataSource()
 
 ## 7. 후속 액션
 
-- [ ] §5 컨펌
+- [x] §5 컨펌 (API 모드, 증상 a)
 - [ ] GitHub Issue 등록 → 위 표 `GitHub #` 갱신
 - [ ] 수정 PR: `Fixes #N`
-- [ ] **fix changelog** 작성 (`docs/changelog/YYYY-MM-DD-fix-stock-news-pagination.md`) — **§6 확정·머지 후**
-- [ ] 이 파일 상태 → `fixed`, §8 해결 요약 추가
-- [ ] 구조 결정 시 DDR (선택)
+- [x] fix changelog — [2026-05-26-fix-stock-news-pagination.md](../changelog/2026-05-26-fix-stock-news-pagination.md)
+- [x] 이 파일 상태 → `fixed`, §8 해결 요약
+- [ ] Mock `hasNext`·픽스처·cursor `sentiment` (백로그)
 
 ---
 
-## 8. 해결 (fixed 시에만 작성)
+## 8. 해결
 
-_아직 없음._
-
-```md
-## 해결 요약
-- 원인:
-- 변경 파일:
-- fix changelog: [../changelog/YYYY-MM-DD-fix-stock-news-pagination.md](...)
-- PR:
-```
+| 항목 | 내용 |
+|------|------|
+| 원인 | API 정상; FE `useInfiniteScroll` 센티넬 remount 시 observer 미재연결, `rootMargin` 상단만 확장 |
+| 변경 | `src/hooks/useInfiniteScroll.ts` — callback ref + `0px 0px 240px 0px` |
+| 커밋 | `ddd80ec` |
+| fix changelog | [../changelog/2026-05-26-fix-stock-news-pagination.md](../changelog/2026-05-26-fix-stock-news-pagination.md) |
+| PR | (등록 후 기입) |

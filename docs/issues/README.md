@@ -37,7 +37,7 @@ changelog는 **끝난 작업**, DDR은 **설계 결정**, 이 폴더는 **제품
 
 | 날짜 | 제목 | Prompt experiment | 상태 |
 |------|------|-------------------|------|
-| 2026-05-26 | [종목 뉴스 — 긍정/부정·무한 스크롤](./2026-05-26-stock-news-pagination.md) | [탐색 범위 vs 컨펌 후](../prompt-experiments/2026-05-26-stock-news-pagination-scope.md) | fix in progress |
+| 2026-05-26 | [종목 뉴스 — 긍정/부정·무한 스크롤](./2026-05-26-stock-news-pagination.md) | [탐색 범위 vs 컨펌 후](../prompt-experiments/2026-05-26-stock-news-pagination-scope.md) | fixed → [fix changelog](../changelog/2026-05-26-fix-stock-news-pagination.md) |
 
 ## changelog 월 인덱스
 
