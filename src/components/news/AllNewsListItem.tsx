@@ -7,19 +7,35 @@ import { newsFeedItemElementId } from '../../lib/newsFeedFocus'
 import { useNavigateToStockFromNewsFeed } from '../../hooks/useNavigateToStockFromNewsFeed'
 import { renderStockNewsTitle } from '../stock/stockNewsTitle'
 import { EntityAvatar } from '../ui/EntityAvatar'
+import { NewsBookmarkButton } from './NewsBookmarkButton'
 import styles from './AllNewsListItem.module.css'
 
 export interface AllNewsListItemProps {
   item: StockNewsItem
   highlighted?: boolean
+  showBookmark?: boolean
+  bookmarked?: boolean
+  bookmarkPending?: boolean
+  onBookmarkToggle?: () => void
 }
 
-export function AllNewsListItem({ item, highlighted = false }: AllNewsListItemProps) {
+export function AllNewsListItem({
+  item,
+  highlighted = false,
+  showBookmark = false,
+  bookmarked = false,
+  bookmarkPending = false,
+  onBookmarkToggle,
+}: AllNewsListItemProps) {
   const navigateToStockFromNews = useNavigateToStockFromNewsFeed()
   const timeBadge = formatNewsTimeBadge(item.publishedAt)
   const dateLabel = formatNewsDateLong(item.publishedAt)
   const relatedStocks = item.relatedStocks ?? []
   const rowClassName = clsx(styles.link, highlighted && styles.linkFocused)
+
+  const titleNode = (
+    <h3 className={styles.title}>{renderStockNewsTitle(item.title, item.highlightTerms)}</h3>
+  )
 
   const body = (
     <>
@@ -35,8 +51,27 @@ export function AllNewsListItem({ item, highlighted = false }: AllNewsListItemPr
             </span>
             <span className={styles.source}>{item.source}</span>
           </div>
+          {showBookmark && onBookmarkToggle ? (
+            <NewsBookmarkButton
+              className={styles.bookmark}
+              bookmarked={bookmarked}
+              pending={bookmarkPending}
+              onToggle={onBookmarkToggle}
+            />
+          ) : null}
         </div>
-        <h3 className={styles.title}>{renderStockNewsTitle(item.title, item.highlightTerms)}</h3>
+        {item.url ? (
+          <a
+            className={styles.titleLink}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {titleNode}
+          </a>
+        ) : (
+          titleNode
+        )}
         {item.description ? <p className={styles.description}>{item.description}</p> : null}
         <div className={styles.relatedStocksRow}>
           <ul className={styles.relatedStocks} aria-label="관련 종목">
@@ -65,22 +100,25 @@ export function AllNewsListItem({ item, highlighted = false }: AllNewsListItemPr
         </div>
       </div>
       {item.imageUrl ? (
-        <img className={styles.thumb} src={item.imageUrl} alt="" width={120} height={80} loading="lazy" />
+        item.url ? (
+          <a
+            className={styles.thumbLink}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-hidden
+            tabIndex={-1}
+          >
+            <img className={styles.thumb} src={item.imageUrl} alt="" width={120} height={80} loading="lazy" />
+          </a>
+        ) : (
+          <img className={styles.thumb} src={item.imageUrl} alt="" width={120} height={80} loading="lazy" />
+        )
       ) : (
         <div className={styles.thumbPlaceholder} aria-hidden />
       )}
     </>
   )
-
-  if (item.url) {
-    return (
-      <li id={newsFeedItemElementId(item.id)} className={styles.item}>
-        <a className={rowClassName} href={item.url} target="_blank" rel="noopener noreferrer">
-          {body}
-        </a>
-      </li>
-    )
-  }
 
   return (
     <li id={newsFeedItemElementId(item.id)} className={styles.item}>

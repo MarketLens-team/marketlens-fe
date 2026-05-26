@@ -1,6 +1,19 @@
 import type { AlertSettings } from './member'
+import type { SentimentPolarity } from './stock'
 
 export const MY_PAGE_WATCHLIST_MAX = 10
+
+export interface MyPageBookmarkItem {
+  id: string
+  title: string
+  url?: string
+  source: string
+  publishedAt: string
+  bookmarkedAt: string
+  imageUrl?: string | null
+  sentimentScore: number
+  sentiment: SentimentPolarity
+}
 
 export interface MyPageWatchlistRow {
   code: string

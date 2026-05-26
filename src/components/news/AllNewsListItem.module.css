@@ -51,6 +51,21 @@
   margin-bottom: var(--space-3);
 }
 
+.bookmark {
+  margin-left: auto;
+}
+
+.titleLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.thumbLink {
+  display: block;
+  line-height: 0;
+}
+
 .timeBadge {
   display: inline-flex;
   align-items: center;

@@ -19,6 +19,7 @@ import {
   ANCHORED_SCROLL_PREFETCH_EDGE_PX,
   ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
 } from '../data/types/anchoredFeed'
+import { useNewsBookmarks } from '../hooks/useNewsBookmarks'
 import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
@@ -50,6 +51,13 @@ export default function NewsFeedPage() {
     resetToLatestFeed,
     resettingToLatest,
   } = useNewsFeedPage(mode)
+
+  const {
+    isBookmarked,
+    isBookmarkPending,
+    toggleBookmark,
+    loadError: bookmarkLoadError,
+  } = useNewsBookmarks()
 
   const [skipFocusScroll, setSkipFocusScroll] = useState(false)
 
@@ -160,6 +168,12 @@ export default function NewsFeedPage() {
               />
             ) : null}
 
+            {bookmarkLoadError && mode === 'all' ? (
+              <p className={styles.bookmarkError} role="status">
+                {bookmarkLoadError}
+              </p>
+            ) : null}
+
             {!loading && !needsLogin && items.length > 0 ? (
               <section className={styles.feed} aria-label="뉴스 목록">
                 <ul className={styles.list} data-anchored-feed-list>
@@ -173,6 +187,10 @@ export default function NewsFeedPage() {
                       key={item.id}
                       item={item}
                       highlighted={isNewsFocused(item.id)}
+                      showBookmark={mode === 'all'}
+                      bookmarked={isBookmarked(item.id)}
+                      bookmarkPending={isBookmarkPending(item.id)}
+                      onBookmarkToggle={() => void toggleBookmark(item.id)}
                     />
                   ))}
                 </ul>
