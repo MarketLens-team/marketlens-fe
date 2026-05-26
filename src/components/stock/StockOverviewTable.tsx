@@ -16,6 +16,7 @@ export type StockOverviewSortKey =
   | 'price'
   | 'change'
   | 'mention'
+  | 'mentionChange'
   | 'sentiment'
 
 interface StockOverviewTableProps {
@@ -58,6 +59,11 @@ const SENTIMENT_CLASS = {
   neg: styles.sentNeg,
   neu: styles.sentNeu,
 } as const
+
+function formatMentionChangeRate(value: number): string {
+  if (value === 0) return '0%'
+  return formatPercent(value)
+}
 
 export function StockOverviewTable({
   rows,
@@ -110,10 +116,18 @@ export function StockOverviewTable({
               </th>
               <th scope="col" className={styles.colNum}>
                 <SortButton
-                  label="24h 언급"
+                  label="24h 언급량"
                   active={sortKey === 'mention'}
                   desc={sortDesc}
                   onClick={() => onSortChange('mention')}
+                />
+              </th>
+              <th scope="col" className={styles.colNum}>
+                <SortButton
+                  label="언급률"
+                  active={sortKey === 'mentionChange'}
+                  desc={sortDesc}
+                  onClick={() => onSortChange('mentionChange')}
                 />
               </th>
               <th scope="col" className={styles.colNum}>
@@ -129,7 +143,7 @@ export function StockOverviewTable({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className={styles.empty}>
+                <td colSpan={6} className={styles.empty}>
                   표시할 종목이 없습니다.
                 </td>
               </tr>
@@ -142,7 +156,7 @@ export function StockOverviewTable({
               return (
                 <tr
                   key={row.code}
-                  className={styles.rowClickable}
+                  className={styles.rowRing}
                   tabIndex={0}
                   role="link"
                   aria-label={`${row.name} 종목 상세 보기`}
@@ -182,18 +196,16 @@ export function StockOverviewTable({
                   >
                     {hasPrice ? formatPercent(row.changePercent) : '—'}
                   </td>
-                  <td className={styles.mentionCell}>
-                    <span className={styles.mono}>{row.mentionCount24h.toLocaleString('ko-KR')}</span>
-                    {row.mentionChangeRate24h !== 0 ? (
-                      <span
-                        className={clsx(
-                          styles.mentionDelta,
-                          mentionUp ? styles.up : styles.down,
-                        )}
-                      >
-                        {formatPercent(row.mentionChangeRate24h)}
-                      </span>
-                    ) : null}
+                  <td className={styles.mono}>
+                    {row.mentionCount24h.toLocaleString('ko-KR')}
+                  </td>
+                  <td
+                    className={clsx(
+                      styles.mono,
+                      row.mentionChangeRate24h !== 0 && (mentionUp ? styles.up : styles.down),
+                    )}
+                  >
+                    {formatMentionChangeRate(row.mentionChangeRate24h)}
                   </td>
                   <td>
                     <span className={clsx(styles.mono, styles.sentScore, SENTIMENT_CLASS[sentKey])}>
