@@ -76,10 +76,9 @@ function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric)
   }
 
   return {
-    center: hasPrice ? formatPercent(item.changePercent) : '—',
-    centerTone: hasPrice ? (priceUp ? 'up' : 'down') : undefined,
-    trailing: hasPrice ? formatPrice(item.price) : '—',
-    trailingTone: null,
+    center: hasPrice ? formatPrice(item.price) : '—',
+    trailing: hasPrice ? formatPercent(item.changePercent) : '—',
+    trailingTone: hasPrice ? (priceUp ? 'up' : 'down') : null,
   }
 }
 
@@ -114,28 +113,32 @@ export function StockRankingCard({ title, items, metric, onMoreClick }: StockRan
                 className={styles.item}
                 title={values.trailingTitle}
               >
-                <EntityAvatar
-                  variant="stock"
-                  size="sm"
-                  name={item.name}
-                  imageUrl={item.imageUrl}
-                />
-                <span className={styles.symbol}>{item.name}</span>
-                <span
-                  className={clsx(
-                    styles.center,
-                    values.centerTone === 'sentiment'
-                      ? toneClass(null, values.centerSentimentKey)
-                      : toneClass(values.centerTone),
-                  )}
-                >
-                  {values.center}
+                <span className={styles.lead}>
+                  <EntityAvatar
+                    variant="stock"
+                    size="sm"
+                    name={item.name}
+                    imageUrl={item.imageUrl}
+                  />
+                  <span className={styles.symbol}>{item.name}</span>
                 </span>
-                <span
-                  className={clsx(styles.trailing, toneClass(values.trailingTone))}
-                  title={values.trailingTitle}
-                >
-                  {values.trailing}
+                <span className={styles.metrics}>
+                  <span
+                    className={clsx(
+                      styles.center,
+                      values.centerTone === 'sentiment'
+                        ? toneClass(null, values.centerSentimentKey)
+                        : toneClass(values.centerTone),
+                    )}
+                  >
+                    {values.center}
+                  </span>
+                  <span
+                    className={clsx(styles.trailing, toneClass(values.trailingTone))}
+                    title={values.trailingTitle}
+                  >
+                    {values.trailing}
+                  </span>
                 </span>
               </Link>
             </li>
