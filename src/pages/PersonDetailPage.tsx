@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { BackToTopButton } from '../components/common/BackToTopButton'
@@ -11,7 +11,8 @@ import { PersonFrequentStocksPanel } from '../components/person/PersonFrequentSt
 import { PersonStatementCard } from '../components/person/PersonStatementCard'
 import { PersonTop5Panel } from '../components/person/PersonTop5Panel'
 import { formatPersonRole } from '../components/person/personDisplay'
-import { IconCircleButton } from '../components/ui/IconCircleButton'
+import { Breadcrumb } from '../components/common/Breadcrumb'
+import { buildPersonTrackerPath } from '../lib/buildPersonRoute'
 import { EntityAvatar } from '../components/ui/EntityAvatar'
 import { personProfileFromMention } from '../data/mappers/personMapper'
 import type { PersonMentionsRange } from '../data/types/person'
@@ -32,25 +33,7 @@ function parsePersonId(raw: string | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
-function PersonTimelineBackButton({ onBack }: { onBack: () => void }) {
-  return (
-    <div className={styles.asideBackBtn}>
-      <div className={styles.toolbarBtnWrap}>
-        <IconCircleButton
-          direction="back"
-          aria-label="전체 인물 타임라인으로 이동"
-          onClick={onBack}
-        />
-        <span className={styles.toolbarTooltip} role="tooltip">
-          전체 인물 타임라인으로 이동
-        </span>
-      </div>
-    </div>
-  )
-}
-
 export default function PersonDetailPage() {
-  const navigate = useNavigate()
   const { personId: personIdParam } = useParams()
   const personId = parsePersonId(personIdParam)
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
@@ -117,10 +100,19 @@ export default function PersonDetailPage() {
   }
 
   const showInitialSkeleton = feedInitialLoading && !feedError
+  const breadcrumbCurrentLabel = profile?.personName ?? (feed ? `인물 #${personId}` : '…')
 
   return (
     <Layout>
       <div className={styles.page}>
+        <Breadcrumb
+          className={styles.breadcrumb}
+          items={[
+            { label: '인물 발언', to: buildPersonTrackerPath() },
+            { label: breadcrumbCurrentLabel, current: true },
+          ]}
+        />
+
         {feedError ? (
           <PageFetchError title="인물 발언을 불러오지 못했어요" message={feedError.message} />
         ) : null}
@@ -128,7 +120,6 @@ export default function PersonDetailPage() {
         {showInitialSkeleton ? (
           <div className={styles.detailGrid} aria-busy="true" aria-label="인물 발언 로딩">
             <div className={styles.detailLeftSticky}>
-              <PersonTimelineBackButton onBack={() => navigate('/person')} />
               <div className={clsx(skeleton.block, styles.skeletonAside)} />
             </div>
             <div className={styles.detailFeedCol}>
@@ -150,7 +141,6 @@ export default function PersonDetailPage() {
         {feed ? (
           <div className={styles.detailGrid}>
             <div className={styles.detailLeftSticky}>
-              <PersonTimelineBackButton onBack={() => navigate('/person')} />
               <PersonTop5Panel
                 items={topPersons ?? []}
                 range={topRange}

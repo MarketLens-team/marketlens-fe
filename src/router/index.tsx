@@ -25,6 +25,7 @@ import PersonDetailPage from '../pages/PersonDetailPage'
 import PersonTrackerPage from '../pages/PersonTrackerPage'
 import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
+import StockListPage from '../pages/StockListPage'
 import WatchlistPage from '../pages/WatchlistPage'
 
 export const router = createBrowserRouter([
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
       { path: '/onboarding', element: <OnboardingPage /> },
       { path: '/', element: <DashboardPage /> },
       { path: '/sector', element: <SectorPage /> },
+      { path: '/stock', element: <StockListPage /> },
       { path: '/stock/:stockCode', element: <StockDetailPage /> },
       { path: '/person', element: <PersonTrackerPage /> },
       { path: '/person/:personId', element: <PersonDetailPage /> },

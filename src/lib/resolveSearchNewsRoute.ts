@@ -1,4 +1,7 @@
 import type { SearchNewsPreview } from '../data/types/search'
+import { buildStockDetailPath } from './buildStockRoute'
+
+export { buildStockDetailPath } from './buildStockRoute'
 
 /** 종목 검색 결과가 1개일 때 — 뉴스 행을 해당 종목 뉴스로 취급 */
 export type SearchNewsStockContext = {
@@ -15,12 +18,6 @@ export function resolveSearchNewsStockCode(
   if (item.sourceType === 'mixed' && item.stocks.length > 0) return item.stocks[0].stockCode
   if (item.stocks.length > 0) return item.stocks[0].stockCode
   return null
-}
-
-export function buildStockDetailPath(stockCode: string, focus?: { newsId?: string }): string {
-  const path = `/stock/${stockCode}`
-  if (!focus?.newsId) return path
-  return `${path}?newsId=${encodeURIComponent(focus.newsId)}`
 }
 
 /** 검색 뉴스 행 클릭 — 종목 상세 + 해당 뉴스 포커스 */

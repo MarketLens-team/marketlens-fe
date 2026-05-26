@@ -18,9 +18,9 @@ const navGroups = [
     items: [
       {
         label: '종목 검색',
-        to: '/stock/005930',
-        end: true,
-        matchStockDetail: true,
+        to: '/stock',
+        end: false,
+        matchStockSection: true,
       },
       { label: '관심 목록', to: '/watchlist', end: true },
       { label: '인물 발언', to: '/person', end: true },
@@ -44,8 +44,8 @@ function isNavActive(
   pathname: string,
   item: (typeof navGroups)[number]['items'][number],
 ) {
-  if ('matchStockDetail' in item && item.matchStockDetail) {
-    return /^\/stock\/.+/.test(pathname)
+  if ('matchStockSection' in item && item.matchStockSection) {
+    return pathname === '/stock' || /^\/stock\/[^/]+/.test(pathname)
   }
   if (item.end) {
     return pathname === item.to

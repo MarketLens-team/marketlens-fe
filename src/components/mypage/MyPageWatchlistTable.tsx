@@ -46,8 +46,8 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
           type="button"
           className={styles.addBtn}
           disabled={atMax}
-          onClick={() => navigate('/stock/005930')}
-          title={atMax ? `최대 ${MY_PAGE_WATCHLIST_MAX}개까지 등록할 수 있습니다` : '종목 상세에서 관심 종목 추가'}
+          onClick={() => navigate('/stock')}
+          title={atMax ? `최대 ${MY_PAGE_WATCHLIST_MAX}개까지 등록할 수 있습니다` : '전체 종목에서 관심 종목 추가'}
         >
           + 추가
         </button>

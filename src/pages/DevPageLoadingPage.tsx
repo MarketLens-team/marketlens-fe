@@ -78,6 +78,7 @@ export default function DevPageLoadingPage() {
           <span className={styles.devTag}>DEV</span>
           <nav className={styles.devLinks} aria-label="개발 시안">
             <Link to="/dev">Dev hub</Link>
+            <Link to="/stock">전체 종목</Link>
             <Link to="/stock/005930">종목 상세 (실제 적용)</Link>
           </nav>
         </div>

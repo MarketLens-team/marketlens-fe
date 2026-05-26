@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
+import { Breadcrumb } from '../common/Breadcrumb'
 import { BackToTopButton } from '../common/BackToTopButton'
 import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
@@ -22,6 +23,7 @@ import { StockHeaderAiSummary } from './StockHeaderAiSummary'
 import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { buildPersonDetailPath } from '../../lib/buildPersonRoute'
+import { buildStockListPath } from '../../lib/buildStockRoute'
 import { formatPercent, formatPrice, formatStockScore } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
@@ -245,6 +247,12 @@ export function StockDetailContent({
 
   return (
     <div className={styles.page}>
+      <Breadcrumb
+        items={[
+          { label: '전체 종목', to: buildStockListPath() },
+          { label: stock.name, current: true },
+        ]}
+      />
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <div className={styles.headerTitleRow}>
