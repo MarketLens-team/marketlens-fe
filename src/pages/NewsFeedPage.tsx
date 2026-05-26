@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { EmptyState } from '../components/common/EmptyState'
@@ -26,10 +26,16 @@ import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import styles from './NewsFeedPage.module.css'
 
+function resolveInitialNewsFeedMode(searchParams: URLSearchParams): NewsFeedMode {
+  const feed = searchParams.get('feed')
+  if (feed === 'all' || feed === 'watchlist') return feed
+  if (searchParams.get('newsId')?.trim()) return 'all'
+  return readNewsFeedSessionModeHint() ?? 'all'
+}
+
 export default function NewsFeedPage() {
   const [searchParams] = useSearchParams()
-  const sessionModeHint = useMemo(() => readNewsFeedSessionModeHint(), [searchParams])
-  const [mode, setMode] = useState<NewsFeedMode>(() => sessionModeHint ?? 'all')
+  const [mode, setMode] = useState<NewsFeedMode>(() => resolveInitialNewsFeedMode(searchParams))
   const todayNews = useTodayNewsStocks()
   const {
     items,

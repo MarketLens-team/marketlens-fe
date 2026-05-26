@@ -6,6 +6,7 @@ import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EmptyState } from '../common/EmptyState'
 import { formatStockScore } from '../stock/stockScore'
 import type { MyPageBookmarkItem } from '../../data/types/myPage'
+import { buildNewsFeedPath } from '../../lib/buildNewsFeedRoute'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import styles from './MyPageBookmarkList.module.css'
 
@@ -53,6 +54,7 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
         <ul className={styles.list}>
           {items.map((item) => {
             const sentKey = buzzSentimentClass(item.sentimentScore)
+            const feedPath = buildNewsFeedPath({ newsId: item.id })
             const titleNode = (
               <h3 className={styles.title}>{item.title}</h3>
             )
@@ -68,18 +70,9 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
                     </span>
                     <span className={styles.source}>{item.source}</span>
                   </div>
-                  {item.url ? (
-                    <a
-                      className={styles.titleLink}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {titleNode}
-                    </a>
-                  ) : (
-                    titleNode
-                  )}
+                  <Link className={styles.titleLink} to={feedPath}>
+                    {titleNode}
+                  </Link>
                   <p className={styles.savedAt}>저장 {formatBookmarkedAt(item.bookmarkedAt)}</p>
                   <span
                     className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
@@ -89,20 +82,9 @@ export function MyPageBookmarkList({ items, removingId, onRemove }: MyPageBookma
                   </span>
                 </div>
                 {item.imageUrl ? (
-                  item.url ? (
-                    <a
-                      className={styles.thumbLink}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-hidden
-                      tabIndex={-1}
-                    >
-                      <img className={styles.thumb} src={item.imageUrl} alt="" loading="lazy" />
-                    </a>
-                  ) : (
+                  <Link className={styles.thumbLink} to={feedPath} aria-hidden tabIndex={-1}>
                     <img className={styles.thumb} src={item.imageUrl} alt="" loading="lazy" />
-                  )
+                  </Link>
                 ) : (
                   <div className={styles.thumbPlaceholder} aria-hidden />
                 )}
