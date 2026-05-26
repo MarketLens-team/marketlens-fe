@@ -8,14 +8,20 @@ import { Breadcrumb } from '../common/Breadcrumb'
 import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
 import { PillButton } from '../ui/PillButton'
-import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
+import {
+  fetchStockNewsFeedAround,
+  fetchStockNewsFeedCursor,
+  fetchStockNewsFeedNewer,
+  fetchStockNewsFeedOlder,
+} from '../../data/clients/stockClient'
+import type { NewsFeedAroundResponse } from '../../data/types/stockApi'
+import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
   SentimentPolarity,
   StockDetail,
   StockNewsItem,
-  StockNewsPagination,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
 import { EntityAvatar } from '../ui/EntityAvatar'
@@ -87,8 +93,6 @@ export function StockDetailContent({
     peopleTimeline,
   } = data
   const [newsFilter, setNewsFilter] = useState<NewsFilter>('all')
-  const [newsItems, setNewsItems] = useState(recentNews)
-  const [pagination, setPagination] = useState<StockNewsPagination>(newsPagination)
   const [loadingMoreNews, setLoadingMoreNews] = useState(false)
   const [loadingNewsFilter, setLoadingNewsFilter] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
@@ -97,14 +101,89 @@ export function StockDetailContent({
   const skipNewsFilterFetchRef = useRef(true)
   const didScrollToNewsFocusRef = useRef<string | null>(null)
   const useApiNewsFilter = !isMockDataSource()
+  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
+
+  const mapStockNewsAroundPage = useCallback(
+    (page: NewsFeedAroundResponse) => ({
+      items: mapNewsFeedItems(page.items, [stock.name, stock.code]),
+      pagination: {
+        newerCursor: page.newerCursor,
+        hasNewer: page.hasNewer,
+        olderCursor: page.olderCursor,
+        hasOlder: page.hasOlder,
+      },
+    }),
+    [stock.code, stock.name],
+  )
+
+  const fetchNewsAround = useCallback(
+    async (newsId: string) => {
+      const page = await fetchStockNewsFeedAround(stock.code, newsId, {
+        limit: 20,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const fetchNewsNewer = useCallback(
+    async (cursor: string) => {
+      const page = await fetchStockNewsFeedNewer(stock.code, {
+        limit: 20,
+        cursor,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const fetchNewsOlder = useCallback(
+    async (cursor: string) => {
+      const page = await fetchStockNewsFeedOlder(stock.code, {
+        limit: 20,
+        cursor,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const {
+    items: newsItems,
+    feedMode,
+    latestPagination: pagination,
+    loadingAround: loadingAnchoredNews,
+    loadingNewer: loadingNewerNews,
+    loadingOlder: loadingOlderNews,
+    aroundError: anchoredNewsError,
+    hasMoreDown,
+    hasMoreUp,
+    loadNewer: loadNewerNews,
+    loadOlder: loadOlderNews,
+    replaceLatestItems,
+    appendLatestItems,
+  } = useAnchoredFeed<StockNewsItem>({
+    scopeKey: stock.code,
+    anchorId: focusNewsId,
+    initialItems: recentNews,
+    initialLatestPagination: newsPagination,
+    anchoredEnabled: Boolean(focusNewsId),
+    fetchAround: fetchNewsAround,
+    fetchNewer: fetchNewsNewer,
+    fetchOlder: fetchNewsOlder,
+  })
 
   useEffect(() => {
     setNewsFilter('all')
-    setNewsItems(recentNews)
-    setPagination(newsPagination)
+    if (!focusNewsId) {
+      replaceLatestItems(recentNews, newsPagination)
+    }
     setLoadMoreError(null)
     skipNewsFilterFetchRef.current = true
-  }, [stock.code, recentNews, newsPagination])
+  }, [stock.code, recentNews, newsPagination, focusNewsId, replaceLatestItems])
 
   useEffect(() => {
     setInterested(watchlistInterested)
@@ -124,11 +203,10 @@ export function StockDetailContent({
       try {
         const page = await fetchStockNewsFeedCursor(stock.code, {
           limit: 20,
-          sentiment: newsFilter === 'all' ? undefined : newsFilter,
+          sentiment: newsSentimentParam,
         })
         if (cancelled) return
-        setNewsItems(mapNewsFeedItems(page.items, [stock.name, stock.code]))
-        setPagination({
+        replaceLatestItems(mapNewsFeedItems(page.items, [stock.name, stock.code]), {
           nextCursor: page.nextCursor,
           hasNext: page.hasNext,
         })
@@ -145,7 +223,7 @@ export function StockDetailContent({
     return () => {
       cancelled = true
     }
-  }, [newsFilter, stock.code, stock.name, useApiNewsFilter])
+  }, [newsFilter, newsSentimentParam, stock.code, stock.name, useApiNewsFilter, replaceLatestItems])
 
   const displayNews = useMemo(
     () => (useApiNewsFilter ? newsItems : filterNews(newsItems, newsFilter)),
@@ -174,9 +252,18 @@ export function StockDetailContent({
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
   }, [focusNewsId, onClearFocusNews])
 
-  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
-
   const loadMoreNews = useCallback(async () => {
+    if (feedMode === 'anchored') {
+      if (loadingOlderNews) return
+      setLoadMoreError(null)
+      try {
+        await loadOlderNews()
+      } catch (e) {
+        setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+      }
+      return
+    }
+
     if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
     setLoadingMoreNews(true)
     setLoadMoreError(null)
@@ -186,13 +273,7 @@ export function StockDetailContent({
         cursor: pagination.nextCursor,
         sentiment: newsSentimentParam,
       })
-      const mapped = mapNewsFeedItems(page.items, [stock.name, stock.code])
-      setNewsItems((prev) => {
-        const seen = new Set(prev.map((item) => item.id))
-        const next = mapped.filter((item) => !seen.has(item.id))
-        return [...prev, ...next]
-      })
-      setPagination({
+      appendLatestItems(mapNewsFeedItems(page.items, [stock.name, stock.code]), {
         nextCursor: page.nextCursor,
         hasNext: page.hasNext,
       })
@@ -202,24 +283,23 @@ export function StockDetailContent({
       setLoadingMoreNews(false)
     }
   }, [
+    feedMode,
+    loadingOlderNews,
+    loadOlderNews,
     loadingMoreNews,
     pagination.hasNext,
     pagination.nextCursor,
     newsSentimentParam,
     stock.code,
     stock.name,
+    appendLatestItems,
   ])
 
   useEffect(() => {
-    if (!focusNewsId || loadingNewsFilter || !scrollToFocusNews) return
+    if (!focusNewsId || loadingNewsFilter || loadingAnchoredNews || !scrollToFocusNews) return
     if (didScrollToNewsFocusRef.current === focusNewsId) return
 
     const hasTarget = displayNews.some((item) => item.id === focusNewsId)
-    if (!hasTarget && pagination.hasNext && !loadingMoreNews) {
-      void loadMoreNews()
-      return
-    }
-
     if (!hasTarget) return
 
     let cancelled = false
@@ -246,15 +326,7 @@ export function StockDetailContent({
       window.cancelAnimationFrame(rafId)
       if (timeoutId != null) window.clearTimeout(timeoutId)
     }
-  }, [
-    focusNewsId,
-    displayNews,
-    loadingNewsFilter,
-    scrollToFocusNews,
-    pagination.hasNext,
-    loadingMoreNews,
-    loadMoreNews,
-  ])
+  }, [focusNewsId, displayNews, loadingNewsFilter, loadingAnchoredNews, scrollToFocusNews])
 
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
@@ -278,10 +350,25 @@ export function StockDetailContent({
     }
   }, [interested, stock.code, watchlistPending])
 
+  const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
+
+  const newsTopSentinelRef = useInfiniteScroll({
+    enabled: feedMode === 'anchored' && displayNews.length > 0 && !loadingAnchoredNews,
+    hasMore: hasMoreUp,
+    loading: loadingNewerNews,
+    direction: 'up',
+    onLoadMore: () => {
+      setLoadMoreError(null)
+      void loadNewerNews().catch((e) => {
+        setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+      })
+    },
+  })
+
   const newsSentinelRef = useInfiniteScroll({
-    enabled: displayNews.length > 0,
-    hasMore: pagination.hasNext,
-    loading: loadingMoreNews,
+    enabled: displayNews.length > 0 && !loadingAnchoredNews,
+    hasMore: hasMoreDown,
+    loading: loadingMoreDown,
     onLoadMore: () => void loadMoreNews(),
   })
 
@@ -517,12 +604,12 @@ export function StockDetailContent({
               ))}
             </div>
           </div>
-          {loadingNewsFilter ? (
+          {loadingNewsFilter || loadingAnchoredNews ? (
             <div className={styles.newsFilterLoading} aria-busy="true">
               <FeedLoadingSpinner />
             </div>
           ) : null}
-          {!loadingNewsFilter && displayNews.length === 0 ? (
+          {!loadingNewsFilter && !loadingAnchoredNews && displayNews.length === 0 ? (
             <EmptyState
               className={styles.emptyNews}
               title="뉴스가 없어요"
@@ -530,8 +617,14 @@ export function StockDetailContent({
               hint="전체 탭에서 다시 확인해 보세요."
             />
           ) : null}
-          {!loadingNewsFilter && displayNews.length > 0 ? (
+          {!loadingNewsFilter && !loadingAnchoredNews && displayNews.length > 0 ? (
             <ul className={styles.newsList}>
+              {feedMode === 'anchored' && hasMoreUp ? (
+                <li className={styles.newsScrollHead} aria-hidden>
+                  <div ref={newsTopSentinelRef} className={styles.newsSentinel} />
+                  {loadingNewerNews ? <FeedLoadingSpinner /> : null}
+                </li>
+              ) : null}
               {displayNews.map((item) => (
                 <StockNewsListItem
                   key={item.id}
@@ -541,15 +634,15 @@ export function StockDetailContent({
               ))}
             </ul>
           ) : null}
-          {pagination.hasNext && !loadingNewsFilter ? (
+          {hasMoreDown && !loadingNewsFilter && !loadingAnchoredNews ? (
             <div className={styles.newsScrollFoot}>
               <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
-              {loadingMoreNews ? <FeedLoadingSpinner /> : null}
+              {loadingMoreDown ? <FeedLoadingSpinner /> : null}
             </div>
           ) : null}
-          {loadMoreError ? (
+          {loadMoreError || anchoredNewsError ? (
             <p className={styles.loadMoreError} role="alert">
-              {loadMoreError}
+              {loadMoreError ?? anchoredNewsError}
             </p>
           ) : null}
         </section>

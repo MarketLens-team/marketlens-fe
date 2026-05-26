@@ -114,6 +114,15 @@ export interface NewsFeedCursorResponse {
   hasNext: boolean
 }
 
+/** OpenAPI `NewsFeedAroundResponse` — `around` / `newer` / `older` 공통 */
+export interface NewsFeedAroundResponse {
+  items: NewsFeedItemResponse[]
+  newerCursor: string | null
+  hasNewer: boolean
+  olderCursor: string | null
+  hasOlder: boolean
+}
+
 /** OpenAPI `TopMover` */
 export interface BuzzSurgeTopMoverResponse {
   stockCode: string

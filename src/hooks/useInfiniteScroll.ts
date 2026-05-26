@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const SCROLL_ROOT_SELECTOR = 'main[data-scroll-root]'
 
 /** 하단 무한 스크롤: 루트 뷰포트 아래 240px 전에 로드 트리거 */
-const DEFAULT_ROOT_MARGIN = '0px 0px 240px 0px'
+const DEFAULT_ROOT_MARGIN_DOWN = '0px 0px 240px 0px'
+/** 상단 무한 스크롤: 루트 뷰포트 위 240px 전에 로드 트리거 */
+const DEFAULT_ROOT_MARGIN_UP = '240px 0px 0px 0px'
 
 export function getLayoutScrollRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>(SCROLL_ROOT_SELECTOR)
@@ -15,6 +17,8 @@ interface UseInfiniteScrollOptions {
   loading: boolean
   onLoadMore: () => void
   rootMargin?: string
+  /** `down`(기본): 하단 더보기 · `up`: 상단 더보기(anchored newer) */
+  direction?: 'down' | 'up'
   /** 기본값: Layout `main[data-scroll-root]`. 인물 상세 등 내부 스크롤 영역에 지정 */
   scrollRootSelector?: string
 }
@@ -24,9 +28,12 @@ export function useInfiniteScroll({
   hasMore,
   loading,
   onLoadMore,
-  rootMargin = DEFAULT_ROOT_MARGIN,
+  rootMargin,
+  direction = 'down',
   scrollRootSelector,
 }: UseInfiniteScrollOptions) {
+  const resolvedRootMargin =
+    rootMargin ?? (direction === 'up' ? DEFAULT_ROOT_MARGIN_UP : DEFAULT_ROOT_MARGIN_DOWN)
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null)
   const onLoadMoreRef = useRef(onLoadMore)
 
@@ -51,12 +58,12 @@ export function useInfiniteScroll({
         if (!hasMore || loading) return
         onLoadMoreRef.current()
       },
-      { root, rootMargin, threshold: 0 },
+      { root, rootMargin: resolvedRootMargin, threshold: 0 },
     )
 
     observer.observe(sentinelEl)
     return () => observer.disconnect()
-  }, [enabled, hasMore, loading, rootMargin, scrollRootSelector, sentinelEl])
+  }, [enabled, hasMore, loading, resolvedRootMargin, scrollRootSelector, sentinelEl])
 
   return sentinelRef
 }

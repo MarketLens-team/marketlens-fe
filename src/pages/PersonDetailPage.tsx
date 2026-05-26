@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { usePersonStatementFocus } from '../hooks/usePersonStatementFocus'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { PageFabRail } from '../components/common/PageFabRail'
@@ -35,6 +35,8 @@ function parsePersonId(raw: string | undefined): number | null {
 
 export default function PersonDetailPage() {
   const { personId: personIdParam } = useParams()
+  const [searchParams] = useSearchParams()
+  const focusStatementId = searchParams.get('statementId')?.trim() || null
   const personId = parsePersonId(personIdParam)
   const [topRange, setTopRange] = useState<PersonMentionsRange>('today')
   const [stocksRange, setStocksRange] = useState<PersonMentionsRange>('today')
@@ -44,9 +46,16 @@ export default function PersonDetailPage() {
     loading: feedLoading,
     isInitialLoading: feedInitialLoading,
     error: feedError,
+    feedMode,
+    hasMoreUp,
+    hasMoreDown,
+    loadingAround,
+    loadingNewer,
+    loadNewer,
     loadMore,
     loadingMore,
-  } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE)
+    aroundError,
+  } = usePersonDetail(personId ?? 0, PERSON_DETAIL_FEED_RANGE, focusStatementId)
   const {
     data: topPersons,
     loading: topLoading,
@@ -82,16 +91,24 @@ export default function PersonDetailPage() {
   const pageReady = !pageLoading && feed != null
 
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
-    loading: feedInitialLoading,
-    hasMore: Boolean(feed?.mentionsHasNext),
-    loadingMore,
-    onLoadMore: () => void loadMore(),
+    loading: feedInitialLoading || loadingAround,
   })
 
-  const infiniteEnabled = Boolean(feed?.mentionsHasNext)
-  const sentinelRef = useInfiniteScroll({
-    enabled: infiniteEnabled && personId != null,
-    hasMore: Boolean(feed?.mentionsHasNext),
+  const topSentinelRef = useInfiniteScroll({
+    enabled:
+      feedMode === 'anchored' &&
+      Boolean(feed?.mentions.length) &&
+      personId != null &&
+      !loadingAround,
+    hasMore: hasMoreUp,
+    loading: loadingNewer,
+    direction: 'up',
+    onLoadMore: () => void loadNewer(),
+  })
+
+  const bottomSentinelRef = useInfiniteScroll({
+    enabled: Boolean(feed?.mentions.length) && personId != null && !loadingAround,
+    hasMore: hasMoreDown,
     loading: loadingMore,
     onLoadMore: () => void loadMore(),
   })
@@ -173,10 +190,23 @@ export default function PersonDetailPage() {
                 </header>
 
                 <div className={styles.feedBody}>
+                  {aroundError ? (
+                    <p className={styles.feedError} role="alert">
+                      {aroundError}
+                    </p>
+                  ) : null}
                   <ul
-                    className={clsx(gridStyles.feedList, feedLoading && styles.feedDimmed)}
+                    className={clsx(
+                      gridStyles.feedList,
+                      (feedLoading || loadingAround) && styles.feedDimmed,
+                    )}
                     aria-label={`${profile?.personName ?? '인물'} 발언 목록`}
                   >
+                    {feedMode === 'anchored' && hasMoreUp ? (
+                      <li className={styles.feedScrollHead} aria-hidden>
+                        <div ref={topSentinelRef} className={styles.infiniteSentinel} />
+                      </li>
+                    ) : null}
                     {feed.mentions.map((mention) => (
                       <li
                         key={mention.id}
@@ -196,8 +226,8 @@ export default function PersonDetailPage() {
                     <p className={styles.empty}>오늘 표시할 발언이 없습니다</p>
                   ) : null}
 
-                  {infiniteEnabled ? (
-                    <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden />
+                  {hasMoreDown ? (
+                    <div ref={bottomSentinelRef} className={styles.infiniteSentinel} aria-hidden />
                   ) : null}
                 </div>
               </div>

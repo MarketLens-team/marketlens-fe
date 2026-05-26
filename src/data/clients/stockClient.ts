@@ -20,6 +20,7 @@ import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
 import { appendNewsCursorParam } from '../../lib/encodeNewsCursor'
 import type {
+  NewsFeedAroundResponse,
   NewsFeedCursorResponse,
   NewsFeedItemResponse,
   NewsFeedResponse,
@@ -92,6 +93,12 @@ export interface FetchStockNewsFeedCursorParams {
   sentiment?: string
 }
 
+export interface FetchStockNewsFeedAnchoredParams {
+  limit?: number
+  cursor?: string
+  sentiment?: string
+}
+
 const DEFAULT_NEWS_CURSOR_LIMIT = 20
 
 /** OpenAPI `getRelatedPersonStatements` — `GET /api/v1/stocks/{code}/related-person-statements` */
@@ -152,6 +159,84 @@ function buildMockNewsCursor(
   return `${anchor.publishedAt}|${anchor.id}`
 }
 
+/** Mock anchored 피드 — `o:{index}` 커서 */
+function mockAnchoredIndexCursor(index: number): string {
+  return `o:${index}`
+}
+
+function parseMockAnchoredIndexCursor(cursor: string | undefined): number {
+  if (!cursor) return 0
+  const m = /^o:(\d+)$/.exec(cursor)
+  return m ? Number(m[1]) : 0
+}
+
+function mockNewsFeedAroundSlice(
+  all: NewsFeedItemResponse[],
+  anchorIndex: number,
+  limit: number,
+): NewsFeedAroundResponse {
+  if (anchorIndex < 0) {
+    return {
+      items: [],
+      newerCursor: null,
+      hasNewer: false,
+      olderCursor: null,
+      hasOlder: false,
+    }
+  }
+  const half = Math.floor(limit / 2)
+  const start = Math.max(0, anchorIndex - half)
+  const end = Math.min(all.length, start + limit)
+  const hasNewer = start > 0
+  const hasOlder = end < all.length
+  return {
+    items: all.slice(start, end),
+    newerCursor: hasNewer ? mockAnchoredIndexCursor(start) : null,
+    hasNewer,
+    olderCursor: hasOlder ? mockAnchoredIndexCursor(end) : null,
+    hasOlder,
+  }
+}
+
+function mockNewsFeedNewerSlice(
+  all: NewsFeedItemResponse[],
+  cursor: string,
+  limit: number,
+): NewsFeedAroundResponse {
+  const end = parseMockAnchoredIndexCursor(cursor)
+  const start = Math.max(0, end - limit)
+  const hasNewer = start > 0
+  return {
+    items: all.slice(start, end),
+    newerCursor: hasNewer ? mockAnchoredIndexCursor(start) : null,
+    hasNewer,
+    olderCursor: mockAnchoredIndexCursor(end),
+    hasOlder: end < all.length,
+  }
+}
+
+function mockNewsFeedOlderSlice(
+  all: NewsFeedItemResponse[],
+  cursor: string,
+  limit: number,
+): NewsFeedAroundResponse {
+  const start = parseMockAnchoredIndexCursor(cursor)
+  const end = Math.min(all.length, start + limit)
+  const hasOlder = end < all.length
+  return {
+    items: all.slice(start, end),
+    newerCursor: mockAnchoredIndexCursor(start),
+    hasNewer: start > 0,
+    olderCursor: hasOlder ? mockAnchoredIndexCursor(end) : null,
+    hasOlder,
+  }
+}
+
+function getMockStockNewsFeedAll(stockCode: string): NewsFeedItemResponse[] {
+  const detail = mockStockDetails[stockCode] ?? mockStockDetails[mockDefaultStockCode]
+  return mapNewsFeedItemResponseFromStockNews(detail.recentNews)
+}
+
 /** OpenAPI `GET /api/v1/news/feed/{ticker}/cursor` — 커서는 `publishedAt|id`, 쿼리에 `%7C` 인코딩 */
 export async function fetchStockNewsFeedCursor(
   stockCode: string,
@@ -188,6 +273,113 @@ export async function fetchStockNewsFeedCursor(
     return unwrapApiEnvelope(data, '종목 뉴스를 불러오지 못했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '종목 뉴스를 불러오지 못했습니다.'))
+  }
+}
+
+function buildStockNewsAnchoredQuery(
+  params?: FetchStockNewsFeedAnchoredParams,
+): URLSearchParams {
+  const searchParams = new URLSearchParams()
+  const limit = params?.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
+  searchParams.set('limit', String(limit))
+  if (params?.sentiment) searchParams.set('sentiment', params.sentiment)
+  if (params?.cursor) appendNewsCursorParam(searchParams, params.cursor)
+  return searchParams
+}
+
+/** OpenAPI `GET /api/v1/news/feed/{ticker}/around/{newsId}` */
+export async function fetchStockNewsFeedAround(
+  stockCode: string,
+  newsId: string,
+  params?: Omit<FetchStockNewsFeedAnchoredParams, 'cursor'>,
+): Promise<NewsFeedAroundResponse> {
+  const code = stockCode.trim()
+  const limit = params?.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(100)
+    const all = getMockStockNewsFeedAll(code)
+    const targetId = Number(newsId)
+    const anchorIndex = all.findIndex((item) => item.id === targetId)
+    return mockNewsFeedAroundSlice(all, anchorIndex, limit)
+  }
+
+  const query = buildStockNewsAnchoredQuery(params).toString()
+  const path = `${newsFeedPath(code)}/around/${encodeURIComponent(newsId)}${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<NewsFeedAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '종목 뉴스를 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '종목 뉴스를 불러오지 못했습니다.'))
+  }
+}
+
+/** OpenAPI `GET /api/v1/news/feed/{ticker}/newer` */
+export async function fetchStockNewsFeedNewer(
+  stockCode: string,
+  params: FetchStockNewsFeedAnchoredParams,
+): Promise<NewsFeedAroundResponse> {
+  const code = stockCode.trim()
+  const limit = params.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = getMockStockNewsFeedAll(code)
+    if (!params.cursor) {
+      return {
+        items: [],
+        newerCursor: null,
+        hasNewer: false,
+        olderCursor: null,
+        hasOlder: false,
+      }
+    }
+    return mockNewsFeedNewerSlice(all, params.cursor, limit)
+  }
+
+  const query = buildStockNewsAnchoredQuery(params).toString()
+  const path = `${newsFeedPath(code)}/newer${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<NewsFeedAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '종목 뉴스를 더 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '종목 뉴스를 더 불러오지 못했습니다.'))
+  }
+}
+
+/** OpenAPI `GET /api/v1/news/feed/{ticker}/older` */
+export async function fetchStockNewsFeedOlder(
+  stockCode: string,
+  params: FetchStockNewsFeedAnchoredParams,
+): Promise<NewsFeedAroundResponse> {
+  const code = stockCode.trim()
+  const limit = params.limit ?? DEFAULT_NEWS_CURSOR_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = getMockStockNewsFeedAll(code)
+    if (!params.cursor) {
+      return {
+        items: [],
+        newerCursor: null,
+        hasNewer: false,
+        olderCursor: null,
+        hasOlder: false,
+      }
+    }
+    return mockNewsFeedOlderSlice(all, params.cursor, limit)
+  }
+
+  const query = buildStockNewsAnchoredQuery(params).toString()
+  const path = `${newsFeedPath(code)}/older${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<NewsFeedAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '종목 뉴스를 더 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '종목 뉴스를 더 불러오지 못했습니다.'))
   }
 }
 

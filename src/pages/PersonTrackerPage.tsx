@@ -55,9 +55,6 @@ export default function PersonTrackerPage() {
 
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
     loading: feedInitialLoading,
-    hasMore: Boolean(feed?.mentionsHasNext),
-    loadingMore: loadingMoreMentions,
-    onLoadMore: () => void loadMoreMentions(),
   })
 
   const infiniteEnabled = Boolean(feed?.mentionsHasNext)

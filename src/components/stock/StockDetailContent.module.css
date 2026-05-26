@@ -853,8 +853,10 @@
   padding: var(--space-6) 0;
 }
 
+.newsScrollHead,
 .newsScrollFoot {
   position: relative;
+  list-style: none;
 }
 
 .newsSentinel {

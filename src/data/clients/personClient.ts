@@ -14,6 +14,7 @@ import type {
 } from '../types/person'
 import type {
   PersonFrequentStockResponse,
+  PersonMentionAroundResponse,
   PersonMentionCountResponse,
   PersonMentionCursorResponse,
   PersonSidebarResponse,
@@ -40,6 +41,11 @@ export interface FetchPersonMentionsParams {
 }
 
 export interface FetchPersonMentionsCursorParams extends FetchPersonMentionsParams {
+  limit?: number
+  cursor?: string
+}
+
+export interface FetchPersonMentionsAnchoredParams extends FetchPersonMentionsParams {
   limit?: number
   cursor?: string
 }
@@ -112,6 +118,75 @@ function mockPersonCursorNext(allLen: number, endExclusive: number): string | nu
   return `o:${endExclusive}`
 }
 
+function mockPersonMentionsAroundSlice(
+  all: PersonStatementResponse[],
+  anchorIndex: number,
+  limit: number,
+): PersonMentionAroundResponse {
+  if (anchorIndex < 0) {
+    return {
+      items: [],
+      newerCursor: null,
+      hasNewer: false,
+      olderCursor: null,
+      hasOlder: false,
+    }
+  }
+  const half = Math.floor(limit / 2)
+  const start = Math.max(0, anchorIndex - half)
+  const end = Math.min(all.length, start + limit)
+  const hasNewer = start > 0
+  const hasOlder = end < all.length
+  return {
+    items: all.slice(start, end),
+    newerCursor: hasNewer ? mockPersonCursorNext(all.length, start) : null,
+    hasNewer,
+    olderCursor: hasOlder ? mockPersonCursorNext(all.length, end) : null,
+    hasOlder,
+  }
+}
+
+function mockPersonMentionsNewerSlice(
+  all: PersonStatementResponse[],
+  cursor: string,
+  limit: number,
+): PersonMentionAroundResponse {
+  const end = mockPersonCursorStartIndex(cursor)
+  const start = Math.max(0, end - limit)
+  const hasNewer = start > 0
+  return {
+    items: all.slice(start, end),
+    newerCursor: hasNewer ? mockPersonCursorNext(all.length, start) : null,
+    hasNewer,
+    olderCursor: mockPersonCursorNext(all.length, end),
+    hasOlder: end < all.length,
+  }
+}
+
+function mockPersonMentionsOlderSlice(
+  all: PersonStatementResponse[],
+  cursor: string,
+  limit: number,
+): PersonMentionAroundResponse {
+  const start = mockPersonCursorStartIndex(cursor)
+  const end = Math.min(all.length, start + limit)
+  const hasOlder = end < all.length
+  return {
+    items: all.slice(start, end),
+    newerCursor: mockPersonCursorNext(all.length, start),
+    hasNewer: start > 0,
+    olderCursor: hasOlder ? mockPersonCursorNext(all.length, end) : null,
+    hasOlder,
+  }
+}
+
+function getMockPersonMentionsAll(
+  personId: number,
+  range?: PersonMentionsRange,
+): PersonStatementResponse[] {
+  return filterMockStatementsForParams({ personId, range })
+}
+
 /** OpenAPI `GET /api/v1/persons/mentions/cursor` — 메인 리스트 전용 */
 export async function fetchPersonStatementsCursor(
   params?: FetchPersonMentionsCursorParams,
@@ -175,6 +250,110 @@ export async function fetchPersonMentionsCursorByPersonId(
     return unwrapApiEnvelope(data, '인물 발언을 불러오지 못했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '인물 발언을 불러오지 못했습니다.'))
+  }
+}
+
+function buildPersonAnchoredQueryParams(
+  params?: FetchPersonMentionsAnchoredParams,
+): URLSearchParams {
+  const searchParams = new URLSearchParams()
+  if (params?.range != null) searchParams.set('range', PERSON_MENTIONS_RANGE_QUERY[params.range])
+  const limit = params?.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT
+  searchParams.set('limit', String(limit))
+  if (params?.cursor) appendNewsCursorParam(searchParams, params.cursor)
+  return searchParams
+}
+
+/** OpenAPI `GET /api/v1/persons/{personId}/mentions/around/{statementId}` */
+export async function fetchPersonMentionsAround(
+  personId: number,
+  statementId: string,
+  params?: Omit<FetchPersonMentionsAnchoredParams, 'cursor'>,
+): Promise<PersonMentionAroundResponse> {
+  const limit = params?.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = getMockPersonMentionsAll(personId, params?.range)
+    const targetId = Number(statementId)
+    const anchorIndex = all.findIndex((item) => item.statementId === targetId)
+    return mockPersonMentionsAroundSlice(all, anchorIndex, limit)
+  }
+
+  const query = buildPersonAnchoredQueryParams(params).toString()
+  const path = `${PERSONS_BASE}/${personId}/mentions/around/${encodeURIComponent(statementId)}${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<PersonMentionAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '인물 발언을 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '인물 발언을 불러오지 못했습니다.'))
+  }
+}
+
+/** OpenAPI `GET /api/v1/persons/{personId}/mentions/newer` */
+export async function fetchPersonMentionsNewer(
+  personId: number,
+  params: FetchPersonMentionsAnchoredParams,
+): Promise<PersonMentionAroundResponse> {
+  const limit = params.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = getMockPersonMentionsAll(personId, params.range)
+    if (!params.cursor) {
+      return {
+        items: [],
+        newerCursor: null,
+        hasNewer: false,
+        olderCursor: null,
+        hasOlder: false,
+      }
+    }
+    return mockPersonMentionsNewerSlice(all, params.cursor, limit)
+  }
+
+  const query = buildPersonAnchoredQueryParams(params).toString()
+  const path = `${PERSONS_BASE}/${personId}/mentions/newer${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<PersonMentionAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '인물 발언을 더 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '인물 발언을 더 불러오지 못했습니다.'))
+  }
+}
+
+/** OpenAPI `GET /api/v1/persons/{personId}/mentions/older` */
+export async function fetchPersonMentionsOlder(
+  personId: number,
+  params: FetchPersonMentionsAnchoredParams,
+): Promise<PersonMentionAroundResponse> {
+  const limit = params.limit ?? PERSON_BY_PERSON_CURSOR_DEFAULT_LIMIT
+
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    const all = getMockPersonMentionsAll(personId, params.range)
+    if (!params.cursor) {
+      return {
+        items: [],
+        newerCursor: null,
+        hasNewer: false,
+        olderCursor: null,
+        hasOlder: false,
+      }
+    }
+    return mockPersonMentionsOlderSlice(all, params.cursor, limit)
+  }
+
+  const query = buildPersonAnchoredQueryParams(params).toString()
+  const path = `${PERSONS_BASE}/${personId}/mentions/older${query ? `?${query}` : ''}`
+
+  try {
+    const { data } = await api.get<ApiEnvelope<PersonMentionAroundResponse>>(path)
+    return unwrapApiEnvelope(data, '인물 발언을 더 불러오지 못했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '인물 발언을 더 불러오지 못했습니다.'))
   }
 }
 

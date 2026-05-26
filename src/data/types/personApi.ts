@@ -54,6 +54,15 @@ export interface PersonMentionCursorResponse {
   hasNext?: boolean
 }
 
+/** OpenAPI `PersonMentionAroundResponse` — `around` / `newer` / `older` 공통 */
+export interface PersonMentionAroundResponse {
+  items: PersonStatementResponse[]
+  newerCursor: string | null
+  hasNewer: boolean
+  olderCursor: string | null
+  hasOlder: boolean
+}
+
 /** OpenAPI `PersonSidebarResponse` — `GET /api/v1/persons/sidebar` */
 export interface PersonSidebarResponse {
   topPersons: PersonTopResponse[]

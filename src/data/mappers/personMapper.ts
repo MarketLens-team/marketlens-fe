@@ -10,11 +10,13 @@ import type {
 } from '../types/person'
 import type {
   FrequentStockItemResponse,
+  PersonMentionAroundResponse,
   PersonMentionCursorResponse,
   PersonSidebarResponse,
   PersonStatementResponse,
   PersonTopResponse,
 } from '../types/personApi'
+import type { AnchoredFeedPagination } from '../types/anchoredFeed'
 import type { SentimentPolarity } from '../types/stock'
 
 function toSentiment(raw: string): SentimentPolarity {
@@ -131,6 +133,24 @@ export function mapPersonMentionsCursor(page: PersonMentionCursorResponse) {
     mentions: mappedMentions,
     mentionsNextCursor: page.nextCursor ?? null,
     mentionsHasNext: page.hasNext ?? false,
+  }
+}
+
+export function mapPersonMentionsAroundPagination(
+  page: PersonMentionAroundResponse,
+): AnchoredFeedPagination {
+  return {
+    newerCursor: page.newerCursor ?? null,
+    hasNewer: page.hasNewer ?? false,
+    olderCursor: page.olderCursor ?? null,
+    hasOlder: page.hasOlder ?? false,
+  }
+}
+
+export function mapPersonMentionsAround(page: PersonMentionAroundResponse) {
+  return {
+    mentions: normalizePersonMentionsList(page.items.map(mapPersonStatement)),
+    anchoredPagination: mapPersonMentionsAroundPagination(page),
   }
 }
 

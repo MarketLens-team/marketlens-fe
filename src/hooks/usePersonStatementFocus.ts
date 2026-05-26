@@ -5,7 +5,6 @@ interface MentionWithId {
   id: string
 }
 
-const MAX_AUTO_LOAD_ATTEMPTS = 12
 const SCROLL_RETRY_COUNT = 10
 const SCROLL_RETRY_MS = 80
 
@@ -35,11 +34,8 @@ function scrollPersonStatementIntoView(statementId: string): boolean {
 }
 
 interface UsePersonStatementFocusOptions {
-  /** 초기 피드 로딩 중이면 스크롤·추가 로드 보류 */
+  /** 초기 피드·around 로딩 중이면 스크롤 보류 */
   loading?: boolean
-  hasMore?: boolean
-  loadingMore?: boolean
-  onLoadMore?: () => void | Promise<void>
 }
 
 /** 검색·트래커 `?statementId=` — 해당 발언까지 로드·스크롤·초록 강조, 바깥 클릭 시 쿼리 해제 */
@@ -50,10 +46,6 @@ export function usePersonStatementFocus(
   const [searchParams, setSearchParams] = useSearchParams()
   const focusStatementId = searchParams.get('statementId')?.trim() || null
   const loading = options?.loading ?? false
-  const hasMore = options?.hasMore ?? false
-  const loadingMore = options?.loadingMore ?? false
-  const onLoadMore = options?.onLoadMore
-  const loadAttemptsRef = useRef(0)
   /** 포커스 대상으로 초기 스크롤 1회만 — 이후 무한 스크롤은 사용자 제어 */
   const didScrollToFocusRef = useRef<string | null>(null)
 
@@ -69,17 +61,8 @@ export function usePersonStatementFocus(
   )
 
   useEffect(() => {
-    loadAttemptsRef.current = 0
     didScrollToFocusRef.current = null
   }, [focusStatementId])
-
-  useEffect(() => {
-    if (!focusStatementId || loading || hasTarget) return
-    if (!hasMore || !onLoadMore || loadAttemptsRef.current >= MAX_AUTO_LOAD_ATTEMPTS) return
-    if (loadingMore) return
-    loadAttemptsRef.current += 1
-    void onLoadMore()
-  }, [focusStatementId, loading, loadingMore, hasTarget, hasMore, onLoadMore])
 
   useEffect(() => {
     if (!focusStatementId || loading || !hasTarget) return

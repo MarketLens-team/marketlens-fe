@@ -141,6 +141,18 @@
   color: var(--color-text-muted);
 }
 
+.feedScrollHead {
+  list-style: none;
+}
+
+.feedError {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
 .infiniteSentinel {
   height: 1px;
 }
