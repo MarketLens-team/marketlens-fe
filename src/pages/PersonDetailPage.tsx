@@ -85,7 +85,7 @@ export default function PersonDetailPage() {
 
   const pageReady = !pageLoading && feed != null
 
-  const focusFeedReady = anchoredWarmComplete && !loadingAround
+  const focusFeedReady = anchoredWarmComplete
 
   const { isStatementFocused } = usePersonStatementFocus(feed?.mentions ?? [], {
     loading: feedInitialLoading || !focusFeedReady,

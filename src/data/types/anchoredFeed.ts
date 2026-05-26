@@ -8,6 +8,19 @@ export interface AnchoredFeedPagination {
   hasOlder: boolean
 }
 
+export interface LatestFeedPagination {
+  nextCursor: string | null
+  hasNext: boolean
+}
+
+/** latest(cursor) vs anchored(around/newer/older) 공통 상태 */
+export interface FeedState<TItem> {
+  mode: FeedMode
+  items: TItem[]
+  latestPagination: LatestFeedPagination
+  anchoredPagination: AnchoredFeedPagination
+}
+
 export const EMPTY_ANCHORED_PAGINATION: AnchoredFeedPagination = {
   newerCursor: null,
   hasNewer: false,

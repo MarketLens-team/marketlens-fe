@@ -6,7 +6,10 @@ import {
   type FeedMode,
 } from '../data/types/anchoredFeed'
 import { anchoredCursorsEqual } from '../lib/anchoredFeedCursor'
-import { mergeFeedItemsById, mergeFeedItemsWithCount } from '../lib/mergeFeedItems'
+import {
+  mergeAnchoredFeedItemsWithCount,
+  mergeFeedItemsById,
+} from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
   schedulePrependScrollRestore,
@@ -24,6 +27,7 @@ interface AnchoredFeedPage<TItem> {
   pagination: AnchoredFeedPagination
 }
 
+/** anchored 양방향 커서 — newer/older 응답이 반대쪽 edge를 덮지 않도록 분리 */
 interface AnchoredEdge {
   hasMore: boolean
   cursor: string | null
@@ -52,6 +56,10 @@ function toAnchoredPagination(newer: AnchoredEdge, older: AnchoredEdge): Anchore
   }
 }
 
+/**
+ * latest: `/cursor`만, 아래로 loadMore.
+ * anchored: `around` 초기화 → 위 `newer`(prepend, newerCursor만 갱신) / 아래 `older`(append, olderCursor만 갱신).
+ */
 export function useAnchoredFeed<TItem extends { id: string; publishedAt: string }>({
   scopeKey,
   anchorId,
@@ -171,12 +179,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         return
       }
 
-      if (
-        added > 0 &&
-        requestedCursor != null &&
-        nextCursor != null &&
-        !anchoredCursorsEqual(requestedCursor, nextCursor)
-      ) {
+      // 항목이 추가됐으면 같은 id 커서라도 다음 페이지 허용 (BE가 경계 id를 유지하는 경우)
+      if (added > 0) {
         ref.current = null
         return
       }
@@ -201,11 +205,12 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       let added = 0
       setItems((prev) => {
-        const merged = mergeFeedItemsWithCount(prev, page.items, 'prepend')
+        const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'prepend')
         added = merged.added
         return merged.items
       })
 
+      // newer 응답: newer edge만 갱신, olderEdgeRef는 유지
       let newerEdge: AnchoredEdge = {
         hasMore: page.pagination.hasNewer,
         cursor: page.pagination.hasNewer ? page.pagination.newerCursor : null,
@@ -246,11 +251,12 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       let added = 0
       setItems((prev) => {
-        const merged = mergeFeedItemsWithCount(prev, page.items, 'append')
+        const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'append')
         added = merged.added
         return merged.items
       })
 
+      // older 응답: older edge만 갱신, newerEdgeRef는 유지
       let olderEdge: AnchoredEdge = {
         hasMore: page.pagination.hasOlder,
         cursor: page.pagination.hasOlder ? page.pagination.olderCursor : null,
@@ -372,7 +378,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     feedMode === 'anchored' ? anchoredPagination.hasOlder : latestPagination.hasNext
   const hasMoreUp = feedMode === 'anchored' && anchoredPagination.hasNewer
 
-  const anchoredReady = !anchoredEnabled || !anchorId || (!loadingAround && feedMode === 'anchored')
+  /** around 로딩이 끝나면 anchored·latest(폴백) 모두 스크롤 로드 가능 */
+  const anchoredReady = !anchoredEnabled || !anchorId || !loadingAround
 
   return {
     items,

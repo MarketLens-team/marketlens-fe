@@ -24,7 +24,8 @@ export function usePersonDetail(
     [personId, feedRange],
   )
   const asyncResult = useAsyncData<PersonMentionsFeedData>(factory, {
-    enabled: personId > 0,
+    // `?statementId=` 진입은 around만 — cursor 첫 페이지와 경쟁하지 않음
+    enabled: personId > 0 && !focusStatementId,
     keepPreviousData: true,
     minLoadingMs: 0,
   })
