@@ -11,7 +11,6 @@ import {
 import { waitAnchoredLoadGap, waitAnchoredLoadVisible } from '../lib/anchoredLoadTiming'
 import {
   alignNewerEdgeToListTop,
-  alignOlderEdgeToListBottom,
   anchoredCursorItemId,
   anchoredCursorsEqual,
   resolveNewerEdgeFromPage,
@@ -367,7 +366,6 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       // older 응답: older edge만 갱신, newerEdgeRef는 목록 최상단과 맞춤
       let olderEdge: AnchoredEdge = resolveOlderEdgeFromPage(page.items, page.pagination)
-      olderEdge = alignOlderEdgeToListBottom(nextItems, olderEdge)
 
       newerEdgeRef.current = alignNewerEdgeToListTop(nextItems, newerEdgeRef.current)
 
@@ -426,10 +424,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
           sortedItems,
           resolveNewerEdgeFromPage(page.items, page.pagination),
         )
-        olderEdgeRef.current = alignOlderEdgeToListBottom(
-          sortedItems,
-          resolveOlderEdgeFromPage(page.items, page.pagination),
-        )
+        olderEdgeRef.current = resolveOlderEdgeFromPage(page.items, page.pagination)
         syncAnchoredPaginationFromEdges()
       } catch (e) {
         if (aroundRequestRef.current !== requestId) return
@@ -487,6 +482,22 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     })
   }, [])
 
+  const failAnchoredDirection = useCallback(
+    (direction: AnchoredLoadDirection, requestedCursor: string) => {
+      const consumedRef =
+        direction === 'newer' ? lastNewerCursorFetchedRef : lastOlderCursorFetchedRef
+      consumedRef.current = requestedCursor
+      if (direction === 'newer') {
+        newerEdgeRef.current = { hasMore: false, cursor: null }
+      } else {
+        olderEdgeRef.current = { hasMore: false, cursor: null }
+      }
+      syncAnchoredPaginationFromEdges()
+      pendingAnchoredLoadRef.current = null
+    },
+    [syncAnchoredPaginationFromEdges],
+  )
+
   const canRunAnchoredLoad = useCallback((direction: AnchoredLoadDirection): string | null => {
     const pagination = anchoredPaginationRef.current
     if (feedModeRef.current !== 'anchored') return null
@@ -543,6 +554,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         }
       } catch (error) {
         if (seq === anchoredLoadSeqRef.current) {
+          failAnchoredDirection(direction, cursor)
           throw error
         }
       } finally {
@@ -563,6 +575,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       applyOlderPage,
       canRunAnchoredLoad,
       clearAnchoredLoading,
+      failAnchoredDirection,
       finishAnchoredLoad,
       scrollRootSelector,
       showAnchoredLoading,
