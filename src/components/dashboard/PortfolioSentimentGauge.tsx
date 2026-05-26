@@ -13,7 +13,7 @@ interface PortfolioSentimentGaugeProps {
 export function PortfolioSentimentGauge({ gauge, className }: PortfolioSentimentGaugeProps) {
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
-      <CardSectionHeader title="내 포트폴리오 감성" variant="embedded" showChevron />
+      <CardSectionHeader title="내 포트폴리오 감성" variant="embedded" />
       <SentimentArcGauge
         chartId="portfolio-sentiment-gauge"
         gauge={gauge}

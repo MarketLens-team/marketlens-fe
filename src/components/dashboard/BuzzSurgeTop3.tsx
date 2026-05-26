@@ -17,7 +17,6 @@ export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
         title="언급량 급증 TOP 3"
         subtitle="전일 대비 뉴스 언급 급등"
         variant="embedded"
-        showChevron
       />
       <ol className={styles.list}>
         {items.map((item) => (

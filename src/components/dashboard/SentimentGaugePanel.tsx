@@ -15,7 +15,7 @@ interface SentimentGaugePanelProps {
 export function SentimentGaugePanel({ title, subtitle, gauge, stocksToWatch }: SentimentGaugePanelProps) {
   return (
     <Card padding="md" className={styles.card}>
-      <CardSectionHeader title={title} subtitle={subtitle} variant="embedded" showChevron />
+      <CardSectionHeader title={title} subtitle={subtitle} variant="embedded" />
       <div className={styles.gaugeBody}>
         <SentimentArcGauge chartId="kospi-sentiment-gauge" gauge={gauge} ariaLabel={`${title} ${gauge.score}`} />
       </div>

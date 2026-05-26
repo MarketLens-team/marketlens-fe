@@ -33,7 +33,6 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
         title="내 관심 종목 워치리스트"
         subtitle="현재가 · 감성 · 언급량"
         variant="embedded"
-        showChevron
       />
       <div className={styles.tableWrap}>
         <table className={styles.table}>
