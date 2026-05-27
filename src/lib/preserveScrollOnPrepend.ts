@@ -150,19 +150,6 @@ export function restorePrependScrollSnapshot(
 }
 
 let pendingPrependRestoreRaf = 0
-let pendingIdleRestoreCancel: (() => void) | null = null
-
-/** API 대기 중 사용자가 많이 스크롤했으면 보정 생략 (스크롤과 싸우지 않음) */
-const PREPEND_RESTORE_DRIFT_SKIP_PX = 72
-const PREPEND_RESTORE_SCROLL_IDLE_MS = 100
-const PREPEND_RESTORE_MAX_WAIT_MS = 480
-
-function snapshotScrollTop(snapshot: PrependScrollSnapshot): number | null {
-  if (snapshot.kind === 'list-height' || snapshot.kind === 'metrics') {
-    return snapshot.scrollTop
-  }
-  return null
-}
 
 /** 레이아웃·이미지 한 프레임 후 1회만 보정 (빠른 연속 prepend 시 이전 보정 취소) */
 export function schedulePrependScrollRestore(root: HTMLElement, snapshot: PrependScrollSnapshot) {
@@ -175,73 +162,52 @@ export function schedulePrependScrollRestore(root: HTMLElement, snapshot: Prepen
   })
 }
 
-/**
- * prepend 직후 — 스크롤이 잠깐 멈춘 뒤 보정.
- * 응답 전에 빠르게 올린 경우 drift가 크면 보정을 건너뜀.
- */
-export function restorePrependScrollWhenIdle(root: HTMLElement, snapshot: PrependScrollSnapshot) {
-  if (pendingIdleRestoreCancel) {
-    pendingIdleRestoreCancel()
-    pendingIdleRestoreCancel = null
+/** prepend 직후 즉시 보정 + 다음 프레임 1회 재보정 */
+export function applyPrependScrollRestore(root: HTMLElement, snapshot: PrependScrollSnapshot) {
+  restorePrependScrollSnapshot(root, snapshot)
+  if (snapshot.kind === 'list-height') {
+    schedulePrependScrollRestore(root, listHeightSnapshotAfterRestore(root, snapshot))
+    return
   }
+  schedulePrependScrollRestore(root, snapshot)
+}
 
-  const capturedScrollTop = snapshotScrollTop(snapshot)
-  const startedAt = Date.now()
-  let lastScrollAt = Date.now()
+export interface ScrollRootLock {
+  release: () => void
+  /** prepend 보정 후 잠금 기준 scrollTop 갱신 */
+  setLockedTop: (top: number) => void
+}
+
+/** newer 로딩 UI 동안 사용자 스크롤·휠로 위치가 밀리지 않도록 고정 */
+export function lockScrollRoot(root: HTMLElement): ScrollRootLock {
+  let lockedTop = root.scrollTop
 
   const onScroll = () => {
-    lastScrollAt = Date.now()
+    if (root.scrollTop !== lockedTop) {
+      root.scrollTop = lockedTop
+    }
   }
+
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault()
+  }
+
+  const onTouchMove = (e: TouchEvent) => {
+    e.preventDefault()
+  }
+
   root.addEventListener('scroll', onScroll, { passive: true })
+  root.addEventListener('wheel', onWheel, { passive: false })
+  root.addEventListener('touchmove', onTouchMove, { passive: false })
 
-  let cancelled = false
-
-  const stopListening = () => {
-    if (cancelled) return
-    cancelled = true
-    root.removeEventListener('scroll', onScroll)
-    pendingIdleRestoreCancel = null
+  return {
+    release: () => {
+      root.removeEventListener('scroll', onScroll)
+      root.removeEventListener('wheel', onWheel)
+      root.removeEventListener('touchmove', onTouchMove)
+    },
+    setLockedTop: (top: number) => {
+      lockedTop = top
+    },
   }
-
-  const finish = () => {
-    stopListening()
-    const drifted =
-      capturedScrollTop != null &&
-      Math.abs(root.scrollTop - capturedScrollTop) > PREPEND_RESTORE_DRIFT_SKIP_PX
-
-    if (snapshot.kind === 'list-height') {
-      restoreListHeightSnapshot(root, snapshot, drifted ? 'current' : 'captured')
-      schedulePrependScrollRestore(root, listHeightSnapshotAfterRestore(root, snapshot))
-      return
-    }
-
-    if (drifted) {
-      if (snapshot.kind === 'metrics') {
-        const delta = root.scrollHeight - snapshot.scrollHeight
-        if (delta > 0) {
-          root.scrollTop += delta
-        }
-      }
-      return
-    }
-
-    restorePrependScrollSnapshot(root, snapshot)
-    schedulePrependScrollRestore(root, snapshot)
-  }
-
-  pendingIdleRestoreCancel = stopListening
-
-  const tick = () => {
-    if (cancelled) return
-    const now = Date.now()
-    const idle = now - lastScrollAt >= PREPEND_RESTORE_SCROLL_IDLE_MS
-    const timedOut = now - startedAt >= PREPEND_RESTORE_MAX_WAIT_MS
-    if (idle || timedOut) {
-      finish()
-      return
-    }
-    requestAnimationFrame(tick)
-  }
-
-  requestAnimationFrame(tick)
 }

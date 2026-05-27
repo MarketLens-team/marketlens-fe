@@ -22,8 +22,10 @@ import {
   sortFeedItemsByPublishedAtDesc,
 } from '../lib/mergeFeedItems'
 import {
+  applyPrependScrollRestore,
   capturePrependScrollSnapshot,
-  restorePrependScrollWhenIdle,
+  lockScrollRoot,
+  type PrependScrollSnapshot,
 } from '../lib/preserveScrollOnPrepend'
 import { resolveScrollRoot } from './useInfiniteScroll'
 
@@ -116,6 +118,9 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   const initialSnapshotRef = useRef({ items: initialItems, pagination: initialLatestPagination })
   const latestSyncKeyRef = useRef<string | null>(null)
   const anchoredPaginationRef = useRef(anchoredPagination)
+  const newerScrollSnapshotRef = useRef<PrependScrollSnapshot | null>(null)
+  const newerScrollLockReleaseRef = useRef<(() => void) | null>(null)
+  const newerScrollLockSetTopRef = useRef<((top: number) => void) | null>(null)
 
   initialSnapshotRef.current = { items: initialItems, pagination: initialLatestPagination }
   anchoredPaginationRef.current = anchoredPagination
@@ -300,7 +305,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       const scrollRoot = resolveScrollRoot(scrollRootSelector)
       const scrollSnapshot =
-        scrollRoot && page.items.length > 0 ? capturePrependScrollSnapshot(scrollRoot) : null
+        newerScrollSnapshotRef.current ??
+        (scrollRoot && page.items.length > 0 ? capturePrependScrollSnapshot(scrollRoot) : null)
 
       let added = 0
       let nextItems: TItem[] = []
@@ -338,7 +344,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       }
 
       if (scrollRoot && scrollSnapshot && added > 0) {
-        restorePrependScrollWhenIdle(scrollRoot, scrollSnapshot)
+        applyPrependScrollRestore(scrollRoot, scrollSnapshot)
+        newerScrollLockSetTopRef.current?.(scrollRoot.scrollTop)
       }
 
       return added
@@ -456,13 +463,31 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     setLatestPagination(pagination)
   }, [])
 
+  const releaseNewerScrollLock = useCallback(() => {
+    newerScrollLockReleaseRef.current?.()
+    newerScrollLockReleaseRef.current = null
+    newerScrollLockSetTopRef.current = null
+    newerScrollSnapshotRef.current = null
+  }, [])
+
+  const beginNewerScrollLock = useCallback(() => {
+    releaseNewerScrollLock()
+    const scrollRoot = resolveScrollRoot(scrollRootSelector)
+    if (!scrollRoot) return
+    newerScrollSnapshotRef.current = capturePrependScrollSnapshot(scrollRoot)
+    const lock = lockScrollRoot(scrollRoot)
+    newerScrollLockReleaseRef.current = lock.release
+    newerScrollLockSetTopRef.current = lock.setLockedTop
+  }, [releaseNewerScrollLock, scrollRootSelector])
+
   const clearAnchoredLoading = useCallback(() => {
     flushSync(() => {
       setAnchoredLoadingUi(null)
       setLoadingNewer(false)
       setLoadingOlder(false)
     })
-  }, [])
+    releaseNewerScrollLock()
+  }, [releaseNewerScrollLock])
 
   const finishAnchoredLoad = useCallback(
     (seq: number) => {
@@ -474,13 +499,19 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     [clearAnchoredLoading],
   )
 
-  const showAnchoredLoading = useCallback((direction: AnchoredLoadDirection) => {
-    flushSync(() => {
-      setAnchoredLoadingUi(direction)
-      setLoadingNewer(direction === 'newer')
-      setLoadingOlder(direction === 'older')
-    })
-  }, [])
+  const showAnchoredLoading = useCallback(
+    (direction: AnchoredLoadDirection) => {
+      if (direction === 'newer') {
+        beginNewerScrollLock()
+      }
+      flushSync(() => {
+        setAnchoredLoadingUi(direction)
+        setLoadingNewer(direction === 'newer')
+        setLoadingOlder(direction === 'older')
+      })
+    },
+    [beginNewerScrollLock],
+  )
 
   const failAnchoredDirection = useCallback(
     (direction: AnchoredLoadDirection, requestedCursor: string) => {
@@ -615,7 +646,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
     setLoadingOlder(false)
     anchoredLoadInFlightRef.current = false
     pendingAnchoredLoadRef.current = null
-  }, [])
+    releaseNewerScrollLock()
+  }, [releaseNewerScrollLock])
 
   return {
     items,
