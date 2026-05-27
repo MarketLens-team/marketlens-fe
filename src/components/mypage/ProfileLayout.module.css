@@ -1,0 +1,20 @@
+.pageLayout {
+  width: min(100%, 70rem); /* 1120px */
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 13.75rem minmax(0, 1fr); /* 220px */
+  gap: 3rem; /* 48px */
+  align-items: start;
+}
+
+.content {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .pageLayout {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
