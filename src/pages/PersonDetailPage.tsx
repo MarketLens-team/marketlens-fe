@@ -137,7 +137,6 @@ export default function PersonDetailPage() {
     loading: showOlderLoader,
     rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
     loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
-    requireUserScrollDown: feedMode === 'anchored',
     disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMore(),
   })

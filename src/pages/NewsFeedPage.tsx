@@ -48,7 +48,7 @@ export default function NewsFeedPage() {
     error,
     loadMoreError,
     loadMore,
-    loadNewer,
+    loadNewer: loadNewerWithError,
     needsLogin,
     restoredScrollTop,
     feedReady,
@@ -103,16 +103,15 @@ export default function NewsFeedPage() {
     rootMargin: newsTopSentinelMargin,
     requireUserScrollUp: true,
     loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
-    onLoadMore: () => void loadNewer(),
+    onLoadMore: () => void loadNewerWithError(),
   })
 
   const newsSentinelRef = useInfiniteScroll({
-    enabled: !loading && !needsLogin && items.length > 0 && feedReady,
+    enabled: items.length > 0 && !needsLogin && feedReady,
     hasMore: hasMoreDown,
     loading: loadingMore,
     rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
     loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
-    requireUserScrollDown: feedMode === 'anchored',
     disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMore(),
   })
@@ -189,34 +188,36 @@ export default function NewsFeedPage() {
 
             {!loading && !needsLogin && items.length > 0 ? (
               <section className={styles.feed} aria-label="뉴스 목록">
-                {showNewerLoader ? (
-                  <div
-                    className={styles.scrollNewerOverlay}
-                    aria-busy="true"
-                    aria-live="polite"
-                  >
-                    <FeedLoadingSpinner label="이전 뉴스 불러오는 중" />
-                  </div>
-                ) : null}
-                <ul className={styles.list} data-anchored-feed-list>
-                  {feedMode === 'anchored' && hasMoreUp ? (
-                    <li className={styles.scrollHead} aria-hidden>
-                      <div ref={newsTopSentinelRef} className={styles.sentinel} aria-hidden />
-                    </li>
+                <div className={styles.feedWrap}>
+                  {showNewerLoader ? (
+                    <div
+                      className={styles.scrollNewerOverlay}
+                      aria-busy="true"
+                      aria-live="polite"
+                    >
+                      <FeedLoadingSpinner label="이전 뉴스 불러오는 중" />
+                    </div>
                   ) : null}
-                  {items.map((item) => (
-                    <AllNewsListItem
-                      key={item.id}
-                      item={item}
-                      highlighted={isNewsFocused(item.id)}
-                      showBookmark={mode === 'all'}
-                      bookmarked={isBookmarked(item.id)}
-                      bookmarkPending={isBookmarkPending(item.id)}
-                      onBookmarkToggle={() => void toggleBookmark(item.id, { type: 'ALL_NEWS' })}
-                    />
-                  ))}
-                </ul>
-                {hasMoreDown || showOlderLoader ? (
+                  <ul className={styles.list} data-anchored-feed-list>
+                    {feedMode === 'anchored' && hasMoreUp ? (
+                      <li className={styles.scrollHead} aria-hidden>
+                        <div ref={newsTopSentinelRef} className={styles.sentinel} aria-hidden />
+                      </li>
+                    ) : null}
+                    {items.map((item) => (
+                      <AllNewsListItem
+                        key={item.id}
+                        item={item}
+                        highlighted={isNewsFocused(item.id)}
+                        showBookmark={mode === 'all'}
+                        bookmarked={isBookmarked(item.id)}
+                        bookmarkPending={isBookmarkPending(item.id)}
+                        onBookmarkToggle={() => void toggleBookmark(item.id, { type: 'ALL_NEWS' })}
+                      />
+                    ))}
+                  </ul>
+                </div>
+                {(hasMoreDown || showOlderLoader) ? (
                   <div
                     className={styles.scrollFoot}
                     role={showOlderLoader ? 'status' : undefined}
@@ -224,11 +225,14 @@ export default function NewsFeedPage() {
                     aria-busy={showOlderLoader || loadingMore || undefined}
                   >
                     <div ref={newsSentinelRef} className={styles.sentinel} aria-hidden />
-                    {showOlderLoader || loadingMore ? (
-                      <div className={styles.scrollFootLoader}>
+                    <div
+                      className={styles.scrollFootLoader}
+                      aria-hidden={!(showOlderLoader || loadingMore)}
+                    >
+                      {showOlderLoader || loadingMore ? (
                         <FeedLoadingSpinner label="뉴스 더 불러오는 중" />
-                      </div>
-                    ) : null}
+                      ) : null}
+                    </div>
                   </div>
                 ) : null}
                 {loadMoreError ? (

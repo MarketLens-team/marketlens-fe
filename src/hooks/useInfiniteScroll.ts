@@ -8,10 +8,10 @@ const DEFAULT_ROOT_MARGIN_DOWN = '0px 0px 240px 0px'
 const DEFAULT_ROOT_MARGIN_UP = '64px 0px 0px 0px'
 /** 연속 트리거 방지 */
 const DEFAULT_LOAD_COOLDOWN_MS = 400
-/** 빠른 휠/터치 시 newer·older 연속 호출 완화 */
-const SCROLL_DIRECTION_ATTEMPT_THROTTLE_MS = 200
-/** 스크롤이 잠깐 멈춘 뒤 로드 — API 응답 전 추가 스크롤과 보정 충돌 완화 */
-const SCROLL_DIRECTION_LOAD_DEBOUNCE_MS = 260
+/** 빠른 휠/터치 시 newer 연속 호출 완화 */
+const SCROLL_UP_ATTEMPT_THROTTLE_MS = 200
+/** 스크롤이 잠깐 멈춘 뒤 newer 요청 — API 응답 전 추가 스크롤과 보정 충돌 완화 */
+const SCROLL_UP_LOAD_DEBOUNCE_MS = 260
 /** 로드 직후 센티넬 재시도 — 스크롤 관성·레이아웃 안정 대기 */
 const POST_LOAD_RETRY_DELAY_MS = 150
 
@@ -64,11 +64,6 @@ interface UseInfiniteScrollOptions {
    * prepend·포커스 점프만으로는 트리거하지 않음.
    */
   requireUserScrollUp?: boolean
-  /**
-   * `down` 전용 — 사용자가 아래로 스크롤하는 동작이 있을 때만 로드.
-   * anchored older가 센티넬 prefetch만으로 연속 호출되는 것을 방지.
-   */
-  requireUserScrollDown?: boolean
   scrollRootSelector?: string
   loadCooldownMs?: number
   /** true면 로드 직후 센티넬 자동 재시도 안 함 (anchored 빠른 스크롤) */
@@ -83,7 +78,6 @@ export function useInfiniteScroll({
   rootMargin,
   direction = 'down',
   requireUserScrollUp = false,
-  requireUserScrollDown = false,
   scrollRootSelector,
   loadCooldownMs = DEFAULT_LOAD_COOLDOWN_MS,
   disablePostLoadRetry = false,
@@ -93,31 +87,28 @@ export function useInfiniteScroll({
   const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null)
   const onLoadMoreRef = useRef(onLoadMore)
   const userScrolledUpRef = useRef(false)
-  const userScrolledDownRef = useRef(false)
   const lastLoadStartedAtRef = useRef(0)
-  const lastDirectionAttemptAtRef = useRef(0)
+  const lastScrollUpAttemptAtRef = useRef(0)
   const touchStartYRef = useRef(0)
   const wasLoadingRef = useRef(false)
   const loadingRef = useRef(loading)
   const enabledRef = useRef(enabled)
   const hasMoreRef = useRef(hasMore)
-  const directionRef = useRef(direction)
   const requireUserScrollUpRef = useRef(requireUserScrollUp)
-  const requireUserScrollDownRef = useRef(requireUserScrollDown)
+  const directionRef = useRef(direction)
   const loadCooldownMsRef = useRef(loadCooldownMs)
-  const resolvedRootMarginRef = useRef(resolvedRootMargin)
-  const scrollDirectionLoadDebounceIdRef = useRef<number | undefined>(undefined)
+  const scrollUpLoadDebounceIdRef = useRef<number | undefined>(undefined)
   const sentinelElRef = useRef(sentinelEl)
+  const resolvedRootMarginRef = useRef(resolvedRootMargin)
 
   loadingRef.current = loading
   enabledRef.current = enabled
   hasMoreRef.current = hasMore
-  directionRef.current = direction
   requireUserScrollUpRef.current = requireUserScrollUp
-  requireUserScrollDownRef.current = requireUserScrollDown
+  directionRef.current = direction
   loadCooldownMsRef.current = loadCooldownMs
-  resolvedRootMarginRef.current = resolvedRootMargin
   sentinelElRef.current = sentinelEl
+  resolvedRootMarginRef.current = resolvedRootMargin
 
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore
@@ -125,15 +116,14 @@ export function useInfiniteScroll({
 
   useEffect(() => {
     userScrolledUpRef.current = false
-    userScrolledDownRef.current = false
     lastLoadStartedAtRef.current = 0
     touchStartYRef.current = 0
     wasLoadingRef.current = false
-    if (scrollDirectionLoadDebounceIdRef.current != null) {
-      window.clearTimeout(scrollDirectionLoadDebounceIdRef.current)
-      scrollDirectionLoadDebounceIdRef.current = undefined
+    if (scrollUpLoadDebounceIdRef.current != null) {
+      window.clearTimeout(scrollUpLoadDebounceIdRef.current)
+      scrollUpLoadDebounceIdRef.current = undefined
     }
-  }, [enabled, requireUserScrollUp, requireUserScrollDown, direction])
+  }, [enabled, requireUserScrollUp, direction])
 
   const resolveRoot = useCallback(() => resolveScrollRoot(scrollRootSelector), [scrollRootSelector])
 
@@ -148,13 +138,6 @@ export function useInfiniteScroll({
     ) {
       return false
     }
-    if (
-      requireUserScrollDownRef.current &&
-      directionRef.current === 'down' &&
-      !userScrolledDownRef.current
-    ) {
-      return false
-    }
 
     const now = Date.now()
     if (now - lastLoadStartedAtRef.current < loadCooldownMsRef.current) return false
@@ -163,27 +146,25 @@ export function useInfiniteScroll({
     if (directionRef.current === 'up') {
       userScrolledUpRef.current = false
     }
-    if (directionRef.current === 'down') {
-      userScrolledDownRef.current = false
-    }
     onLoadMoreRef.current()
     return true
   }
 
-  const attemptDirectionalLoadRef = useRef<() => boolean>(() => false)
-  attemptDirectionalLoadRef.current = () => {
-    const dir = directionRef.current
-    const sentinel = sentinelElRef.current
-    if (!sentinel || (dir !== 'up' && dir !== 'down')) return false
-
+  const attemptUpLoadRef = useRef<() => boolean>(() => false)
+  attemptUpLoadRef.current = () => {
+    if (directionRef.current !== 'up' || !sentinelElRef.current) return false
     const now = Date.now()
-    if (now - lastDirectionAttemptAtRef.current < SCROLL_DIRECTION_ATTEMPT_THROTTLE_MS) {
-      return false
-    }
-    lastDirectionAttemptAtRef.current = now
-
+    if (now - lastScrollUpAttemptAtRef.current < SCROLL_UP_ATTEMPT_THROTTLE_MS) return false
+    lastScrollUpAttemptAtRef.current = now
     const root = resolveScrollRoot(scrollRootSelector)
-    if (!isSentinelInLoadZone(sentinel, root, resolvedRootMarginRef.current, dir)) {
+    if (
+      !isSentinelInLoadZone(
+        sentinelElRef.current,
+        root,
+        resolvedRootMarginRef.current,
+        'up',
+      )
+    ) {
       return false
     }
     return tryLoadMoreRef.current()
@@ -194,34 +175,25 @@ export function useInfiniteScroll({
   }, [])
 
   useEffect(() => {
-    const needsScrollIntent =
-      (direction === 'up' && requireUserScrollUp) ||
-      (direction === 'down' && requireUserScrollDown)
-    if (!enabled || !needsScrollIntent) return
+    if (!enabled || direction !== 'up' || !requireUserScrollUp) return
 
     const root = resolveRoot()
     if (!root) return
 
-    const scheduleDirectionalLoadAfterScroll = () => {
-      if (scrollDirectionLoadDebounceIdRef.current != null) {
-        window.clearTimeout(scrollDirectionLoadDebounceIdRef.current)
+    const scheduleUpLoadAfterScroll = () => {
+      if (scrollUpLoadDebounceIdRef.current != null) {
+        window.clearTimeout(scrollUpLoadDebounceIdRef.current)
       }
-      scrollDirectionLoadDebounceIdRef.current = window.setTimeout(() => {
-        scrollDirectionLoadDebounceIdRef.current = undefined
-        attemptDirectionalLoadRef.current()
-      }, SCROLL_DIRECTION_LOAD_DEBOUNCE_MS)
+      scrollUpLoadDebounceIdRef.current = window.setTimeout(() => {
+        scrollUpLoadDebounceIdRef.current = undefined
+        attemptUpLoadRef.current()
+      }, SCROLL_UP_LOAD_DEBOUNCE_MS)
     }
 
     const onWheel = (event: WheelEvent) => {
-      if (direction === 'up' && event.deltaY < 0) {
-        userScrolledUpRef.current = true
-        scheduleDirectionalLoadAfterScroll()
-        return
-      }
-      if (direction === 'down' && event.deltaY > 0) {
-        userScrolledDownRef.current = true
-        scheduleDirectionalLoadAfterScroll()
-      }
+      if (event.deltaY >= 0) return
+      userScrolledUpRef.current = true
+      scheduleUpLoadAfterScroll()
     }
 
     const onTouchStart = (event: TouchEvent) => {
@@ -230,37 +202,24 @@ export function useInfiniteScroll({
 
     const onTouchMove = (event: TouchEvent) => {
       const y = event.touches[0]?.clientY ?? 0
-      if (direction === 'up' && y > touchStartYRef.current + 12) {
-        userScrolledUpRef.current = true
-        scheduleDirectionalLoadAfterScroll()
-        return
-      }
-      if (direction === 'down' && y < touchStartYRef.current - 12) {
-        userScrolledDownRef.current = true
-        scheduleDirectionalLoadAfterScroll()
-      }
+      if (y <= touchStartYRef.current + 12) return
+      userScrolledUpRef.current = true
+      scheduleUpLoadAfterScroll()
     }
 
     root.addEventListener('wheel', onWheel, { passive: true })
     root.addEventListener('touchstart', onTouchStart, { passive: true })
     root.addEventListener('touchmove', onTouchMove, { passive: true })
     return () => {
-      if (scrollDirectionLoadDebounceIdRef.current != null) {
-        window.clearTimeout(scrollDirectionLoadDebounceIdRef.current)
-        scrollDirectionLoadDebounceIdRef.current = undefined
+      if (scrollUpLoadDebounceIdRef.current != null) {
+        window.clearTimeout(scrollUpLoadDebounceIdRef.current)
+        scrollUpLoadDebounceIdRef.current = undefined
       }
       root.removeEventListener('wheel', onWheel)
       root.removeEventListener('touchstart', onTouchStart)
       root.removeEventListener('touchmove', onTouchMove)
     }
-  }, [
-    enabled,
-    requireUserScrollUp,
-    requireUserScrollDown,
-    direction,
-    resolveRoot,
-    scrollRootSelector,
-  ])
+  }, [enabled, requireUserScrollUp, direction, resolveRoot])
 
   useEffect(() => {
     if (!enabled || !sentinelEl) return
@@ -271,11 +230,7 @@ export function useInfiniteScroll({
       (entries) => {
         if (!entries[0]?.isIntersecting) return
         if (direction === 'up' && requireUserScrollUp) {
-          attemptDirectionalLoadRef.current()
-          return
-        }
-        if (direction === 'down' && requireUserScrollDown) {
-          attemptDirectionalLoadRef.current()
+          attemptUpLoadRef.current()
           return
         }
         tryLoadMoreRef.current()
@@ -285,15 +240,7 @@ export function useInfiniteScroll({
 
     observer.observe(sentinelEl)
     return () => observer.disconnect()
-  }, [
-    enabled,
-    resolvedRootMargin,
-    resolveRoot,
-    sentinelEl,
-    direction,
-    requireUserScrollUp,
-    requireUserScrollDown,
-  ])
+  }, [enabled, resolvedRootMargin, resolveRoot, sentinelEl, direction, requireUserScrollUp])
 
   /** down 전용 — 로드 후 센티넬이 여전히 보이면 1회 재시도 */
   useEffect(() => {
@@ -317,15 +264,7 @@ export function useInfiniteScroll({
     }, POST_LOAD_RETRY_DELAY_MS)
 
     return () => window.clearTimeout(timeoutId)
-  }, [
-    loading,
-    enabled,
-    sentinelEl,
-    hasMore,
-    resolveRoot,
-    direction,
-    disablePostLoadRetry,
-  ])
+  }, [loading, enabled, sentinelEl, hasMore, resolveRoot, direction, disablePostLoadRetry])
 
   return sentinelRef
 }

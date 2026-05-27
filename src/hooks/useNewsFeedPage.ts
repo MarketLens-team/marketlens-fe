@@ -225,10 +225,26 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     }
   }, [mode, needsLogin, focusNewsId, replaceLatestItems])
 
+  const loadNewerWithError = useCallback(async () => {
+    setLoadMoreError(null)
+    try {
+      await loadNewer()
+    } catch (e) {
+      setLoadMoreError(
+        e instanceof Error
+          ? e.message
+          : mode === 'watchlist'
+            ? '관심종목 뉴스를 더 불러오지 못했습니다.'
+            : '뉴스를 더 불러오지 못했습니다.',
+      )
+    }
+  }, [loadNewer, mode])
+
   const loadMore = useCallback(async () => {
     if (needsLogin) return
 
     if (feedMode === 'anchored') {
+      if (loadingOlder) return
       setLoadMoreError(null)
       try {
         await loadOlder()
@@ -269,6 +285,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
   }, [
     needsLogin,
     feedMode,
+    loadingOlder,
     loadOlder,
     pagination,
     loadingLatestMore,
@@ -322,7 +339,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     error: feedError,
     loadMoreError,
     loadMore,
-    loadNewer,
+    loadNewer: loadNewerWithError,
     needsLogin,
     restoredScrollTop,
     feedReady,
