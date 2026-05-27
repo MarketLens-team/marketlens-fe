@@ -6,6 +6,7 @@ import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EmptyState } from '../common/EmptyState'
 import { UnderlineTabNav } from '../common/UnderlineTabNav'
 import { formatStockScore } from '../stock/stockScore'
+import type { BookmarkSortOrder } from '../../data/types/bookmark'
 import type { MyPageBookmarkItem, MyPageBookmarkStockSummary, MyPageBookmarkView } from '../../data/types/myPage'
 import { buildBookmarkItemPath, formatBookmarkContextLabel } from '../../lib/bookmarkNavigation'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
@@ -35,6 +36,11 @@ interface MyPageBookmarkSectionProps {
   removingId?: string | null
   onRemove: (id: string) => void
   refreshing?: boolean
+  sortOrder: BookmarkSortOrder
+  onSortChange: (order: BookmarkSortOrder) => void
+  page: number
+  totalPages: number
+  onPageChange: (page: number) => void
 }
 
 function formatBookmarkedAt(iso: string): string {
@@ -122,10 +128,16 @@ export function MyPageBookmarkSection({
   removingId,
   onRemove,
   refreshing,
+  sortOrder,
+  onSortChange,
+  page,
+  totalPages,
+  onPageChange,
 }: MyPageBookmarkSectionProps) {
   const showStockPicker = view === 'stock'
   const stockEmpty = showStockPicker && !stockSummariesLoading && stockSummaries.length === 0
   const listLoading = showStockPicker && stockBookmarksLoading
+  const hasPagination = totalPages > 1
 
   return (
     <Card padding="md" className={styles.card}>
@@ -143,6 +155,23 @@ export function MyPageBookmarkSection({
         onChange={onViewChange}
         ariaLabel="저장한 뉴스 보기 방식"
       />
+
+      <div className={styles.sortBar}>
+        <button
+          type="button"
+          className={clsx(styles.sortBtn, sortOrder === 'LATEST' && styles.sortBtnActive)}
+          onClick={() => onSortChange('LATEST')}
+        >
+          최신순
+        </button>
+        <button
+          type="button"
+          className={clsx(styles.sortBtn, sortOrder === 'OLDEST' && styles.sortBtnActive)}
+          onClick={() => onSortChange('OLDEST')}
+        >
+          오래된순
+        </button>
+      </div>
 
       {showStockPicker ? (
         <div className={styles.stockPicker} role="tablist" aria-label="저장한 종목">
@@ -197,6 +226,32 @@ export function MyPageBookmarkSection({
           <BookmarkItemsList items={items} removingId={removingId} onRemove={onRemove} />
         )}
       </div>
+
+      {hasPagination && (
+        <div className={styles.pagination}>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page === 0}
+            onClick={() => onPageChange(page - 1)}
+            aria-label="이전 페이지"
+          >
+            ‹
+          </button>
+          <span className={styles.pageInfo}>
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page >= totalPages - 1}
+            onClick={() => onPageChange(page + 1)}
+            aria-label="다음 페이지"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </Card>
   )
 }

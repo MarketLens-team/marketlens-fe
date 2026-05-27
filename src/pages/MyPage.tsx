@@ -47,6 +47,11 @@ export default function MyPage() {
     stockSummariesLoading,
     stockBookmarksLoading,
     items: bookmarks,
+    totalPages: bookmarkTotalPages,
+    page: bookmarkPage,
+    sortOrder: bookmarkSortOrder,
+    changeSortOrder: changeBookmarkSortOrder,
+    goToPage: goToBookmarkPage,
     initialLoading: bookmarksInitialLoading,
     sectionReady: bookmarksSectionReady,
     error: bookmarksError,
@@ -183,6 +188,11 @@ export default function MyPage() {
                       removingId={removingBookmarkId}
                       onRemove={handleBookmarkRemove}
                       refreshing={bookmarksRefreshing}
+                      sortOrder={bookmarkSortOrder}
+                      onSortChange={changeBookmarkSortOrder}
+                      page={bookmarkPage}
+                      totalPages={bookmarkTotalPages}
+                      onPageChange={goToBookmarkPage}
                     />
                   ) : null}
               </div>

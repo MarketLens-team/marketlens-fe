@@ -1,28 +1,43 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchBookmarkStockSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
-import { mapBookmarkStockSummaryList, mapNewsBookmarkList } from '../data/mappers/bookmarkMapper'
-import type { MyPageBookmarkItem, MyPageBookmarkStockSummary, MyPageBookmarkView } from '../data/types/myPage'
+import { mapBookmarkStockSummaryList, mapNewsBookmarkPage } from '../data/mappers/bookmarkMapper'
+import type { BookmarkSortOrder } from '../data/types/bookmark'
+import type { MyPageBookmarkItem, MyPageBookmarkPage, MyPageBookmarkStockSummary, MyPageBookmarkView } from '../data/types/myPage'
 import { useAsyncData } from './useAsyncData'
+
+const PAGE_SIZE = 10
 
 export function useMyPageBookmarks(refreshKey: number) {
   const [view, setView] = useState<MyPageBookmarkView>('date')
   const [selectedStockCode, setSelectedStockCode] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<BookmarkSortOrder>('LATEST')
+  const [page, setPage] = useState(0)
 
-  const dateFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
-    const rows = await fetchNewsBookmarks()
-    return mapNewsBookmarkList(rows)
-  }, [refreshKey])
+  // view·sortOrder·selectedStockCode·refreshKey 바뀌면 페이지 리셋
+  useEffect(() => {
+    setPage(0)
+  }, [view, sortOrder, selectedStockCode, refreshKey])
+
+  const dateFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
+    const raw = await fetchNewsBookmarks({ page, size: PAGE_SIZE, sortOrder })
+    return mapNewsBookmarkPage(raw)
+  }, [refreshKey, page, sortOrder]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const stockSummariesFactory = useCallback(async (): Promise<MyPageBookmarkStockSummary[]> => {
     const rows = await fetchBookmarkStockSummaries()
     return mapBookmarkStockSummaryList(rows)
-  }, [refreshKey])
+  }, [refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const stockBookmarksFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
-    if (!selectedStockCode) return []
-    const rows = await fetchNewsBookmarks({ contextStockCode: selectedStockCode })
-    return mapNewsBookmarkList(rows)
-  }, [refreshKey, selectedStockCode])
+  const stockBookmarksFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
+    if (!selectedStockCode) return { items: [], totalElements: 0, totalPages: 0, page: 0 }
+    const raw = await fetchNewsBookmarks({
+      contextStockCode: selectedStockCode,
+      page,
+      size: PAGE_SIZE,
+      sortOrder,
+    })
+    return mapNewsBookmarkPage(raw)
+  }, [refreshKey, selectedStockCode, page, sortOrder]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const dateState = useAsyncData(dateFactory)
   const stockSummariesState = useAsyncData(stockSummariesFactory, { enabled: view === 'stock' })
@@ -44,8 +59,11 @@ export function useMyPageBookmarks(refreshKey: number) {
     }
   }, [view, stockSummaries, selectedStockCode, stockSummariesState.loading, stockSummariesState.error])
 
-  const items =
-    view === 'date' ? (dateState.data ?? []) : (stockBookmarksState.data ?? [])
+  const activePage = view === 'date' ? dateState.data : stockBookmarksState.data
+  const items: MyPageBookmarkItem[] = activePage?.items ?? []
+  const totalPages = activePage?.totalPages ?? 0
+  const totalElements = activePage?.totalElements ?? 0
+
   const initialLoading =
     view === 'date'
       ? dateState.loading && dateState.data == null
@@ -68,6 +86,14 @@ export function useMyPageBookmarks(refreshKey: number) {
     setView(next)
   }, [])
 
+  const changeSortOrder = useCallback((next: BookmarkSortOrder) => {
+    setSortOrder(next)
+  }, [])
+
+  const goToPage = useCallback((next: number) => {
+    setPage(next)
+  }, [])
+
   return {
     view,
     changeView,
@@ -81,6 +107,12 @@ export function useMyPageBookmarks(refreshKey: number) {
       stockBookmarksState.loading &&
       stockBookmarksState.data == null,
     items,
+    totalPages,
+    totalElements,
+    page,
+    sortOrder,
+    changeSortOrder,
+    goToPage,
     initialLoading,
     sectionReady,
     error,

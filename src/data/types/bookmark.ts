@@ -6,10 +6,23 @@ export interface NewsBookmarkSaveContext {
   stockCode?: string
 }
 
-/** `GET /api/v1/bookmarks` 쿼리 — `contextStockCode`만내면 STOCK 필터 */
+export type BookmarkSortOrder = 'LATEST' | 'OLDEST'
+
+/** `GET /api/v1/bookmarks` 쿼리 */
 export interface NewsBookmarkListQuery {
   contextType?: NewsBookmarkContextType
   contextStockCode?: string
+  page?: number
+  size?: number
+  sortOrder?: BookmarkSortOrder
+}
+
+/** `GET /api/v1/bookmarks` 페이지 응답 — OpenAPI `NewsBookmarkPageResponse` */
+export interface NewsBookmarkPageDto {
+  content: NewsBookmarkDto[]
+  totalElements: number
+  totalPages: number
+  page: number
 }
 
 /** `GET /api/v1/bookmarks/stocks` — OpenAPI `BookmarkStockSummaryResponse` */
@@ -32,6 +45,7 @@ export interface NewsBookmarkDto {
   contextType: NewsBookmarkContextType
   contextStockCode?: string | null
   contextStockName?: string | null
+  contextLabel?: string | null
   sentimentScore: number
   sentimentLabel: string
 }

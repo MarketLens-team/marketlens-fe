@@ -152,3 +152,4 @@ dist-ssr
 # Local editor / AI (레포 미포함)
 .cursor/
 .claude/
+CLAUDE.md

@@ -25,6 +25,14 @@ export interface MyPageBookmarkItem {
   contextType: NewsBookmarkContextType
   contextStockCode?: string | null
   contextStockName?: string | null
+  contextLabel?: string | null
+}
+
+export interface MyPageBookmarkPage {
+  items: MyPageBookmarkItem[]
+  totalElements: number
+  totalPages: number
+  page: number
 }
 
 export interface MyPageWatchlistRow {
