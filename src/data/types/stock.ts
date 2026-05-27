@@ -9,6 +9,7 @@ export interface StockPriceInfo {
 export interface StockSummary {
   code: string
   name: string
+  imageUrl?: string | null
   market: string
   sector: string
   sentimentScore: number
@@ -51,6 +52,14 @@ export interface StockSentimentBreakdown {
   finalScore: number
 }
 
+/** 전체 뉴스 피드 — 기사별 관련 종목 태그 */
+export interface NewsRelatedStock {
+  stockCode: string
+  stockName: string
+  imageUrl?: string | null
+  relevanceScore: number
+}
+
 export interface StockNewsItem {
   id: string
   title: string
@@ -66,20 +75,32 @@ export interface StockNewsItem {
   highlightTerms?: string[]
   imageUrl?: string | null
   url?: string
+  relatedStocks?: NewsRelatedStock[]
 }
 
 export interface StockRelatedStock {
   code: string
   name: string
+  imageUrl?: string | null
   market?: string
   sentimentScore: number
+  /** `GET /api/v1/stocks/prices` 병합 */
+  price?: StockPriceInfo
 }
 
 export interface StockPersonTimelineItem {
   id: string
+  personId: string
   personName: string
+  imageUrl?: string | null
   role: string
+  /** OpenAPI `statementSummary` */
+  summary: string
+  sourceName: string
+  publishedAt: string
   relativeLabel: string
+  /** 발표 후 1시간 이내 — 시각 라벨 강조(빨간색) */
+  isFresh: boolean
   sentimentScore: number
 }
 
@@ -105,4 +126,85 @@ export interface StockDetail {
 export interface StockSearchItem {
   code: string
   name: string
+}
+
+/** 상단 TickerBar 종목 한 줄 */
+export interface TickerStockRow {
+  id: string
+  code: string
+  name: string
+  price: number
+  changePercent: number
+}
+
+/** 전체 종목 시세 테이블 — `GET /api/v1/stocks/prices` + directory 병합 */
+export interface StockMarketRow {
+  code: string
+  name: string
+  market: string
+  sectorName: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+}
+
+/** 전체 종목 overview — `GET /api/v1/stocks/overview` */
+export interface StockOverviewRow {
+  code: string
+  name: string
+  market: string
+  sectorCode: string
+  sectorName: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+  mentionCount24h: number
+  mentionChangeRate24h: number | null
+  sentimentScore24h: number
+  sentimentDelta24h: number | null
+}
+
+export interface StockOverview {
+  currentNewsCount: number
+  stocks: StockOverviewRow[]
+}
+
+/** 랭킹 카드 한 줄 — `GET /api/v1/stocks/rankings` */
+export interface StockRankingItem {
+  code: string
+  name: string
+  imageUrl?: string | null
+  price: number
+  changePercent: number
+  mentionCount24h: number
+  mentionChangeRate24h: number | null
+  sentimentScore24h: number
+  sentimentDelta24h: number | null
+}
+
+export type StockRankingCategory =
+  | 'topMentionCount'
+  | 'topSentimentScore'
+  | 'topChangeRate'
+
+export interface StockRankings {
+  topMentionCount: StockRankingItem[]
+  topSentimentScore: StockRankingItem[]
+  topChangeRate: StockRankingItem[]
+}
+
+/** 오늘 뉴스 건수 한 줄 — `GET /api/v1/stocks/today-news` */
+export interface StockTodayNewsItem {
+  stockCode: string
+  stockName: string
+  market: string
+  sectorName: string
+  imageUrl?: string | null
+  todayNewsCount: number
+}
+
+export interface StockTodayNews {
+  updatedAt: string
+  totalTodayNewsCount: number
+  items: StockTodayNewsItem[]
 }

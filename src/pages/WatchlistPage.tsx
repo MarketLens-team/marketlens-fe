@@ -5,6 +5,7 @@ import {
   DetailSplitShell,
   type DetailAccordionSidebarGroup,
 } from '../components/common/DetailSplitShell'
+import { EntityAvatar } from '../components/ui/EntityAvatar'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
 import { useWatchlistStore } from '../store/watchlistStore'
@@ -56,9 +57,12 @@ export default function WatchlistPage() {
             <ul className={styles.list}>
               {items.map((item) => (
                 <li key={item.code} className={styles.item}>
-                  <div className={styles.meta}>
-                    <p className={styles.name}>{item.name}</p>
-                    <p className={styles.code}>{item.code}</p>
+                  <div className={styles.itemLead}>
+                    <EntityAvatar variant="stock" size="sm" name={item.name} imageUrl={item.imageUrl} />
+                    <div className={styles.meta}>
+                      <p className={styles.name}>{item.name}</p>
+                      <p className={styles.code}>{item.code}</p>
+                    </div>
                   </div>
                   <div className={styles.actions}>
                     <button type="button" className={styles.btn} onClick={() => navigate(`/stock/${item.code}`)}>

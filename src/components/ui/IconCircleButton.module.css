@@ -1,0 +1,65 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-border-default) 65%, var(--color-text-primary) 10%);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-bg-elevated) 70%, var(--color-text-primary) 12%);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.btn:hover {
+  border-color: color-mix(in srgb, var(--color-border-strong) 75%, var(--color-text-primary) 12%);
+  background: color-mix(in srgb, var(--color-bg-elevated) 62%, var(--color-text-primary) 18%);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sizeMd {
+  width: 40px;
+  height: 40px;
+}
+
+.sizeLg {
+  width: var(--layout-back-to-top-size);
+  height: var(--layout-back-to-top-size);
+}
+
+.surfaceModal {
+  border-color: color-mix(in srgb, var(--color-border-default) 50%, var(--color-text-primary) 14%);
+  background: color-mix(in srgb, var(--color-bg-modal-inset) 68%, var(--color-text-primary) 16%);
+}
+
+.surfaceModal:hover {
+  border-color: color-mix(in srgb, var(--color-border-strong) 60%, var(--color-text-primary) 16%);
+  background: color-mix(in srgb, var(--color-bg-modal-inset) 58%, var(--color-text-primary) 22%);
+}
+
+.icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.iconMd {
+  width: 26px;
+  height: 26px;
+}
+
+.iconLg {
+  width: 28px;
+  height: 28px;
+}

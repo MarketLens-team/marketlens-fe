@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { AiSummaryText } from '../common/AiSummaryText'
+import { PillButton } from '../ui/PillButton'
 import styles from './StockHeaderAiSummary.module.css'
 
 export interface StockHeaderAiSummaryProps {
@@ -36,14 +37,14 @@ export function StockHeaderAiSummary({ summary }: StockHeaderAiSummaryProps) {
         <AiSummaryText text={summary} />
       </p>
       {showToggle ? (
-        <button
-          type="button"
+        <PillButton
+          variant="ghost"
           className={styles.toggle}
           aria-expanded={expanded}
           onClick={() => setExpanded((prev) => !prev)}
         >
           {expanded ? '접기' : '더보기'}
-        </button>
+        </PillButton>
       ) : null}
     </div>
   )

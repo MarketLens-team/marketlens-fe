@@ -3,6 +3,12 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  border-radius: var(--radius-lg);
+}
+
+.loginPrompt {
+  flex: 1;
+  min-height: 0;
 }
 
 .tableWrap {
@@ -14,8 +20,7 @@
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+  composes: tableBase from '../common/interactiveTableRow.module.css';
   font-size: var(--font-size-base);
 }
 
@@ -31,26 +36,22 @@
 
 .table td {
   padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border-default);
   vertical-align: middle;
 }
 
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
 .rowClickable {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+  composes: rowRing from '../common/interactiveTableRow.module.css';
 }
 
-.rowClickable:hover {
-  background: var(--color-interactive-hover);
+.stockCell {
+  min-width: 0;
 }
 
-.rowClickable:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
+.stockLead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .stockName {

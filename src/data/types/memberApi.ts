@@ -12,4 +12,5 @@ export interface WatchlistResponse {
   stockName: string
   sectorName: string
   market: string
+  imageUrl?: string
 }

@@ -13,6 +13,7 @@ export interface PersonStatementResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   statementSummary: string
   sourceName: string
   publishedAt: string
@@ -27,21 +28,43 @@ export interface PersonTopResponse {
   personName: string
   personRole: string
   organizationName: string
+  imageUrl?: string
   mentionCount: number
 }
 
-/** OpenAPI `FrequentStockItem` */
+/** OpenAPI `FrequentStockItem` / `PersonFrequentStockResponse` */
 export interface FrequentStockItemResponse {
   stockCode?: string
   stockName?: string
   mentionCount?: number
 }
 
+/** `GET /api/v1/persons/{personId}/frequent-stocks` */
+export type PersonFrequentStockResponse = FrequentStockItemResponse
+
+/** `GET /api/v1/persons/{personId}/mention-count` */
+export interface PersonMentionCountResponse {
+  mentionCount: number
+}
+
 /** OpenAPI `PersonMentionCursorResponse` — `GET /api/v1/persons/mentions/cursor` */
 export interface PersonMentionCursorResponse {
   items: PersonStatementResponse[]
-  topPersons?: PersonTopResponse[]
-  frequentStocks?: FrequentStockItemResponse[]
   nextCursor?: string | null
   hasNext?: boolean
+}
+
+/** OpenAPI `PersonMentionAroundResponse` — `around` / `newer` / `older` 공통 */
+export interface PersonMentionAroundResponse {
+  items: PersonStatementResponse[]
+  newerCursor: string | null
+  hasNewer: boolean
+  olderCursor: string | null
+  hasOlder: boolean
+}
+
+/** OpenAPI `PersonSidebarResponse` — `GET /api/v1/persons/sidebar` */
+export interface PersonSidebarResponse {
+  topPersons: PersonTopResponse[]
+  frequentStocks: FrequentStockItemResponse[]
 }

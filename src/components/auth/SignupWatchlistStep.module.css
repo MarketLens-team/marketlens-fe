@@ -243,14 +243,17 @@
     color var(--duration-fast) ease;
 }
 
-.stockChip:not(.stockChipActive):hover {
-  border-color: var(--color-interactive-active);
-  background: var(--color-interactive-hover);
-  color: var(--color-interactive-active-text);
-}
+@media (hover: hover) and (pointer: fine) {
+  .stockChip:not(.stockChipActive):hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
 
-.stockChip:not(.stockChipActive):hover .chipMark {
-  color: var(--color-interactive-active-text);
+  .stockChip:not(.stockChipActive):hover .chipMark {
+    color: var(--color-text-muted);
+  }
 }
 
 .stockChipActive {

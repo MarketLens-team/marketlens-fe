@@ -3,4 +3,6 @@
   flex-direction: column;
   align-self: start;
   width: 100%;
+  min-height: 0;
+  border-radius: var(--radius-lg);
 }

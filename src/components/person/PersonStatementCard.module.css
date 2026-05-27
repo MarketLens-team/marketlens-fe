@@ -1,38 +1,47 @@
-.card {
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg-card);
-  padding: var(--space-6);
+/* —— 인물 트래커: 유튜브 댓글형 타임라인 —— */
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.profile {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
+.timelineLink {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  align-items: start;
   min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.timelineLink:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.bodyCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.rail {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .avatar {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 999px;
-  background: var(--color-bg-section);
-  border: 1px solid var(--color-border-default);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  position: relative;
+  z-index: 1;
 }
 
 .identity {
@@ -41,29 +50,78 @@
 
 .name {
   margin: 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   color: var(--color-text-primary);
+  transition: color var(--duration-fast) ease;
 }
 
 .role {
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-lg);
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
   color: var(--color-text-secondary);
 }
 
-.meta {
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
   margin: var(--space-1) 0 0;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.metaTime {
   color: var(--color-text-muted);
 }
 
-.sentScore {
-  flex-shrink: 0;
+.metaDot {
+  color: var(--color-text-muted);
+}
+
+.sentInline {
   font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
+}
+
+.statement {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.statementText {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-primary);
+  transition: color var(--duration-fast) ease;
+}
+
+.timelineLink:hover .name,
+.timelineLink:focus-visible .name,
+.timelineLink:hover .statementText,
+.timelineLink:focus-visible .statementText {
+  color: var(--color-primary);
+}
+
+.timelineLinkFocusedFromSearch .statementText {
+  color: var(--color-success);
+}
+
+.timelineLinkFocusedFromSearch:hover .name,
+.timelineLinkFocusedFromSearch:hover .statementText,
+.timelineLinkFocusedFromSearch:focus-visible .name,
+.timelineLinkFocusedFromSearch:focus-visible .statementText {
+  color: var(--color-success);
+}
+
+.detailFeedFocused .statementText {
+  color: var(--color-success);
 }
 
 .sentPos {
@@ -76,6 +134,70 @@
 
 .sentNeg {
   color: var(--color-danger);
+}
+
+/* —— 인물 상세: 프로필 고정 아래 발언 타임라인 —— */
+
+.detailFeed {
+  /* detailFeedCol --person-timeline-rail + 스텁 이후 본문 */
+  padding-left: calc(
+    var(--person-timeline-rail, 0px) + var(--timeline-stub, var(--space-4)) + var(--space-3)
+  );
+  min-width: 0;
+}
+
+/* -- 세로축에서 시간·감성 행(metaRow) 중앙으로 연결 */
+.detailFeed .metaRow {
+  position: relative;
+  z-index: 1;
+}
+
+.detailFeed .metaRow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: calc(var(--timeline-stub, var(--space-4)) + var(--space-3));
+  height: var(--timeline-line, 2px);
+  transform: translateY(-50%);
+  background: var(--timeline-line-color, var(--color-border-strong));
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+/* —— 인물 상세 피드(레거시 카드) —— */
+
+.card {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  padding: var(--space-6);
+}
+
+.cardFeed {
+  padding: var(--space-5);
+}
+
+.feedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.feedMeta {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.sentScore {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
 }
 
 .quote {

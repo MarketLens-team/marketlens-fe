@@ -18,9 +18,12 @@
   cursor: pointer;
 }
 
-.option:hover {
-  border-color: var(--color-interactive-active);
-  background: var(--color-interactive-hover);
+@media (hover: hover) and (pointer: fine) {
+  .option:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+  }
 }
 
 .option:has(.checkboxInput:checked) {

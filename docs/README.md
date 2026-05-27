@@ -20,6 +20,8 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
 대응 방식:
 - 큰 결정은 DDR로 기록
 - 일일·브랜치 변경은 Changelog로 기록 (`YYYY-MM.md` 인덱스 + `YYYY-MM-DD-feat-*.md` 상세)
+- **미해결 버그·조사**는 [issues/](./issues/) (fix 완료 후에만 `changelog`의 `fix` 파일)
+- **프롬프트 전략 실험**(질문 방식 → 조사·답변 차이)은 [prompt-experiments/](./prompt-experiments/) (issues와 분리)
 - 화면 근거는 Snapshots로 고정 경로 관리
 
 ## 문서 맵 (권장 유지)
@@ -37,8 +39,20 @@ MarketLens 프론트엔드는 Dev 실험 -> 실페이지 반영 흐름을 사용
   - 5월 인덱스 → 기능별 상세로 연결
 - [changelog/2026-05-15-feat-design-tokens.md](./changelog/2026-05-15-feat-design-tokens.md)  
   - `feat/design-tokens` 브랜치 작업 (토큰·Stylelint·CSS 마이그레이션)
+- [changelog/2026-05-21-feat-design-refresh-search-modal.md](./changelog/2026-05-21-feat-design-refresh-search-modal.md)  
+  - `feat/design-refresh` 통합 검색 모달 너비·모달 서피스 (5/15 문서와 분리)
+- [changelog/2026-05-23-feat-design-refresh-person-timeline.md](./changelog/2026-05-23-feat-design-refresh-person-timeline.md)  
+  - 인물 트래커/상세 타임라인 축·전역 스크롤·맨 위로 FAB (5/22 인물 3열 이후)
+- [design/ui-product-overview.md](./design/ui-product-overview.md)  
+  - 홈·종목·버즈·인물·마이 등 **현재 제품 UI 톤·화면 패턴** 개요 (스냅샷 권장 목록 포함)
+- [design/interactive-surfaces.md](./design/interactive-surfaces.md)  
+  - **호버·포커스·링 행·테이블 행** 인터랙션 패턴 (토큰 `src/styles/tokens.css` 와 대응)
 - [changelog/2026-04.md](./changelog/2026-04.md)  
   - 4월 변경 이력 ("무엇을 바꿨는지" 중심)
+- [issues/README.md](./issues/README.md)  
+  - **조사 중·미해결** 이슈 (제품·코드, fix는 changelog `fix`로만)
+- [prompt-experiments/README.md](./prompt-experiments/README.md)  
+  - **프롬프트 전략 실험** — 같은 버그에 다른 질문 방식을 썼을 때 탐색·답변 차이 (issues와 분리)
 - [snapshots/README.md](./snapshots/README.md)  
   - 스냅샷 파일 인덱스 + DDR/PR 연결 규칙
 

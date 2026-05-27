@@ -1,0 +1,34 @@
+.pageLayout {
+  --profile-nav-width: 13.75rem;
+  --profile-nav-gap: 0.25rem;
+
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+.nav {
+  position: fixed;
+  top: calc(var(--layout-top-strip-height) + var(--main-pad-block, var(--space-5)));
+  left: var(--layout-main-pad-inline);
+  width: var(--profile-nav-width);
+  z-index: var(--z-popover);
+}
+
+.content {
+  margin-left: var(--profile-nav-gap);
+  min-width: 48rem;
+  max-width: 48rem;
+}
+
+@media (max-width: 720px) {
+  .nav {
+    position: static;
+    width: 100%;
+  }
+
+  .content {
+    margin-left: 0;
+    max-width: 100%;
+  }
+}

@@ -56,7 +56,7 @@ export default function AdminStocksPage() {
                   {(data ?? []).map((row) => {
                     const active = row.deletedAt === null
                     return (
-                      <tr key={row.stockId}>
+                      <tr key={row.stockId} className={styles.rowInteractive}>
                         <td className={styles.mono}>{row.stockCode}</td>
                         <td>{row.stockName}</td>
                         <td className={styles.mono}>{row.market}</td>

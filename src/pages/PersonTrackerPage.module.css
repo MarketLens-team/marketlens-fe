@@ -1,135 +1,30 @@
 .page {
   max-width: var(--layout-page-max);
   margin: 0 auto;
-  padding-bottom: var(--space-6);
+  padding-bottom: var(--layout-back-to-top-reserve);
 }
 
-.mainGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
-  gap: var(--space-4);
-  align-items: stretch;
+.feedDimmed {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.feedCol {
-  min-width: 0;
-}
-
-.feedList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.feedScrollFoot {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  min-height: 3.5rem;
+  padding-top: var(--space-2);
 }
 
 .infiniteSentinel {
+  width: 100%;
   height: 1px;
-  margin-top: var(--space-4);
-}
-
-.asideCol {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
-  min-height: 0;
-  position: sticky;
-  top: var(--space-4);
-  max-height: calc(100vh - 4.5rem);
-}
-
-.rangeRow {
-  flex-shrink: 0;
-  margin-bottom: var(--space-3);
-}
-
-.segmented {
-  display: inline-flex;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-strong);
-  overflow: hidden;
-  background: var(--color-bg-section);
-}
-
-.segmentBtn {
-  margin: 0;
-  padding: 0.35rem 0.85rem;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
-}
-
-.segmentBtn:hover {
-  color: var(--color-text-primary);
-}
-
-.segmentBtnActive {
-  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-card));
-  color: var(--color-text-primary);
-}
-
-.asideScroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-right: 2px;
-}
-
-.asideFooter {
-  flex-shrink: 0;
-  padding-top: var(--space-3);
-  display: flex;
-  justify-content: center;
 }
 
 .empty {
-  margin: var(--space-4) 0 0;
+  margin: 0;
   text-align: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.skeletonCard {
-  height: 14rem;
-  border-radius: var(--radius-md);
-}
-
-.skeletonRange {
-  height: 2.25rem;
-  border-radius: var(--radius-full);
-  max-width: 11rem;
-}
-
-.skeletonAside {
-  height: 12rem;
-  border-radius: var(--radius-md);
-}
-
-@media (max-width: 900px) {
-  .mainGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .asideCol {
-    position: static;
-    max-height: none;
-    align-self: stretch;
-  }
-
-  .asideScroll {
-    overflow: visible;
-    min-height: 0;
-  }
 }

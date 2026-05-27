@@ -42,8 +42,7 @@
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
+  composes: tableBase from '../common/interactiveTableRow.module.css';
   font-size: var(--font-size-base);
 }
 
@@ -59,12 +58,12 @@
 
 .table td {
   padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border-default);
   vertical-align: middle;
 }
 
-.table tbody tr:last-child td {
-  border-bottom: none;
+.row {
+  composes: rowBase from '../common/interactiveTableRow.module.css';
+  cursor: default;
 }
 
 .colStock {
@@ -90,9 +89,9 @@
 
 .stockBtn {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
   padding: 0;
   border: none;
   background: none;
@@ -104,6 +103,14 @@
 
 .stockBtn:hover .stockName {
   text-decoration: underline;
+}
+
+.stockText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
 }
 
 .stockName {
@@ -167,17 +174,6 @@
   white-space: nowrap;
 }
 
-.bell {
-  display: inline-block;
-  margin-right: var(--space-2);
-  opacity: 0.35;
-  font-size: 1rem;
-}
-
-.bellActive {
-  opacity: 1;
-}
-
 .removeBtn {
   width: 1.75rem;
   height: 1.75rem;
@@ -206,4 +202,16 @@
   text-align: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

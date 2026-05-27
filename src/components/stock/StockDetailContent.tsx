@@ -1,38 +1,65 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
 import { BackToTopButton } from '../common/BackToTopButton'
+import { Breadcrumb } from '../common/Breadcrumb'
+import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
-import { fetchStockNewsFeedCursor } from '../../data/clients/stockClient'
+import { PillButton } from '../ui/PillButton'
+import {
+  fetchStockNewsFeedAround,
+  fetchStockNewsFeedCursor,
+  fetchStockNewsFeedNewer,
+  fetchStockNewsFeedOlder,
+} from '../../data/clients/stockClient'
+import { ANCHORED_FEED_PAGE_LIMIT } from '../../data/types/anchoredFeed'
+import type { NewsFeedAroundResponse } from '../../data/types/stockApi'
+import {
+  ANCHORED_INFINITE_SCROLL_COOLDOWN_MS,
+  ANCHORED_SCROLL_PREFETCH_EDGE_PX,
+  ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX,
+} from '../../data/types/anchoredFeed'
+import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
+import { useNewsBookmarks } from '../../hooks/useNewsBookmarks'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
   SentimentPolarity,
   StockDetail,
   StockNewsItem,
-  StockNewsPagination,
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
+import { StockDetailPeoplePanel } from './StockDetailPeoplePanel'
 import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
-import { formatPercent, formatPrice, formatStockScore } from './stockScore'
+import { buildStockListPath } from '../../lib/buildStockRoute'
+import { scrollStockNewsItemIntoView } from '../../lib/newsFeedFocus'
+import { formatPercent, formatPrice, formatStockScore, stockSentimentTone } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
 type NewsFilter = 'all' | 'positive' | 'negative'
 
+/** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
+const RELATED_STOCKS_DISPLAY_MAX = 3
+const NEWS_FOCUS_SCROLL_RETRIES = 10
+const NEWS_FOCUS_SCROLL_RETRY_MS = 80
+
 function scoreToneClass(score: number) {
-  if (score > 0) return styles.scoreUp
-  if (score < 0) return styles.scoreDown
-  return styles.scoreMuted
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.scoreUp
+  if (tone === 'negative') return styles.scoreDown
+  return styles.scoreNeutral
 }
 
 function pillClass(score: number) {
-  if (score > 0) return styles.pillPos
-  if (score < 0) return styles.pillNeg
-  return styles.pillNeu
+  const tone = stockSentimentTone(score)
+  if (tone === 'positive') return styles.pillPos
+  if (tone === 'negative') return styles.pillNeg
+  return styles.pillWarn
 }
 
 function barSegmentClass(polarity: SentimentPolarity) {
@@ -49,9 +76,17 @@ function filterNews(items: StockNewsItem[], filter: NewsFilter): StockNewsItem[]
 
 export interface StockDetailContentProps {
   data: StockDetail
+  /** 검색 등에서 진입 시 강조·(선택) 스크롤할 뉴스 id */
+  focusNewsId?: string | null
+  /** `false`면 제목 초록 강조만, 스크롤 없음 (전체 뉴스 → 종목) */
+  scrollToFocusNews?: boolean
 }
 
-export function StockDetailContent({ data }: StockDetailContentProps) {
+export function StockDetailContent({
+  data,
+  focusNewsId = null,
+  scrollToFocusNews = true,
+}: StockDetailContentProps) {
   const {
     stock,
     watchlistInterested,
@@ -63,23 +98,166 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     peopleTimeline,
   } = data
   const [newsFilter, setNewsFilter] = useState<NewsFilter>('all')
-  const [newsItems, setNewsItems] = useState(recentNews)
-  const [pagination, setPagination] = useState<StockNewsPagination>(newsPagination)
   const [loadingMoreNews, setLoadingMoreNews] = useState(false)
   const [loadingNewsFilter, setLoadingNewsFilter] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [interested, setInterested] = useState(watchlistInterested)
   const [watchlistPending, setWatchlistPending] = useState(false)
   const skipNewsFilterFetchRef = useRef(true)
+  const didScrollToNewsFocusRef = useRef<string | null>(null)
+  const [suppressAnchored, setSuppressAnchored] = useState(false)
+  const [latestNewsOverride, setLatestNewsOverride] = useState<{
+    items: StockNewsItem[]
+    pagination: { nextCursor: string | null; hasNext: boolean }
+  } | null>(null)
+  const [resettingToLatest, setResettingToLatest] = useState(false)
+  const [skipFocusScroll, setSkipFocusScroll] = useState(false)
+  const {
+    isBookmarked,
+    isBookmarkPending,
+    toggleBookmark,
+    loadError: bookmarkLoadError,
+  } = useNewsBookmarks()
   const useApiNewsFilter = !isMockDataSource()
+  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
+  const useAnchoredAround = Boolean(focusNewsId) && !suppressAnchored
+  const initialNewsItems = latestNewsOverride?.items ?? recentNews
+  const initialNewsPagination = latestNewsOverride?.pagination ?? newsPagination
+
+  const mapStockNewsAroundPage = useCallback(
+    (page: NewsFeedAroundResponse) => ({
+      items: mapNewsFeedItems(page.items, [stock.name, stock.code]),
+      pagination: {
+        newerCursor: page.newerCursor,
+        hasNewer: page.hasNewer,
+        olderCursor: page.olderCursor,
+        hasOlder: page.hasOlder,
+      },
+    }),
+    [stock.code, stock.name],
+  )
+
+  const fetchNewsAround = useCallback(
+    async (newsId: string) => {
+      const page = await fetchStockNewsFeedAround(stock.code, newsId, {
+        limit: ANCHORED_FEED_PAGE_LIMIT,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const fetchNewsNewer = useCallback(
+    async (cursor: string) => {
+      const page = await fetchStockNewsFeedNewer(stock.code, {
+        limit: ANCHORED_FEED_PAGE_LIMIT,
+        cursor,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const fetchNewsOlder = useCallback(
+    async (cursor: string) => {
+      const page = await fetchStockNewsFeedOlder(stock.code, {
+        limit: ANCHORED_FEED_PAGE_LIMIT,
+        cursor,
+        sentiment: newsSentimentParam,
+      })
+      return mapStockNewsAroundPage(page)
+    },
+    [stock.code, newsSentimentParam, mapStockNewsAroundPage],
+  )
+
+  const {
+    items: newsItems,
+    feedMode,
+    latestPagination: pagination,
+    loadingAround: loadingAnchoredNews,
+    loadingNewer: loadingNewerNews,
+    loadingOlder: loadingOlderNews,
+    anchoredLoadingUi,
+    aroundError: anchoredNewsError,
+    anchoredWarmComplete,
+    hasMoreDown,
+    hasMoreUp,
+    loadNewer: loadNewerNews,
+    loadOlder: loadOlderNews,
+    replaceLatestItems,
+    appendLatestItems,
+    cancelAroundLoad,
+  } = useAnchoredFeed<StockNewsItem>({
+    scopeKey: stock.code,
+    anchorId: useAnchoredAround ? focusNewsId : null,
+    initialItems: initialNewsItems,
+    initialLatestPagination: initialNewsPagination,
+    anchoredEnabled: useAnchoredAround,
+    fetchAround: fetchNewsAround,
+    fetchNewer: fetchNewsNewer,
+    fetchOlder: fetchNewsOlder,
+  })
+
+  const focusNewsFeedReady =
+    anchoredWarmComplete && !loadingAnchoredNews && !resettingToLatest
+
+  useEffect(() => {
+    setSuppressAnchored(false)
+    setLatestNewsOverride(null)
+    setSkipFocusScroll(false)
+  }, [focusNewsId, stock.code])
 
   useEffect(() => {
     setNewsFilter('all')
-    setNewsItems(recentNews)
-    setPagination(newsPagination)
+    if (!focusNewsId) {
+      replaceLatestItems(recentNews, newsPagination)
+    }
     setLoadMoreError(null)
     skipNewsFilterFetchRef.current = true
-  }, [stock.code, recentNews, newsPagination])
+  }, [stock.code, recentNews, newsPagination, focusNewsId, replaceLatestItems])
+
+  const resetToLatestNewsFeed = useCallback(async () => {
+    if (!focusNewsId) return
+
+    cancelAroundLoad()
+    setResettingToLatest(true)
+    setLoadMoreError(null)
+    try {
+      const page = await fetchStockNewsFeedCursor(stock.code, {
+        limit: 20,
+        sentiment: newsSentimentParam,
+      })
+      const items = mapNewsFeedItems(page.items, [stock.name, stock.code])
+      const pagination = {
+        nextCursor: page.nextCursor ?? null,
+        hasNext: page.hasNext ?? false,
+      }
+      setLatestNewsOverride({ items, pagination })
+      replaceLatestItems(items, pagination)
+      setSuppressAnchored(true)
+      skipNewsFilterFetchRef.current = true
+    } catch (e) {
+      setLoadMoreError(e instanceof Error ? e.message : '뉴스 목록을 새로고침하지 못했습니다.')
+    } finally {
+      setResettingToLatest(false)
+    }
+  }, [
+    focusNewsId,
+    cancelAroundLoad,
+    stock.code,
+    stock.name,
+    newsSentimentParam,
+    replaceLatestItems,
+  ])
+
+  const handleBackToTop = useCallback(() => {
+    if (focusNewsId) {
+      setSkipFocusScroll(true)
+      void resetToLatestNewsFeed()
+    }
+  }, [focusNewsId, resetToLatestNewsFeed])
 
   useEffect(() => {
     setInterested(watchlistInterested)
@@ -99,11 +277,10 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       try {
         const page = await fetchStockNewsFeedCursor(stock.code, {
           limit: 20,
-          sentiment: newsFilter === 'all' ? undefined : newsFilter,
+          sentiment: newsSentimentParam,
         })
         if (cancelled) return
-        setNewsItems(mapNewsFeedItems(page.items, [stock.name, stock.code]))
-        setPagination({
+        replaceLatestItems(mapNewsFeedItems(page.items, [stock.name, stock.code]), {
           nextCursor: page.nextCursor,
           hasNext: page.hasNext,
         })
@@ -120,16 +297,32 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     return () => {
       cancelled = true
     }
-  }, [newsFilter, stock.code, stock.name, useApiNewsFilter])
+  }, [newsFilter, newsSentimentParam, stock.code, stock.name, useApiNewsFilter, replaceLatestItems])
 
   const displayNews = useMemo(
     () => (useApiNewsFilter ? newsItems : filterNews(newsItems, newsFilter)),
     [newsItems, newsFilter, useApiNewsFilter],
   )
 
-  const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
+  useEffect(() => {
+    if (!focusNewsId) return
+    setNewsFilter('all')
+    skipNewsFilterFetchRef.current = true
+    didScrollToNewsFocusRef.current = null
+  }, [focusNewsId, stock.code])
 
   const loadMoreNews = useCallback(async () => {
+    if (feedMode === 'anchored') {
+      if (loadingOlderNews) return
+      setLoadMoreError(null)
+      try {
+        await loadOlderNews()
+      } catch (e) {
+        setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+      }
+      return
+    }
+
     if (!pagination.hasNext || !pagination.nextCursor || loadingMoreNews) return
     setLoadingMoreNews(true)
     setLoadMoreError(null)
@@ -139,13 +332,7 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         cursor: pagination.nextCursor,
         sentiment: newsSentimentParam,
       })
-      const mapped = mapNewsFeedItems(page.items, [stock.name, stock.code])
-      setNewsItems((prev) => {
-        const seen = new Set(prev.map((item) => item.id))
-        const next = mapped.filter((item) => !seen.has(item.id))
-        return [...prev, ...next]
-      })
-      setPagination({
+      appendLatestItems(mapNewsFeedItems(page.items, [stock.name, stock.code]), {
         nextCursor: page.nextCursor,
         hasNext: page.hasNext,
       })
@@ -155,12 +342,59 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
       setLoadingMoreNews(false)
     }
   }, [
+    feedMode,
+    loadingOlderNews,
+    loadOlderNews,
     loadingMoreNews,
     pagination.hasNext,
     pagination.nextCursor,
     newsSentimentParam,
     stock.code,
     stock.name,
+    appendLatestItems,
+  ])
+
+  useEffect(() => {
+    if (skipFocusScroll) return
+    if (!focusNewsId || loadingNewsFilter || !focusNewsFeedReady || !scrollToFocusNews) return
+    if (didScrollToNewsFocusRef.current === focusNewsId) return
+
+    const hasTarget = displayNews.some(
+      (item) => focusNewsId != null && String(item.id) === String(focusNewsId),
+    )
+    if (!hasTarget) return
+
+    let cancelled = false
+    let timeoutId: number | undefined
+    let rafId = 0
+
+    const attemptScroll = (triesLeft: number) => {
+      if (cancelled) return
+      if (scrollStockNewsItemIntoView(focusNewsId)) {
+        didScrollToNewsFocusRef.current = focusNewsId
+        return
+      }
+      if (triesLeft > 0) {
+        timeoutId = window.setTimeout(() => attemptScroll(triesLeft - 1), NEWS_FOCUS_SCROLL_RETRY_MS)
+      }
+    }
+
+    rafId = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => attemptScroll(NEWS_FOCUS_SCROLL_RETRIES))
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(rafId)
+      if (timeoutId != null) window.clearTimeout(timeoutId)
+    }
+  }, [
+    focusNewsId,
+    displayNews,
+    loadingNewsFilter,
+    focusNewsFeedReady,
+    scrollToFocusNews,
+    skipFocusScroll,
   ])
 
   const toggleWatchlist = useCallback(async () => {
@@ -185,10 +419,37 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
     }
   }, [interested, stock.code, watchlistPending])
 
+  const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
+  const showNewerLoader =
+    feedMode === 'anchored' && (loadingNewerNews || anchoredLoadingUi === 'newer')
+  const showOlderLoader =
+    feedMode === 'anchored' && (loadingMoreDown || anchoredLoadingUi === 'older')
+
+  const newsTopSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
+
+  const newsTopSentinelRef = useInfiniteScroll({
+    enabled: feedMode === 'anchored' && displayNews.length > 0 && focusNewsFeedReady,
+    hasMore: hasMoreUp,
+    loading: loadingNewerNews,
+    direction: 'up',
+    rootMargin: newsTopSentinelMargin,
+    requireUserScrollUp: true,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
+    onLoadMore: () => {
+      setLoadMoreError(null)
+      void loadNewerNews().catch((e) => {
+        setLoadMoreError(e instanceof Error ? e.message : '뉴스를 더 불러오지 못했습니다.')
+      })
+    },
+  })
+
   const newsSentinelRef = useInfiniteScroll({
-    enabled: displayNews.length > 0,
-    hasMore: pagination.hasNext,
-    loading: loadingMoreNews,
+    enabled: displayNews.length > 0 && focusNewsFeedReady,
+    hasMore: hasMoreDown,
+    loading: loadingMoreDown,
+    rootMargin: feedMode === 'anchored' ? `0px 0px ${ANCHORED_SCROLL_PREFETCH_EDGE_PX}px 0px` : undefined,
+    loadCooldownMs: feedMode === 'anchored' ? ANCHORED_INFINITE_SCROLL_COOLDOWN_MS : undefined,
+    disablePostLoadRetry: feedMode === 'anchored',
     onLoadMore: () => void loadMoreNews(),
   })
 
@@ -196,18 +457,33 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
 
   return (
     <div className={styles.page}>
+      <Breadcrumb
+        items={[
+          { label: '전체 종목', to: buildStockListPath() },
+          { label: stock.name, current: true },
+        ]}
+      />
       <header className={styles.header}>
         <div className={styles.headerTop}>
-          <h1 className={styles.stockTitle}>{stock.name}</h1>
-          <button
-            type="button"
-            className={styles.watchlistBtn}
+          <div className={styles.headerTitleRow}>
+            <EntityAvatar
+              variant="stock"
+              size="xl"
+              name={stock.name}
+              imageUrl={stock.imageUrl}
+            />
+            <h1 className={styles.stockTitle}>{stock.name}</h1>
+          </div>
+          <PillButton
+            variant={interested ? 'secondary' : 'primary'}
+            active={interested}
+            disableHover
             onClick={() => void toggleWatchlist()}
             disabled={watchlistPending}
             aria-pressed={interested}
           >
-            {interested ? '★ 관심종목' : '☆ 관심종목 추가'}
-          </button>
+            {interested ? '★ 관심종목' : '관심종목 추가'}
+          </PillButton>
         </div>
         <div className={styles.headerBody}>
           <div className={styles.headerLeft}>
@@ -260,73 +536,11 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
         </div>
       </header>
 
-      <div className={styles.middleGrid}>
-        <section className={styles.panel} aria-labelledby="stock-trend-title">
-          <div className={styles.panelBody}>
-            <h2 id="stock-trend-title" className={styles.panelTitle}>
-              30일 감성 추이
-            </h2>
-            <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
-            <StockSentimentTrendChart trend={sentimentContext.trend} currentScore={sentimentContext.current} />
-          </div>
-        </section>
-
-        <aside className={styles.middleAside}>
-          <section
-            className={clsx(styles.panel, styles.panelBreakdown)}
-            aria-labelledby="stock-breakdown-title"
-          >
-            <div className={styles.panelBody}>
-              <h2 id="stock-breakdown-title" className={styles.panelTitle}>
-                감성 분류 분포 · 오늘
-              </h2>
-              <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
-                {sentimentBreakdown.rows.map((row) => (
-                  <span
-                    key={row.polarity}
-                    className={barSegmentClass(row.polarity)}
-                    style={{ width: `${row.percent}%` }}
-                  />
-                ))}
-              </div>
-              <BreakdownList rows={sentimentBreakdown.rows} />
-            </div>
-          </section>
-
-          <section className={styles.panel} aria-labelledby="stock-context-title">
-            <div className={styles.panelBody}>
-              <h2 id="stock-context-title" className={styles.panelTitle}>
-                30일 평균 대비 현재 위치
-              </h2>
-              <p className={styles.panelSub}>최근 한 달 감성점수 맥락</p>
-              <div className={styles.contextStats}>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>현재</span>
-                  <span
-                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.current))}
-                  >
-                    {formatStockScore(sentimentContext.current)}
-                  </span>
-                </div>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>30일 평균</span>
-                  <span className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.avg30d))}>
-                    {formatStockScore(sentimentContext.avg30d)}
-                  </span>
-                </div>
-                <div className={styles.contextStat}>
-                  <span className={styles.contextStatLabel}>30일 최고</span>
-                  <span
-                    className={clsx(styles.contextStatValue, scoreToneClass(sentimentContext.high30d))}
-                  >
-                    {formatStockScore(sentimentContext.high30d)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        </aside>
-      </div>
+      <StockDetailMiddleGrid
+        sentimentContext={sentimentContext}
+        sentimentBreakdown={sentimentBreakdown}
+        relatedStocks={relatedStocks}
+      />
 
       <div className={styles.bottomGrid}>
         <section className={styles.panel} aria-labelledby="stock-news-title">
@@ -342,109 +556,249 @@ export function StockDetailContent({ data }: StockDetailContentProps) {
                   ['negative', '부정'],
                 ] as const
               ).map(([key, label]) => (
-                <button
+                <PillButton
                   key={key}
-                  type="button"
-                  className={clsx(styles.filterBtn, newsFilter === key && styles.filterBtnActive)}
+                  variant="secondary"
+                  compact
+                  active={newsFilter === key}
                   aria-pressed={newsFilter === key}
                   onClick={() => setNewsFilter(key)}
                 >
                   {label}
-                </button>
+                </PillButton>
               ))}
             </div>
           </div>
-          {loadingNewsFilter ? (
+          {loadingNewsFilter || (loadingAnchoredNews && focusNewsId && displayNews.length === 0) ? (
             <div className={styles.newsFilterLoading} aria-busy="true">
               <FeedLoadingSpinner />
             </div>
           ) : null}
-          {!loadingNewsFilter && displayNews.length === 0 ? (
-            <p className={styles.emptyNews}>해당 필터에 맞는 뉴스가 없습니다.</p>
+          {bookmarkLoadError ? (
+            <p className={styles.newsBookmarkError} role="status">
+              {bookmarkLoadError}
+            </p>
+          ) : null}
+          {!loadingNewsFilter && displayNews.length === 0 && !loadingAnchoredNews ? (
+            <EmptyState
+              className={styles.emptyNews}
+              title="뉴스가 없어요"
+              message="선택한 감성 필터에 맞는 기사가 없습니다."
+              hint="전체 탭에서 다시 확인해 보세요."
+            />
           ) : null}
           {!loadingNewsFilter && displayNews.length > 0 ? (
-            <ul className={styles.newsList}>
+            <div
+              className={clsx(
+                styles.newsFeedWrap,
+                loadingAnchoredNews && focusNewsId && styles.newsListAnchoring,
+              )}
+            >
+              {showNewerLoader ? (
+                <div className={styles.newsNewerOverlay} aria-busy="true" aria-live="polite">
+                  <FeedLoadingSpinner label="이전 뉴스 불러오는 중" />
+                </div>
+              ) : null}
+              <ul
+                className={styles.newsList}
+                data-anchored-feed-list={feedMode === 'anchored' ? true : undefined}
+              >
+                {feedMode === 'anchored' && hasMoreUp ? (
+                  <li className={styles.newsScrollHead} aria-hidden>
+                    <div ref={newsTopSentinelRef} className={styles.newsSentinel} aria-hidden />
+                  </li>
+                ) : null}
               {displayNews.map((item) => (
-                <StockNewsListItem key={item.id} item={item} />
+                <StockNewsListItem
+                  key={item.id}
+                  item={item}
+                  highlighted={
+                    focusNewsId != null && String(focusNewsId) === String(item.id)
+                  }
+                  showBookmark
+                  bookmarked={isBookmarked(item.id)}
+                  bookmarkPending={isBookmarkPending(item.id)}
+                  onBookmarkToggle={() =>
+                    void toggleBookmark(item.id, { type: 'STOCK', stockCode: stock.code })
+                  }
+                />
               ))}
-            </ul>
-          ) : null}
-          {pagination.hasNext && !loadingNewsFilter ? (
-            <div className={styles.newsScrollFoot}>
-              <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
-              {loadingMoreNews ? <FeedLoadingSpinner /> : null}
+              </ul>
             </div>
           ) : null}
-          {loadMoreError ? (
+          {(hasMoreDown || showOlderLoader) && !loadingNewsFilter ? (
+            <div
+              className={styles.newsScrollFoot}
+              role={showOlderLoader ? 'status' : undefined}
+              aria-live={showOlderLoader ? 'polite' : undefined}
+              aria-busy={showOlderLoader || loadingMoreDown || undefined}
+            >
+              <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
+              <div
+                className={styles.newsLoadMoreSlot}
+                aria-hidden={!(showOlderLoader || loadingMoreDown)}
+              >
+                {showOlderLoader || loadingMoreDown ? (
+                  <FeedLoadingSpinner label="뉴스 더 불러오는 중" />
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+          {loadMoreError || anchoredNewsError ? (
             <p className={styles.loadMoreError} role="alert">
-              {loadMoreError}
+              {loadMoreError ?? anchoredNewsError}
             </p>
           ) : null}
         </section>
 
-        <div className={styles.rightStack}>
-          <section className={styles.panel} aria-labelledby="stock-related-title">
-            <div className={styles.panelBody}>
-              <h2 id="stock-related-title" className={styles.panelTitle}>
-                연관 종목
-              </h2>
-              <ul className={styles.simpleList}>
-                {relatedStocks.map((related) => (
-                  <li key={related.code} className={styles.simpleListItem}>
-                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
-                      <span className={styles.stockLinkName}>{related.name}</span>
-                      <span
-                        className={clsx(
-                          styles.stockLinkScore,
-                          styles.mono,
-                          scoreToneClass(related.sentimentScore),
-                        )}
-                      >
-                        {formatStockScore(related.sentimentScore)}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          <section className={styles.panel} aria-labelledby="stock-people-title">
-            <div className={styles.panelBody}>
-              <h2 id="stock-people-title" className={styles.panelTitle}>
-                인물 발언 타임라인
-              </h2>
-              <ul className={styles.simpleList}>
-                {peopleTimeline.length === 0 ? (
-                  <li className={styles.simpleListItem}>
-                    <p className={styles.emptyPeople}>연관된 인물 발언이 없습니다.</p>
-                  </li>
-                ) : (
-                  peopleTimeline.map((person) => (
-                    <li key={person.id} className={styles.simpleListItem}>
-                      <div className={styles.personRow}>
-                        <span className={styles.personTime}>{person.relativeLabel}</span>
-                        <div className={styles.personInfo}>
-                          <p className={styles.personName}>{person.personName}</p>
-                          <p className={styles.personRole}>{person.role}</p>
-                        </div>
-                        <span className={clsx(styles.scorePill, pillClass(person.sentimentScore))}>
-                          {formatStockScore(person.sentimentScore)}
-                        </span>
-                      </div>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          </section>
-        </div>
+        <StockDetailPeoplePanel peopleTimeline={peopleTimeline} pillClass={pillClass} />
       </div>
 
-      <BackToTopButton placement="fixed" tooltipSide="left" />
+      <BackToTopButton
+        placement="fixed"
+        tooltipSide="left"
+        stockDetailMarker
+        onBackToTop={handleBackToTop}
+      />
     </div>
   )
 }
+
+interface StockDetailMiddleGridProps {
+  sentimentContext: StockDetail['sentimentContext']
+  sentimentBreakdown: StockDetail['sentimentBreakdown']
+  relatedStocks: StockDetail['relatedStocks']
+}
+
+const StockDetailMiddleGrid = memo(function StockDetailMiddleGrid({
+  sentimentContext,
+  sentimentBreakdown,
+  relatedStocks,
+}: StockDetailMiddleGridProps) {
+  return (
+    <div className={styles.middleGrid}>
+      <section className={styles.panel} aria-labelledby="stock-trend-title">
+        <div className={styles.panelBody}>
+          <div className={styles.trendPanelHead}>
+            <div className={styles.trendPanelHeadMain}>
+              <h2 id="stock-trend-title" className={styles.panelTitle}>
+                30일 감성 추이
+              </h2>
+              <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
+            </div>
+            <div className={styles.trendContextStats} aria-label="30일 감성 맥락">
+              <div className={styles.trendContextStat}>
+                <span className={styles.trendContextStatLabel}>30일 평균</span>
+                <span
+                  className={clsx(
+                    styles.trendContextStatValue,
+                    scoreToneClass(sentimentContext.avg30d),
+                  )}
+                >
+                  {formatStockScore(sentimentContext.avg30d)}
+                </span>
+              </div>
+              <div className={styles.trendContextStat}>
+                <span className={styles.trendContextStatLabel}>30일 최고</span>
+                <span
+                  className={clsx(
+                    styles.trendContextStatValue,
+                    scoreToneClass(sentimentContext.high30d),
+                  )}
+                >
+                  {formatStockScore(sentimentContext.high30d)}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.trendChartWrap}>
+            <StockSentimentTrendChart
+              trend={sentimentContext.trend}
+              currentScore={sentimentContext.current}
+            />
+          </div>
+        </div>
+      </section>
+
+      <aside className={styles.middleAside}>
+        <section
+          className={clsx(styles.panel, styles.panelBreakdown)}
+          aria-labelledby="stock-breakdown-title"
+        >
+          <div className={styles.panelBody}>
+            <h2 id="stock-breakdown-title" className={styles.panelTitle}>
+              감성 분류 분포 · 오늘
+            </h2>
+            <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
+              {sentimentBreakdown.rows.map((row) => (
+                <span
+                  key={row.polarity}
+                  className={barSegmentClass(row.polarity)}
+                  style={{ width: `${row.percent}%` }}
+                />
+              ))}
+            </div>
+            <BreakdownList rows={sentimentBreakdown.rows} />
+          </div>
+        </section>
+
+        <section
+          className={clsx(styles.panel, styles.relatedPanel)}
+          aria-labelledby="stock-related-title"
+        >
+          <div className={styles.panelBody}>
+            <h2 id="stock-related-title" className={styles.panelTitle}>
+              연관 종목
+            </h2>
+            <ul className={styles.simpleList}>
+              {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => {
+                const relatedPriceUp = (related.price?.changePercent ?? 0) >= 0
+                return (
+                  <li key={related.code} className={styles.simpleListItem}>
+                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={related.name}
+                        imageUrl={related.imageUrl}
+                      />
+                      <span className={styles.stockLinkName}>{related.name}</span>
+                      <span className={styles.stockLinkTrailing}>
+                        {related.price && related.price.current > 0 ? (
+                          <span className={styles.stockLinkPrice}>
+                            {formatPrice(related.price.current)}
+                          </span>
+                        ) : null}
+                        {related.price && related.price.current > 0 ? (
+                          <span
+                            className={clsx(
+                              styles.stockLinkChange,
+                              relatedPriceUp ? styles.priceUp : styles.priceDown,
+                            )}
+                          >
+                            {formatPercent(related.price.changePercent)}
+                          </span>
+                        ) : null}
+                        <span
+                          className={clsx(
+                            styles.stockLinkScore,
+                            scoreToneClass(related.sentimentScore),
+                          )}
+                        >
+                          {formatStockScore(related.sentimentScore)}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </section>
+      </aside>
+    </div>
+  )
+})
 
 function breakdownBadgeClass(polarity: SentimentPolarity) {
   if (polarity === 'positive') return styles.breakdownBadgePos

@@ -6,65 +6,28 @@
   box-sizing: border-box;
 }
 
-/* 종목 상세 우측 컬럼 하단 (좌측 nav + main 패딩 + bottomGrid 기준) */
+/* 종목 상세 — 뉴스·인물 FAB 레일과 동일한 page-max 우측 정렬 */
 .wrapFixed {
-  --page-w: min(
-    var(--layout-page-max),
-    100vw - var(--layout-sidebar-width) - 2 * var(--main-pad-inline, var(--space-6))
-  );
-  --main-inner: calc(
-    100vw - var(--layout-sidebar-width) - 2 * var(--main-pad-inline, var(--space-6))
-  );
+  --main-inner: calc(100vw - 2 * var(--main-pad-inline, var(--layout-main-pad-inline)));
+  --page-w: min(var(--layout-page-wide-cap, 120rem), var(--main-inner));
   position: fixed;
-  bottom: var(--space-6);
-  z-index: var(--z-popover);
+  bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-dropdown);
   left: calc(
-    var(--layout-sidebar-width) + var(--main-pad-inline, var(--space-6)) +
-      max(0px, (var(--main-inner) - var(--page-w)) / 2) + var(--page-w) - 8.25rem +
-      var(--back-to-top-offset-x, 0px)
+    var(--main-pad-inline, var(--layout-main-pad-inline)) + var(--page-w) -
+      calc(var(--layout-back-to-top-reserve) / 2) + var(--back-to-top-offset-x, 0px)
   );
   transform: translateX(-50%);
   pointer-events: none;
 }
 
-.wrapFixed .btn {
+.wrapFixed .btnWrap {
   pointer-events: auto;
 }
 
-.btn {
+.btnWrap {
   position: relative;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  margin: 0;
-  border: 1px solid color-mix(in srgb, var(--color-border-strong) 85%, transparent);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-elevated) 92%, var(--color-bg-card));
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition:
-    background-color var(--duration-fast) ease,
-    color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
-}
-
-.btn:hover {
-  background: var(--color-bg-elevated);
-  color: var(--color-text-primary);
-  border-color: var(--color-border-default);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.icon {
-  display: block;
   flex-shrink: 0;
 }
 
@@ -99,8 +62,8 @@
   transform: translateY(-50%) rotate(45deg);
 }
 
-.btn:hover .tooltip,
-.btn:focus-visible .tooltip {
+.btnWrap:hover .tooltip,
+.btnWrap:focus-within .tooltip {
   opacity: 1;
 }
 
@@ -120,10 +83,7 @@
 
 @media (max-width: 960px) {
   .wrapFixed {
-    left: calc(
-      var(--layout-sidebar-width) + (100vw - var(--layout-sidebar-width)) / 2 +
-        var(--back-to-top-offset-x, 0px)
-    );
+    left: calc(50vw + var(--back-to-top-offset-x, 0px));
     transform: translateX(-50%);
   }
 }

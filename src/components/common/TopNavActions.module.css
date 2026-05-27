@@ -7,26 +7,65 @@
 .searchTrigger {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-3);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
-  background: var(--color-bg-app);
+  background: var(--color-bg-modal-inset);
   padding: 0 var(--space-3);
-  min-width: 180px;
+  min-width: 280px;
   cursor: pointer;
 }
 
-.searchIcon {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+.searchTrigger:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .searchPlaceholder {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   padding: var(--space-2) 0;
-  width: 100%;
   text-align: left;
+}
+
+.searchShortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+.loginTrigger {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-sans);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.loginTrigger:hover {
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
 }
 
 @media (max-width: 920px) {

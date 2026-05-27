@@ -1,15 +1,40 @@
 import type { AlertSettings } from './member'
+import type { NewsBookmarkContextType } from './bookmark'
+import type { SentimentPolarity } from './stock'
 
 export const MY_PAGE_WATCHLIST_MAX = 10
+
+export interface MyPageBookmarkStockSummary {
+  stockCode: string
+  stockName: string
+  bookmarkCount: number
+}
+
+export type MyPageBookmarkView = 'date' | 'stock'
+
+export interface MyPageBookmarkItem {
+  id: string
+  title: string
+  url?: string
+  source: string
+  publishedAt: string
+  bookmarkedAt: string
+  imageUrl?: string | null
+  sentimentScore: number
+  sentiment: SentimentPolarity
+  contextType: NewsBookmarkContextType
+  contextStockCode?: string | null
+  contextStockName?: string | null
+}
 
 export interface MyPageWatchlistRow {
   code: string
   name: string
+  imageUrl?: string | null
   price: number
   changePercent: number
   sentimentScore: number
   mentionSurgePercent: number
-  hasAlert: boolean
 }
 
 export interface MyPageSummary {

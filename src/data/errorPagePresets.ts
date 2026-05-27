@@ -1,3 +1,4 @@
+import { sanitizeClientErrorMessage } from '../lib/sanitizeClientErrorMessage'
 import { ERROR_CODE_MESSAGES } from './constants/errorCodes'
 
 export type ErrorPageVariant = '404' | '401' | '403' | '500' | 'network' | 'unknown'
@@ -39,7 +40,7 @@ export const ERROR_PAGE_PRESETS: Record<ErrorPageVariant, ErrorPagePreset> = {
     hint: '로그인 페이지로 이동하시겠어요?',
     errorCode: 'C004',
     primaryCta: 'login',
-    loginHref: '/login',
+    loginHref: '/',
   },
   '403': {
     variant: '403',
@@ -93,7 +94,7 @@ export function appErrorPresetFromMessage(
   return {
     ...base,
     title: options?.title ?? base.title,
-    message,
+    message: sanitizeClientErrorMessage(message),
     ...(options?.omitHint ? { hint: undefined } : options?.hint !== undefined ? { hint: options.hint } : {}),
   }
 }

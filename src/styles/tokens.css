@@ -3,19 +3,27 @@
 
 :root {
   /* Color (semantic) */
+  /* 배경: 레퍼런스처럼 바탕과 거의 같고 한 단계만 밝게 (Coinness/거래소 톤) */
   --color-bg-app: #0a0f16;
-  --color-bg-section: #0e1723;
-  --color-bg-card: #1a2332;
-  --color-bg-elevated: #243040;
+  --color-bg-section: #0c121a;
+  /*
+   * 모달: 셸(회색 트레이) + inset(안쪽 필드·입력) — 페이지 카드(#0f151e)와 별도.
+   */
+  --color-bg-modal: #212630;
+  --color-bg-modal-inset: #282e3a;
+  --color-bg-card: #0f151e;
+  --color-bg-elevated: #141c27;
 
-  --color-border-default: #2a3847;
-  --color-border-strong: #344757;
+  --color-border-default: #1c2734;
+  --color-border-strong: #263445;
 
   --color-text-primary: #ffffff;
-  --color-text-secondary: #b8c2cc;
-  --color-text-muted: #7c93a6;
+  --color-text-secondary: #d0d8e2;
+  --color-text-muted: #8fa3b6;
 
   --color-primary: #3b82f6;
+  /* 어두운 배경 위 텍스트·아이콘 — solid primary(토글 ON)과 체감 맞춤 */
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 84%, #ffffff);
   --color-success: #02c076;
   --color-danger: #f6465d;
   --color-danger-muted: color-mix(in srgb, var(--color-danger) 82%, #0a0f16);
@@ -65,10 +73,43 @@
   --radius-full: 9999px;
 
   /* Layout (shared shell / modal widths) */
-  --layout-page-max: 83rem; /* 1328px */
+  /* 본문 좌우 여백 — 작은 화면 24px, 넓을수록 최대 48px */
+  --layout-main-pad-inline: clamp(var(--space-6), 2.5vw, var(--space-12));
+  /* 본문: .main 안에서는 100%로 채움. 초광폭만 --layout-page-wide-cap 으로 상한 */
+  --layout-page-wide-cap: 120rem;
+  --layout-page-max: min(var(--layout-page-wide-cap), 100%);
+  /* 긴 본문·뉴스 피드 — 초광폭에서 시선 이동 거리 제한 (~50rem ≈ 800px) */
+  --layout-page-read-max: 50rem;
   --layout-sidebar-width: 196px; /* Layout .sidebar */
-  --layout-modal-search: 45rem; /* 720px */
+  --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
+  --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
+  /* 검색 모달: 상단 41px · 하단 82px */
+  --layout-search-modal-top: 2.5625rem; /* 41px */
+  --layout-search-modal-bottom: var(--layout-top-strip-height); /* 82px */
   --layout-sidebar-accordion: 16.25rem; /* 260px */
+  /* 종목 상세 fixed 맨 위로 — BackToTopButton.module.css 와 동일 */
+  --layout-back-to-top-size: 2.75rem;
+  --layout-back-to-top-bottom: var(--space-6);
+  --layout-back-to-top-reserve: calc(
+    var(--layout-back-to-top-size) + var(--layout-back-to-top-bottom) + var(--space-2)
+  );
+  /* 종목 상세 — 최신 인물 발언 타임라인 카드 높이 */
+  --layout-stock-people-panel-height: 32rem;
+
+  /* FAB 맨 위로 — CMC 톤(다크 UI: 밝은 회색 면) */
+  --color-fab-surface: #5a6578;
+  --color-fab-on-surface: #f2f6fa;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
+  --color-fab-surface-hover: #6b778c;
+
+  /*
+   * Interactive surfaces — 패턴 정의: docs/design/interactive-surfaces.md
+   * 링 행(검색·TOP3) / 테이블 행(interactiveTableRow) / 텍스트만(뉴스) 구분
+   */
+  --interactive-surface-border: color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  --interactive-ring-hover: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --interactive-ring-focus: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --interactive-surface-bg-hover: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
 
   /* Motion */
   --duration-instant: 120ms;
@@ -80,12 +121,15 @@
   --z-popover: 20;
   --z-dropdown: 40;
   --z-overlay: 1000;
+  --z-overlay-stacked: 1100;
   --z-toast: 1250;
 }
 
 :root[data-theme='light'] {
   --color-bg-app: #f4f7fb;
   --color-bg-section: #ffffff;
+  --color-bg-modal: #eceff4;
+  --color-bg-modal-inset: #f4f6fa;
   --color-bg-card: #f7f9fc;
   --color-bg-elevated: #edf2f8;
   --color-border-default: #d7e0ea;
@@ -94,6 +138,7 @@
   --color-text-secondary: #475467;
   --color-text-muted: #667085;
   --color-primary: #2563eb;
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 88%, #ffffff);
   --color-success: #16a34a;
   --color-danger: #dc2626;
   --color-danger-muted: color-mix(in srgb, var(--color-danger) 88%, #ffffff);
@@ -102,4 +147,10 @@
   --color-interactive-active: #2563eb;
   --color-interactive-active-text: #ffffff;
   --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
+
+  /* FAB 맨 위로 — 라이트 UI */
+  --color-fab-surface: #475467;
+  --color-fab-on-surface: #ffffff;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 70%, transparent);
+  --color-fab-surface-hover: #344054;
 }

@@ -46,7 +46,7 @@ export function AppErrorPage({
     layout === 'embedded' ? preset.title : `${status} | ${preset.title}`
   const showAuthIcon = preset.tone === 'auth'
   const primaryIsLogin = preset.primaryCta === 'login'
-  const loginHref = preset.loginHref ?? '/login'
+  const loginHref = preset.loginHref ?? '/'
 
   const isFullscreen = layout === 'fullscreen'
   const Root: 'main' | 'div' = isFullscreen ? 'main' : 'div'

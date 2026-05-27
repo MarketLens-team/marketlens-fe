@@ -1,25 +1,48 @@
-import { formatRelativeTimeKo } from '../../lib/formatRelativeTime'
-import { normalizeStockCodeForMatch } from '../../lib/normalizeStockCode'
+import { formatPersonTimelineTime } from '../../lib/formatRelativeTime'
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
+import { truncateText } from '../../lib/truncateText'
+import { personStatementRelatesToStock as rowRelatesToStock } from '../../lib/personStatementStockMatch'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
+import { toNullableNumber } from '../../lib/toNullableNumber'
+
+export { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import type { PersonStatementResponse } from '../types/personApi'
 import type {
   NewsFeedItemResponse,
   RelatedStocksResponse,
   StockDetailResponse,
+  StockOverviewItemResponse,
+  StockOverviewResponse,
+  StockPricesResponse,
+  StockRankingItemResponse,
+  StockRankingsResponse,
+  StockTodayNewsItemResponse,
+  StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
+import type { StockDirectory } from '../types/stockDirectory'
 import type {
+  NewsRelatedStock,
   SentimentPolarity,
   StockDetail,
+  StockMarketRow,
+  StockOverview,
+  StockOverviewRow,
+  StockRankingItem,
+  StockRankings,
+  StockTodayNews,
+  StockTodayNewsItem,
   StockNewsItem,
+  StockPriceInfo,
   StockRelatedStock,
   StockSentimentBreakdown,
   StockSentimentBreakdownRow,
   StockSentimentContext,
   StockPersonTimelineItem,
   StockSentimentTrendPoint,
+  TickerStockRow,
   StockSummary,
 } from '../types/stock'
 
@@ -87,9 +110,38 @@ export function mapRelatedStocks(
     .map((item) => ({
       code: item.code,
       name: item.name,
+      imageUrl: normalizeImageUrl(item.imageUrl),
       market: item.market,
       sentimentScore: item.sentimentScore,
     }))
+}
+
+/** 연관 종목 코드에 `GET /api/v1/stocks/prices` 시세 병합 */
+export function enrichRelatedStocksWithPrices(
+  stocks: StockRelatedStock[],
+  tickerRows: TickerStockRow[],
+): StockRelatedStock[] {
+  const priceByCode = new Map(tickerRows.map((row) => [row.code, row]))
+  return stocks.map((stock) => {
+    const row = priceByCode.get(stock.code)
+    if (!row || row.price <= 0) return stock
+    return {
+      ...stock,
+      price: mapStockPriceInfo(row.price, row.changePercent),
+    }
+  })
+}
+
+function mapNewsRelatedStocks(
+  rows: NewsFeedItemResponse['relatedStocks'],
+): NewsRelatedStock[] | undefined {
+  if (!rows?.length) return undefined
+  return rows.map((row) => ({
+    stockCode: row.stockCode,
+    stockName: row.stockName,
+    imageUrl: normalizeImageUrl(row.imageUrl),
+    relevanceScore: row.relevanceScore,
+  }))
 }
 
 export function mapNewsFeedItems(
@@ -106,42 +158,54 @@ export function mapNewsFeedItems(
     sentimentScore: item.sentimentScore,
     aiReason: '',
     highlightTerms,
-    imageUrl: item.imageUrl || null,
+    imageUrl: normalizeImageUrl(item.imageUrl),
     url: item.originalLink || undefined,
+    relatedStocks: mapNewsRelatedStocks(item.relatedStocks),
   }))
 }
 
-/** `PersonStatementResponse[]` — 종목 연관 발언만 추림 (커서 API 수집 결과) */
-function mentionRelatesToStock(row: PersonStatementResponse, targetNormalized: string): boolean {
-  const tags = row.relatedStocks ?? []
-  if (tags.length === 0) return false
-  return tags.some((stock) => {
-    const raw = stock.stockCode ?? stock.code ?? ''
-    return normalizeStockCodeForMatch(raw) === targetNormalized
-  })
+/** OpenAPI `StockInfo.currentPrice` / `changeRate` → UI `StockPriceInfo` */
+export function mapStockPriceInfo(
+  currentPrice: number | undefined,
+  changeRate: number | undefined,
+): StockPriceInfo {
+  const current = toFiniteNumber(currentPrice)
+  const changePercent = toFiniteNumber(changeRate)
+  if (current <= 0) {
+    return { current: 0, change: 0, changePercent: 0 }
+  }
+  const change =
+    changePercent === 0 ? 0 : Math.round((current * changePercent) / (100 + changePercent))
+  return { current, change, changePercent }
 }
 
-/** 종목 상세 등 — 발언이 해당 종목과 연관되는지 */
-export function personStatementRelatesToStock(row: PersonStatementResponse, stockCode: string): boolean {
-  return mentionRelatesToStock(row, normalizeStockCodeForMatch(stockCode))
-}
+/** 종목 상세 사이드 타임라인 — 한 줄에 너무 길지 않게 */
+const STOCK_PERSON_SUMMARY_MAX_LEN = 140
 
 export function mapStockPeopleTimeline(
   mentions: PersonStatementResponse[],
   stockCode: string,
-  limit = 8,
+  limit = 5,
 ): StockPersonTimelineItem[] {
-  const target = normalizeStockCodeForMatch(stockCode)
   return mentions
-    .filter((row) => mentionRelatesToStock(row, target))
+    .filter((row) => rowRelatesToStock(row, stockCode))
     .slice(0, limit)
-    .map((row) => ({
-      id: String(row.statementId),
-      personName: row.personName,
-      role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
-      relativeLabel: formatRelativeTimeKo(row.publishedAt),
-      sentimentScore: toFiniteNumber(row.score),
-    }))
+    .map((row) => {
+      const { label, isFresh } = formatPersonTimelineTime(row.publishedAt)
+      return {
+        id: String(row.statementId),
+        personId: String(row.personId),
+        personName: row.personName,
+        imageUrl: normalizeImageUrl(row.imageUrl),
+        role: [row.personRole, row.organizationName].filter(Boolean).join(' · ') || '—',
+        summary: truncateText(row.statementSummary?.trim() || '—', STOCK_PERSON_SUMMARY_MAX_LEN),
+        sourceName: row.sourceName?.trim() || '—',
+        publishedAt: row.publishedAt,
+        relativeLabel: label,
+        isFresh,
+        sentimentScore: toFiniteNumber(row.score),
+      }
+    })
 }
 
 export function mapStockDetailPage(
@@ -159,12 +223,13 @@ export function mapStockDetailPage(
   const stockSummary: StockSummary = {
     code: stock.code,
     name: stock.name,
+    imageUrl: normalizeImageUrl(stock.imageUrl),
     market: stock.market,
     sector: stock.sectorName,
     sentimentScore: toFiniteNumber(summary.score),
     mentionChangePercent: toFiniteNumber(summary.mentionChangeRate),
     buzz24h: toFiniteNumber(summary.mentionCount),
-    price: { current: 0, change: 0, changePercent: 0 },
+    price: mapStockPriceInfo(stock.currentPrice, stock.changeRate),
     aiSummary: summary.aiSummary ?? '',
   }
 
@@ -189,4 +254,143 @@ export function mapStockDetailPage(
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
   }
+}
+
+function mapOverviewItem(item: StockOverviewItemResponse): StockOverviewRow {
+  return {
+    code: item.stockCode,
+    name: item.stockName,
+    market: item.market ?? '—',
+    sectorCode: item.sectorCode ?? '',
+    sectorName: item.sectorName ?? '—',
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    price: toFiniteNumber(item.currentPrice),
+    changePercent: toFiniteNumber(item.changeRate),
+    mentionCount24h: toFiniteNumber(item.mentionCount24h),
+    mentionChangeRate24h: toNullableNumber(item.mentionChangeRate24h),
+    sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
+    sentimentDelta24h: toNullableNumber(item.sentimentDelta24h),
+  }
+}
+
+function mapRankingItem(item: StockRankingItemResponse): StockRankingItem {
+  return {
+    code: item.stockCode,
+    name: item.stockName,
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    price: toFiniteNumber(item.currentPrice),
+    changePercent: toFiniteNumber(item.changeRate),
+    mentionCount24h: toFiniteNumber(item.mentionCount24h),
+    mentionChangeRate24h: toNullableNumber(item.mentionChangeRate24h),
+    sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
+    sentimentDelta24h: toNullableNumber(item.sentimentDelta24h),
+  }
+}
+
+/** `GET /api/v1/stocks/overview` */
+export function mapStockOverviewResponse(response: StockOverviewResponse): StockOverview {
+  const stocks = (response.items ?? []).map(mapOverviewItem)
+  const summedMentions = stocks.reduce((sum, row) => sum + row.mentionCount24h, 0)
+  const currentNewsCount =
+    response.currentNewsCount > 0 ? response.currentNewsCount : summedMentions
+
+  return {
+    currentNewsCount,
+    stocks,
+  }
+}
+
+/** `GET /api/v1/stocks/rankings` */
+export function mapStockRankingsResponse(response: StockRankingsResponse): StockRankings {
+  return {
+    topMentionCount: (response.topMentionCount ?? []).map(mapRankingItem),
+    topSentimentScore: (response.topSentimentScore ?? []).map(mapRankingItem),
+    topChangeRate: (response.topChangeRate ?? []).map(mapRankingItem),
+  }
+}
+
+function mapTodayNewsItem(item: StockTodayNewsItemResponse): StockTodayNewsItem {
+  return {
+    stockCode: item.stockCode,
+    stockName: item.stockName,
+    market: item.market,
+    sectorName: item.sectorName,
+    imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+    todayNewsCount: Math.max(0, item.todayNewsCount ?? 0),
+  }
+}
+
+/** `GET /api/v1/stocks/today-news` */
+export function mapStockTodayNewsResponse(response: StockTodayNewsResponse): StockTodayNews {
+  const items = (response.items ?? []).map(mapTodayNewsItem)
+  const summed = items.reduce((sum, row) => sum + row.todayNewsCount, 0)
+  return {
+    updatedAt: response.updatedAt,
+    totalTodayNewsCount:
+      response.totalTodayNewsCount > 0 ? response.totalTodayNewsCount : summed,
+    items,
+  }
+}
+
+/** directory + `GET /api/v1/stocks/prices` → 전체 종목 시세 테이블 */
+export function mapDirectoryToStockMarketRows(
+  directory: StockDirectory,
+  prices: StockPricesResponse,
+): StockMarketRow[] {
+  const priceByCode = new Map(prices.items.map((item) => [item.stockCode, item]))
+  const rows: StockMarketRow[] = []
+
+  for (const sector of directory.sectors) {
+    for (const stock of sector.stocks) {
+      const item = priceByCode.get(stock.code)
+      rows.push({
+        code: stock.code,
+        name: item?.stockName ?? stock.name,
+        market: item?.market ?? stock.market ?? '—',
+        sectorName: sector.sectorName,
+        imageUrl: normalizeImageUrl(item?.imageUrl) ?? null,
+        price: toFiniteNumber(item?.currentPrice),
+        changePercent: toFiniteNumber(item?.changeRate),
+      })
+    }
+  }
+
+  const knownCodes = new Set(rows.map((row) => row.code))
+  for (const item of prices.items) {
+    if (knownCodes.has(item.stockCode)) continue
+    rows.push({
+      code: item.stockCode,
+      name: item.stockName,
+      market: item.market ?? '—',
+      sectorName: '—',
+      imageUrl: normalizeImageUrl(item.imageUrl) ?? null,
+      price: toFiniteNumber(item.currentPrice),
+      changePercent: toFiniteNumber(item.changeRate),
+    })
+  }
+
+  return rows
+}
+
+/** `GET /api/v1/stocks/prices` → TickerBar 행 (지정 코드 순서 유지) */
+export function mapStockPricesToTickerRows(
+  response: StockPricesResponse,
+  orderedCodes: readonly string[],
+): TickerStockRow[] {
+  const byCode = new Map(response.items.map((item) => [item.stockCode, item]))
+  return orderedCodes.flatMap((code) => {
+    const item = byCode.get(code)
+    if (!item) return []
+    const price = toFiniteNumber(item.currentPrice)
+    if (price <= 0) return []
+    return [
+      {
+        id: item.stockCode,
+        code: item.stockCode,
+        name: item.stockName,
+        price,
+        changePercent: toFiniteNumber(item.changeRate),
+      },
+    ]
+  })
 }

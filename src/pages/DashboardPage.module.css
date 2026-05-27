@@ -12,6 +12,10 @@
   align-items: start;
 }
 
+.skeletonCard {
+  border-radius: var(--radius-lg);
+}
+
 .topGrid {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);

@@ -60,6 +60,11 @@ interface TooltipState {
 
 const SCORE_MIN = -100
 const SCORE_MAX = 100
+/** 우측 패널과 겹치지 않도록 플롯·툴팁 여백 */
+const CHART_LAYOUT_PADDING_RIGHT = 20
+const TOOLTIP_RIGHT_INSET = CHART_LAYOUT_PADDING_RIGHT + 8
+/** lightweight-charts lineWidth: 1~4 (4가 최대) */
+const SENTIMENT_SCORE_LINE_WIDTH = 2
 type SeriesKey = 'score' | 'mention'
 
 interface SeriesVisibility {
@@ -83,7 +88,8 @@ function buildChartOptions(colors: StockChartColors) {
       background: { type: ColorType.Solid, color: 'transparent' },
       textColor: colors.chartText,
       fontFamily: 'IBM Plex Mono, monospace',
-      fontSize: 11,
+      fontSize: 12,
+      padding: { right: CHART_LAYOUT_PADDING_RIGHT },
     },
     grid: {
       vertLines: { visible: false },
@@ -171,19 +177,24 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
   const syncOverlays = useCallback(() => {
     const series = mainSeriesRef.current
     const chart = chartRef.current
-    if (!series || !chart) return
+    const container = chartContainerRef.current
+    if (!series || !chart || !container) return
 
-    const plotWidth = chart.timeScale().width()
     const rightScaleWidth = chart.priceScale('right').width()
+    /* timeScale().width()는 fitContent·padding 이후 실제 플롯보다 좁을 수 있음 */
+    const plotWidth = Math.max(0, container.clientWidth - rightScaleWidth)
+    const timeScaleWidth = chart.timeScale().width()
 
     if (bandsLayerRef.current) {
+      bandsLayerRef.current.style.left = '0'
+      bandsLayerRef.current.style.right = 'auto'
       bandsLayerRef.current.style.width = `${plotWidth}px`
     }
 
     if (zoneLabelsLayerRef.current) {
       const labelRight = rightScaleWidth + 6
       zoneLabelsLayerRef.current.style.right = `${labelRight}px`
-      zoneLabelsLayerRef.current.style.width = `${Math.min(72, plotWidth * 0.22)}px`
+      zoneLabelsLayerRef.current.style.width = `${Math.min(72, Math.max(timeScaleWidth, plotWidth) * 0.22)}px`
     }
 
     STOCK_SENTIMENT_BANDS.forEach((band, i) => {
@@ -257,10 +268,10 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       const lineSeries = chart.addSeries(LineSeries, {
         priceScaleId: 'right',
         color: segment.color,
-        lineWidth: 4,
-        lineType: LineType.Curved,
+        lineWidth: SENTIMENT_SCORE_LINE_WIDTH,
+        lineType: LineType.Simple,
         crosshairMarkerVisible: index === lineSegments.length - 1,
-        crosshairMarkerRadius: 5,
+        crosshairMarkerRadius: 4,
         crosshairMarkerBorderColor: segment.color,
         crosshairMarkerBackgroundColor: 'transparent',
         lastValueVisible: false,
@@ -300,7 +311,11 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
     histogramSeries.applyOptions({ visible: visibility.mention })
     chart.timeScale().fitContent()
     lockScorePriceScale(chart)
-    syncOverlays()
+    const syncOverlaysAfterLayout = () => {
+      syncOverlays()
+      requestAnimationFrame(syncOverlays)
+    }
+    syncOverlaysAfterLayout()
 
     const onCrosshair = (param: MouseEventParams) => {
       const chartArea = chartAreaRef.current
@@ -316,7 +331,12 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       }
 
       const { width, height } = chartArea.getBoundingClientRect()
-      const pos = computeTooltipPosition(width, height, param.point.x, param.point.y)
+      const pos = computeTooltipPosition(
+        Math.max(0, width - TOOLTIP_RIGHT_INSET),
+        height,
+        param.point.x,
+        param.point.y,
+      )
 
       setTooltip({
         left: pos.left,
@@ -335,13 +355,14 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
 
     chart.subscribeCrosshairMove(onCrosshair)
 
-    const onVisibleRange = () => syncOverlays()
+    const onVisibleRange = () => syncOverlaysAfterLayout()
     chart.timeScale().subscribeVisibleLogicalRangeChange(onVisibleRange)
+    chart.timeScale().subscribeSizeChange(syncOverlaysAfterLayout)
 
     const observer = new ResizeObserver(() => {
       chart.applyOptions({ width: container.clientWidth, height: container.clientHeight })
       lockScorePriceScale(chart)
-      syncOverlays()
+      syncOverlaysAfterLayout()
     })
     observer.observe(container)
 
@@ -349,6 +370,7 @@ export function StockSentimentTrendChart({ trend, currentScore }: StockSentiment
       observer.disconnect()
       chart.unsubscribeCrosshairMove(onCrosshair)
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(onVisibleRange)
+      chart.timeScale().unsubscribeSizeChange(syncOverlaysAfterLayout)
       chart.remove()
       chartRef.current = null
       mainSeriesRef.current = null

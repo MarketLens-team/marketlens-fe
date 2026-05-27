@@ -20,6 +20,10 @@ export interface ModalProps {
   bodyClassName?: string
   /** 병합되어 `.content`에 적용. 예: 더 넓은 모달 `max-width` */
   contentClassName?: string
+  /** true면 `.content` 기본 스타일 없이 `contentClassName`만 적용 (검색 모달 등) */
+  contentClassOnly?: boolean
+  /** 오버레이 래퍼에 추가 클래스 (검색 모달 상·하단 여백 등) */
+  overlayClassName?: string
 }
 
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
@@ -51,6 +55,8 @@ export function Modal({
   initialFocusRef,
   bodyClassName,
   contentClassName,
+  contentClassOnly = false,
+  overlayClassName,
 }: ModalProps) {
   useModal(isOpen && lockBackgroundScroll)
   const titleId = useId()
@@ -122,7 +128,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="modal-overlay"
+      className={clsx('modal-overlay', overlayClassName)}
       role="presentation"
       onMouseDown={(e) => {
         overlayPointerDownRef.current = e.target === e.currentTarget
@@ -136,7 +142,11 @@ export function Modal({
     >
       <div
         ref={dialogRef}
-        className={clsx(styles.content, contentClassName)}
+        className={
+          contentClassOnly
+            ? contentClassName
+            : clsx(styles.content, contentClassName)
+        }
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
@@ -145,7 +155,12 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {(title || headerMeta || showCloseButton) ? (
-          <header className={styles.header}>
+          <header
+            className={clsx(
+              styles.header,
+              showCloseButton && !title && !headerMeta && styles.headerCloseOnly,
+            )}
+          >
             <div className={styles.headingGroup}>
               {title ? (
                 <h2 id={titleId} className={styles.title}>

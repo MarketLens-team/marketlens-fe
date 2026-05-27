@@ -1,22 +1,21 @@
 import { isMockDataSource } from '../../config/dataSource'
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { api } from '../../services/api'
 import type { ApiEnvelope } from '../types/api'
+import type { WatchlistResponse } from '../types/memberApi'
 import type { WatchlistItem } from '../../store/watchlistStore'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
-interface WatchlistDto {
-  stockCode: string
-  stockName: string
-  sectorName?: string
-  market?: string
-}
-
 const WATCHLIST_PATH = '/api/v1/watchlist'
 
-function mapWatchlistItem(dto: WatchlistDto): WatchlistItem {
-  return { code: dto.stockCode, name: dto.stockName }
+function mapWatchlistItem(dto: WatchlistResponse): WatchlistItem {
+  return {
+    code: dto.stockCode,
+    name: dto.stockName,
+    imageUrl: normalizeImageUrl(dto.imageUrl),
+  }
 }
 
 export async function fetchWatchlist(): Promise<WatchlistItem[]> {
@@ -25,7 +24,7 @@ export async function fetchWatchlist(): Promise<WatchlistItem[]> {
     return []
   }
   try {
-    const { data } = await api.get<ApiEnvelope<WatchlistDto[]>>(WATCHLIST_PATH)
+    const { data } = await api.get<ApiEnvelope<WatchlistResponse[]>>(WATCHLIST_PATH)
     const rows = unwrapApiEnvelope(data, '관심종목을 불러오지 못했습니다.')
     return (rows ?? []).map(mapWatchlistItem)
   } catch (error) {

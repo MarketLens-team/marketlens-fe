@@ -124,7 +124,6 @@ export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
         title="섹터 감성 히트맵"
         subtitle="섹터별 감성 · 언급 건수"
         variant="embedded"
-        showChevron
       />
       <div ref={chartRef} className={styles.chartWrap} role="img" aria-label="섹터 감성 히트맵">
         {size.width > 0 && size.height > 0 ? (

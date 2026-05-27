@@ -1,3 +1,4 @@
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type {
   BuzzSurgeItem,
@@ -7,6 +8,7 @@ import type {
   SentimentGaugeBlock,
   StockHighlight,
 } from '../types/dashboard'
+import type { TickerStockRow } from '../types/stock'
 import type { StockSummaryResponse } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
 import type { DashboardOverviewResponse } from '../types/dashboardApi'
@@ -81,14 +83,16 @@ function mapHotStatementsToHighlights(
 export function mapDashboardWatchlistRow(
   item: WatchlistResponse,
   summary?: StockSummaryResponse | null,
+  priceRow?: TickerStockRow | null,
 ): DashboardWatchlistRow {
   const sentimentScore = toFiniteNumber(summary?.score)
   const mentionSurgePercent = toFiniteNumber(summary?.mentionChangeRate)
   return {
     name: item.stockName,
     code: item.stockCode,
-    price: 0,
-    changePercent: 0,
+    imageUrl: normalizeImageUrl(item.imageUrl),
+    price: toFiniteNumber(priceRow?.price),
+    changePercent: toFiniteNumber(priceRow?.changePercent),
     sentimentScore,
     newsCount: toFiniteNumber(summary?.mentionCount),
     mentionSurgePercent,

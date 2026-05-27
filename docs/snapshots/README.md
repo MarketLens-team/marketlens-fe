@@ -6,6 +6,10 @@ Dev 실험 -> 실페이지 반영 과정을 추적하기 위한 스냅샷 모음
 
 - [docs/snapshots/2026-04-16/](./2026-04-16)
   - 2026-04-16 작업 스냅샷 보관 폴더
+- [docs/snapshots/2026-05-21/](./2026-05-21)
+  - 디자인 리프레시 **이전** 실 UI 베이스라인 (8화면 + [ui-pre-design-refresh.md](./2026-05-21/ui-pre-design-refresh.md))
+- [docs/snapshots/2026-05-26/](./2026-05-26)
+  - 상세 화면 ‹ → 브레드크럼 ([DDR-0002](../ddr/0002-detail-breadcrumb-navigation.md))
 
 ## 파일 매핑 (2026-04-16)
 
@@ -19,6 +23,29 @@ Dev 실험 -> 실페이지 반영 과정을 추적하기 위한 스냅샷 모음
 | 06 | [2026-04-16/06-sidebar-minimal.png](./2026-04-16/06-sidebar-minimal.png) | Sidebar Variant | Minimal 스타일 사이드바 |
 | 07 | [2026-04-16/07-sidebar-glow.png](./2026-04-16/07-sidebar-glow.png) | Sidebar Variant | Glow(Glassmorphism) 스타일 사이드바 |
 | 08 | [2026-04-16/08-sidebar-compact.png](./2026-04-16/08-sidebar-compact.png) | Sidebar Variant | Compact/Grouped + Collapse 스타일 사이드바 |
+
+## 파일 매핑 (2026-05-26)
+
+| 번호 | 파일명 | 라우트 | 설명 |
+|---|---|---|---|
+| 01 | [2026-05-26/01-person-detail-back-button.png](./2026-05-26/01-person-detail-back-button.png) | `/person/:id` | **Before** — 좌열 원형 ‹ 뒤로가기 |
+| 02 | [2026-05-26/02-person-detail-breadcrumb.png](./2026-05-26/02-person-detail-breadcrumb.png) | `/person/:id` | **After** — 인물 상세 브레드크럼 |
+| 03 | [2026-05-26/03-stock-detail-breadcrumb.png](./2026-05-26/03-stock-detail-breadcrumb.png) | `/stock/:code` | **After** — 종목 상세 브레드크럼 |
+| 04 | [2026-05-26/04-stock-list.png](./2026-05-26/04-stock-list.png) | `/stock` | **After** — 전체 종목 목록 |
+
+## 파일 매핑 (2026-05-21)
+
+| 번호 | 파일명 | 라우트 | 설명 |
+|---|---|---|---|
+| — | [2026-05-21/ui-pre-design-refresh.md](./2026-05-21/ui-pre-design-refresh.md) | 문서 | 리프레시 이전 UI 전체 서술·Before 기준 |
+| 01 | [2026-05-21/01-home-dashboard.png](./2026-05-21/01-home-dashboard.png) | `/` | 홈 대시보드 |
+| 02 | [2026-05-21/02-stock-detail.png](./2026-05-21/02-stock-detail.png) | `/stock/:code` | 종목 상세 (헤더·차트) |
+| 03 | [2026-05-21/03-stock-detail-news.png](./2026-05-21/03-stock-detail-news.png) | `/stock/:code` | 종목 상세 (뉴스·사이드) |
+| 04 | [2026-05-21/04-search-modal.png](./2026-05-21/04-search-modal.png) | 전역 | 검색 모달 (이전 UX) |
+| 05 | [2026-05-21/05-settings-dropdown.png](./2026-05-21/05-settings-dropdown.png) | 전역 | 설정 드롭다운 |
+| 06 | [2026-05-21/06-person-tracker.png](./2026-05-21/06-person-tracker.png) | `/person` | 인물 발언 |
+| 07 | [2026-05-21/07-buzz-surge.png](./2026-05-21/07-buzz-surge.png) | `/buzz` | 언급량 급등 |
+| 08 | [2026-05-21/08-mypage.png](./2026-05-21/08-mypage.png) | `/mypage` | 마이페이지 |
 
 ## 핵심 변화 흐름
 

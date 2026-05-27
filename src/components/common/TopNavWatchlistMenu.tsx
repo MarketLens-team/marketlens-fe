@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { useWatchlistStore } from '../../store/watchlistStore'
 import styles from './TopNavWatchlistMenu.module.css'
 
@@ -41,9 +42,12 @@ export function TopNavWatchlistMenu({ suppressPanel = false, onRequestOpen }: To
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.code} className={styles.item}>
-              <div className={styles.meta}>
-                <p className={styles.name}>{item.name}</p>
-                <p className={styles.code}>{item.code}</p>
+              <div className={styles.itemLead}>
+                <EntityAvatar variant="stock" size="sm" name={item.name} imageUrl={item.imageUrl} />
+                <div className={styles.meta}>
+                  <p className={styles.name}>{item.name}</p>
+                  <p className={styles.code}>{item.code}</p>
+                </div>
               </div>
               <button type="button" className={styles.remove} onClick={() => remove(item.code)}>
                 제거

@@ -4,6 +4,7 @@ import { WATCHLIST_KEY } from '../constants/storage'
 export interface WatchlistItem {
   code: string
   name: string
+  imageUrl?: string | null
 }
 
 interface WatchlistState {

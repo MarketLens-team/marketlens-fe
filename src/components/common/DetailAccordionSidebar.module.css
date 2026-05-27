@@ -18,24 +18,35 @@
 
 .item,
 .itemActive {
-  border: none;
   border-radius: var(--radius-lg);
-  background: transparent;
   text-align: left;
-  color: var(--color-text-primary);
   padding: var(--space-3) var(--space-3);
   cursor: pointer;
   font-size: var(--font-size-lg);
-  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
-.item:hover {
-  background: var(--color-interactive-hover);
-  color: var(--color-interactive-active-text);
+.item {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
 }
 
 .groupToggle {
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
@@ -49,8 +60,13 @@
   margin-bottom: 2px;
 }
 
-.groupToggle:hover {
-  background: var(--color-interactive-hover);
+@media (hover: hover) and (pointer: fine) {
+  .groupToggle:hover {
+    border: 1px solid var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
 }
 
 .chevron {

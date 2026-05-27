@@ -21,6 +21,7 @@ export interface StockHighlight {
 export interface DashboardWatchlistRow {
   name: string
   code: string
+  imageUrl?: string | null
   price: number
   changePercent: number
   sentimentScore: number
