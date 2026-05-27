@@ -127,15 +127,8 @@ export default function MyPage() {
                 <div key={i} className={clsx(skeleton.block, styles.skeletonSummaryCard)} />
               ))}
             </div>
-            <div className={styles.mainGrid}>
-              <div className={styles.mainCol}>
-                <div className={clsx(skeleton.block, styles.skeletonTable)} />
-                <div className={clsx(skeleton.block, styles.skeletonBookmarks)} />
-              </div>
-              <div className={styles.asideCol}>
-                <div className={clsx(skeleton.block, styles.skeletonAside)} />
-                <div className={clsx(skeleton.block, styles.skeletonAside)} />
-              </div>
+            <div className={styles.tabPanel}>
+              <div className={clsx(skeleton.block, styles.skeletonTable)} />
             </div>
           </div>
         ) : null}
@@ -143,65 +136,30 @@ export default function MyPage() {
         {data && alertSettings ? (
           <ProfileLayout nav={<ProfileSideNav active={tab} onChange={handleTabChange} />}>
             {tab === 'watchlist' ? (
-              <>
+              <div className={styles.tabPanel}>
                 <MyPageSummaryCards summary={data.summary} />
-                <div className={styles.mainGrid}>
-                  <div className={styles.mainCol}>
-                    <MyPageWatchlistTable
-                      rows={data.watchlist}
-                      removingCode={removingCode}
-                      onRemove={handleRemove}
-                    />
-                    {bookmarksError ? (
-                      <PageFetchError
-                        title="저장한 뉴스를 불러오지 못했어요"
-                        message={bookmarksError.message}
-                      />
-                    ) : null}
-                    {bookmarksInitialLoading && !bookmarksError ? (
-                      <div
-                        className={clsx(skeleton.block, styles.skeletonBookmarks)}
-                        aria-busy="true"
-                        aria-label="저장한 뉴스 로딩"
-                      />
-                    ) : null}
-                    {bookmarksSectionReady && !bookmarksError ? (
-                      <MyPageBookmarkSection
-                        view={bookmarkView}
-                        onViewChange={changeBookmarkView}
-                        stockSummaries={stockSummaries}
-                        stockSummariesLoading={stockSummariesLoading}
-                        selectedStockCode={selectedStockCode}
-                        onSelectStock={selectStock}
-                        items={bookmarks}
-                        stockBookmarksLoading={stockBookmarksLoading}
-                        removingId={removingBookmarkId}
-                        onRemove={handleBookmarkRemove}
-                        refreshing={bookmarksRefreshing}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              </>
+                <MyPageWatchlistTable
+                  rows={data.watchlist}
+                  removingCode={removingCode}
+                  onRemove={handleRemove}
+                />
+              </div>
             ) : null}
 
             {tab === 'account' ? (
-              <div className={styles.mainGrid}>
-                <div className={styles.mainCol}>
-                  <MyPageAccountInfo account={data.account} />
-                  <MyPageAlertSettings
-                    settings={alertSettings}
-                    alertExample={data.alertExample}
-                    saving={savingAlerts}
-                    onSettingsChange={handleSettingsChange}
-                  />
-                </div>
+              <div className={styles.tabPanel}>
+                <MyPageAccountInfo account={data.account} />
+                <MyPageAlertSettings
+                  settings={alertSettings}
+                  alertExample={data.alertExample}
+                  saving={savingAlerts}
+                  onSettingsChange={handleSettingsChange}
+                />
               </div>
             ) : null}
 
             {tab === 'news' ? (
-              <div className={styles.mainGrid}>
-                <div className={styles.mainCol}>
+              <div className={styles.tabPanel}>
                   {bookmarksError ? (
                     <PageFetchError title="저장한 뉴스를 불러오지 못했어요" message={bookmarksError.message} />
                   ) : null}
@@ -227,7 +185,6 @@ export default function MyPage() {
                       refreshing={bookmarksRefreshing}
                     />
                   ) : null}
-                </div>
               </div>
             ) : null}
           </ProfileLayout>

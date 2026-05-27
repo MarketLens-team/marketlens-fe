@@ -1,4 +1,7 @@
 .pageLayout {
+  --profile-nav-width: 13.75rem;
+  --profile-nav-gap: 0.2rem;
+
   position: relative;
   width: 100%;
   min-height: 100%;
@@ -8,14 +11,14 @@
   position: fixed;
   top: calc(var(--layout-top-strip-height) + var(--main-pad-block, var(--space-5)));
   left: var(--layout-main-pad-inline);
-  width: 13.75rem;
+  width: var(--profile-nav-width);
   z-index: var(--z-popover);
 }
 
 .content {
-  margin-left: calc(13.75rem + 3rem);
-  min-width: 0;
-  max-width: calc(70rem - 13.75rem - 3rem);
+  margin-left: calc(var(--profile-nav-width) + var(--profile-nav-gap));
+  min-width: 48rem;
+  max-width: 48rem;
 }
 
 @media (max-width: 720px) {
