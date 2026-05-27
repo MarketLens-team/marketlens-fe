@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
@@ -536,127 +536,11 @@ export function StockDetailContent({
         </div>
       </header>
 
-      <div className={styles.middleGrid}>
-        <section className={styles.panel} aria-labelledby="stock-trend-title">
-          <div className={styles.panelBody}>
-            <div className={styles.trendPanelHead}>
-              <div className={styles.trendPanelHeadMain}>
-                <h2 id="stock-trend-title" className={styles.panelTitle}>
-                  30일 감성 추이
-                </h2>
-                <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
-              </div>
-              <div className={styles.trendContextStats} aria-label="30일 감성 맥락">
-                <div className={styles.trendContextStat}>
-                  <span className={styles.trendContextStatLabel}>30일 평균</span>
-                  <span
-                    className={clsx(
-                      styles.trendContextStatValue,
-                      scoreToneClass(sentimentContext.avg30d),
-                    )}
-                  >
-                    {formatStockScore(sentimentContext.avg30d)}
-                  </span>
-                </div>
-                <div className={styles.trendContextStat}>
-                  <span className={styles.trendContextStatLabel}>30일 최고</span>
-                  <span
-                    className={clsx(
-                      styles.trendContextStatValue,
-                      scoreToneClass(sentimentContext.high30d),
-                    )}
-                  >
-                    {formatStockScore(sentimentContext.high30d)}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className={styles.trendChartWrap}>
-              <StockSentimentTrendChart
-                trend={sentimentContext.trend}
-                currentScore={sentimentContext.current}
-              />
-            </div>
-          </div>
-        </section>
-
-        <aside className={styles.middleAside}>
-          <section
-            className={clsx(styles.panel, styles.panelBreakdown)}
-            aria-labelledby="stock-breakdown-title"
-          >
-            <div className={styles.panelBody}>
-              <h2 id="stock-breakdown-title" className={styles.panelTitle}>
-                감성 분류 분포 · 오늘
-              </h2>
-              <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
-                {sentimentBreakdown.rows.map((row) => (
-                  <span
-                    key={row.polarity}
-                    className={barSegmentClass(row.polarity)}
-                    style={{ width: `${row.percent}%` }}
-                  />
-                ))}
-              </div>
-              <BreakdownList rows={sentimentBreakdown.rows} />
-            </div>
-          </section>
-
-          <section
-            className={clsx(styles.panel, styles.relatedPanel)}
-            aria-labelledby="stock-related-title"
-          >
-            <div className={styles.panelBody}>
-              <h2 id="stock-related-title" className={styles.panelTitle}>
-                연관 종목
-              </h2>
-              <ul className={styles.simpleList}>
-                {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => {
-                  const priceUp = (related.price?.changePercent ?? 0) >= 0
-                  return (
-                    <li key={related.code} className={styles.simpleListItem}>
-                      <Link className={styles.stockLink} to={`/stock/${related.code}`}>
-                        <EntityAvatar
-                          variant="stock"
-                          size="sm"
-                          name={related.name}
-                          imageUrl={related.imageUrl}
-                        />
-                        <span className={styles.stockLinkName}>{related.name}</span>
-                        <span className={styles.stockLinkTrailing}>
-                          {related.price && related.price.current > 0 ? (
-                            <span className={styles.stockLinkPrice}>
-                              {formatPrice(related.price.current)}
-                            </span>
-                          ) : null}
-                          {related.price && related.price.current > 0 ? (
-                            <span
-                              className={clsx(
-                                styles.stockLinkChange,
-                                priceUp ? styles.priceUp : styles.priceDown,
-                              )}
-                            >
-                              {formatPercent(related.price.changePercent)}
-                            </span>
-                          ) : null}
-                          <span
-                            className={clsx(
-                              styles.stockLinkScore,
-                              scoreToneClass(related.sentimentScore),
-                            )}
-                          >
-                            {formatStockScore(related.sentimentScore)}
-                          </span>
-                        </span>
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          </section>
-        </aside>
-      </div>
+      <StockDetailMiddleGrid
+        sentimentContext={sentimentContext}
+        sentimentBreakdown={sentimentBreakdown}
+        relatedStocks={relatedStocks}
+      />
 
       <div className={styles.bottomGrid}>
         <section className={styles.panel} aria-labelledby="stock-news-title">
@@ -779,6 +663,142 @@ export function StockDetailContent({
     </div>
   )
 }
+
+interface StockDetailMiddleGridProps {
+  sentimentContext: StockDetail['sentimentContext']
+  sentimentBreakdown: StockDetail['sentimentBreakdown']
+  relatedStocks: StockDetail['relatedStocks']
+}
+
+const StockDetailMiddleGrid = memo(function StockDetailMiddleGrid({
+  sentimentContext,
+  sentimentBreakdown,
+  relatedStocks,
+}: StockDetailMiddleGridProps) {
+  return (
+    <div className={styles.middleGrid}>
+      <section className={styles.panel} aria-labelledby="stock-trend-title">
+        <div className={styles.panelBody}>
+          <div className={styles.trendPanelHead}>
+            <div className={styles.trendPanelHeadMain}>
+              <h2 id="stock-trend-title" className={styles.panelTitle}>
+                30일 감성 추이
+              </h2>
+              <p className={styles.panelSub}>최근 한 달 감성점수 변화</p>
+            </div>
+            <div className={styles.trendContextStats} aria-label="30일 감성 맥락">
+              <div className={styles.trendContextStat}>
+                <span className={styles.trendContextStatLabel}>30일 평균</span>
+                <span
+                  className={clsx(
+                    styles.trendContextStatValue,
+                    scoreToneClass(sentimentContext.avg30d),
+                  )}
+                >
+                  {formatStockScore(sentimentContext.avg30d)}
+                </span>
+              </div>
+              <div className={styles.trendContextStat}>
+                <span className={styles.trendContextStatLabel}>30일 최고</span>
+                <span
+                  className={clsx(
+                    styles.trendContextStatValue,
+                    scoreToneClass(sentimentContext.high30d),
+                  )}
+                >
+                  {formatStockScore(sentimentContext.high30d)}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.trendChartWrap}>
+            <StockSentimentTrendChart
+              trend={sentimentContext.trend}
+              currentScore={sentimentContext.current}
+            />
+          </div>
+        </div>
+      </section>
+
+      <aside className={styles.middleAside}>
+        <section
+          className={clsx(styles.panel, styles.panelBreakdown)}
+          aria-labelledby="stock-breakdown-title"
+        >
+          <div className={styles.panelBody}>
+            <h2 id="stock-breakdown-title" className={styles.panelTitle}>
+              감성 분류 분포 · 오늘
+            </h2>
+            <div className={styles.stackedBar} role="img" aria-label="감성 분류 분포 막대">
+              {sentimentBreakdown.rows.map((row) => (
+                <span
+                  key={row.polarity}
+                  className={barSegmentClass(row.polarity)}
+                  style={{ width: `${row.percent}%` }}
+                />
+              ))}
+            </div>
+            <BreakdownList rows={sentimentBreakdown.rows} />
+          </div>
+        </section>
+
+        <section
+          className={clsx(styles.panel, styles.relatedPanel)}
+          aria-labelledby="stock-related-title"
+        >
+          <div className={styles.panelBody}>
+            <h2 id="stock-related-title" className={styles.panelTitle}>
+              연관 종목
+            </h2>
+            <ul className={styles.simpleList}>
+              {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => {
+                const relatedPriceUp = (related.price?.changePercent ?? 0) >= 0
+                return (
+                  <li key={related.code} className={styles.simpleListItem}>
+                    <Link className={styles.stockLink} to={`/stock/${related.code}`}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={related.name}
+                        imageUrl={related.imageUrl}
+                      />
+                      <span className={styles.stockLinkName}>{related.name}</span>
+                      <span className={styles.stockLinkTrailing}>
+                        {related.price && related.price.current > 0 ? (
+                          <span className={styles.stockLinkPrice}>
+                            {formatPrice(related.price.current)}
+                          </span>
+                        ) : null}
+                        {related.price && related.price.current > 0 ? (
+                          <span
+                            className={clsx(
+                              styles.stockLinkChange,
+                              relatedPriceUp ? styles.priceUp : styles.priceDown,
+                            )}
+                          >
+                            {formatPercent(related.price.changePercent)}
+                          </span>
+                        ) : null}
+                        <span
+                          className={clsx(
+                            styles.stockLinkScore,
+                            scoreToneClass(related.sentimentScore),
+                          )}
+                        >
+                          {formatStockScore(related.sentimentScore)}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </section>
+      </aside>
+    </div>
+  )
+})
 
 function breakdownBadgeClass(polarity: SentimentPolarity) {
   if (polarity === 'positive') return styles.breakdownBadgePos

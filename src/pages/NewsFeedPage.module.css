@@ -91,6 +91,12 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-bg-card);
+  overflow-anchor: none;
+}
+
+.scrollHead,
+.list [data-scroll-anchor-item] {
+  overflow-anchor: none;
 }
 
 .scrollFoot {

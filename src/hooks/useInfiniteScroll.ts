@@ -9,7 +9,10 @@ const DEFAULT_ROOT_MARGIN_UP = '64px 0px 0px 0px'
 /** 연속 트리거 방지 */
 const DEFAULT_LOAD_COOLDOWN_MS = 400
 /** 빠른 휠/터치 시 newer 연속 호출 완화 */
-const SCROLL_UP_ATTEMPT_THROTTLE_MS = 120
+const SCROLL_UP_ATTEMPT_THROTTLE_MS = 200
+/** 빠른 위 스크롤 — 휠 이벤트 연속 시 마지막 한 번만 로드 시도 */
+/** 스크롤이 잠깐 멈춘 뒤 newer 요청 — API 응답 전 추가 스크롤과 보정 충돌 완화 */
+const SCROLL_UP_LOAD_DEBOUNCE_MS = 260
 /** 로드 직후 센티넬 재시도 — 스크롤 관성·레이아웃 안정 대기 */
 const POST_LOAD_RETRY_DELAY_MS = 150
 
@@ -90,6 +93,7 @@ export function useInfiniteScroll({
   const touchStartYRef = useRef(0)
   const wasLoadingRef = useRef(false)
   const loadingRef = useRef(loading)
+  const scrollUpLoadDebounceIdRef = useRef<number | undefined>(undefined)
 
   loadingRef.current = loading
 
@@ -102,6 +106,10 @@ export function useInfiniteScroll({
     lastLoadStartedAtRef.current = 0
     touchStartYRef.current = 0
     wasLoadingRef.current = false
+    if (scrollUpLoadDebounceIdRef.current != null) {
+      window.clearTimeout(scrollUpLoadDebounceIdRef.current)
+      scrollUpLoadDebounceIdRef.current = undefined
+    }
   }, [enabled, requireUserScrollUp, direction])
 
   const resolveRoot = useCallback(() => resolveScrollRoot(scrollRootSelector), [scrollRootSelector])
@@ -143,10 +151,20 @@ export function useInfiniteScroll({
     const root = resolveRoot()
     if (!root) return
 
+    const scheduleUpLoadAfterScroll = () => {
+      if (scrollUpLoadDebounceIdRef.current != null) {
+        window.clearTimeout(scrollUpLoadDebounceIdRef.current)
+      }
+      scrollUpLoadDebounceIdRef.current = window.setTimeout(() => {
+        scrollUpLoadDebounceIdRef.current = undefined
+        attemptUpLoad()
+      }, SCROLL_UP_LOAD_DEBOUNCE_MS)
+    }
+
     const onWheel = (event: WheelEvent) => {
       if (event.deltaY >= 0) return
       userScrolledUpRef.current = true
-      attemptUpLoad()
+      scheduleUpLoadAfterScroll()
     }
 
     const onTouchStart = (event: TouchEvent) => {
@@ -157,13 +175,17 @@ export function useInfiniteScroll({
       const y = event.touches[0]?.clientY ?? 0
       if (y <= touchStartYRef.current + 12) return
       userScrolledUpRef.current = true
-      attemptUpLoad()
+      scheduleUpLoadAfterScroll()
     }
 
     root.addEventListener('wheel', onWheel, { passive: true })
     root.addEventListener('touchstart', onTouchStart, { passive: true })
     root.addEventListener('touchmove', onTouchMove, { passive: true })
     return () => {
+      if (scrollUpLoadDebounceIdRef.current != null) {
+        window.clearTimeout(scrollUpLoadDebounceIdRef.current)
+        scrollUpLoadDebounceIdRef.current = undefined
+      }
       root.removeEventListener('wheel', onWheel)
       root.removeEventListener('touchstart', onTouchStart)
       root.removeEventListener('touchmove', onTouchMove)
@@ -178,8 +200,8 @@ export function useInfiniteScroll({
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting) return
-        if (direction === 'up') {
-          tryLoadMore()
+        if (direction === 'up' && requireUserScrollUp) {
+          attemptUpLoad()
           return
         }
         tryLoadMore()
@@ -189,7 +211,16 @@ export function useInfiniteScroll({
 
     observer.observe(sentinelEl)
     return () => observer.disconnect()
-  }, [enabled, resolvedRootMargin, resolveRoot, sentinelEl, tryLoadMore, direction])
+  }, [
+    enabled,
+    resolvedRootMargin,
+    resolveRoot,
+    sentinelEl,
+    tryLoadMore,
+    attemptUpLoad,
+    direction,
+    requireUserScrollUp,
+  ])
 
   /** down 전용 — 로드 후 센티넬이 여전히 보이면 1회 재시도 */
   useEffect(() => {

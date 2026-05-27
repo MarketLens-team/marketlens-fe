@@ -1,6 +1,7 @@
 .item {
   scroll-margin-top: 6rem;
   scroll-margin-bottom: 4rem;
+  overflow-anchor: none;
 }
 
 .item:last-child .link {

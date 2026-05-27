@@ -23,9 +23,7 @@ import {
 } from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
-  restorePrependScrollSnapshot,
-  schedulePrependScrollRestore,
-  type PrependScrollSnapshot,
+  restorePrependScrollWhenIdle,
 } from '../lib/preserveScrollOnPrepend'
 import { resolveScrollRoot } from './useInfiniteScroll'
 
@@ -292,17 +290,17 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   )
 
   const applyNewerPage = useCallback(
-    (
-      page: AnchoredFeedPage<TItem>,
-      scrollSnapshot: PrependScrollSnapshot | null,
-      requestedCursor: string | null = null,
-    ) => {
+    (page: AnchoredFeedPage<TItem>, requestedCursor: string | null = null) => {
       if (page.items.length === 0) {
         newerEdgeRef.current = { hasMore: false, cursor: null }
         const pagination = syncAnchoredPaginationFromEdges()
         markCursorConsumed('newer', requestedCursor, pagination, 0)
         return 0
       }
+
+      const scrollRoot = resolveScrollRoot(scrollRootSelector)
+      const scrollSnapshot =
+        scrollRoot && page.items.length > 0 ? capturePrependScrollSnapshot(scrollRoot) : null
 
       let added = 0
       let nextItems: TItem[] = []
@@ -339,10 +337,8 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
         lastOlderCursorFetchedRef.current = null
       }
 
-      const scrollRoot = resolveScrollRoot(scrollRootSelector)
       if (scrollRoot && scrollSnapshot && added > 0) {
-        restorePrependScrollSnapshot(scrollRoot, scrollSnapshot)
-        schedulePrependScrollRestore(scrollRoot, scrollSnapshot)
+        restorePrependScrollWhenIdle(scrollRoot, scrollSnapshot)
       }
 
       return added
@@ -541,9 +537,6 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
       pendingAnchoredLoadRef.current = null
 
       const startedAt = Date.now()
-      const scrollRoot = resolveScrollRoot(scrollRootSelector)
-      const scrollSnapshot =
-        direction === 'newer' && scrollRoot ? capturePrependScrollSnapshot(scrollRoot) : null
 
       try {
         const page =
@@ -552,7 +545,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
             : await fetchOlderRef.current(cursor)
         if (seq !== anchoredLoadSeqRef.current) return
         if (direction === 'newer') {
-          applyNewerPage(page, scrollSnapshot, cursor)
+          applyNewerPage(page, cursor)
         } else {
           applyOlderPage(page, cursor)
         }

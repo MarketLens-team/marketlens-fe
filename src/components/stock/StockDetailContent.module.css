@@ -17,6 +17,7 @@
   background: var(--color-bg-card);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
+  overflow-anchor: none;
 }
 
 .headerTop {
@@ -155,6 +156,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
   gap: var(--space-6);
   align-items: start;
+  overflow-anchor: none;
 }
 
 .trendChartWrap {
@@ -398,6 +400,8 @@
   position: sticky;
   top: var(--space-1);
   max-height: calc(100vh - var(--space-5) - var(--space-4));
+  /* 뉴스 prepend 스크롤 보정 시 sticky 패널이 브라우저 anchoring으로 흔들리지 않게 */
+  overflow-anchor: none;
 }
 
 .rightStack .panelBody {
@@ -504,6 +508,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  overflow-anchor: none;
   scroll-padding-bottom: var(--space-3);
   padding-bottom: var(--space-1);
   scrollbar-width: thin;
@@ -694,11 +699,13 @@
   list-style: none;
   margin: 0;
   padding: 0 var(--space-6) var(--space-4);
-  overflow-anchor: auto;
+  /* 수동 prepend 스크롤 복원과 브라우저 scroll anchoring 충돌 방지 */
+  overflow-anchor: none;
 }
 
 .newsFeedWrap {
   position: relative;
+  contain: layout style;
 }
 
 .newsNewerOverlay {

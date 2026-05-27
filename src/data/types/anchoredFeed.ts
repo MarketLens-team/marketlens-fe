@@ -44,7 +44,7 @@ export const ANCHORED_LOAD_MIN_INTERVAL_MS = 550
 export const ANCHORED_LOAD_MIN_VISIBLE_MS = 480
 
 /** anchored 무한 스크롤 — 센티널 연속 트리거만 완화 (API 간격은 MIN_INTERVAL) */
-export const ANCHORED_INFINITE_SCROLL_COOLDOWN_MS = 180
+export const ANCHORED_INFINITE_SCROLL_COOLDOWN_MS = 400
 
 /** IntersectionObserver rootMargin (위 newer) — 크면 상단에서 자동 연속 로드 */
 export const ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX = 64
