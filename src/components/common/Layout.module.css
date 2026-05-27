@@ -50,7 +50,8 @@
   min-width: 0;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
   padding: var(--main-pad-block) var(--main-pad-inline);
   background: var(--color-bg-section);

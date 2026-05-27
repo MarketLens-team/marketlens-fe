@@ -1,9 +1,5 @@
 .nav {
-  width: 13.75rem; /* 220px */
-  flex-shrink: 0;
-  position: sticky;
-  top: var(--main-pad-block);
-  align-self: start;
+  width: 100%;
 }
 
 .list {
@@ -61,15 +57,6 @@
 }
 
 @media (max-width: 720px) {
-  .nav {
-    width: 100%;
-    position: static;
-  }
-
-  .groupTitle {
-    padding: 0;
-  }
-
   .list {
     flex-direction: row;
     overflow-x: auto;
@@ -87,4 +74,3 @@
     flex-shrink: 0;
   }
 }
-
