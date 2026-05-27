@@ -7,7 +7,8 @@
 | 항목 | 내용 |
 |------|------|
 | 브랜치 | `feat/design-refresh` |
-| 관련 | [2026-05-26-fix-person-feed-scroll-ux.md](./2026-05-26-fix-person-feed-scroll-ux.md) · [2026-05-27-fix-stock-detail-newsid-persist.md](./2026-05-27-fix-stock-detail-newsid-persist.md) |
+| 커밋 | `d634ee5` · `229fb93` · `e0d84c5` |
+| 관련 | [2026-05-26-fix-person-feed-scroll-ux.md](./2026-05-26-fix-person-feed-scroll-ux.md) · [2026-05-27-fix-stock-detail-newsid-persist.md](./2026-05-27-fix-stock-detail-newsid-persist.md) · [2026-05-27-fix-news-feed-older-scroll-ux.md](./2026-05-27-fix-news-feed-older-scroll-ux.md) |
 
 ## 증상
 
@@ -20,24 +21,30 @@
 
 | 파일 | 내용 |
 |------|------|
-| `NewsFeedPage.tsx` · `NewsFeedPage.module.css` | newer **오버레이** 스피너·older `anchoredLoadingUi` 연동. |
-| `StockDetailContent.tsx` · `.module.css` | 오버레이·`StockDetailMiddleGrid` memo·`overflow-anchor`·sticky 사이드. |
-| `useNewsFeedPage.ts` | `anchoredLoadingUi` 노출. |
-| `useAnchoredFeed.ts` | prepend 직전 스냅샷·`flushSync`·`restorePrependScrollWhenIdle`. |
-| `useInfiniteScroll.ts` | 위 스크롤 디바운스·상단 IO와 휠 정합·쿨다운 완화. |
-| `preserveScrollOnPrepend.ts` | 목록 높이 기준 복원·idle 후 보정·drift 시 **현재 scrollTop + Δheight**. |
+| `NewsFeedPage.tsx` · `NewsFeedPage.module.css` | newer **오버레이** 스피너·`feedWrap`·older `anchoredLoadingUi` 연동. |
+| `StockDetailContent.tsx` · `.module.css` | 오버레이·`StockDetailMiddleGrid` memo·`overflow-anchor`·sticky 사이드·하단 `newsScrollFoot`를 `ul` 밖으로. |
+| `useNewsFeedPage.ts` | `anchoredLoadingUi` 노출·`loadNewerWithError`. |
+| `useAnchoredFeed.ts` | newer 로딩 시작 시 스냅샷·`lockScrollRoot`·prepend 후 `applyPrependScrollRestore`·로딩 종료 시 잠금 해제. |
+| `useInfiniteScroll.ts` | 위 스크롤 디바운스·상단 IO와 휠 정합·쿨다운·**IO 콜백 ref 고정**(로딩 토글 시 재구독 방지). |
+| `preserveScrollOnPrepend.ts` | 목록 높이 기준 `applyPrependScrollRestore`·`lockScrollRoot` / `setLockedTop`. |
 | `anchoredFeed.ts` | `ANCHORED_INFINITE_SCROLL_COOLDOWN_MS` 400. |
 | `AllNewsListItem.tsx` · `.module.css` | `data-scroll-anchor-item` · `overflow-anchor: none`. |
 | `personPageLayout.module.css` | 발언 피드 `overflow-anchor: none`. |
 
+### 후속 — 스크롤 잠금 (`e0d84c5`)
+
+- idle·drift 기반 `restorePrependScrollWhenIdle` **제거**.
+- newer 스피너가 보이는 동안 `main[data-scroll-root]` **휠·터치·scrollTop 고정**.
+- API 응답·prepend 직후 목록 높이만 보정하고 잠금 기준 `scrollTop` 갱신 → 로딩 UI 종료 시 해제.
+
 ## Notes
 
-- 인물 상세와 동일: `loadingNewer || anchoredLoadingUi === 'newer'` 시 상단 스피너 (`이전 뉴스 불러오는 중`).
+- 인물·종목·전체 뉴스 공통: `loadingNewer \|\| anchoredLoadingUi === 'newer'` 시 상단 스피너 (`이전 뉴스 불러오는 중`).
 - 오버레이는 `position: absolute` — 스크롤 높이를 바꾸지 않음.
-- API 대기 중 많이 스크롤한 경우 예전 `scrollTop`으로 끌지 않고, **지금 위치 + prepend 높이**만 반영.
+- 하단 older 연속 로드는 [2026-05-27-fix-news-feed-older-scroll-ux.md](./2026-05-27-fix-news-feed-older-scroll-ux.md) 참고.
 
 ## 확인
 
-- [ ] `/news?newsId=…` — 위로 스크롤 newer 로드 시 읽던 기사 위치 유지·상단 스피너
+- [ ] `/news?newsId=…` — 위로 스크롤 newer 로드 시 읽던 기사 위치 유지·상단 스피너·빠른 위 스크롤 시 차트/헤더로 튀지 않음
 - [ ] 종목 상세 `?newsId=…` — 동일
-- [ ] 하단 older 로드 시 기존처럼 `뉴스 더 불러오는 중` 표시
+- [ ] 하단 older — 종목 상세와 같이 한 페이지씩 로드 ([older changelog](./2026-05-27-fix-news-feed-older-scroll-ux.md))
