@@ -26,4 +26,4 @@
 ## Notes
 
 - URL `newsId`는 유지 — 첫 페이지에 해당 기사가 있으면 초록 강조 유지.
-- 종목 상세는 FAB 외 영역 클릭 시에만 `newsId` 제거(기존 UX).
+- 후속: [2026-05-27-fix-stock-detail-newsid-persist.md](./2026-05-27-fix-stock-detail-newsid-persist.md) — 바깥 클릭 시에도 `newsId` 유지(`/news`와 동일).

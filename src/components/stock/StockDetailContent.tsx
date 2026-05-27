@@ -80,14 +80,12 @@ export interface StockDetailContentProps {
   focusNewsId?: string | null
   /** `false`면 제목 초록 강조만, 스크롤 없음 (전체 뉴스 → 종목) */
   scrollToFocusNews?: boolean
-  onClearFocusNews?: () => void
 }
 
 export function StockDetailContent({
   data,
   focusNewsId = null,
   scrollToFocusNews = true,
-  onClearFocusNews,
 }: StockDetailContentProps) {
   const {
     stock,
@@ -311,22 +309,6 @@ export function StockDetailContent({
     skipNewsFilterFetchRef.current = true
     didScrollToNewsFocusRef.current = null
   }, [focusNewsId, stock.code])
-
-  useEffect(() => {
-    if (!focusNewsId || !onClearFocusNews) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      if (target.closest('[data-stock-back-to-top]')) return
-      const focusedEl = document.getElementById(`stock-news-${focusNewsId}`)
-      if (focusedEl?.contains(target)) return
-      onClearFocusNews()
-    }
-
-    document.addEventListener('pointerdown', onPointerDown, true)
-    return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [focusNewsId, onClearFocusNews])
 
   const loadMoreNews = useCallback(async () => {
     if (feedMode === 'anchored') {

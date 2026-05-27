@@ -3,6 +3,7 @@ import { memo } from 'react'
 import type { StockNewsItem } from '../../data/types/stock'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { NewsBookmarkButton } from '../news/NewsBookmarkButton'
+import { stockNewsItemElementId } from '../../lib/newsFeedFocus'
 import { formatStockScore, stockSentimentTone } from './stockScore'
 import { renderStockNewsTitle } from './stockNewsTitle'
 import styles from './StockNewsListItem.module.css'
@@ -101,7 +102,7 @@ export const StockNewsListItem = memo(function StockNewsListItem({
   )
 
   return (
-    <li id={`stock-news-${item.id}`} data-scroll-anchor-item className={styles.item}>
+    <li id={stockNewsItemElementId(item.id)} data-scroll-anchor-item className={styles.item}>
       <div className={linkClassName}>{body}</div>
     </li>
   )

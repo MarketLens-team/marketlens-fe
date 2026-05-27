@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Layout } from '../components/common/Layout'
@@ -12,19 +12,11 @@ import styles from './StockDetailPage.module.css'
 
 export default function StockDetailPage() {
   const { stockCode } = useParams()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const normalizedCode = stockCode?.trim() ?? ''
   const focusNewsId = searchParams.get('newsId')?.trim() || null
   const scrollToFocusNews = searchParams.get('scrollToNews') !== '0'
   const { data, loading, error } = useStockDetail(stockCode)
-
-  const clearFocusNews = useCallback(() => {
-    if (!searchParams.has('newsId')) return
-    const next = new URLSearchParams(searchParams)
-    next.delete('newsId')
-    next.delete('scrollToNews')
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     getLayoutScrollRoot()?.scrollTo({ top: 0, left: 0 })
@@ -54,7 +46,6 @@ export default function StockDetailPage() {
             data={data!}
             focusNewsId={focusNewsId}
             scrollToFocusNews={scrollToFocusNews}
-            onClearFocusNews={clearFocusNews}
           />
         ) : null}
       </div>
