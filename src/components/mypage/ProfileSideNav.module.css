@@ -33,26 +33,24 @@
   }
 }
 
-.itemActive {
+.itemActive,
+.item.itemActive:focus,
+.item.itemActive:focus-visible {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-on-surface);
   font-weight: var(--font-weight-semibold);
   border-color: transparent;
   box-shadow: none;
+  outline: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .item.itemActive:hover {
     background: transparent;
-    color: var(--color-primary);
+    color: var(--color-primary-on-surface);
     border-color: transparent;
     box-shadow: none;
   }
-}
-
-.itemActive:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: var(--interactive-ring-focus);
 }
 
 .icon {

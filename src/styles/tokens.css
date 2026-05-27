@@ -22,6 +22,8 @@
   --color-text-muted: #8fa3b6;
 
   --color-primary: #3b82f6;
+  /* 어두운 배경 위 텍스트·아이콘 — solid primary(토글 ON)과 체감 맞춤 */
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 88%, #ffffff);
   --color-success: #02c076;
   --color-danger: #f6465d;
   --color-danger-muted: color-mix(in srgb, var(--color-danger) 82%, #0a0f16);
@@ -136,6 +138,7 @@
   --color-text-secondary: #475467;
   --color-text-muted: #667085;
   --color-primary: #2563eb;
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 88%, #ffffff);
   --color-success: #16a34a;
   --color-danger: #dc2626;
   --color-danger-muted: color-mix(in srgb, var(--color-danger) 88%, #ffffff);
