@@ -39,23 +39,22 @@ export default function MyPage() {
   const { data, loading, error } = useAsyncData(factory)
 
   const {
-    view: bookmarkView,
-    changeView: changeBookmarkView,
-    selectedStockCode,
-    selectStock,
-    stockSummaries,
-    stockSummariesLoading,
-    stockBookmarksLoading,
-    items: bookmarks,
+    items: bookmarkItems,
     totalPages: bookmarkTotalPages,
     page: bookmarkPage,
     sortOrder: bookmarkSortOrder,
     changeSortOrder: changeBookmarkSortOrder,
     goToPage: goToBookmarkPage,
-    initialLoading: bookmarksInitialLoading,
-    sectionReady: bookmarksSectionReady,
+    initialLoading: bookmarkInitialLoading,
+    refreshing: bookmarkRefreshing,
     error: bookmarksError,
-    refreshing: bookmarksRefreshing,
+    dateSummaries: bookmarkDateSummaries,
+    dateSummariesLoading: bookmarkDateSummariesLoading,
+    modalDate: bookmarkModalDate,
+    modalItems: bookmarkModalItems,
+    modalLoading: bookmarkModalLoading,
+    openDateModal: openBookmarkDateModal,
+    closeDateModal: closeBookmarkDateModal,
   } = useMyPageBookmarks(bookmarkRefreshKey)
 
   const [localSettings, setLocalSettings] = useState<AlertSettings | null>(null)
@@ -165,36 +164,29 @@ export default function MyPage() {
 
             {tab === 'news' ? (
               <div className={styles.tabPanel}>
-                  {bookmarksError ? (
-                    <PageFetchError title="저장한 뉴스를 불러오지 못했어요" message={bookmarksError.message} />
-                  ) : null}
-                  {bookmarksInitialLoading && !bookmarksError ? (
-                    <div
-                      className={clsx(skeleton.block, styles.skeletonBookmarks)}
-                      aria-busy="true"
-                      aria-label="저장한 뉴스 로딩"
-                    />
-                  ) : null}
-                  {bookmarksSectionReady && !bookmarksError ? (
-                    <MyPageBookmarkSection
-                      view={bookmarkView}
-                      onViewChange={changeBookmarkView}
-                      stockSummaries={stockSummaries}
-                      stockSummariesLoading={stockSummariesLoading}
-                      selectedStockCode={selectedStockCode}
-                      onSelectStock={selectStock}
-                      items={bookmarks}
-                      stockBookmarksLoading={stockBookmarksLoading}
-                      removingId={removingBookmarkId}
-                      onRemove={handleBookmarkRemove}
-                      refreshing={bookmarksRefreshing}
-                      sortOrder={bookmarkSortOrder}
-                      onSortChange={changeBookmarkSortOrder}
-                      page={bookmarkPage}
-                      totalPages={bookmarkTotalPages}
-                      onPageChange={goToBookmarkPage}
-                    />
-                  ) : null}
+                {bookmarksError ? (
+                  <PageFetchError title="저장한 뉴스를 불러오지 못했어요" message={bookmarksError.message} />
+                ) : (
+                  <MyPageBookmarkSection
+                    dateSummaries={bookmarkDateSummaries}
+                    dateSummariesLoading={bookmarkDateSummariesLoading}
+                    items={bookmarkItems}
+                    totalPages={bookmarkTotalPages}
+                    page={bookmarkPage}
+                    sortOrder={bookmarkSortOrder}
+                    initialLoading={bookmarkInitialLoading}
+                    refreshing={bookmarkRefreshing}
+                    onSortChange={changeBookmarkSortOrder}
+                    onPageChange={goToBookmarkPage}
+                    modalDate={bookmarkModalDate}
+                    modalItems={bookmarkModalItems}
+                    modalLoading={bookmarkModalLoading}
+                    onDateClick={openBookmarkDateModal}
+                    onModalClose={closeBookmarkDateModal}
+                    removingId={removingBookmarkId}
+                    onRemove={handleBookmarkRemove}
+                  />
+                )}
               </div>
             ) : null}
           </ProfileLayout>

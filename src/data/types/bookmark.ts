@@ -12,9 +12,26 @@ export type BookmarkSortOrder = 'LATEST' | 'OLDEST'
 export interface NewsBookmarkListQuery {
   contextType?: NewsBookmarkContextType
   contextStockCode?: string
+  publishedDate?: string // YYYY-MM-DD
   page?: number
   size?: number
   sortOrder?: BookmarkSortOrder
+}
+
+/** `GET /api/v1/bookmarks/dates` — OpenAPI `BookmarkDateContextSummaryResponse` */
+export interface BookmarkDateContextSummaryDto {
+  contextType: string
+  stockCode?: string | null
+  stockName?: string | null
+  stockImageUrl?: string | null
+  count: number
+}
+
+/** `GET /api/v1/bookmarks/dates` — OpenAPI `BookmarkDateSummaryResponse` */
+export interface BookmarkDateSummaryDto {
+  date: string // YYYY-MM-DD
+  count: number
+  contexts: BookmarkDateContextSummaryDto[]
 }
 
 /** `GET /api/v1/bookmarks` 페이지 응답 — OpenAPI `NewsBookmarkPageResponse` */

@@ -35,6 +35,20 @@ export interface MyPageBookmarkPage {
   page: number
 }
 
+export interface MyPageBookmarkDateContext {
+  contextType: NewsBookmarkContextType
+  stockCode?: string | null
+  stockName?: string | null
+  stockImageUrl?: string | null
+  count: number
+}
+
+export interface MyPageBookmarkDateSummary {
+  date: string // YYYY-MM-DD
+  count: number
+  contexts: MyPageBookmarkDateContext[]
+}
+
 export interface MyPageWatchlistRow {
   code: string
   name: string

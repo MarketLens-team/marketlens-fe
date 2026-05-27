@@ -2,10 +2,6 @@
   width: 100%;
 }
 
-.tabs {
-  margin-bottom: var(--space-3);
-}
-
 .sortBar {
   display: flex;
   gap: var(--space-2);
@@ -36,6 +32,42 @@
   border-color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
   color: var(--color-primary);
+}
+
+.calendarBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.calendarBtn:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.calendarModalContent {
+  width: min(26rem, 92vw);
+  display: flex;
+  justify-content: center;
+}
+
+.modalContent {
+  width: min(44rem, 92vw);
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .pagination {

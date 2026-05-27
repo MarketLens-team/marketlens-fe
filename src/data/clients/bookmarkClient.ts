@@ -2,6 +2,7 @@ import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
 import type { ApiEnvelope } from '../types/api'
 import type {
+  BookmarkDateSummaryDto,
   BookmarkStockSummaryDto,
   NewsBookmarkDto,
   NewsBookmarkListQuery,
@@ -34,6 +35,7 @@ function buildBookmarkListQuery(query?: NewsBookmarkListQuery): string {
   const params = new URLSearchParams()
   if (query.contextType) params.set('contextType', query.contextType)
   if (query.contextStockCode?.trim()) params.set('contextStockCode', query.contextStockCode.trim())
+  if (query.publishedDate) params.set('publishedDate', query.publishedDate)
   if (query.page != null) params.set('page', String(query.page + 1)) // 내부 0-based → API 1-based
   if (query.size != null) params.set('size', String(query.size))
   if (query.sortOrder) params.set('sortOrder', query.sortOrder)
@@ -72,6 +74,10 @@ export async function fetchNewsBookmarks(query?: NewsBookmarkListQuery): Promise
       rows = rows.filter((row) => row.contextType === 'ALL_NEWS')
     } else if (query?.contextType === 'STOCK') {
       rows = rows.filter((row) => row.contextType === 'STOCK')
+    }
+    if (query?.publishedDate) {
+      const d = query.publishedDate
+      rows = rows.filter((row) => row.publishedAt.startsWith(d))
     }
     if (query?.sortOrder === 'OLDEST') rows = [...rows].reverse()
     const size = query?.size ?? 10
@@ -120,6 +126,40 @@ export async function fetchBookmarkStockSummaries(): Promise<BookmarkStockSummar
     return unwrapApiEnvelope(data, '종목별 즐겨찾기를 불러오지 못했습니다.') ?? []
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '종목별 즐겨찾기를 불러오지 못했습니다.'))
+  }
+}
+
+export async function fetchBookmarkDateSummaries(): Promise<BookmarkDateSummaryDto[]> {
+  if (isMockDataSource()) {
+    await mockDelay(120)
+    const byDate = new Map<string, { count: number; contexts: Map<string, { contextType: string; stockCode: string | null; stockName: string | null; count: number }> }>()
+    for (const [, row] of mockBookmarks.entries()) {
+      const date = new Date().toISOString().slice(0, 10)
+      const entry = byDate.get(date) ?? { count: 0, contexts: new Map() }
+      entry.count++
+      const ctxKey = row.context.type === 'STOCK' ? `STOCK:${row.context.stockCode ?? ''}` : 'ALL_NEWS'
+      const ctx = entry.contexts.get(ctxKey) ?? { contextType: row.context.type, stockCode: row.context.stockCode ?? null, stockName: row.context.stockCode ?? null, count: 0 }
+      ctx.count++
+      entry.contexts.set(ctxKey, ctx)
+      byDate.set(date, entry)
+    }
+    return Array.from(byDate.entries()).map(([date, entry]) => ({
+      date,
+      count: entry.count,
+      contexts: Array.from(entry.contexts.values()).map((c) => ({
+        contextType: c.contextType,
+        stockCode: c.stockCode,
+        stockName: c.stockName,
+        stockImageUrl: null,
+        count: c.count,
+      })),
+    }))
+  }
+  try {
+    const { data } = await api.get<ApiEnvelope<BookmarkDateSummaryDto[]>>('/api/v1/bookmarks/dates')
+    return unwrapApiEnvelope(data, '날짜별 집계를 불러오지 못했습니다.') ?? []
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '날짜별 집계를 불러오지 못했습니다.'))
   }
 }
 

@@ -1,121 +1,68 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchBookmarkStockSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
-import { mapBookmarkStockSummaryList, mapNewsBookmarkPage } from '../data/mappers/bookmarkMapper'
+import { fetchBookmarkDateSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
+import { mapBookmarkDateSummaryList, mapNewsBookmarkPage } from '../data/mappers/bookmarkMapper'
 import type { BookmarkSortOrder } from '../data/types/bookmark'
-import type { MyPageBookmarkItem, MyPageBookmarkPage, MyPageBookmarkStockSummary, MyPageBookmarkView } from '../data/types/myPage'
+import type { MyPageBookmarkDateSummary, MyPageBookmarkItem, MyPageBookmarkPage } from '../data/types/myPage'
 import { useAsyncData } from './useAsyncData'
 
 const PAGE_SIZE = 10
 
 export function useMyPageBookmarks(refreshKey: number) {
-  const [view, setView] = useState<MyPageBookmarkView>('date')
-  const [selectedStockCode, setSelectedStockCode] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<BookmarkSortOrder>('LATEST')
   const [page, setPage] = useState(0)
+  const [modalDate, setModalDate] = useState<string | null>(null)
 
-  // view·sortOrder·selectedStockCode·refreshKey 바뀌면 페이지 리셋
-  useEffect(() => {
-    setPage(0)
-  }, [view, sortOrder, selectedStockCode, refreshKey])
+  // sort·refreshKey 변경 시 페이지 리셋
+  useEffect(() => { setPage(0) }, [sortOrder, refreshKey])
 
-  const dateFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
+  // 삭제 후 모달 닫기
+  useEffect(() => { setModalDate(null) }, [refreshKey])
+
+  const listFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
     const raw = await fetchNewsBookmarks({ page, size: PAGE_SIZE, sortOrder })
     return mapNewsBookmarkPage(raw)
   }, [refreshKey, page, sortOrder]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const stockSummariesFactory = useCallback(async (): Promise<MyPageBookmarkStockSummary[]> => {
-    const rows = await fetchBookmarkStockSummaries()
-    return mapBookmarkStockSummaryList(rows)
+  const dateSummariesFactory = useCallback(async (): Promise<MyPageBookmarkDateSummary[]> => {
+    const rows = await fetchBookmarkDateSummaries()
+    return mapBookmarkDateSummaryList(rows)
   }, [refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const stockBookmarksFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
-    if (!selectedStockCode) return { items: [], totalElements: 0, totalPages: 0, page: 0 }
-    const raw = await fetchNewsBookmarks({
-      contextStockCode: selectedStockCode,
-      page,
-      size: PAGE_SIZE,
-      sortOrder,
-    })
-    return mapNewsBookmarkPage(raw)
-  }, [refreshKey, selectedStockCode, page, sortOrder]) // eslint-disable-line react-hooks/exhaustive-deps
+  const modalDateFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
+    if (!modalDate) return []
+    const raw = await fetchNewsBookmarks({ publishedDate: modalDate, size: 50, sortOrder: 'LATEST' })
+    return mapNewsBookmarkPage(raw).items
+  }, [modalDate, refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const dateState = useAsyncData(dateFactory)
-  const stockSummariesState = useAsyncData(stockSummariesFactory, { enabled: view === 'stock' })
-  const stockBookmarksState = useAsyncData(stockBookmarksFactory, {
-    enabled: view === 'stock' && selectedStockCode != null,
-    keepPreviousData: true,
-  })
+  const listState = useAsyncData(listFactory, { keepPreviousData: true })
+  const dateSummariesState = useAsyncData(dateSummariesFactory)
+  const modalDateState = useAsyncData(modalDateFactory, { enabled: modalDate != null })
 
-  const stockSummaries = stockSummariesState.data ?? []
+  const openDateModal = useCallback((date: string) => { setModalDate(date) }, [])
+  const closeDateModal = useCallback(() => { setModalDate(null) }, [])
 
-  useEffect(() => {
-    if (view !== 'stock' || stockSummariesState.loading || stockSummariesState.error) return
-    if (stockSummaries.length === 0) {
-      setSelectedStockCode(null)
-      return
-    }
-    if (!selectedStockCode || !stockSummaries.some((row) => row.stockCode === selectedStockCode)) {
-      setSelectedStockCode(stockSummaries[0].stockCode)
-    }
-  }, [view, stockSummaries, selectedStockCode, stockSummariesState.loading, stockSummariesState.error])
-
-  const activePage = view === 'date' ? dateState.data : stockBookmarksState.data
-  const items: MyPageBookmarkItem[] = activePage?.items ?? []
-  const totalPages = activePage?.totalPages ?? 0
-  const totalElements = activePage?.totalElements ?? 0
-
-  const initialLoading =
-    view === 'date'
-      ? dateState.loading && dateState.data == null
-      : stockSummariesState.loading && stockSummariesState.data == null
-  const sectionReady =
-    view === 'date'
-      ? !initialLoading
-      : !stockSummariesState.loading || stockSummariesState.data != null
-  const error = view === 'date' ? dateState.error : stockSummariesState.error ?? stockBookmarksState.error
-  const refreshing =
-    view === 'date'
-      ? dateState.refreshing
-      : stockSummariesState.refreshing || stockBookmarksState.refreshing
-
-  const selectStock = useCallback((stockCode: string) => {
-    setSelectedStockCode(stockCode)
-  }, [])
-
-  const changeView = useCallback((next: MyPageBookmarkView) => {
-    setView(next)
-  }, [])
-
-  const changeSortOrder = useCallback((next: BookmarkSortOrder) => {
-    setSortOrder(next)
-  }, [])
-
-  const goToPage = useCallback((next: number) => {
-    setPage(next)
-  }, [])
+  const changeSortOrder = useCallback((next: BookmarkSortOrder) => { setSortOrder(next) }, [])
+  const goToPage = useCallback((next: number) => { setPage(next) }, [])
 
   return {
-    view,
-    changeView,
-    selectedStockCode,
-    selectStock,
-    stockSummaries,
-    stockSummariesLoading: stockSummariesState.loading && stockSummariesState.data == null,
-    stockBookmarksLoading:
-      view === 'stock' &&
-      selectedStockCode != null &&
-      stockBookmarksState.loading &&
-      stockBookmarksState.data == null,
-    items,
-    totalPages,
-    totalElements,
+    // 목록
+    items: listState.data?.items ?? [],
+    totalPages: listState.data?.totalPages ?? 0,
     page,
     sortOrder,
     changeSortOrder,
     goToPage,
-    initialLoading,
-    sectionReady,
-    error,
-    refreshing,
+    initialLoading: listState.loading && listState.data == null,
+    refreshing: listState.refreshing,
+    error: listState.error,
+    // 달력
+    dateSummaries: dateSummariesState.data ?? [],
+    dateSummariesLoading: dateSummariesState.loading && dateSummariesState.data == null,
+    // 모달
+    modalDate,
+    modalItems: modalDateState.data ?? [],
+    modalLoading: modalDate != null && modalDateState.loading,
+    openDateModal,
+    closeDateModal,
   }
 }
