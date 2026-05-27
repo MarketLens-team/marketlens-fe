@@ -60,4 +60,5 @@ issues / changelog 링크
 
 | 날짜 | 제목 | 관련 이슈 |
 |------|------|-----------|
+| 2026-05-27 | [마이페이지 사이드 nav — sticky 반복 vs viewport fixed](./2026-05-27-mypage-sidenav-fixed-vs-sticky.md) | [issues/2026-05-27-mypage-profile-sidenav-position.md](../issues/2026-05-27-mypage-profile-sidenav-position.md) |
 | 2026-05-26 | [종목 뉴스 — 탐색 범위 vs 컨펌 후 조사](./2026-05-26-stock-news-pagination-scope.md) | [issues/2026-05-26-stock-news-pagination.md](../issues/2026-05-26-stock-news-pagination.md) |
