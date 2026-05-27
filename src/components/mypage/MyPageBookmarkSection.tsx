@@ -245,6 +245,7 @@ export function MyPageBookmarkSection({
         title="날짜별 보기"
         lockBackgroundScroll
         contentClassName={styles.calendarModalContent}
+        contentClassOnly
       >
         {dateSummariesLoading ? (
           <p className={styles.listLoadingHint} aria-busy="true">불러오는 중…</p>

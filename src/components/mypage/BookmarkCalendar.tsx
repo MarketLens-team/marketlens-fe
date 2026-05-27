@@ -18,6 +18,7 @@ interface TooltipState {
   date: string
   x: number
   y: number
+  side: 'left' | 'right'
 }
 
 export function BookmarkCalendar({ summaries, onDateClick }: BookmarkCalendarProps) {
@@ -51,10 +52,13 @@ export function BookmarkCalendar({ summaries, onDateClick }: BookmarkCalendarPro
     const rect = e.currentTarget.getBoundingClientRect()
     const calRect = e.currentTarget.closest(`.${styles.calendar}`)?.getBoundingClientRect()
     if (!calRect) return
+    const cellCenterX = rect.left + rect.width / 2 - calRect.left
+    const isRightHalf = cellCenterX > calRect.width / 2
     setTooltip({
       date,
-      x: rect.left - calRect.left + rect.width / 2,
-      y: rect.top - calRect.top,
+      x: isRightHalf ? rect.left - calRect.left - 8 : rect.right - calRect.left + 8,
+      y: rect.top - calRect.top + rect.height / 2,
+      side: isRightHalf ? 'left' : 'right',
     })
   }
 
@@ -110,7 +114,11 @@ export function BookmarkCalendar({ summaries, onDateClick }: BookmarkCalendarPro
       {tooltip && tooltipSummary && (
         <div
           className={styles.tooltip}
-          style={{ left: tooltip.x, top: tooltip.y }}
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: tooltip.side === 'left' ? 'translate(-100%, -50%)' : 'translateY(-50%)',
+          }}
           aria-hidden
         >
           <p className={styles.tooltipHeader}>{tooltipSummary.count}건 저장</p>

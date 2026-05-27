@@ -121,14 +121,13 @@
 /* 툴팁 */
 .tooltip {
   position: absolute;
-  transform: translate(-50%, calc(-100% - var(--space-2)));
   z-index: var(--z-popover);
   min-width: 9rem;
   padding: var(--space-3);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   background: var(--color-bg-elevated);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text-primary) 12%, transparent);
+  box-shadow: none;
   pointer-events: none;
 }
 

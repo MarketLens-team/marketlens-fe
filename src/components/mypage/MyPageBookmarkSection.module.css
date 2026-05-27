@@ -84,9 +84,16 @@
 }
 
 .calendarModalContent {
-  width: min(26rem, 92vw);
+  position: relative;
+  z-index: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: min(26rem, 92vw);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-modal);
+  border: 1px solid var(--color-border-strong);
+  overflow: visible;
 }
 
 .modalContent {
