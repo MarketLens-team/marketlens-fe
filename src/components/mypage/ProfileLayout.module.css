@@ -1,6 +1,6 @@
 .pageLayout {
   --profile-nav-width: 13.75rem;
-  --profile-nav-gap: 0.2rem;
+  --profile-nav-gap: 0.25rem;
 
   position: relative;
   width: 100%;
@@ -17,7 +17,7 @@
 
 .content {
   margin-left: calc(var(--profile-nav-width) + var(--profile-nav-gap));
-  min-width: 48rem;
+  min-width: 0;
   max-width: 48rem;
 }
 
