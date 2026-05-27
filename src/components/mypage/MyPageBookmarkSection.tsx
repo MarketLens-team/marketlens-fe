@@ -64,6 +64,10 @@ function formatTodayLabel(): string {
   return new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }).replace(/ /g, '')
 }
 
+function formatDateShort(date: string): string {
+  return new Date(date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }).replace(/ /g, '')
+}
+
 function BookmarkItemsList({
   items,
   removingId,
@@ -176,7 +180,7 @@ export function MyPageBookmarkSection({
               onClick={onDateClear}
             >
               <CalendarIcon />
-              {formatTodayLabel()}
+              {formatDateShort(filterDate)}
               <span className={styles.calendarBtnClear} aria-hidden>×</span>
             </button>
           ) : (
