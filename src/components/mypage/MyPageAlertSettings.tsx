@@ -26,14 +26,12 @@ const ALERT_OPTIONS: { key: keyof AlertSettings; label: string; description: str
 
 interface MyPageAlertSettingsProps {
   settings: AlertSettings
-  alertExample: string
   saving?: boolean
   onSettingsChange: (settings: AlertSettings) => void
 }
 
 export function MyPageAlertSettings({
   settings,
-  alertExample,
   saving = false,
   onSettingsChange,
 }: MyPageAlertSettingsProps) {
@@ -75,11 +73,6 @@ export function MyPageAlertSettings({
             )
           })}
         </ul>
-      </div>
-
-      <div className={styles.exampleSection}>
-        <h3 className={styles.sectionTitle}>알림 예시</h3>
-        <p className={styles.exampleText}>{alertExample}</p>
       </div>
     </section>
   )

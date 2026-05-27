@@ -147,11 +147,10 @@ export default function MyPage() {
             ) : null}
 
             {tab === 'account' ? (
-              <div className={styles.tabPanel}>
+              <div className={clsx(styles.tabPanel, styles.tabPanelSections)}>
                 <MyPageAccountInfo account={data.account} />
                 <MyPageAlertSettings
                   settings={alertSettings}
-                  alertExample={data.alertExample}
                   saving={savingAlerts}
                   onSettingsChange={handleSettingsChange}
                 />

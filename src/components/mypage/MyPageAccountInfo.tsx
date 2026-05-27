@@ -1,6 +1,4 @@
 import type { MyPageAccount } from '../../data/types/myPage'
-import { Card } from '../common/Card'
-import { CardSectionHeader } from '../common/CardSectionHeader'
 import styles from './MyPageAccountInfo.module.css'
 
 interface MyPageAccountInfoProps {
@@ -17,28 +15,31 @@ function formatJoinedAt(iso: string): string {
   })
 }
 
+const FIELDS: { key: keyof MyPageAccount; label: string; format?: (v: string) => string }[] = [
+  { key: 'nickname', label: '닉네임' },
+  { key: 'email', label: '이메일' },
+  { key: 'joinedAt', label: '가입일', format: formatJoinedAt },
+  { key: 'plan', label: '플랜' },
+]
+
 export function MyPageAccountInfo({ account }: MyPageAccountInfoProps) {
   return (
-    <Card padding="md" className={styles.card}>
-      <CardSectionHeader title="계정 정보" variant="embedded" />
+    <section className={styles.root} aria-labelledby="account-info-title">
+      <h2 id="account-info-title" className={styles.pageTitle}>
+        계정 정보
+      </h2>
       <dl className={styles.list}>
-        <div className={styles.row}>
-          <dt>닉네임</dt>
-          <dd>{account.nickname}</dd>
-        </div>
-        <div className={styles.row}>
-          <dt>이메일</dt>
-          <dd>{account.email}</dd>
-        </div>
-        <div className={styles.row}>
-          <dt>가입일</dt>
-          <dd>{formatJoinedAt(account.joinedAt)}</dd>
-        </div>
-        <div className={styles.row}>
-          <dt>플랜</dt>
-          <dd className={styles.plan}>{account.plan}</dd>
-        </div>
+        {FIELDS.map(({ key, label, format }) => {
+          const raw = account[key]
+          const value = format ? format(String(raw)) : String(raw)
+          return (
+            <div key={key} className={styles.row}>
+              <dt className={styles.label}>{label}</dt>
+              <dd className={key === 'plan' ? styles.valuePlan : styles.value}>{value}</dd>
+            </div>
+          )
+        })}
       </dl>
-    </Card>
+    </section>
   )
 }

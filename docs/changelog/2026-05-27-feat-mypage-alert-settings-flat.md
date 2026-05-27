@@ -18,7 +18,7 @@
 | 컨테이너 | `Card` + `CardSectionHeader` | `<section>` + 페이지 제목 `알림 설정` |
 | 항목 행 | 테두리·배경 박스 | 구분선 없음, `gap`으로 간격 |
 | 소제목 `알림` | `h3` 섹션 타이틀 | **제거** (페이지 제목만 유지) |
-| 알림 예시 | 노란 `exampleBox` 카드 | `알림 예시` 섹션 + 본문 텍스트 |
+| 알림 예시 | 노란 `exampleBox` 카드 | **UI에서 제거** (`alertExample` prop 미전달, API 필드는 유지) |
 | 타이포 | `base` / `sm` | 제목 `xl`, 설명 `base` |
 | 토글 OFF | `--color-interactive-active` | muted grey track |
 

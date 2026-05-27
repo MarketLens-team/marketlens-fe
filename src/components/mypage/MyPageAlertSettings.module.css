@@ -19,14 +19,6 @@
   gap: var(--space-4);
 }
 
-.sectionTitle {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-  color: var(--color-text-primary);
-}
-
 .optionList {
   margin: 0;
   padding: 0;
@@ -112,20 +104,6 @@
 
 .toggleTrack[data-on='true'] .toggleThumb {
   transform: translateX(1.25rem);
-}
-
-.exampleSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-}
-
-.exampleText {
-  margin: 0;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  color: var(--color-text-secondary);
 }
 
 @media (max-width: 720px) {

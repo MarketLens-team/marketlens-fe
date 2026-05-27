@@ -29,8 +29,10 @@
 | `--profile-nav-gap` | nav 오른쪽 ↔ 메인 시작 간격 | `0.2rem` |
 | `.content` `max-width` | 메인 컬럼 최대 폭 | `48rem` |
 
-- `.content` `margin-left`: `calc(var(--profile-nav-width) + var(--profile-nav-gap))` — fixed nav 아래 메인 시작점
-- 간격만 바꿀 때: `--profile-nav-gap`만 수정 (nav 너비는 `--profile-nav-width`)
+- `.content` `margin-left`: **`var(--profile-nav-gap)`만** (의도적 — nav와 메인 밀착, `calc(nav-width + gap)` 아님)
+- `.content` `min-width` / `max-width`: `48rem`
+- 간격만 바꿀 때: `--profile-nav-gap` (현재 `0.25rem`)
+- nav 너비: `--profile-nav-width` (`.nav` `width`와 별도 — 메인 offset에 nav width 미포함)
 
 ### 기타
 

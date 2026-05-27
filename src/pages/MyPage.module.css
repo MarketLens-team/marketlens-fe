@@ -25,6 +25,10 @@
   min-width: 0;
 }
 
+.tabPanelSections {
+  gap: var(--space-8);
+}
+
 .skeletonTable {
   height: 22rem;
   border-radius: var(--radius-md);
