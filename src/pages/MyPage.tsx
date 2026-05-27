@@ -48,13 +48,11 @@ export default function MyPage() {
     initialLoading: bookmarkInitialLoading,
     refreshing: bookmarkRefreshing,
     error: bookmarksError,
+    filterDate: bookmarkFilterDate,
+    selectDate: selectBookmarkDate,
+    clearDateFilter: clearBookmarkDateFilter,
     dateSummaries: bookmarkDateSummaries,
     dateSummariesLoading: bookmarkDateSummariesLoading,
-    modalDate: bookmarkModalDate,
-    modalItems: bookmarkModalItems,
-    modalLoading: bookmarkModalLoading,
-    openDateModal: openBookmarkDateModal,
-    closeDateModal: closeBookmarkDateModal,
   } = useMyPageBookmarks(bookmarkRefreshKey)
 
   const [localSettings, setLocalSettings] = useState<AlertSettings | null>(null)
@@ -178,11 +176,9 @@ export default function MyPage() {
                     refreshing={bookmarkRefreshing}
                     onSortChange={changeBookmarkSortOrder}
                     onPageChange={goToBookmarkPage}
-                    modalDate={bookmarkModalDate}
-                    modalItems={bookmarkModalItems}
-                    modalLoading={bookmarkModalLoading}
-                    onDateClick={openBookmarkDateModal}
-                    onModalClose={closeBookmarkDateModal}
+                    filterDate={bookmarkFilterDate}
+                    onDateSelect={selectBookmarkDate}
+                    onDateClear={clearBookmarkDateFilter}
                     removingId={removingBookmarkId}
                     onRemove={handleBookmarkRemove}
                   />

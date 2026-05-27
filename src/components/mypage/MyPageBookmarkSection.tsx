@@ -32,12 +32,10 @@ interface MyPageBookmarkSectionProps {
   refreshing?: boolean
   onSortChange: (order: BookmarkSortOrder) => void
   onPageChange: (page: number) => void
-  // 날짜 상세 모달
-  modalDate: string | null
-  modalItems: MyPageBookmarkItem[]
-  modalLoading: boolean
-  onDateClick: (date: string) => void
-  onModalClose: () => void
+  // 날짜 필터
+  filterDate: string | null
+  onDateSelect: (date: string) => void
+  onDateClear: () => void
   // 삭제
   removingId?: string | null
   onRemove: (id: string) => void
@@ -53,11 +51,12 @@ function formatBookmarkedAt(iso: string): string {
   })
 }
 
-function formatModalTitle(date: string): string {
+function formatFilterDateLabel(date: string): string {
   return new Date(date).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    weekday: 'long',
   })
 }
 
@@ -136,11 +135,9 @@ export function MyPageBookmarkSection({
   refreshing,
   onSortChange,
   onPageChange,
-  modalDate,
-  modalItems,
-  modalLoading,
-  onDateClick,
-  onModalClose,
+  filterDate,
+  onDateSelect,
+  onDateClear,
   removingId,
   onRemove,
 }: MyPageBookmarkSectionProps) {
@@ -148,7 +145,7 @@ export function MyPageBookmarkSection({
 
   const handleCalendarDateClick = (date: string) => {
     setCalendarOpen(false)
-    onDateClick(date)
+    onDateSelect(date)
   }
 
   return (
@@ -171,17 +168,35 @@ export function MyPageBookmarkSection({
         </button>
 
         {dateSummaries.length > 0 && (
-          <button
-            type="button"
-            className={styles.calendarBtn}
-            aria-label="날짜별 보기"
-            onClick={() => setCalendarOpen(true)}
-          >
-            <CalendarIcon />
-            {formatTodayLabel()}
-          </button>
+          filterDate ? (
+            <button
+              type="button"
+              className={clsx(styles.calendarBtn, styles.calendarBtnActive)}
+              aria-label="날짜 필터 해제"
+              onClick={onDateClear}
+            >
+              <CalendarIcon />
+              {formatTodayLabel()}
+              <span className={styles.calendarBtnClear} aria-hidden>×</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.calendarBtn}
+              aria-label="날짜별 보기"
+              onClick={() => setCalendarOpen(true)}
+            >
+              <CalendarIcon />
+              {formatTodayLabel()}
+            </button>
+          )
         )}
       </div>
+
+      {/* 날짜 필터 헤더 */}
+      {filterDate && (
+        <p className={styles.filterDateLabel}>{formatFilterDateLabel(filterDate)}</p>
+      )}
 
       {/* 목록 */}
       <div className={clsx(styles.listWrap, refreshing && styles.listRefreshing)}>
@@ -191,7 +206,7 @@ export function MyPageBookmarkSection({
           <EmptyState
             className={styles.empty}
             title="저장한 뉴스가 없어요"
-            message="전체 뉴스나 종목 상세 뉴스에서 ☆ 버튼으로 기사를 저장해 보세요."
+            message={filterDate ? '해당 날짜에 저장한 뉴스가 없어요.' : '전체 뉴스나 종목 상세 뉴스에서 ☆ 버튼으로 기사를 저장해 보세요.'}
           />
         ) : (
           <BookmarkItemsList items={items} removingId={removingId} onRemove={onRemove} />
@@ -235,23 +250,6 @@ export function MyPageBookmarkSection({
           <p className={styles.listLoadingHint} aria-busy="true">불러오는 중…</p>
         ) : (
           <BookmarkCalendar summaries={dateSummaries} onDateClick={handleCalendarDateClick} />
-        )}
-      </Modal>
-
-      {/* 날짜 상세 모달 */}
-      <Modal
-        isOpen={modalDate != null}
-        onClose={onModalClose}
-        title={modalDate ? formatModalTitle(modalDate) : undefined}
-        lockBackgroundScroll
-        contentClassName={styles.modalContent}
-      >
-        {modalLoading ? (
-          <p className={styles.listLoadingHint} aria-busy="true">불러오는 중…</p>
-        ) : modalItems.length === 0 ? (
-          <EmptyState title="저장한 뉴스가 없어요" message="" />
-        ) : (
-          <BookmarkItemsList items={modalItems} removingId={removingId} onRemove={onRemove} />
         )}
       </Modal>
     </div>

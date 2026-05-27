@@ -58,6 +58,31 @@
   color: var(--color-text-primary);
 }
 
+.calendarBtnActive {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+}
+
+.calendarBtnActive:hover {
+  border-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-elevated));
+  color: var(--color-danger);
+}
+
+.calendarBtnClear {
+  font-size: var(--font-size-base);
+  line-height: 1;
+  margin-left: var(--space-1);
+}
+
+.filterDateLabel {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
 .calendarModalContent {
   width: min(26rem, 92vw);
   display: flex;
