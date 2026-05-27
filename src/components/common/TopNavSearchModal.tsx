@@ -216,7 +216,7 @@ function StockSearchRow({
           className={styles.actionBtn}
           onClick={() => {
             if (inWatchlist) remove(stock.code)
-            else add({ code: stock.code, name: stock.name })
+            else add({ code: stock.code, name: stock.name, imageUrl: stock.imageUrl })
           }}
         >
           {inWatchlist ? '관심해제' : '관심추가'}

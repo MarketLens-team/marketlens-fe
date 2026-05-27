@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { buzzSentimentClass, formatSurgePercent } from '../buzz/buzzSurgeScore'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { formatPercent, formatPrice, formatStockScore } from '../stock/stockScore'
 import type { MyPageWatchlistRow } from '../../data/types/myPage'
 import { MY_PAGE_WATCHLIST_MAX } from '../../data/types/myPage'
@@ -73,7 +74,7 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
                 언급량
               </th>
               <th scope="col" className={styles.colActions}>
-                알림
+                <span className={styles.srOnly}>관리</span>
               </th>
             </tr>
           </thead>
@@ -90,8 +91,16 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
                       className={styles.stockBtn}
                       onClick={() => goToStock(row.code)}
                     >
-                      <span className={styles.stockName}>{row.name}</span>
-                      <span className={styles.stockCode}>{row.code}</span>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={row.name}
+                        imageUrl={row.imageUrl}
+                      />
+                      <span className={styles.stockText}>
+                        <span className={styles.stockName}>{row.name}</span>
+                        <span className={styles.stockCode}>{row.code}</span>
+                      </span>
                     </button>
                   </td>
                   <td className={clsx(styles.mono, styles.numCell)}>{formatPriceCell(row.price)}</td>
@@ -109,13 +118,6 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
                       : '—'}
                   </td>
                   <td className={styles.actionsCell}>
-                    <span
-                      className={clsx(styles.bell, row.hasAlert && styles.bellActive)}
-                      aria-label={row.hasAlert ? '주의 알림' : '알림 없음'}
-                      title={row.hasAlert ? '주의 필요' : '알림'}
-                    >
-                      🔔
-                    </span>
                     <button
                       type="button"
                       className={styles.removeBtn}

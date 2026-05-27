@@ -1,3 +1,4 @@
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type {
   BuzzSurgeItem,
@@ -89,6 +90,7 @@ export function mapDashboardWatchlistRow(
   return {
     name: item.stockName,
     code: item.stockCode,
+    imageUrl: normalizeImageUrl(item.imageUrl),
     price: toFiniteNumber(priceRow?.price),
     changePercent: toFiniteNumber(priceRow?.changePercent),
     sentimentScore,

@@ -1,3 +1,4 @@
+import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { AlertSettings } from '../types/member'
 import type { MemberResponse } from '../types/memberApi'
@@ -16,11 +17,11 @@ export function mapWatchlistRow(
   return {
     code: item.stockCode,
     name: item.stockName,
+    imageUrl: normalizeImageUrl(item.imageUrl),
     price: 0,
     changePercent: 0,
     sentimentScore,
     mentionSurgePercent: toFiniteNumber(summary?.mentionChangeRate),
-    hasAlert: sentimentScore <= ATTENTION_SCORE_THRESHOLD,
   }
 }
 

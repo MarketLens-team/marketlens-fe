@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
+import { EntityAvatar } from '../ui/EntityAvatar'
 import { useAuthStore } from '../../store/authStore'
 import type { DashboardWatchlistRow } from '../../data/types/dashboard'
 import { DashboardLoginPrompt } from './DashboardLoginPrompt'
@@ -79,8 +80,16 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
                     }
                   }}
                 >
-                  <td>
-                    <span className={styles.stockName}>{row.name}</span>
+                  <td className={styles.stockCell}>
+                    <span className={styles.stockLead}>
+                      <EntityAvatar
+                        variant="stock"
+                        size="sm"
+                        name={row.name}
+                        imageUrl={row.imageUrl}
+                      />
+                      <span className={styles.stockName}>{row.name}</span>
+                    </span>
                   </td>
                   <td className={styles.mono}>{formatPrice(row.price)}</td>
                   <td className={clsx(styles.mono, row.changePercent >= 0 ? styles.up : styles.down)}>

@@ -16,6 +16,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: '셀트리온',
       code: '068270',
+      imageUrl: '/images/stocks/Stock068270.svg',
       price: 168500,
       changePercent: -0.8,
       sentimentScore: -34,
@@ -26,6 +27,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: '카카오',
       code: '035720',
+      imageUrl: '/images/stocks/Stock035720.svg',
       price: 45200,
       changePercent: 1.4,
       sentimentScore: 28,
@@ -36,6 +38,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: '현대차',
       code: '005380',
+      imageUrl: '/images/stocks/Stock005380.svg',
       price: 248500,
       changePercent: 0.6,
       sentimentScore: 41,
@@ -46,6 +49,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: 'LG에너지솔루션',
       code: '373220',
+      imageUrl: '/images/stocks/Stock373220.svg',
       price: 412000,
       changePercent: -1.2,
       sentimentScore: 15,
@@ -56,6 +60,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: 'SK하이닉스',
       code: '000660',
+      imageUrl: '/images/stocks/Stock000660.svg',
       price: 198500,
       changePercent: 2.8,
       sentimentScore: 62,
@@ -66,6 +71,7 @@ export const mockDashboardOverview: DashboardOverview = {
     {
       name: '삼성전자',
       code: '005930',
+      imageUrl: '/images/stocks/Stock005930.svg',
       price: 87400,
       changePercent: 1.2,
       sentimentScore: 73,

@@ -30,11 +30,11 @@ export interface MyPageBookmarkItem {
 export interface MyPageWatchlistRow {
   code: string
   name: string
+  imageUrl?: string | null
   price: number
   changePercent: number
   sentimentScore: number
   mentionSurgePercent: number
-  hasAlert: boolean
 }
 
 export interface MyPageSummary {
