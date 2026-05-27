@@ -23,6 +23,7 @@ import {
 } from '../lib/mergeFeedItems'
 import {
   capturePrependScrollSnapshot,
+  restorePrependScrollSnapshot,
   schedulePrependScrollRestore,
   type PrependScrollSnapshot,
 } from '../lib/preserveScrollOnPrepend'
@@ -305,11 +306,13 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       let added = 0
       let nextItems: TItem[] = []
-      setItems((prev) => {
-        const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'prepend')
-        added = merged.added
-        nextItems = merged.items
-        return merged.items
+      flushSync(() => {
+        setItems((prev) => {
+          const merged = mergeAnchoredFeedItemsWithCount(prev, page.items, 'prepend')
+          added = merged.added
+          nextItems = merged.items
+          return merged.items
+        })
       })
 
       // newer 응답: newer edge만 갱신, olderEdgeRef는 유지
@@ -338,6 +341,7 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
 
       const scrollRoot = resolveScrollRoot(scrollRootSelector)
       if (scrollRoot && scrollSnapshot && added > 0) {
+        restorePrependScrollSnapshot(scrollRoot, scrollSnapshot)
         schedulePrependScrollRestore(scrollRoot, scrollSnapshot)
       }
 

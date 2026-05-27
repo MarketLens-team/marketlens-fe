@@ -121,7 +121,7 @@ export function AllNewsListItem({
   )
 
   return (
-    <li id={newsFeedItemElementId(item.id)} className={styles.item}>
+    <li id={newsFeedItemElementId(item.id)} data-scroll-anchor-item className={styles.item}>
       <div className={rowClassName}>{body}</div>
     </li>
   )

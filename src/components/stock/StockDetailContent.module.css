@@ -697,6 +697,25 @@
   overflow-anchor: auto;
 }
 
+.newsFeedWrap {
+  position: relative;
+}
+
+.newsNewerOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: var(--space-2) 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-bg-card) 88%, transparent);
+}
+
 .newsListAnchoring {
   position: relative;
 }

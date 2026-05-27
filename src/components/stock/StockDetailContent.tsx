@@ -179,6 +179,7 @@ export function StockDetailContent({
     loadingAround: loadingAnchoredNews,
     loadingNewer: loadingNewerNews,
     loadingOlder: loadingOlderNews,
+    anchoredLoadingUi,
     aroundError: anchoredNewsError,
     anchoredWarmComplete,
     hasMoreDown,
@@ -419,6 +420,10 @@ export function StockDetailContent({
   }, [interested, stock.code, watchlistPending])
 
   const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
+  const showNewerLoader =
+    feedMode === 'anchored' && (loadingNewerNews || anchoredLoadingUi === 'newer')
+  const showOlderLoader =
+    feedMode === 'anchored' && (loadingMoreDown || anchoredLoadingUi === 'older')
 
   const newsTopSentinelMargin = `${ANCHORED_SCROLL_PREFETCH_EDGE_UP_PX}px 0px 0px 0px`
 
@@ -699,18 +704,26 @@ export function StockDetailContent({
             />
           ) : null}
           {!loadingNewsFilter && displayNews.length > 0 ? (
-            <ul
+            <div
               className={clsx(
-                styles.newsList,
+                styles.newsFeedWrap,
                 loadingAnchoredNews && focusNewsId && styles.newsListAnchoring,
               )}
-              data-anchored-feed-list={feedMode === 'anchored' ? true : undefined}
             >
-              {feedMode === 'anchored' && hasMoreUp ? (
-                <li className={styles.newsScrollHead} aria-hidden>
-                  <div ref={newsTopSentinelRef} className={styles.newsSentinel} />
-                </li>
+              {showNewerLoader ? (
+                <div className={styles.newsNewerOverlay} aria-busy="true" aria-live="polite">
+                  <FeedLoadingSpinner label="이전 뉴스 불러오는 중" />
+                </div>
               ) : null}
+              <ul
+                className={styles.newsList}
+                data-anchored-feed-list={feedMode === 'anchored' ? true : undefined}
+              >
+                {feedMode === 'anchored' && hasMoreUp ? (
+                  <li className={styles.newsScrollHead} aria-hidden>
+                    <div ref={newsTopSentinelRef} className={styles.newsSentinel} aria-hidden />
+                  </li>
+                ) : null}
               {displayNews.map((item) => (
                 <StockNewsListItem
                   key={item.id}
@@ -726,13 +739,24 @@ export function StockDetailContent({
                   }
                 />
               ))}
-            </ul>
+              </ul>
+            </div>
           ) : null}
-          {hasMoreDown && !loadingNewsFilter ? (
-            <div className={styles.newsScrollFoot} aria-busy={loadingMoreDown || undefined}>
+          {(hasMoreDown || showOlderLoader) && !loadingNewsFilter ? (
+            <div
+              className={styles.newsScrollFoot}
+              role={showOlderLoader ? 'status' : undefined}
+              aria-live={showOlderLoader ? 'polite' : undefined}
+              aria-busy={showOlderLoader || loadingMoreDown || undefined}
+            >
               <div ref={newsSentinelRef} className={styles.newsSentinel} aria-hidden />
-              <div className={styles.newsLoadMoreSlot} aria-hidden={!loadingMoreDown}>
-                {loadingMoreDown ? <FeedLoadingSpinner label="뉴스 더 불러오는 중" /> : null}
+              <div
+                className={styles.newsLoadMoreSlot}
+                aria-hidden={!(showOlderLoader || loadingMoreDown)}
+              >
+                {showOlderLoader || loadingMoreDown ? (
+                  <FeedLoadingSpinner label="뉴스 더 불러오는 중" />
+                ) : null}
               </div>
             </div>
           ) : null}
