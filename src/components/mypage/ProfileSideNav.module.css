@@ -12,36 +12,47 @@
 }
 
 .item {
+  composes: ringRow from '../common/interactiveListRow.module.css';
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
   min-height: 3.25rem;
   padding: var(--space-3) var(--space-4);
-  box-sizing: border-box;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
   color: var(--color-text-secondary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   text-align: left;
   line-height: 1.2;
   cursor: pointer;
-  transition:
-    background-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
 }
 
-.item:hover {
-  background: var(--color-interactive-hover);
-  color: var(--color-text-primary);
+@media (hover: hover) and (pointer: fine) {
+  .item:not(.itemActive):hover {
+    color: var(--color-text-primary);
+  }
 }
 
 .itemActive {
-  background: color-mix(in srgb, var(--color-interactive-active) 22%, transparent);
-  color: var(--color-text-primary);
+  background: transparent;
+  color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item.itemActive:hover {
+    background: transparent;
+    color: var(--color-primary);
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.itemActive:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
 }
 
 .icon {
