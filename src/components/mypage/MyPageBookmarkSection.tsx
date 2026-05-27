@@ -1,8 +1,6 @@
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { buzzSentimentClass } from '../buzz/buzzSurgeScore'
-import { Card } from '../common/Card'
-import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EmptyState } from '../common/EmptyState'
 import { UnderlineTabNav } from '../common/UnderlineTabNav'
 import { formatStockScore } from '../stock/stockScore'
@@ -140,14 +138,7 @@ export function MyPageBookmarkSection({
   const hasPagination = totalPages > 1
 
   return (
-    <Card padding="md" className={styles.card}>
-      <div className={styles.header}>
-        <CardSectionHeader title="저장한 뉴스" variant="embedded" />
-        <Link to="/news" className={styles.feedLink}>
-          뉴스 피드
-        </Link>
-      </div>
-
+    <div className={styles.section}>
       <UnderlineTabNav
         className={styles.tabs}
         options={VIEW_TABS}
@@ -252,6 +243,6 @@ export function MyPageBookmarkSection({
           </button>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
