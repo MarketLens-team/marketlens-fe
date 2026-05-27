@@ -28,8 +28,92 @@
   border-radius: var(--radius-sm);
 }
 
+.tabs {
+  margin-bottom: var(--space-3);
+}
+
+.stockPicker {
+  margin-bottom: var(--space-3);
+}
+
+.stockPickerHint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.stockList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stockChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.stockChip:hover {
+  border-color: var(--color-border-strong);
+}
+
+.stockChipActive {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+}
+
+.stockChipName {
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stockChipCount {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.stockChipActive .stockChipCount {
+  color: var(--color-primary);
+}
+
+.listWrap {
+  transition: opacity var(--duration-fast) ease;
+}
+
+.listRefreshing {
+  opacity: 0.72;
+}
+
 .empty {
   padding: var(--space-4) 0;
+}
+
+.listLoadingHint {
+  margin: 0;
+  padding: var(--space-4) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .list {

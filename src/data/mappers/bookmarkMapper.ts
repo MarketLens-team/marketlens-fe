@@ -1,5 +1,5 @@
-import type { NewsBookmarkDto } from '../types/bookmark'
-import type { MyPageBookmarkItem } from '../types/myPage'
+import type { BookmarkStockSummaryDto, NewsBookmarkDto } from '../types/bookmark'
+import type { MyPageBookmarkItem, MyPageBookmarkStockSummary } from '../types/myPage'
 import type { SentimentPolarity } from '../types/stock'
 import { normalizeBookmarkContextType } from '../../lib/bookmarkNavigation'
 
@@ -29,4 +29,18 @@ export function mapNewsBookmarkDto(dto: NewsBookmarkDto): MyPageBookmarkItem {
 
 export function mapNewsBookmarkList(dtos: NewsBookmarkDto[]): MyPageBookmarkItem[] {
   return dtos.map(mapNewsBookmarkDto)
+}
+
+export function mapBookmarkStockSummaryDto(dto: BookmarkStockSummaryDto): MyPageBookmarkStockSummary {
+  return {
+    stockCode: dto.stockCode,
+    stockName: dto.stockName,
+    bookmarkCount: dto.bookmarkCount,
+  }
+}
+
+export function mapBookmarkStockSummaryList(
+  dtos: BookmarkStockSummaryDto[],
+): MyPageBookmarkStockSummary[] {
+  return dtos.map(mapBookmarkStockSummaryDto)
 }

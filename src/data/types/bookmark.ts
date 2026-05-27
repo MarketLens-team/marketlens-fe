@@ -6,6 +6,19 @@ export interface NewsBookmarkSaveContext {
   stockCode?: string
 }
 
+/** `GET /api/v1/bookmarks` 쿼리 — `contextStockCode`만내면 STOCK 필터 */
+export interface NewsBookmarkListQuery {
+  contextType?: NewsBookmarkContextType
+  contextStockCode?: string
+}
+
+/** `GET /api/v1/bookmarks/stocks` — OpenAPI `BookmarkStockSummaryResponse` */
+export interface BookmarkStockSummaryDto {
+  stockCode: string
+  stockName: string
+  bookmarkCount: number
+}
+
 /** `GET /api/v1/bookmarks` — OpenAPI `NewsBookmarkResponse` */
 export interface NewsBookmarkDto {
   bookmarkId: number

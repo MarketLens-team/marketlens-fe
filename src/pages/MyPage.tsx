@@ -3,22 +3,21 @@ import { useCallback, useState } from 'react'
 import { MyPageAccountInfo } from '../components/mypage/MyPageAccountInfo'
 import { MyPageAlertSettings } from '../components/mypage/MyPageAlertSettings'
 import { MyPageSummaryCards } from '../components/mypage/MyPageSummaryCards'
-import { MyPageBookmarkList } from '../components/mypage/MyPageBookmarkList'
+import { MyPageBookmarkSection } from '../components/mypage/MyPageBookmarkSection'
 import { MyPageWatchlistTable } from '../components/mypage/MyPageWatchlistTable'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import skeleton from '../components/common/Skeleton.module.css'
-import { fetchNewsBookmarks, removeNewsBookmark } from '../data/clients/bookmarkClient'
+import { removeNewsBookmark } from '../data/clients/bookmarkClient'
 import { updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
-import { mapNewsBookmarkList } from '../data/mappers/bookmarkMapper'
-import type { MyPageBookmarkItem } from '../data/types/myPage'
 import type { AlertSettings } from '../data/types/member'
 import { getApiErrorMessage } from '../data/util/apiError'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useAsyncData } from '../hooks/useAsyncData'
+import { useMyPageBookmarks } from '../hooks/useMyPageBookmarks'
 import styles from './MyPage.module.css'
 
 export default function MyPage() {
@@ -32,15 +31,20 @@ export default function MyPage() {
   const factory = useCallback(() => fetchMyPage(), [refreshKey])
   const { data, loading, error } = useAsyncData(factory)
 
-  const bookmarkFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
-    const rows = await fetchNewsBookmarks()
-    return mapNewsBookmarkList(rows)
-  }, [bookmarkRefreshKey])
   const {
-    data: bookmarks,
-    loading: bookmarksLoading,
+    view: bookmarkView,
+    changeView: changeBookmarkView,
+    selectedStockCode,
+    selectStock,
+    stockSummaries,
+    stockSummariesLoading,
+    stockBookmarksLoading,
+    items: bookmarks,
+    initialLoading: bookmarksInitialLoading,
+    sectionReady: bookmarksSectionReady,
     error: bookmarksError,
-  } = useAsyncData(bookmarkFactory)
+    refreshing: bookmarksRefreshing,
+  } = useMyPageBookmarks(bookmarkRefreshKey)
 
   const [localSettings, setLocalSettings] = useState<AlertSettings | null>(null)
   const alertSettings = localSettings ?? data?.alertSettings
@@ -138,18 +142,26 @@ export default function MyPage() {
                     message={bookmarksError.message}
                   />
                 ) : null}
-                {bookmarksLoading && !bookmarks && !bookmarksError ? (
+                {bookmarksInitialLoading && !bookmarksError ? (
                   <div
                     className={clsx(skeleton.block, styles.skeletonBookmarks)}
                     aria-busy="true"
                     aria-label="저장한 뉴스 로딩"
                   />
                 ) : null}
-                {bookmarks ? (
-                  <MyPageBookmarkList
+                {bookmarksSectionReady && !bookmarksError ? (
+                  <MyPageBookmarkSection
+                    view={bookmarkView}
+                    onViewChange={changeBookmarkView}
+                    stockSummaries={stockSummaries}
+                    stockSummariesLoading={stockSummariesLoading}
+                    selectedStockCode={selectedStockCode}
+                    onSelectStock={selectStock}
                     items={bookmarks}
+                    stockBookmarksLoading={stockBookmarksLoading}
                     removingId={removingBookmarkId}
                     onRemove={handleBookmarkRemove}
+                    refreshing={bookmarksRefreshing}
                   />
                 ) : null}
               </div>

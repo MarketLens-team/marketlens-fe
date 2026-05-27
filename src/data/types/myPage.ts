@@ -4,6 +4,14 @@ import type { SentimentPolarity } from './stock'
 
 export const MY_PAGE_WATCHLIST_MAX = 10
 
+export interface MyPageBookmarkStockSummary {
+  stockCode: string
+  stockName: string
+  bookmarkCount: number
+}
+
+export type MyPageBookmarkView = 'date' | 'stock'
+
 export interface MyPageBookmarkItem {
   id: string
   title: string
