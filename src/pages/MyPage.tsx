@@ -149,6 +149,7 @@ export default function MyPage() {
             {tab === 'account' ? (
               <div className={clsx(styles.tabPanel, styles.tabPanelSections)}>
                 <MyPageAccountInfo account={data.account} />
+                <hr className={styles.sectionDivider} aria-hidden />
                 <MyPageAlertSettings
                   settings={alertSettings}
                   saving={savingAlerts}
