@@ -3,7 +3,6 @@ import { api } from '../../services/api'
 import type { ApiEnvelope } from '../types/api'
 import type {
   BookmarkDateSummaryDto,
-  BookmarkStockSummaryDto,
   NewsBookmarkDto,
   NewsBookmarkListQuery,
   NewsBookmarkPageDto,
@@ -14,7 +13,6 @@ import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
 const BOOKMARKS_PATH = '/api/v1/bookmarks'
-const BOOKMARK_STOCKS_PATH = '/api/v1/bookmarks/stocks'
 
 interface MockBookmarkRow {
   context: NewsBookmarkSaveContext
@@ -33,8 +31,6 @@ function buildAddBookmarkQuery(context: NewsBookmarkSaveContext): URLSearchParam
 function buildBookmarkListQuery(query?: NewsBookmarkListQuery): string {
   if (!query) return ''
   const params = new URLSearchParams()
-  if (query.contextType) params.set('contextType', query.contextType)
-  if (query.contextStockCode?.trim()) params.set('contextStockCode', query.contextStockCode.trim())
   if (query.publishedDate) params.set('publishedDate', query.publishedDate)
   if (query.page != null) params.set('page', String(query.page + 1)) // 내부 0-based → API 1-based
   if (query.size != null) params.set('size', String(query.size))
@@ -62,22 +58,8 @@ export async function fetchNewsBookmarks(query?: NewsBookmarkListQuery): Promise
       sentimentScore: 0,
       sentimentLabel: 'neutral',
     }))
-    if (query?.contextStockCode?.trim()) {
-      const code = query.contextStockCode.trim()
-      rows = rows.filter(
-        (row) =>
-          row.contextType === 'STOCK' &&
-          row.contextStockCode === code &&
-          (!query.contextType || query.contextType === 'STOCK'),
-      )
-    } else if (query?.contextType === 'ALL_NEWS') {
-      rows = rows.filter((row) => row.contextType === 'ALL_NEWS')
-    } else if (query?.contextType === 'STOCK') {
-      rows = rows.filter((row) => row.contextType === 'STOCK')
-    }
     if (query?.publishedDate) {
-      const d = query.publishedDate
-      rows = rows.filter((row) => row.publishedAt.startsWith(d))
+      rows = rows.filter((row) => row.publishedAt.startsWith(query.publishedDate!))
     }
     if (query?.sortOrder === 'OLDEST') rows = [...rows].reverse()
     const size = query?.size ?? 10
@@ -99,33 +81,6 @@ export async function fetchNewsBookmarks(query?: NewsBookmarkListQuery): Promise
     }
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '즐겨찾기를 불러오지 못했습니다.'))
-  }
-}
-
-export async function fetchBookmarkStockSummaries(): Promise<BookmarkStockSummaryDto[]> {
-  if (isMockDataSource()) {
-    await mockDelay(120)
-    const counts = new Map<string, { stockName: string; bookmarkCount: number }>()
-    for (const row of mockBookmarks.values()) {
-      if (row.context.type !== 'STOCK' || !row.context.stockCode?.trim()) continue
-      const stockCode = row.context.stockCode.trim()
-      const prev = counts.get(stockCode)
-      counts.set(stockCode, {
-        stockName: stockCode,
-        bookmarkCount: (prev?.bookmarkCount ?? 0) + 1,
-      })
-    }
-    return Array.from(counts.entries()).map(([stockCode, summary]) => ({
-      stockCode,
-      stockName: summary.stockName,
-      bookmarkCount: summary.bookmarkCount,
-    }))
-  }
-  try {
-    const { data } = await api.get<ApiEnvelope<BookmarkStockSummaryDto[]>>(BOOKMARK_STOCKS_PATH)
-    return unwrapApiEnvelope(data, '종목별 즐겨찾기를 불러오지 못했습니다.') ?? []
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error, '종목별 즐겨찾기를 불러오지 못했습니다.'))
   }
 }
 

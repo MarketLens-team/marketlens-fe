@@ -1,5 +1,5 @@
-import type { BookmarkDateSummaryDto, BookmarkStockSummaryDto, NewsBookmarkDto, NewsBookmarkPageDto } from '../types/bookmark'
-import type { MyPageBookmarkDateSummary, MyPageBookmarkItem, MyPageBookmarkPage, MyPageBookmarkStockSummary } from '../types/myPage'
+import type { BookmarkDateSummaryDto, NewsBookmarkDto, NewsBookmarkPageDto } from '../types/bookmark'
+import type { MyPageBookmarkDateSummary, MyPageBookmarkItem, MyPageBookmarkPage } from '../types/myPage'
 import type { NewsBookmarkContextType } from '../types/bookmark'
 import type { SentimentPolarity } from '../types/stock'
 import { normalizeBookmarkContextType } from '../../lib/bookmarkNavigation'
@@ -42,14 +42,6 @@ export function mapNewsBookmarkPage(page: NewsBookmarkPageDto): MyPageBookmarkPa
   }
 }
 
-export function mapBookmarkStockSummaryDto(dto: BookmarkStockSummaryDto): MyPageBookmarkStockSummary {
-  return {
-    stockCode: dto.stockCode,
-    stockName: dto.stockName,
-    bookmarkCount: dto.bookmarkCount,
-  }
-}
-
 export function mapBookmarkDateSummaryList(dtos: BookmarkDateSummaryDto[]): MyPageBookmarkDateSummary[] {
   return dtos.map((dto) => ({
     date: dto.date,
@@ -62,10 +54,4 @@ export function mapBookmarkDateSummaryList(dtos: BookmarkDateSummaryDto[]): MyPa
       count: ctx.count,
     })),
   }))
-}
-
-export function mapBookmarkStockSummaryList(
-  dtos: BookmarkStockSummaryDto[],
-): MyPageBookmarkStockSummary[] {
-  return dtos.map(mapBookmarkStockSummaryDto)
 }

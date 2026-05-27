@@ -10,8 +10,6 @@ export type BookmarkSortOrder = 'LATEST' | 'OLDEST'
 
 /** `GET /api/v1/bookmarks` 쿼리 */
 export interface NewsBookmarkListQuery {
-  contextType?: NewsBookmarkContextType
-  contextStockCode?: string
   publishedDate?: string // YYYY-MM-DD
   page?: number
   size?: number
@@ -40,13 +38,6 @@ export interface NewsBookmarkPageDto {
   totalElements: number
   totalPages: number
   page: number
-}
-
-/** `GET /api/v1/bookmarks/stocks` — OpenAPI `BookmarkStockSummaryResponse` */
-export interface BookmarkStockSummaryDto {
-  stockCode: string
-  stockName: string
-  bookmarkCount: number
 }
 
 /** `GET /api/v1/bookmarks` — OpenAPI `NewsBookmarkResponse` */
