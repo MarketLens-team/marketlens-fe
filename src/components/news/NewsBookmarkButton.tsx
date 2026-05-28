@@ -14,7 +14,7 @@ export function NewsBookmarkButton({
   onToggle,
   className,
 }: NewsBookmarkButtonProps) {
-  const label = bookmarked ? '즐겨찾기 해제' : '즐겨찾기 추가'
+  const label = bookmarked ? '저장 해제' : '뉴스 저장'
 
   return (
     <button

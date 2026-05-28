@@ -3,31 +3,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-border-default);
+  border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
-  transition:
-    color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    background var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .btn:disabled {
   cursor: wait;
-  opacity: 0.65;
+  opacity: 0.5;
 }
 
 .btnActive {
   color: var(--color-warning);
-  border-color: color-mix(in srgb, var(--color-warning) 50%, var(--color-border-default));
-  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-bg-elevated));
 }
 
 .icon {
@@ -37,14 +31,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover:not(:disabled) {
-    border-color: var(--color-warning);
     color: var(--color-warning);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 40%, transparent);
   }
 }
 
 .btn:focus-visible {
   outline: none;
-  border-color: var(--color-warning);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 55%, transparent);
 }
