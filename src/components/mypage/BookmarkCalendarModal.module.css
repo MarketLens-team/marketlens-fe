@@ -1,0 +1,23 @@
+/* 달력 피커 모달 — 본문은 BookmarkCalendar가 100% 채움 */
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  /* 28rem 상한이면 1470px+ 에서 크기 고정 — vw로 키우고 상한만 둠 */
+  width: min(clamp(20rem, 38vw, 40rem), 92vw);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-modal);
+  border: 1px solid var(--color-border-strong);
+  overflow: visible;
+}
+
+.loadingHint {
+  margin: 0;
+  padding: var(--space-6) var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
