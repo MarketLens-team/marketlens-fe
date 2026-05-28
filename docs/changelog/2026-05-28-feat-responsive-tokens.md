@@ -24,6 +24,8 @@
 | `src/components/mypage/ProfileLayout.module.css` | 본문 48rem 고정 해제 · nav↔본문·우측 여백 — [상세](./2026-05-28-fix-mypage-profile-content-width.md) |
 | `src/pages/MyPage.module.css` | `.page` `width: 100%` |
 | `src/components/ui/Modal.module.css` | 기본 모달 `max-width` `clamp(480px, 38vw, 680px)` |
+| `src/components/common/DetailAccordionSidebar.module.css` | 매직 넘버 `78px` → `var(--layout-top-strip-height)` (82px, 4px 오차 수정) |
+| `src/components/dashboard/NewsDetailModal.module.css` | `max-width` 고정 `760px` → `clamp(560px, 52vw, 920px)` |
 
 ## 설계 노트
 
