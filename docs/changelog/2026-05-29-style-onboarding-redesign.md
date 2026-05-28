@@ -32,6 +32,17 @@
 - `.needleArm` 높이 재보정: `clamp(4.25rem, 38.5cqw, 6.5rem)`
 - `.gaugeWrap` `max-width: 280px` 추가 — 넓은 뷰포트에서 `react-gauge-chart`가 SVG 높이를 과도하게 자동 계산하는 문제 방지
 
+---
+
+## Fixed
+
+### 온보딩 스크롤 불가 버그 (`OnboardingPage.module.css`)
+- **원인**: `overflow: hidden` + `align-items: center` 조합이 세로 스크롤을 차단
+- `overflow: hidden` → `overflow-x: clip` (가로 넘침만 클립, 세로 스크롤 허용)
+- `align-items: center` → `align-items: flex-start` (콘텐츠가 뷰포트보다 길 때 상단 잘림 방지)
+- `padding: space-6` → `padding: space-8 space-6` (상하 여백 보완)
+- AuthPanel `pageSignup` 패턴과 동일 방식
+
 ## Notes
 - `react-gauge-chart`는 `style.height`를 무시하고 SVG 높이를 `svgWidth / 2 × 0.9`로 자동 계산함
   → `gaugeWrap`에 `max-width` 제한으로 해결
