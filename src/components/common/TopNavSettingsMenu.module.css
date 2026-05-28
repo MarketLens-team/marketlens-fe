@@ -123,18 +123,29 @@
 }
 
 .linkBtn {
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   text-align: left;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  padding: var(--space-3) var(--space-1);
+  padding: var(--space-3) var(--space-2);
   border-radius: var(--radius-md);
   cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
-.linkBtn:hover {
-  background: var(--color-interactive-hover);
-  color: var(--color-interactive-active-text);
+@media (hover: hover) and (pointer: fine) {
+  .linkBtn:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+  }
+}
+
+.linkBtn:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
 }
