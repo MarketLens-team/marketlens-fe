@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useOptimisticRemove } from '../../hooks/useOptimisticRemove'
 import { buzzSentimentClass } from '../buzz/buzzSurgeScore'
 import { EmptyState } from '../common/EmptyState'
 import { Modal } from '../ui/Modal'
@@ -58,8 +58,6 @@ function XIcon() {
   )
 }
 
-const REMOVE_ANIM_MS = 150 // opacity fade duration
-
 function BookmarkItemsList({
   items,
   onRemove,
@@ -67,19 +65,7 @@ function BookmarkItemsList({
   items: MyPageBookmarkItem[]
   onRemove: (id: string) => void
 }) {
-  const [animatingId, setAnimatingId] = useState<string | null>(null)
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
-
-  const handleRemove = (id: string) => {
-    setAnimatingId(id)
-    onRemove(id) // fire-and-forget
-    window.setTimeout(() => {
-      setHiddenIds((prev) => new Set(prev).add(id))
-      setAnimatingId(null)
-    }, REMOVE_ANIM_MS)
-  }
-
-  const visibleItems = items.filter((item) => !hiddenIds.has(item.id))
+  const { visibleItems, handleRemove, animatingId } = useOptimisticRemove(items, onRemove)
 
   return (
     <ul className={styles.list}>

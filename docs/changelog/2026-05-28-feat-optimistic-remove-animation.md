@@ -17,13 +17,14 @@
 | 파일 | 내용 |
 |------|------|
 | `components/common/optimisticRemove.module.css` | 공통 낙관적 삭제 애니메이션 모듈 (`.item` / `.itemRemoving`) |
+| `hooks/useOptimisticRemove.ts` | 공통 낙관적 삭제 훅 — `animatingId` · `hiddenIds` · `handleRemove` · `visibleItems` 캡슐화, `T extends { id: string }` 제네릭 |
 | `docs/design/optimistic-remove-animation.md` | 패턴 설계 문서 — 동작 흐름·성능 근거·구현 템플릿 |
 
 ## Changed
 
 | 파일 | 내용 |
 |------|------|
-| `components/mypage/MyPageBookmarkSection.tsx` | 인라인 애니메이션 → `optimisticRemove.module.css` 공통 모듈 사용 · API fire-and-forget · `removingId` prop 제거 |
+| `components/mypage/MyPageBookmarkSection.tsx` | 인라인 애니메이션 → `useOptimisticRemove` 훅 사용 · API fire-and-forget · `removingId` prop 제거 |
 | `components/mypage/MyPageBookmarkSection.module.css` | `.itemCollapse` / `.itemCollapsing` 인라인 정의 제거 |
 | `pages/MyPage.tsx` | `handleBookmarkRemove` 동기 fire-and-forget · `removingBookmarkId` 상태 제거 |
 
