@@ -2,10 +2,8 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useOptimisticRemove } from '../../hooks/useOptimisticRemove'
-import { buzzSentimentClass } from '../buzz/buzzSurgeScore'
 import { EmptyState } from '../common/EmptyState'
 import { Modal } from '../ui/Modal'
-import { formatStockScore } from '../stock/stockScore'
 import type { BookmarkSortOrder } from '../../data/types/bookmark'
 import type { MyPageBookmarkDateSummary, MyPageBookmarkItem } from '../../data/types/myPage'
 import { buildBookmarkItemPath, formatBookmarkContextLabel } from '../../lib/bookmarkNavigation'
@@ -13,13 +11,6 @@ import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDat
 import { BookmarkCalendar } from './BookmarkCalendar'
 import remove from '../common/optimisticRemove.module.css'
 import styles from './MyPageBookmarkSection.module.css'
-
-const SENTIMENT_SCORE_CLASS = {
-  pos: styles.sentPos,
-  warm: styles.sentWarm,
-  neg: styles.sentNeg,
-  neu: styles.sentNeu,
-} as const
 
 interface MyPageBookmarkSectionProps {
   // 달력
@@ -71,7 +62,6 @@ function BookmarkItemsList({
   return (
     <ul className={styles.list}>
       {visibleItems.map((item) => {
-        const sentKey = buzzSentimentClass(item.sentimentScore)
         const itemPath = buildBookmarkItemPath(item)
         const contextLabel = item.contextLabel ?? formatBookmarkContextLabel(item)
         const isAnimating = animatingId === item.id
@@ -90,14 +80,6 @@ function BookmarkItemsList({
                   <h3 className={styles.title}>{item.title}</h3>
                 </Link>
                 <p className={styles.contextLabel}>{contextLabel}</p>
-                {item.contextType === 'STOCK' && (
-                  <span
-                    className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
-                    aria-label={`감성 점수 ${item.sentimentScore}`}
-                  >
-                    {formatStockScore(item.sentimentScore)}
-                  </span>
-                )}
               </div>
               {item.imageUrl ? (
                 <Link className={styles.thumbLink} to={itemPath} aria-hidden tabIndex={-1}>
