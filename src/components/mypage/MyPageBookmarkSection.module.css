@@ -6,8 +6,8 @@
   display: flex;
   align-items: stretch;
   gap: 0;
-  margin-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border-default);
+  margin-bottom: var(--space-4);
+  border-bottom: 2px solid var(--color-border-strong);
 }
 
 /* ── 언더라인 정렬 탭 (D variant) ── */
@@ -18,8 +18,8 @@
   align-items: center;
   padding: var(--space-3) var(--space-4) var(--space-3);
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
   background: transparent;
   color: var(--color-text-secondary);
   font-size: var(--font-size-lg);
@@ -270,17 +270,14 @@
   gap: var(--space-3);
 }
 
+/* 삭제 애니메이션 → src/components/common/optimisticRemove.module.css 공통 모듈 사용 */
+
 .item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 8.5rem auto;
   gap: var(--space-3);
   align-items: start;
   padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.item:first-child {
-  border-top: 1px solid var(--color-border-default);
 }
 
 .body {
@@ -401,30 +398,30 @@
 
 .removeBtn {
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xl);
-  line-height: 1;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
   transition:
     color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
     background var(--duration-fast) ease;
 }
 
 .removeBtn:hover:not(:disabled) {
   color: var(--color-danger);
-  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border-default));
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
 }
 
 .removeBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: wait;
 }
 

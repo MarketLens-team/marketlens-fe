@@ -31,7 +31,6 @@ export default function MyPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [bookmarkRefreshKey, setBookmarkRefreshKey] = useState(0)
   const [removingCode, setRemovingCode] = useState<string | null>(null)
-  const [removingBookmarkId, setRemovingBookmarkId] = useState<string | null>(null)
   const [savingAlerts, setSavingAlerts] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
@@ -65,17 +64,11 @@ export default function MyPage() {
     setSearchParams(nextParams, { replace: true })
   }
 
-  const handleBookmarkRemove = async (newsId: string) => {
-    setActionError(null)
-    setRemovingBookmarkId(newsId)
-    try {
-      await removeNewsBookmark(newsId)
-      setBookmarkRefreshKey((key) => key + 1)
-    } catch (e) {
-      setActionError(getApiErrorMessage(e, '즐겨찾기 해제에 실패했습니다.'))
-    } finally {
-      setRemovingBookmarkId(null)
-    }
+  const handleBookmarkRemove = (newsId: string) => {
+    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
+    removeNewsBookmark(newsId).catch(() => {
+      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+    })
   }
 
   const handleRemove = async (code: string) => {
@@ -179,7 +172,6 @@ export default function MyPage() {
                     filterDate={bookmarkFilterDate}
                     onDateSelect={selectBookmarkDate}
                     onDateClear={clearBookmarkDateFilter}
-                    removingId={removingBookmarkId}
                     onRemove={handleBookmarkRemove}
                   />
                 )}

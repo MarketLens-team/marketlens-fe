@@ -10,6 +10,7 @@ import type { MyPageBookmarkDateSummary, MyPageBookmarkItem } from '../../data/t
 import { buildBookmarkItemPath, formatBookmarkContextLabel } from '../../lib/bookmarkNavigation'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
 import { BookmarkCalendar } from './BookmarkCalendar'
+import remove from '../common/optimisticRemove.module.css'
 import styles from './MyPageBookmarkSection.module.css'
 
 const SENTIMENT_SCORE_CLASS = {
@@ -36,8 +37,7 @@ interface MyPageBookmarkSectionProps {
   filterDate: string | null
   onDateSelect: (date: string) => void
   onDateClear: () => void
-  // 삭제
-  removingId?: string | null
+  // 삭제 (fire-and-forget — UI는 낙관적 삭제)
   onRemove: (id: string) => void
 }
 
@@ -58,60 +58,77 @@ function XIcon() {
   )
 }
 
+const REMOVE_ANIM_MS = 150 // opacity fade duration
+
 function BookmarkItemsList({
   items,
-  removingId,
   onRemove,
 }: {
   items: MyPageBookmarkItem[]
-  removingId?: string | null
   onRemove: (id: string) => void
 }) {
+  const [animatingId, setAnimatingId] = useState<string | null>(null)
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
+
+  const handleRemove = (id: string) => {
+    setAnimatingId(id)
+    onRemove(id) // fire-and-forget
+    window.setTimeout(() => {
+      setHiddenIds((prev) => new Set(prev).add(id))
+      setAnimatingId(null)
+    }, REMOVE_ANIM_MS)
+  }
+
+  const visibleItems = items.filter((item) => !hiddenIds.has(item.id))
+
   return (
     <ul className={styles.list}>
-      {items.map((item) => {
+      {visibleItems.map((item) => {
         const sentKey = buzzSentimentClass(item.sentimentScore)
         const itemPath = buildBookmarkItemPath(item)
         const contextLabel = item.contextLabel ?? formatBookmarkContextLabel(item)
+        const isAnimating = animatingId === item.id
 
         return (
-          <li key={item.id} className={styles.item}>
-            <div className={styles.body}>
-              <div className={styles.meta}>
-                <span className={styles.timeBadge}>{formatNewsTimeBadge(item.publishedAt)}</span>
-                <span className={styles.date}>{formatNewsDateLong(item.publishedAt)}</span>
-                <span className={styles.metaSep} aria-hidden>·</span>
-                <span className={styles.source}>{item.source}</span>
+          <li key={item.id} className={clsx(remove.item, isAnimating && remove.itemRemoving)}>
+            <div className={styles.item}>
+              <div className={styles.body}>
+                <div className={styles.meta}>
+                  <span className={styles.timeBadge}>{formatNewsTimeBadge(item.publishedAt)}</span>
+                  <span className={styles.date}>{formatNewsDateLong(item.publishedAt)}</span>
+                  <span className={styles.metaSep} aria-hidden>·</span>
+                  <span className={styles.source}>{item.source}</span>
+                </div>
+                <Link className={styles.titleLink} to={itemPath}>
+                  <h3 className={styles.title}>{item.title}</h3>
+                </Link>
+                <p className={styles.contextLabel}>{contextLabel}</p>
+                {item.contextType === 'STOCK' && (
+                  <span
+                    className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
+                    aria-label={`감성 점수 ${item.sentimentScore}`}
+                  >
+                    {formatStockScore(item.sentimentScore)}
+                  </span>
+                )}
               </div>
-              <Link className={styles.titleLink} to={itemPath}>
-                <h3 className={styles.title}>{item.title}</h3>
-              </Link>
-              <p className={styles.contextLabel}>{contextLabel}</p>
-              {item.contextType === 'STOCK' && (
-                <span
-                  className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
-                  aria-label={`감성 점수 ${item.sentimentScore}`}
-                >
-                  {formatStockScore(item.sentimentScore)}
-                </span>
+              {item.imageUrl ? (
+                <Link className={styles.thumbLink} to={itemPath} aria-hidden tabIndex={-1}>
+                  <img className={styles.thumb} src={item.imageUrl} alt="" loading="lazy" />
+                </Link>
+              ) : (
+                <div className={styles.thumbPlaceholder} aria-hidden />
               )}
+              <button
+                type="button"
+                className={styles.removeBtn}
+                aria-label={`${item.title} 즐겨찾기 해제`}
+                disabled={isAnimating}
+                onClick={() => handleRemove(item.id)}
+              >
+                <XIcon />
+              </button>
             </div>
-            {item.imageUrl ? (
-              <Link className={styles.thumbLink} to={itemPath} aria-hidden tabIndex={-1}>
-                <img className={styles.thumb} src={item.imageUrl} alt="" loading="lazy" />
-              </Link>
-            ) : (
-              <div className={styles.thumbPlaceholder} aria-hidden />
-            )}
-            <button
-              type="button"
-              className={styles.removeBtn}
-              aria-label={`${item.title} 즐겨찾기 해제`}
-              disabled={removingId === item.id}
-              onClick={() => onRemove(item.id)}
-            >
-              ×
-            </button>
           </li>
         )
       })}
@@ -133,7 +150,6 @@ export function MyPageBookmarkSection({
   filterDate,
   onDateSelect,
   onDateClear,
-  removingId,
   onRemove,
 }: MyPageBookmarkSectionProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
@@ -201,7 +217,7 @@ export function MyPageBookmarkSection({
             message={filterDate ? '해당 날짜에 저장한 뉴스가 없어요.' : '전체 뉴스나 종목 상세 뉴스에서 ☆ 버튼으로 기사를 저장해 보세요.'}
           />
         ) : (
-          <BookmarkItemsList items={items} removingId={removingId} onRemove={onRemove} />
+          <BookmarkItemsList items={items} onRemove={onRemove} />
         )}
       </div>
 
