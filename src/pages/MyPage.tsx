@@ -30,12 +30,11 @@ export default function MyPage() {
 
   const [refreshKey, setRefreshKey] = useState(0)
   const [bookmarkRefreshKey, setBookmarkRefreshKey] = useState(0)
-  const [removingCode, setRemovingCode] = useState<string | null>(null)
   const [savingAlerts, setSavingAlerts] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
   const factory = useCallback(() => fetchMyPage(), [refreshKey])
-  const { data, loading, error } = useAsyncData(factory)
+  const { data, loading, error } = useAsyncData(factory, { keepPreviousData: true })
 
   const {
     items: bookmarkItems,
@@ -71,18 +70,15 @@ export default function MyPage() {
     })
   }
 
-  const handleRemove = async (code: string) => {
-    setActionError(null)
-    setRemovingCode(code)
-    try {
-      await removeWatchlistItem(code)
+  const handleRemove = (code: string) => {
+    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
+    // API 성공 후 데이터 재조회로 카운트 등 갱신 (keepPreviousData: true로 플래시 없음)
+    removeWatchlistItem(code).then(() => {
       setLocalSettings(null)
       setRefreshKey((key) => key + 1)
-    } catch (e) {
-      setActionError(e instanceof Error ? e.message : '관심 종목 삭제에 실패했습니다.')
-    } finally {
-      setRemovingCode(null)
-    }
+    }).catch(() => {
+      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+    })
   }
 
   const handleSettingsChange = async (next: AlertSettings) => {
@@ -135,7 +131,6 @@ export default function MyPage() {
                 <MyPageSummaryCards summary={data.summary} />
                 <MyPageWatchlistTable
                   rows={data.watchlist}
-                  removingCode={removingCode}
                   onRemove={handleRemove}
                 />
               </div>

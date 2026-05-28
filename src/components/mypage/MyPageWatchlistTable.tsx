@@ -7,6 +7,8 @@ import { EntityAvatar } from '../ui/EntityAvatar'
 import { formatPercent, formatPrice, formatStockScore } from '../stock/stockScore'
 import type { MyPageWatchlistRow } from '../../data/types/myPage'
 import { MY_PAGE_WATCHLIST_MAX } from '../../data/types/myPage'
+import { useOptimisticRemove } from '../../hooks/useOptimisticRemove'
+import remove from '../common/optimisticRemove.module.css'
 import styles from './MyPageWatchlistTable.module.css'
 
 const SENTIMENT_SCORE_CLASS = {
@@ -19,7 +21,6 @@ const SENTIMENT_SCORE_CLASS = {
 interface MyPageWatchlistTableProps {
   rows: MyPageWatchlistRow[]
   onRemove: (code: string) => void
-  removingCode?: string | null
 }
 
 function formatPriceCell(price: number): string {
@@ -31,8 +32,11 @@ function formatChangeCell(changePercent: number): string {
   return formatPercent(changePercent)
 }
 
-export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWatchlistTableProps) {
+export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTableProps) {
   const navigate = useNavigate()
+  // code를 id로 매핑해 훅에 전달 (useOptimisticRemove는 T extends { id: string } 제약)
+  const rowsWithId = rows.map((r) => ({ ...r, id: r.code }))
+  const { visibleItems, handleRemove, animatingId } = useOptimisticRemove(rowsWithId, onRemove)
   const atMax = rows.length >= MY_PAGE_WATCHLIST_MAX
 
   const goToStock = (code: string) => {
@@ -79,12 +83,13 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {visibleItems.map((row) => {
               const sentKey = buzzSentimentClass(row.sentimentScore)
               const changeClass =
                 row.changePercent > 0 ? styles.changeUp : row.changePercent < 0 ? styles.changeDown : undefined
+              const isAnimating = animatingId === row.id
               return (
-                <tr key={row.code} className={styles.row}>
+                <tr key={row.code} className={clsx(remove.item, isAnimating && remove.itemRemoving, styles.row)}>
                   <td className={styles.stockCell}>
                     <button
                       type="button"
@@ -122,8 +127,8 @@ export function MyPageWatchlistTable({ rows, onRemove, removingCode }: MyPageWat
                       type="button"
                       className={styles.removeBtn}
                       aria-label={`${row.name} 관심 종목에서 제거`}
-                      disabled={removingCode === row.code}
-                      onClick={() => onRemove(row.code)}
+                      disabled={isAnimating}
+                      onClick={() => handleRemove(row.id)}
                     >
                       ×
                     </button>
