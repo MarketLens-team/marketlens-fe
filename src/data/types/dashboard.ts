@@ -27,7 +27,6 @@ export interface DashboardWatchlistRow {
   sentimentScore: number
   newsCount: number
   mentionSurgePercent: number
-  hasAlert: boolean
 }
 
 export interface BuzzSurgeItem {

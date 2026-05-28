@@ -11,40 +11,68 @@
   min-height: 0;
 }
 
-.tableWrap {
+.listWrap {
   flex: 1;
   min-height: 0;
   overflow: auto;
   margin: 0 calc(-1 * var(--space-4));
   padding: 0 var(--space-4);
+  -webkit-overflow-scrolling: touch;
 }
 
-.table {
-  composes: tableBase from '../common/interactiveTableRow.module.css';
+.list {
+  --watch-cols:
+    minmax(10rem, 1.5fr)
+    minmax(6rem, 1fr)
+    minmax(5rem, 0.8fr)
+    minmax(5rem, 0.8fr)
+    minmax(5rem, 0.8fr)
+    minmax(5rem, 0.8fr);
+  min-width: min(100%, 36rem);
   font-size: var(--font-size-base);
 }
 
-.table th {
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
+.watchHeader,
+.watchRow {
+  display: grid;
+  grid-template-columns: var(--watch-cols);
+  align-items: center;
+  column-gap: var(--space-4);
+}
+
+.watchHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-default);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-border-default);
-  white-space: nowrap;
+  background: var(--color-bg-card);
 }
 
-.table td {
-  padding: var(--space-3);
-  vertical-align: middle;
+.watchHeader > div:not(:first-child) {
+  text-align: right;
 }
 
-.rowClickable {
-  composes: rowRing from '../common/interactiveTableRow.module.css';
+.watchRow {
+  composes: ringRow from '../common/interactiveListRow.module.css';
+  padding: var(--space-3) var(--space-1);
+  cursor: pointer;
+}
+
+.watchRow:focus {
+  outline: none;
+}
+
+.watchRow > div:not(:first-child) {
+  text-align: right;
 }
 
 .stockCell {
   min-width: 0;
+  text-align: left;
 }
 
 .stockLead {
@@ -54,8 +82,27 @@
   min-width: 0;
 }
 
+.stockText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
 .stockName {
   font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.stockCode {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .mono {
@@ -71,56 +118,30 @@
   color: var(--color-danger);
 }
 
-.mention {
-  color: var(--color-danger);
-}
-
-.sentPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2.5rem;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+.sentScore {
   font-weight: var(--font-weight-semibold);
 }
 
 .sentPos {
-  background: color-mix(in srgb, var(--color-success) 18%, transparent);
   color: var(--color-success);
 }
 
+.sentWarm {
+  color: var(--color-warning);
+}
+
 .sentNeg {
-  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
   color: var(--color-danger);
 }
 
 .sentNeu {
-  background: color-mix(in srgb, var(--color-text-muted) 12%, transparent);
   color: var(--color-text-secondary);
 }
 
-.alertCell {
-  text-align: center;
-  width: 2rem;
-}
-
 .empty {
-  padding: var(--space-6) var(--space-3);
+  margin: 0;
+  padding: var(--space-6) 0;
   text-align: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
 }

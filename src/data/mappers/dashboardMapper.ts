@@ -96,7 +96,6 @@ export function mapDashboardWatchlistRow(
     sentimentScore,
     newsCount: toFiniteNumber(summary?.mentionCount),
     mentionSurgePercent,
-    hasAlert: mentionSurgePercent >= 50 || sentimentScore <= -30,
   }
 }
 
