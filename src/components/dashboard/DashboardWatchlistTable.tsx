@@ -63,7 +63,7 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
               <div>등락</div>
               <div>감성</div>
               <div>뉴스</div>
-              <div>언급량</div>
+              <div>언급률</div>
             </div>
             {rows.length === 0 ? (
               <p className={styles.empty}>관심종목이 없습니다. 종목 상세에서 추가해 보세요.</p>
