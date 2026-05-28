@@ -172,6 +172,23 @@
     box-shadow var(--duration-fast) ease;
 }
 
+.searchRowBtn {
+  composes: searchRow;
+  width: 100%;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.searchRowStock {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.searchRowStockWithStat {
+  grid-template-columns: auto minmax(0, 1fr) minmax(5.5rem, auto);
+}
+
 .searchRowTwoCol {
   grid-template-columns: minmax(0, 1fr) auto;
 }
@@ -180,14 +197,21 @@
   grid-template-columns: minmax(0, 1fr) minmax(5.5rem, auto) auto;
 }
 
-.searchRow[data-search-nav-selected='true'] {
+li[data-search-nav-item][data-search-nav-selected='true'] > .searchRow,
+li[data-search-nav-item][data-search-nav-selected='true'] .searchRowBtn {
   border-color: var(--color-primary);
   box-shadow: var(--interactive-ring-hover);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .scrollRegion:not([data-search-nav-active='true']) .searchRow:hover,
-  .scrollRegion[data-search-nav-active='true'] .searchRow[data-search-nav-selected='true']:hover {
+  .scrollRegion:not([data-search-nav-active='true']) li[data-search-nav-item]:hover > .searchRow,
+  .scrollRegion:not([data-search-nav-active='true']) li[data-search-nav-item]:hover .searchRowBtn,
+  .scrollRegion[data-search-nav-active='true']
+    li[data-search-nav-item][data-search-nav-selected='true']:hover
+    > .searchRow,
+  .scrollRegion[data-search-nav-active='true']
+    li[data-search-nav-item][data-search-nav-selected='true']:hover
+    .searchRowBtn {
     border-color: var(--color-primary);
     box-shadow: var(--interactive-ring-hover);
   }
