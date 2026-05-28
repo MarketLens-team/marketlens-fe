@@ -41,16 +41,6 @@ interface MyPageBookmarkSectionProps {
   onRemove: (id: string) => void
 }
 
-function formatBookmarkedAt(iso: string): string {
-  return new Date(iso).toLocaleString('ko-KR', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-}
-
 function formatFilterDateLabel(date: string): string {
   return new Date(date).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -97,13 +87,14 @@ function BookmarkItemsList({
                 <h3 className={styles.title}>{item.title}</h3>
               </Link>
               <p className={styles.contextLabel}>{contextLabel}</p>
-              <p className={styles.savedAt}>저장 {formatBookmarkedAt(item.bookmarkedAt)}</p>
-              <span
-                className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
-                aria-label={`감성 점수 ${item.sentimentScore}`}
-              >
-                {formatStockScore(item.sentimentScore)}
-              </span>
+              {item.contextType === 'STOCK' && (
+                <span
+                  className={clsx(styles.sentScore, SENTIMENT_SCORE_CLASS[sentKey])}
+                  aria-label={`감성 점수 ${item.sentimentScore}`}
+                >
+                  {formatStockScore(item.sentimentScore)}
+                </span>
+              )}
             </div>
             {item.imageUrl ? (
               <Link className={styles.thumbLink} to={itemPath} aria-hidden tabIndex={-1}>
