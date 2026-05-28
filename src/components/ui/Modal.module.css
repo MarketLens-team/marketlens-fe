@@ -2,7 +2,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 560px;
+  max-width: clamp(480px, 38vw, 680px);
   margin: auto;
   flex-shrink: 0;
   max-height: min(760px, calc(100vh - var(--space-12)));

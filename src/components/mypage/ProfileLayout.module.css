@@ -1,6 +1,8 @@
 .pageLayout {
   --profile-nav-width: 13.75rem;
-  --profile-nav-gap: 0.25rem;
+  --profile-nav-gap: var(--space-5);
+  /* 본문 우측 — main 패딩보다 살짝 넓게 */
+  --profile-content-pad-end: clamp(var(--space-8), 3.5vw, calc(var(--space-12) + var(--space-4)));
 
   position: relative;
   width: 100%;
@@ -16,9 +18,14 @@
 }
 
 .content {
-  margin-left: var(--profile-nav-gap);
-  min-width: 48rem;
-  max-width: 48rem;
+  box-sizing: border-box;
+  margin-left: calc(var(--profile-nav-width) + var(--profile-nav-gap));
+  width: calc(
+    100% - var(--profile-nav-width) - var(--profile-nav-gap) - var(--profile-content-pad-end)
+  );
+  padding-right: var(--profile-content-pad-end);
+  min-width: 0;
+  max-width: none;
 }
 
 @media (max-width: 720px) {
@@ -29,6 +36,8 @@
 
   .content {
     margin-left: 0;
-    max-width: 100%;
+    width: 100%;
+    padding-right: var(--profile-content-pad-end);
+    max-width: none;
   }
 }

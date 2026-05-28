@@ -19,6 +19,11 @@
 |------|------|
 | `src/styles/tokens.css` | `--font-size-xs~4xl` 8단계 → `clamp()` 전환 (1470px 기준값 유지) |
 | `src/styles/tokens.css` | `--layout-modal-search` `52rem` → `clamp(20rem, 57vw, 90rem)` |
+| `src/styles/tokens.css` | `--layout-page-wide-cap` `120rem` → `160rem` (2560px 상한) |
+| `src/styles/tokens.css` | `--layout-sidebar-width` `196px` → `clamp(196px, 13vw, 260px)` |
+| `src/components/mypage/ProfileLayout.module.css` | 본문 48rem 고정 해제 · nav↔본문·우측 여백 — [상세](./2026-05-28-fix-mypage-profile-content-width.md) |
+| `src/pages/MyPage.module.css` | `.page` `width: 100%` |
+| `src/components/ui/Modal.module.css` | 기본 모달 `max-width` `clamp(480px, 38vw, 680px)` |
 
 ## 설계 노트
 
