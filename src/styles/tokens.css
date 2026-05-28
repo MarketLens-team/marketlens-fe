@@ -37,15 +37,15 @@
   --font-mono: 'IBM Plex Mono', monospace;
   --font-sans: 'Pretendard', sans-serif;
 
-  /* Typography — size (8-step; converge irregular px to nearest step) */
-  --font-size-xs: 0.625rem; /* 10px — badge, caption */
-  --font-size-sm: 0.75rem; /* 12px — secondary body */
-  --font-size-base: 0.8125rem; /* 13px — default UI */
-  --font-size-lg: 0.875rem; /* 14px — emphasized body */
-  --font-size-xl: 1rem; /* 16px — list title */
-  --font-size-2xl: 1.125rem; /* 18px — section title */
-  --font-size-3xl: 1.25rem; /* 20px — large emphasis */
-  --font-size-4xl: 1.375rem; /* 22px — page title */
+  /* Typography — size (8-step; 1470px 기준, clamp로 375px~2560px 대응) */
+  --font-size-xs:   clamp(0.5625rem, 0.68vw, 0.75rem);   /* 9–10–12px */
+  --font-size-sm:   clamp(0.6875rem, 0.82vw, 0.875rem);  /* 11–12–14px */
+  --font-size-base: clamp(0.75rem,   0.88vw, 1rem);      /* 12–13–16px */
+  --font-size-lg:   clamp(0.8125rem, 0.95vw, 1.125rem);  /* 13–14–18px */
+  --font-size-xl:   clamp(0.875rem,  1.09vw, 1.25rem);   /* 14–16–20px */
+  --font-size-2xl:  clamp(1rem,      1.22vw, 1.5rem);    /* 16–18–24px */
+  --font-size-3xl:  clamp(1.125rem,  1.36vw, 1.75rem);   /* 18–20–28px */
+  --font-size-4xl:  clamp(1.25rem,   1.5vw,  2rem);      /* 20–22–32px */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -76,17 +76,17 @@
   /* 본문 좌우 여백 — 작은 화면 24px, 넓을수록 최대 48px */
   --layout-main-pad-inline: clamp(var(--space-6), 2.5vw, var(--space-12));
   /* 본문: .main 안에서는 100%로 채움. 초광폭만 --layout-page-wide-cap 으로 상한 */
-  --layout-page-wide-cap: 120rem;
+  --layout-page-wide-cap: 160rem; /* 2560px — 4K 대응 */
   --layout-page-max: min(var(--layout-page-wide-cap), 100%);
   /* 긴 본문·뉴스 피드 — 초광폭에서 시선 이동 거리 제한 (~50rem ≈ 800px) */
   --layout-page-read-max: 50rem;
-  --layout-sidebar-width: 196px; /* Layout .sidebar */
-  --layout-modal-search: 52rem; /* 832px — 통합 검색 모달 */
+  --layout-sidebar-width: clamp(196px, 13vw, 260px); /* 196–254–260px — 1470px 기준 */
+  --layout-modal-search: clamp(20rem, 57vw, 90rem); /* 320–832–1440px — 통합 검색 모달 */
   --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
   /* 검색 모달: 상단 41px · 하단 82px */
   --layout-search-modal-top: 2.5625rem; /* 41px */
   --layout-search-modal-bottom: var(--layout-top-strip-height); /* 82px */
-  --layout-sidebar-accordion: 16.25rem; /* 260px */
+  --layout-sidebar-accordion: clamp(16.25rem, 14vw, 22rem); /* 260–205–352px */
   /* 종목 상세 fixed 맨 위로 — BackToTopButton.module.css 와 동일 */
   --layout-back-to-top-size: 2.75rem;
   --layout-back-to-top-bottom: var(--space-6);

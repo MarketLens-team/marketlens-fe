@@ -1,4 +1,5 @@
 .card {
+  width: 100%;
   overflow: hidden;
 }
 
@@ -43,6 +44,8 @@
 
 .table {
   composes: tableBase from '../common/interactiveTableRow.module.css';
+  width: 100%;
+  table-layout: fixed;
   font-size: var(--font-size-base);
 }
 
@@ -67,19 +70,23 @@
 
 .colStock {
   text-align: left;
-  width: 28%;
+  width: 38%;
 }
 
 .colNum {
-  width: 7rem;
+  width: 13%;
 }
 
 .colSentiment {
-  width: 5rem;
+  width: 11%;
 }
 
 .colActions {
-  width: 6rem;
+  width: 3.25rem;
+}
+
+.table th.colStock {
+  text-align: left;
 }
 
 .stockCell {

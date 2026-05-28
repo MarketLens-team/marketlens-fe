@@ -1,5 +1,5 @@
 .modalContent {
-  max-width: min(760px, calc(100vw - var(--space-8)));
+  max-width: min(clamp(560px, 52vw, 920px), calc(100vw - var(--space-8)));
 }
 
 .modalBody {

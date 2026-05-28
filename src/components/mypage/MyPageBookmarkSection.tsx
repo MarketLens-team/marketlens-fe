@@ -3,12 +3,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useOptimisticRemove } from '../../hooks/useOptimisticRemove'
 import { EmptyState } from '../common/EmptyState'
-import { Modal } from '../ui/Modal'
 import type { BookmarkSortOrder } from '../../data/types/bookmark'
 import type { MyPageBookmarkDateSummary, MyPageBookmarkItem } from '../../data/types/myPage'
 import { buildBookmarkItemPath, formatBookmarkContextLabel } from '../../lib/bookmarkNavigation'
 import { formatNewsDateLong, formatNewsTimeBadge } from '../../lib/formatNewsDateTime'
-import { BookmarkCalendar } from './BookmarkCalendar'
+import { BookmarkCalendarModal } from './BookmarkCalendarModal'
 import remove from '../common/optimisticRemove.module.css'
 import styles from './MyPageBookmarkSection.module.css'
 
@@ -215,21 +214,13 @@ export function MyPageBookmarkSection({
         </div>
       )}
 
-      {/* 달력 피커 모달 */}
-      <Modal
+      <BookmarkCalendarModal
         isOpen={calendarOpen}
         onClose={() => setCalendarOpen(false)}
-        title="날짜별 보기"
-        lockBackgroundScroll
-        contentClassName={styles.calendarModalContent}
-        contentClassOnly
-      >
-        {dateSummariesLoading ? (
-          <p className={styles.listLoadingHint} aria-busy="true">불러오는 중…</p>
-        ) : (
-          <BookmarkCalendar summaries={dateSummaries} onDateClick={handleCalendarDateClick} />
-        )}
-      </Modal>
+        summaries={dateSummaries}
+        loading={dateSummariesLoading}
+        onDateClick={handleCalendarDateClick}
+      />
     </div>
   )
 }

@@ -3,8 +3,8 @@
   padding: var(--space-3) var(--space-3);
   position: sticky;
   top: 0;
-  max-height: calc(100vh - 78px);
-  max-height: calc(100dvh - 78px);
+  max-height: calc(100vh - var(--layout-top-strip-height));
+  max-height: calc(100dvh - var(--layout-top-strip-height));
   overflow-y: auto;
   overscroll-behavior-y: none;
 }
