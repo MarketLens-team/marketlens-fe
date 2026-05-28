@@ -3,13 +3,13 @@
   position: relative;
   min-height: calc(100vh - var(--layout-top-strip-height));
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
   box-sizing: border-box;
   background: var(--color-bg-app);
   font-family: var(--font-sans);
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 /* Grid background */
