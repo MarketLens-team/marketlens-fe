@@ -9,7 +9,7 @@
 .layout {
   display: grid;
   grid-template-columns:
-    minmax(14rem, 18rem)
+    minmax(14rem, 22rem)
     minmax(0, 1fr)
     var(--layout-back-to-top-reserve);
   column-gap: var(--space-4);
@@ -151,7 +151,7 @@
 @media (max-width: 1100px) {
   .layout {
     grid-template-columns:
-      minmax(11rem, 14rem)
+      minmax(11rem, 16rem)
       minmax(0, 1fr)
       var(--layout-back-to-top-reserve);
     column-gap: var(--space-3);
