@@ -2,10 +2,9 @@ import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   addNewsBookmark,
-  fetchNewsBookmarks,
+  fetchBookmarkIds,
   removeNewsBookmark,
 } from '../data/clients/bookmarkClient'
-import type { ApiEnvelope } from '../data/types/api'
 import type { NewsBookmarkSaveContext } from '../data/types/bookmark'
 import { getApiErrorMessage } from '../data/util/apiError'
 import { useAuthModalStore } from '../store/authModalStore'
@@ -41,9 +40,9 @@ export function useNewsBookmarks() {
     let cancelled = false
     void (async () => {
       try {
-        const rows = await fetchNewsBookmarks()
+        const ids = await fetchBookmarkIds()
         if (cancelled) return
-        setBookmarkedIds(new Set(rows.map((row) => String(row.newsArticleId))))
+        setBookmarkedIds(new Set(ids.map(String)))
         setLoadError(null)
       } catch (error) {
         if (cancelled) return

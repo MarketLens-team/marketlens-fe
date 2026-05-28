@@ -1,0 +1,788 @@
+.page {
+  height: 100%;
+  overflow-y: auto;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.desc {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.variantWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+}
+
+.variantLabel {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.sortBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ─── Current ─── */
+.cur_sortBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    background var(--duration-fast) ease;
+}
+.cur_active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+}
+.cur_calBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+/* ─── A: Segmented Control ─── */
+.seg_control {
+  display: inline-flex;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-base);
+  overflow: hidden;
+  padding: 3px;
+  gap: 2px;
+}
+.seg_btn {
+  padding: calc(var(--space-1) - 1px) var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+.seg_active {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.seg_calBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: calc(var(--space-1) - 1px) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+/* ─── B: Underline Tab ─── */
+.tab_row {
+  display: inline-flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border-default);
+}
+.tab_btn {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+.tab_active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.tab_calBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+/* ─── C: Background chip (borderless) ─── */
+.chip_btn {
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+.chip_btn:hover:not(.chip_active) {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+.chip_active {
+  background: color-mix(in srgb, var(--color-primary) 15%, var(--color-bg-base));
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.chip_calBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 15%, var(--color-bg-base));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+/* ─── D: 흰색 강조 언더라인 탭 ─── */
+.wu_bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.wu_tabRow {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+
+
+.wu_tab {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
+}
+
+.wu_tab:hover:not(.wu_tabActive) {
+  color: var(--color-text-primary);
+}
+
+.wu_tabActive {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-primary);
+}
+
+.wu_calBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  margin-bottom: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-elevated));
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+/* ─── E: 3탭 언더라인 ─── */
+.e_nav {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.e_hoverIndicator {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  pointer-events: none;
+  transition:
+    transform var(--duration-base) ease,
+    width var(--duration-base) ease,
+    opacity var(--duration-fast) ease;
+}
+
+.e_tab {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
+}
+
+.e_tab:hover:not(.e_tabActive) {
+  color: var(--color-text-primary);
+}
+
+.e_tabActive {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-primary);
+}
+
+.e_dateLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+}
+
+.e_calPopup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  margin-top: var(--space-2);
+}
+
+.e_calHint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.e_calDates {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.e_calDateBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) ease;
+}
+
+.e_calDateBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.e_calClose {
+  align-self: flex-end;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.e_status {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+/* ─── 달력 버튼 비교 섹션 ─── */
+.calHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.calToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.calGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+.calRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.calRowLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: 14rem;
+}
+
+.calX {
+  font-size: var(--font-size-base);
+  line-height: 1;
+  margin-left: 2px;
+  color: var(--color-text-muted);
+}
+
+/* ── 공통 베이스 버튼 ── */
+.cal_base {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    background var(--duration-fast) ease;
+}
+.cal_base:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* active 공통: 날짜 표시, 테두리 강조, 텍스트 흰색 */
+.cal_base_active {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-section);
+  color: var(--color-text-primary);
+}
+.cal_base_active:hover {
+  border-color: var(--color-text-muted);
+}
+
+.cal_activeDate {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+/* 기본 상태 내용 스타일 */
+.cal_defaultText {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: inherit;
+}
+
+.cal_defaultMono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+}
+
+.cal_dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ── 미니 달력 팝업 ── */
+.miniCal {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  min-width: 16rem;
+}
+.miniCalHint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.miniCalDates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.miniCalDate {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+.miniCalDate:hover { border-color: var(--color-text-primary); color: var(--color-text-primary); }
+.miniCalClose {
+  align-self: flex-end;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+/* 버튼 + 팝업 포지션 wrapper */
+.calBtnWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* X 클릭 영역 — 버튼 내부 독립 클릭 */
+.cvX {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  padding: 2px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) ease, background var(--duration-fast) ease;
+}
+.cvX:hover { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 12%, transparent); }
+
+/* ── 달력 버튼 cv 공통 베이스 ── */
+.cv_base {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--duration-fast) ease,
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+/* 1 — 아이콘만 pill */
+.cv1 {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+}
+.cv1:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv1_on {
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 1-ring — ringChip 패턴 적용 */
+.cv1ring {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    gap var(--duration-fast) ease,
+    padding var(--duration-fast) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cv1ring:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    color: var(--color-text-primary);
+  }
+}
+.cv1ring:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}
+.cv1ring_on {
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-hover);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 2 — ghost */
+.cv2 {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.cv2:hover { background: var(--color-bg-elevated); color: var(--color-text-primary); }
+.cv2_on { color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+
+/* 3 — outlined radius-sm */
+.cv3 {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+.cv3:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv3_on { border-color: var(--color-border-strong); color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+
+/* 4 — split */
+.cv4 {
+  composes: cv_base;
+  padding: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+}
+.cv4:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv4_on { border-color: var(--color-border-strong); color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+.cv4_icon {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+}
+.cv4_divider {
+  display: inline-block;
+  width: 1px;
+  height: 1rem;
+  background: var(--color-border-default);
+  flex-shrink: 0;
+}
+.cv4_text {
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+}
+
+/* 5 — filled chip */
+.cv5 {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+}
+.cv5:hover { background: var(--color-bg-section); color: var(--color-text-primary); }
+.cv5_on { background: var(--color-bg-section); color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+
+/* 6 — 원형 아이콘 + 날짜 따로 */
+.cv6_wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.cv6_icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+.cv6_icon:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv6_on { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv6_date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+.cv6_date:hover { background: var(--color-bg-elevated); }
+.cv6_clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
+}
+.cv6_clear:hover { color: var(--color-danger); }
+
+/* 7 — 텍스트 링크 */
+.cv7 {
+  composes: cv_base;
+  padding: var(--space-1) 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.cv7:hover { color: var(--color-text-primary); border-bottom-color: var(--color-border-default); }
+.cv7_on { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+
+/* 8 — 날짜 강조 */
+.cv8 {
+  composes: cv_base;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+.cv8:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.cv8_on { border-color: var(--color-border-strong); }
+.cv8_date {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+.cv8_label {
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+}

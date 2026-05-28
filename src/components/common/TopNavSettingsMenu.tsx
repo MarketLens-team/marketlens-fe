@@ -31,7 +31,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const { handleLogout } = useAuthFlow()
-  const { theme, language, currency, aiAssistant, setTheme, setAiAssistant } = useUserPreferencesStore()
+  const { theme, language, currency, setTheme } = useUserPreferencesStore()
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange])
 
@@ -94,25 +94,6 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
                   {id === 'light' ? '라이트' : id === 'dark' ? '다크' : '시스템'}
                 </button>
               ))}
-            </div>
-          </div>
-          <div className={styles.segmentBlock}>
-            <span className={styles.segmentLabel}>AI 어시스턴트</span>
-            <div className={styles.segmented} role="group" aria-label="AI 어시스턴트 표시">
-              <button
-                type="button"
-                className={`${styles.segmentBtn} ${aiAssistant === 'show' ? styles.segmentBtnActive : ''}`}
-                onClick={() => setAiAssistant('show')}
-              >
-                표시
-              </button>
-              <button
-                type="button"
-                className={`${styles.segmentBtn} ${aiAssistant === 'hide' ? styles.segmentBtnActive : ''}`}
-                onClick={() => setAiAssistant('hide')}
-              >
-                숨기기
-              </button>
             </div>
           </div>
           <div className={styles.linkGroup}>

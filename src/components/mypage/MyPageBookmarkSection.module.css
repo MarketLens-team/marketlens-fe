@@ -1,35 +1,180 @@
-.card {
-  overflow: hidden;
+.section {
+  width: 100%;
 }
 
-.header {
+.sortBar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: var(--space-4);
+  border-bottom: 2px solid var(--color-border-strong);
 }
 
-.feedLink {
+/* ── 언더라인 정렬 탭 (D variant) ── */
+.sortTab {
+  position: relative;
   flex-shrink: 0;
-  font-size: var(--font-size-sm);
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4) var(--space-3);
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
-  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
 }
 
-.feedLink:hover {
-  text-decoration: underline;
+.sortTab:hover:not(.sortTabActive) {
+  color: var(--color-text-primary);
 }
 
-.feedLink:focus-visible {
+.sortTabActive {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ── ring hover 달력 버튼 (1-ring variant) ── */
+.calendarBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .calendarBtn:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.calendarBtn:focus-visible {
   outline: none;
+  border-color: var(--color-primary);
   box-shadow: var(--interactive-ring-focus);
-  border-radius: var(--radius-sm);
 }
 
-.tabs {
-  margin-bottom: var(--space-3);
+.calendarBtnActive {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-hover);
+  color: var(--color-text-primary);
+  padding: var(--space-1) var(--space-3);
+  font-weight: var(--font-weight-medium);
+}
+
+.calendarBtnDate {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  letter-spacing: -0.01em;
+}
+
+.calendarBtnX {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-left: 2px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) ease, background var(--duration-fast) ease;
+}
+
+.calendarBtnX:hover {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+}
+
+.filterDateLabel {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.calendarModalContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: min(26rem, 92vw);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-modal);
+  border: 1px solid var(--color-border-strong);
+  overflow: visible;
+}
+
+.modalContent {
+  width: min(44rem, 92vw);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pageInfo {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  min-width: 3rem;
+  text-align: center;
 }
 
 .stockPicker {
@@ -125,15 +270,14 @@
   gap: var(--space-3);
 }
 
+/* 삭제 애니메이션 → src/components/common/optimisticRemove.module.css 공통 모듈 사용 */
+
 .item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 5.5rem auto;
+  grid-template-columns: minmax(0, 1fr) 8.5rem auto;
   gap: var(--space-3);
   align-items: start;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-section);
+  padding: var(--space-4) 0;
 }
 
 .body {
@@ -182,7 +326,7 @@
 
 .title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   color: var(--color-text-primary);
@@ -237,16 +381,16 @@
 }
 
 .thumb {
-  width: 5.5rem;
-  height: 3.75rem;
+  width: 8.5rem;
+  height: 5.75rem;
   object-fit: cover;
   border-radius: var(--radius-sm);
   background: var(--color-bg-elevated);
 }
 
 .thumbPlaceholder {
-  width: 5.5rem;
-  height: 3.75rem;
+  width: 8.5rem;
+  height: 5.75rem;
   border-radius: var(--radius-sm);
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border-default);
@@ -254,30 +398,30 @@
 
 .removeBtn {
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-elevated);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xl);
-  line-height: 1;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
   transition:
     color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
     background var(--duration-fast) ease;
 }
 
 .removeBtn:hover:not(:disabled) {
   color: var(--color-danger);
-  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border-default));
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
 }
 
 .removeBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: wait;
 }
 

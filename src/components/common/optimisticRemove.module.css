@@ -1,0 +1,27 @@
+/**
+ * 낙관적 삭제 애니메이션 패턴
+ *
+ * 사용법:
+ *   import remove from '../common/optimisticRemove.module.css'
+ *
+ *   <li className={clsx(remove.item, isAnimating && remove.itemRemoving)}>
+ *     ...content...
+ *   </li>
+ *
+ * JS 타이밍:
+ *   const REMOVE_ANIM_MS = 150
+ *   setAnimatingId(id)
+ *   onRemove(id)  // fire-and-forget
+ *   setTimeout(() => { setHiddenIds(...); setAnimatingId(null) }, REMOVE_ANIM_MS)
+ *
+ * 설계 결정 → docs/design/optimistic-remove-animation.md
+ */
+
+.item {
+  transition: opacity 150ms ease;
+}
+
+.itemRemoving {
+  opacity: 0;
+  pointer-events: none;
+}

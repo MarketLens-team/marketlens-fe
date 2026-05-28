@@ -30,27 +30,27 @@ export default function MyPage() {
 
   const [refreshKey, setRefreshKey] = useState(0)
   const [bookmarkRefreshKey, setBookmarkRefreshKey] = useState(0)
-  const [removingCode, setRemovingCode] = useState<string | null>(null)
-  const [removingBookmarkId, setRemovingBookmarkId] = useState<string | null>(null)
   const [savingAlerts, setSavingAlerts] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
   const factory = useCallback(() => fetchMyPage(), [refreshKey])
-  const { data, loading, error } = useAsyncData(factory)
+  const { data, loading, error } = useAsyncData(factory, { keepPreviousData: true })
 
   const {
-    view: bookmarkView,
-    changeView: changeBookmarkView,
-    selectedStockCode,
-    selectStock,
-    stockSummaries,
-    stockSummariesLoading,
-    stockBookmarksLoading,
-    items: bookmarks,
-    initialLoading: bookmarksInitialLoading,
-    sectionReady: bookmarksSectionReady,
+    items: bookmarkItems,
+    totalPages: bookmarkTotalPages,
+    page: bookmarkPage,
+    sortOrder: bookmarkSortOrder,
+    changeSortOrder: changeBookmarkSortOrder,
+    goToPage: goToBookmarkPage,
+    initialLoading: bookmarkInitialLoading,
+    refreshing: bookmarkRefreshing,
     error: bookmarksError,
-    refreshing: bookmarksRefreshing,
+    filterDate: bookmarkFilterDate,
+    selectDate: selectBookmarkDate,
+    clearDateFilter: clearBookmarkDateFilter,
+    dateSummaries: bookmarkDateSummaries,
+    dateSummariesLoading: bookmarkDateSummariesLoading,
   } = useMyPageBookmarks(bookmarkRefreshKey)
 
   const [localSettings, setLocalSettings] = useState<AlertSettings | null>(null)
@@ -63,31 +63,22 @@ export default function MyPage() {
     setSearchParams(nextParams, { replace: true })
   }
 
-  const handleBookmarkRemove = async (newsId: string) => {
-    setActionError(null)
-    setRemovingBookmarkId(newsId)
-    try {
-      await removeNewsBookmark(newsId)
-      setBookmarkRefreshKey((key) => key + 1)
-    } catch (e) {
-      setActionError(getApiErrorMessage(e, '즐겨찾기 해제에 실패했습니다.'))
-    } finally {
-      setRemovingBookmarkId(null)
-    }
+  const handleBookmarkRemove = (newsId: string) => {
+    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
+    removeNewsBookmark(newsId).catch(() => {
+      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+    })
   }
 
-  const handleRemove = async (code: string) => {
-    setActionError(null)
-    setRemovingCode(code)
-    try {
-      await removeWatchlistItem(code)
+  const handleRemove = (code: string) => {
+    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
+    // API 성공 후 데이터 재조회로 카운트 등 갱신 (keepPreviousData: true로 플래시 없음)
+    removeWatchlistItem(code).then(() => {
       setLocalSettings(null)
       setRefreshKey((key) => key + 1)
-    } catch (e) {
-      setActionError(e instanceof Error ? e.message : '관심 종목 삭제에 실패했습니다.')
-    } finally {
-      setRemovingCode(null)
-    }
+    }).catch(() => {
+      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+    })
   }
 
   const handleSettingsChange = async (next: AlertSettings) => {
@@ -140,7 +131,6 @@ export default function MyPage() {
                 <MyPageSummaryCards summary={data.summary} />
                 <MyPageWatchlistTable
                   rows={data.watchlist}
-                  removingCode={removingCode}
                   onRemove={handleRemove}
                 />
               </div>
@@ -160,31 +150,26 @@ export default function MyPage() {
 
             {tab === 'news' ? (
               <div className={styles.tabPanel}>
-                  {bookmarksError ? (
-                    <PageFetchError title="저장한 뉴스를 불러오지 못했어요" message={bookmarksError.message} />
-                  ) : null}
-                  {bookmarksInitialLoading && !bookmarksError ? (
-                    <div
-                      className={clsx(skeleton.block, styles.skeletonBookmarks)}
-                      aria-busy="true"
-                      aria-label="저장한 뉴스 로딩"
-                    />
-                  ) : null}
-                  {bookmarksSectionReady && !bookmarksError ? (
-                    <MyPageBookmarkSection
-                      view={bookmarkView}
-                      onViewChange={changeBookmarkView}
-                      stockSummaries={stockSummaries}
-                      stockSummariesLoading={stockSummariesLoading}
-                      selectedStockCode={selectedStockCode}
-                      onSelectStock={selectStock}
-                      items={bookmarks}
-                      stockBookmarksLoading={stockBookmarksLoading}
-                      removingId={removingBookmarkId}
-                      onRemove={handleBookmarkRemove}
-                      refreshing={bookmarksRefreshing}
-                    />
-                  ) : null}
+                {bookmarksError ? (
+                  <PageFetchError title="저장한 뉴스를 불러오지 못했어요" message={bookmarksError.message} />
+                ) : (
+                  <MyPageBookmarkSection
+                    dateSummaries={bookmarkDateSummaries}
+                    dateSummariesLoading={bookmarkDateSummariesLoading}
+                    items={bookmarkItems}
+                    totalPages={bookmarkTotalPages}
+                    page={bookmarkPage}
+                    sortOrder={bookmarkSortOrder}
+                    initialLoading={bookmarkInitialLoading}
+                    refreshing={bookmarkRefreshing}
+                    onSortChange={changeBookmarkSortOrder}
+                    onPageChange={goToBookmarkPage}
+                    filterDate={bookmarkFilterDate}
+                    onDateSelect={selectBookmarkDate}
+                    onDateClear={clearBookmarkDateFilter}
+                    onRemove={handleBookmarkRemove}
+                  />
+                )}
               </div>
             ) : null}
           </ProfileLayout>

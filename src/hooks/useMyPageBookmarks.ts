@@ -1,89 +1,64 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchBookmarkStockSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
-import { mapBookmarkStockSummaryList, mapNewsBookmarkList } from '../data/mappers/bookmarkMapper'
-import type { MyPageBookmarkItem, MyPageBookmarkStockSummary, MyPageBookmarkView } from '../data/types/myPage'
+import { fetchBookmarkDateSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
+import { mapBookmarkDateSummaryList, mapNewsBookmarkPage } from '../data/mappers/bookmarkMapper'
+import type { BookmarkSortOrder } from '../data/types/bookmark'
+import type { MyPageBookmarkDateSummary, MyPageBookmarkItem, MyPageBookmarkPage } from '../data/types/myPage'
 import { useAsyncData } from './useAsyncData'
 
+const PAGE_SIZE = 10
+
 export function useMyPageBookmarks(refreshKey: number) {
-  const [view, setView] = useState<MyPageBookmarkView>('date')
-  const [selectedStockCode, setSelectedStockCode] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<BookmarkSortOrder>('LATEST')
+  const [page, setPage] = useState(0)
+  const [filterDate, setFilterDate] = useState<string | null>(null)
 
-  const dateFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
-    const rows = await fetchNewsBookmarks()
-    return mapNewsBookmarkList(rows)
-  }, [refreshKey])
+  // sort·filterDate·refreshKey 변경 시 페이지 리셋
+  useEffect(() => { setPage(0) }, [sortOrder, filterDate, refreshKey])
 
-  const stockSummariesFactory = useCallback(async (): Promise<MyPageBookmarkStockSummary[]> => {
-    const rows = await fetchBookmarkStockSummaries()
-    return mapBookmarkStockSummaryList(rows)
-  }, [refreshKey])
+  // 삭제 후 날짜 필터 유지 (refreshKey 변경 시 필터 유지)
+  // 필터는 사용자가 직접 해제
 
-  const stockBookmarksFactory = useCallback(async (): Promise<MyPageBookmarkItem[]> => {
-    if (!selectedStockCode) return []
-    const rows = await fetchNewsBookmarks({ contextStockCode: selectedStockCode })
-    return mapNewsBookmarkList(rows)
-  }, [refreshKey, selectedStockCode])
+  const listFactory = useCallback(async (): Promise<MyPageBookmarkPage> => {
+    const raw = await fetchNewsBookmarks({
+      page,
+      size: PAGE_SIZE,
+      sortOrder,
+      publishedDate: filterDate ?? undefined,
+    })
+    return mapNewsBookmarkPage(raw)
+  }, [refreshKey, page, sortOrder, filterDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const dateState = useAsyncData(dateFactory)
-  const stockSummariesState = useAsyncData(stockSummariesFactory, { enabled: view === 'stock' })
-  const stockBookmarksState = useAsyncData(stockBookmarksFactory, {
-    enabled: view === 'stock' && selectedStockCode != null,
-    keepPreviousData: true,
-  })
+  const dateSummariesFactory = useCallback(async (): Promise<MyPageBookmarkDateSummary[]> => {
+    const rows = await fetchBookmarkDateSummaries()
+    return mapBookmarkDateSummaryList(rows)
+  }, [refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const stockSummaries = stockSummariesState.data ?? []
+  const listState = useAsyncData(listFactory, { keepPreviousData: true })
+  const dateSummariesState = useAsyncData(dateSummariesFactory)
 
-  useEffect(() => {
-    if (view !== 'stock' || stockSummariesState.loading || stockSummariesState.error) return
-    if (stockSummaries.length === 0) {
-      setSelectedStockCode(null)
-      return
-    }
-    if (!selectedStockCode || !stockSummaries.some((row) => row.stockCode === selectedStockCode)) {
-      setSelectedStockCode(stockSummaries[0].stockCode)
-    }
-  }, [view, stockSummaries, selectedStockCode, stockSummariesState.loading, stockSummariesState.error])
+  const selectDate = useCallback((date: string) => { setFilterDate(date) }, [])
+  const clearDateFilter = useCallback(() => { setFilterDate(null) }, [])
 
-  const items =
-    view === 'date' ? (dateState.data ?? []) : (stockBookmarksState.data ?? [])
-  const initialLoading =
-    view === 'date'
-      ? dateState.loading && dateState.data == null
-      : stockSummariesState.loading && stockSummariesState.data == null
-  const sectionReady =
-    view === 'date'
-      ? !initialLoading
-      : !stockSummariesState.loading || stockSummariesState.data != null
-  const error = view === 'date' ? dateState.error : stockSummariesState.error ?? stockBookmarksState.error
-  const refreshing =
-    view === 'date'
-      ? dateState.refreshing
-      : stockSummariesState.refreshing || stockBookmarksState.refreshing
-
-  const selectStock = useCallback((stockCode: string) => {
-    setSelectedStockCode(stockCode)
-  }, [])
-
-  const changeView = useCallback((next: MyPageBookmarkView) => {
-    setView(next)
-  }, [])
+  const changeSortOrder = useCallback((next: BookmarkSortOrder) => { setSortOrder(next) }, [])
+  const goToPage = useCallback((next: number) => { setPage(next) }, [])
 
   return {
-    view,
-    changeView,
-    selectedStockCode,
-    selectStock,
-    stockSummaries,
-    stockSummariesLoading: stockSummariesState.loading && stockSummariesState.data == null,
-    stockBookmarksLoading:
-      view === 'stock' &&
-      selectedStockCode != null &&
-      stockBookmarksState.loading &&
-      stockBookmarksState.data == null,
-    items,
-    initialLoading,
-    sectionReady,
-    error,
-    refreshing,
+    // 목록
+    items: listState.data?.items ?? [],
+    totalPages: listState.data?.totalPages ?? 0,
+    page,
+    sortOrder,
+    changeSortOrder,
+    goToPage,
+    initialLoading: listState.loading && listState.data == null,
+    refreshing: listState.refreshing,
+    error: listState.error,
+    // 날짜 필터
+    filterDate,
+    selectDate,
+    clearDateFilter,
+    // 달력
+    dateSummaries: dateSummariesState.data ?? [],
+    dateSummariesLoading: dateSummariesState.loading && dateSummariesState.data == null,
   }
 }
