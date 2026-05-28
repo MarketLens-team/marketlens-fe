@@ -4,7 +4,7 @@
 | 브랜치   | fix/auth-proactive-token-refresh |
 | 작업일   | 2026-05-29                       |
 | 관련 PR  | -                                |
-| 커밋     | -                                |
+| 커밋     | 89ed2b4                          |
 
 ## 요약
 
