@@ -5,6 +5,7 @@ import {
   fetchBookmarkIds,
   removeNewsBookmark,
 } from '../data/clients/bookmarkClient'
+import type { ApiEnvelope } from '../data/types/api'
 import type { NewsBookmarkSaveContext } from '../data/types/bookmark'
 import { getApiErrorMessage } from '../data/util/apiError'
 import { useAuthModalStore } from '../store/authModalStore'
