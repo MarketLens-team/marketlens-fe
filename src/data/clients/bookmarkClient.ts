@@ -141,3 +141,17 @@ export async function removeNewsBookmark(newsArticleId: string): Promise<void> {
   }
   await api.delete(`${BOOKMARKS_PATH}/${encodeURIComponent(newsArticleId)}`)
 }
+
+/** `GET /api/v1/bookmarks/ids` — 로그인 사용자의 북마크된 newsArticleId 전체 목록 */
+export async function fetchBookmarkIds(): Promise<number[]> {
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    return Array.from(mockBookmarks.keys())
+  }
+  try {
+    const { data } = await api.get<ApiEnvelope<number[]>>(`${BOOKMARKS_PATH}/ids`)
+    return unwrapApiEnvelope(data, '즐겨찾기 목록을 불러오지 못했습니다.') ?? []
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '즐겨찾기 목록을 불러오지 못했습니다.'))
+  }
+}
