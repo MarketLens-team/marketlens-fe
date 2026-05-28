@@ -50,12 +50,12 @@ function formatFilterDateLabel(date: string): string {
   })
 }
 
-function formatTodayLabel(): string {
-  return new Date().toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }).replace(/ /g, '')
-}
-
-function formatDateShort(date: string): string {
-  return new Date(date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }).replace(/ /g, '')
+function XIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+      <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 function BookmarkItemsList({
@@ -145,46 +145,43 @@ export function MyPageBookmarkSection({
 
   return (
     <div className={styles.section}>
-      {/* 정렬 + 날짜 버튼 */}
+      {/* 정렬 탭 + 달력 버튼 */}
       <div className={styles.sortBar}>
         <button
           type="button"
-          className={clsx(styles.sortBtn, sortOrder === 'LATEST' && styles.sortBtnActive)}
+          className={clsx(styles.sortTab, sortOrder === 'LATEST' && styles.sortTabActive)}
           onClick={() => onSortChange('LATEST')}
         >
           최신순
         </button>
         <button
           type="button"
-          className={clsx(styles.sortBtn, sortOrder === 'OLDEST' && styles.sortBtnActive)}
+          className={clsx(styles.sortTab, sortOrder === 'OLDEST' && styles.sortTabActive)}
           onClick={() => onSortChange('OLDEST')}
         >
           오래된순
         </button>
 
         {dateSummaries.length > 0 && (
-          filterDate ? (
-            <button
-              type="button"
-              className={clsx(styles.calendarBtn, styles.calendarBtnActive)}
-              aria-label="날짜 필터 해제"
-              onClick={onDateClear}
-            >
-              <CalendarIcon />
-              {formatDateShort(filterDate)}
-              <span className={styles.calendarBtnClear} aria-hidden>×</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={styles.calendarBtn}
-              aria-label="날짜별 보기"
-              onClick={() => setCalendarOpen(true)}
-            >
-              <CalendarIcon />
-              {formatTodayLabel()}
-            </button>
-          )
+          <button
+            type="button"
+            className={clsx(styles.calendarBtn, filterDate && styles.calendarBtnActive)}
+            aria-label={filterDate ? '날짜 변경' : '날짜별 보기'}
+            onClick={() => setCalendarOpen(true)}
+          >
+            <CalendarIcon />
+            {filterDate && <span className={styles.calendarBtnDate}>{filterDate}</span>}
+            {filterDate && (
+              <span
+                className={styles.calendarBtnX}
+                role="button"
+                aria-label="날짜 필터 해제"
+                onClick={(e) => { e.stopPropagation(); onDateClear() }}
+              >
+                <XIcon />
+              </span>
+            )}
+          </button>
         )}
       </div>
 
@@ -254,7 +251,7 @@ export function MyPageBookmarkSection({
 
 function CalendarIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="1.75" />
       <path d="M3 9h18" stroke="currentColor" strokeWidth="1.75" />
       <path d="M8 2v4M16 2v4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
