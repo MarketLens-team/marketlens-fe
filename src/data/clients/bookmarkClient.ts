@@ -3,7 +3,6 @@ import { api } from '../../services/api'
 import type { ApiEnvelope } from '../types/api'
 import type {
   BookmarkDateSummaryDto,
-  NewsBookmarkDto,
   NewsBookmarkListQuery,
   NewsBookmarkPageDto,
   NewsBookmarkSaveContext,

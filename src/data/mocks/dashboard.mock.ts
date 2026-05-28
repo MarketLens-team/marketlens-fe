@@ -22,7 +22,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: -34,
       newsCount: 12,
       mentionSurgePercent: 45,
-      hasAlert: true,
     },
     {
       name: '카카오',
@@ -33,7 +32,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: 28,
       newsCount: 18,
       mentionSurgePercent: 84,
-      hasAlert: true,
     },
     {
       name: '현대차',
@@ -44,7 +42,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: 41,
       newsCount: 9,
       mentionSurgePercent: 22,
-      hasAlert: false,
     },
     {
       name: 'LG에너지솔루션',
@@ -55,7 +52,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: 15,
       newsCount: 14,
       mentionSurgePercent: 31,
-      hasAlert: false,
     },
     {
       name: 'SK하이닉스',
@@ -66,7 +62,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: 62,
       newsCount: 32,
       mentionSurgePercent: 189,
-      hasAlert: true,
     },
     {
       name: '삼성전자',
@@ -77,7 +72,6 @@ export const mockDashboardOverview: DashboardOverview = {
       sentimentScore: 73,
       newsCount: 25,
       mentionSurgePercent: 89,
-      hasAlert: true,
     },
   ],
   kospiSentiment: {

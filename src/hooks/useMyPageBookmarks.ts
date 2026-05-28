@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { fetchBookmarkDateSummaries, fetchNewsBookmarks } from '../data/clients/bookmarkClient'
 import { mapBookmarkDateSummaryList, mapNewsBookmarkPage } from '../data/mappers/bookmarkMapper'
 import type { BookmarkSortOrder } from '../data/types/bookmark'
-import type { MyPageBookmarkDateSummary, MyPageBookmarkItem, MyPageBookmarkPage } from '../data/types/myPage'
+import type { MyPageBookmarkDateSummary, MyPageBookmarkPage } from '../data/types/myPage'
 import { useAsyncData } from './useAsyncData'
 
 const PAGE_SIZE = 10

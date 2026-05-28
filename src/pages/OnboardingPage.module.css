@@ -1,15 +1,60 @@
+/* ── Page shell ── */
 .page {
+  position: relative;
   min-height: calc(100vh - var(--layout-top-strip-height));
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: var(--space-6);
+  padding: var(--space-8) var(--space-6);
   box-sizing: border-box;
   background: var(--color-bg-app);
   font-family: var(--font-sans);
+  overflow-x: clip;
 }
 
+/* Grid background */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-border-default) 55%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 32px 32px;
+}
+
+/* Top primary glow */
+.page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 55%;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    color-mix(in srgb, var(--color-primary) 12%, transparent) 0%,
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Shell (above bg) ── */
 .shell {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 720px;
 }
@@ -18,21 +63,89 @@
   max-width: 480px;
 }
 
+/* ── Card ── */
 .card {
   padding: var(--space-6);
   border: 1px solid var(--color-border-default);
+  border-top: 2px solid color-mix(in srgb, var(--color-primary) 65%, var(--color-border-default));
   border-radius: var(--radius-lg);
   background: var(--color-bg-card);
-  box-shadow: 0 var(--space-6) var(--space-12) color-mix(in srgb, var(--color-bg-app) 65%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 6%, transparent),
+    0 var(--space-6) var(--space-12) color-mix(in srgb, var(--color-bg-app) 72%, transparent);
   box-sizing: border-box;
 }
 
+/* ── Step indicator ── */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.stepItem[data-active="true"] .stepDot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-interactive-active-text);
+}
+
+.stepLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: color var(--duration-fast) ease;
+}
+
+.stepItem[data-active="true"] .stepLabel {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stepLine {
+  flex: 1;
+  height: 1px;
+  min-width: var(--space-4);
+  background: var(--color-border-default);
+}
+
+/* ── Footer ── */
 .footer {
   display: flex;
   justify-content: flex-end;
   margin-top: var(--space-4);
 }
 
+/* ── Buttons ── */
 .submit {
   min-width: 5.5rem;
   height: 40px;
@@ -45,6 +158,13 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-sans);
   cursor: pointer;
+  transition: filter var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .submit:not(:disabled):hover {
+    filter: brightness(1.1);
+  }
 }
 
 .submit:disabled {
@@ -58,6 +178,7 @@
   margin-top: var(--space-2);
 }
 
+/* ── Misc ── */
 .error {
   margin: var(--space-3) 0 0;
   font-size: var(--font-size-sm);
@@ -65,6 +186,8 @@
 }
 
 .missing {
+  position: relative;
+  z-index: 1;
   text-align: center;
   color: var(--color-text-secondary);
   font-size: var(--font-size-lg);

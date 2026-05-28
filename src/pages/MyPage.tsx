@@ -18,7 +18,6 @@ import { updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
 import type { AlertSettings } from '../data/types/member'
-import { getApiErrorMessage } from '../data/util/apiError'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useMyPageBookmarks } from '../hooks/useMyPageBookmarks'
@@ -29,7 +28,7 @@ export default function MyPage() {
   const tab = parseMyPageTab(searchParams.get('tab'))
 
   const [refreshKey, setRefreshKey] = useState(0)
-  const [bookmarkRefreshKey, setBookmarkRefreshKey] = useState(0)
+  const [bookmarkRefreshKey] = useState(0)
   const [savingAlerts, setSavingAlerts] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 

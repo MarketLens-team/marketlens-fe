@@ -31,6 +31,30 @@ function readAccountDraft(state: unknown): SignupAccountDraft | null {
   return draft as SignupAccountDraft
 }
 
+function StepIndicator({ phase }: { phase: OnboardingPhase }) {
+  return (
+    <div className={styles.stepper} aria-label="온보딩 단계">
+      <div
+        className={styles.stepItem}
+        data-active={phase === 'watchlist' ? 'true' : 'false'}
+        aria-current={phase === 'watchlist' ? 'step' : undefined}
+      >
+        <span className={styles.stepDot} aria-hidden>1</span>
+        <span className={styles.stepLabel}>관심 종목</span>
+      </div>
+      <div className={styles.stepLine} aria-hidden />
+      <div
+        className={styles.stepItem}
+        data-active={phase === 'alerts' ? 'true' : 'false'}
+        aria-current={phase === 'alerts' ? 'step' : undefined}
+      >
+        <span className={styles.stepDot} aria-hidden>2</span>
+        <span className={styles.stepLabel}>알림 설정</span>
+      </div>
+    </div>
+  )
+}
+
 export default function OnboardingPage() {
   const location = useLocation()
   const openAuthModal = useAuthModalStore((s) => s.open)
@@ -92,6 +116,7 @@ export default function OnboardingPage() {
         <div className={styles.page}>
           <div className={`${styles.shell} ${styles.shellNarrow}`}>
             <div className={styles.card}>
+              <StepIndicator phase="alerts" />
               <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
               {submitError ? (
                 <p className={styles.error} role="alert">
@@ -119,6 +144,7 @@ export default function OnboardingPage() {
       <div className={styles.page}>
         <div className={styles.shell}>
           <div className={styles.card}>
+            <StepIndicator phase="watchlist" />
             <SignupWatchlistStep
               selected={watchlistSelection}
               onSelectedChange={setWatchlistSelection}

@@ -15,6 +15,11 @@
   transition: color var(--duration-fast) ease;
 }
 
+.btnLg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
 .btn:disabled {
   cursor: wait;
   opacity: 0.5;
@@ -27,6 +32,10 @@
 .icon {
   font-size: var(--font-size-xl);
   line-height: 1;
+}
+
+.btnLg .icon {
+  font-size: var(--font-size-2xl);
 }
 
 @media (hover: hover) and (pointer: fine) {
