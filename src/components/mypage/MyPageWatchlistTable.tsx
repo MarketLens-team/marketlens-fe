@@ -97,13 +97,13 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                 row.changePercent > 0 ? styles.changeUp : row.changePercent < 0 ? styles.changeDown : undefined
               const isAnimating = animatingId === row.id
               return (
-                <tr key={row.code} className={clsx(remove.item, isAnimating && remove.itemRemoving, styles.row)}>
+                <tr
+                  key={row.code}
+                  className={clsx(remove.item, isAnimating && remove.itemRemoving, styles.row)}
+                  onClick={() => goToStock(row.code)}
+                >
                   <td className={styles.stockCell}>
-                    <button
-                      type="button"
-                      className={styles.stockBtn}
-                      onClick={() => goToStock(row.code)}
-                    >
+                    <div className={styles.stockBtn}>
                       <EntityAvatar
                         variant="stock"
                         size="sm"
@@ -114,7 +114,7 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                         <span className={styles.stockName}>{row.name}</span>
                         <span className={styles.stockCode}>{row.code}</span>
                       </span>
-                    </button>
+                    </div>
                   </td>
                   <td className={clsx(styles.mono, styles.numCell)}>{formatPriceCell(row.price)}</td>
                   <td className={clsx(styles.mono, styles.numCell, changeClass)}>
@@ -136,7 +136,7 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                       className={styles.removeBtn}
                       aria-label={`${row.name} 관심 종목에서 제거`}
                       disabled={isAnimating}
-                      onClick={() => handleRemove(row.id)}
+                      onClick={(e) => { e.stopPropagation(); handleRemove(row.id) }}
                     >
                       <XIcon />
                     </button>

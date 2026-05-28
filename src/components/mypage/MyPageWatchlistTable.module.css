@@ -62,8 +62,7 @@
 }
 
 .row {
-  composes: rowBase from '../common/interactiveTableRow.module.css';
-  cursor: default;
+  composes: rowRing from '../common/interactiveTableRow.module.css';
 }
 
 .colStock {
@@ -92,17 +91,6 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-}
-
-.stockBtn:hover .stockName {
-  text-decoration: underline;
 }
 
 .stockText {
