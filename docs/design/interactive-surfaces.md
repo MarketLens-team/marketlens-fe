@@ -83,8 +83,9 @@
 
 | 적용 예 | 파일 |
 |---------|------|
-| 홈 관심종목 워치리스트 | `DashboardWatchlistTable` |
 | 언급량 급등 TOP 10 | `BuzzSurgeTop10Table` |
+
+> 홈 **내 관심 종목 워치리스트**(`DashboardWatchlistTable`)는 `<table>`이 아니라 **CSS Grid + `ringRow`** — sticky 열·`rowRing` 미사용 ([changelog 2026-05-29](../changelog/2026-05-29-refactor-dashboard-watchlist-grid.md)).
 
 ---
 
@@ -131,7 +132,8 @@ tr[role='link']:focus-visible {
 ```
 클릭 가능한 한 줄(리스트·검색 결과)?
   ├─ 모달/카드 안 “행 카드” → A. 링 행 (평소 transparent 권장)
-  ├─ <table> 안 데이터 행     → B. 테이블 행 (rowBase) 또는 A′. 링 테이블 (rowRing, 워치리스트)
+  ├─ <table> 안 데이터 행     → B. 테이블 행 (rowBase) 또는 A′. 링 테이블 (rowRing)
+  ├─ Grid 목록(홈 워치리스트) → A. 링 행 (ringRow, `DashboardWatchlistTable`)
   └─ 뉴스·기사형 (썸네일+제목) → C. 텍스트만
 
 상단 GNB 탭? → D. 예외 (밑줄만)
@@ -170,7 +172,7 @@ tr[role='link']:focus-visible {
 |------|-----------|
 | 토큰 | `src/styles/tokens.css` |
 | 테이블 공유 | `src/components/common/interactiveTableRow.module.css` (`rowBase` / `rowRing`) |
-| 링 테이블 (워치리스트) | `DashboardWatchlistTable.module.css` |
+| Grid 링 행 (홈 워치리스트) | `DashboardWatchlistTable.module.css` (`ringRow`) |
 | 링 행 공유 | `src/components/common/interactiveListRow.module.css` |
 | 링 행 (TOP3) | `src/components/dashboard/BuzzSurgeTop3.module.css` |
 | 링 행 (검색) | `src/components/common/TopNavSearchModal.module.css` |

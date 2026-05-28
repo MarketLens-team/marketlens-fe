@@ -28,6 +28,7 @@ import PersonTrackerPage from '../pages/PersonTrackerPage'
 import SectorPage from '../pages/SectorPage'
 import StockDetailPage from '../pages/StockDetailPage'
 import StockListPage from '../pages/StockListPage'
+import NotFoundPage from '../pages/NotFoundPage'
 import WatchlistPage from '../pages/WatchlistPage'
 
 export const router = createBrowserRouter([
@@ -73,6 +74,7 @@ export const router = createBrowserRouter([
           { path: 'crawling', element: <AdminCrawlingPage /> },
         ],
       },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ])

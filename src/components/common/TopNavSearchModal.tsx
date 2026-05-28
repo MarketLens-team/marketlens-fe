@@ -30,8 +30,9 @@ import {
   resolveSearchNewsStockRoute,
   type SearchNewsStockContext,
 } from '../../lib/resolveSearchNewsRoute'
+import { useServerWatchlist } from '../../hooks/useServerWatchlist'
 import { formatStockScore, stockSentimentTone } from '../stock/stockScore'
-import { useWatchlistStore } from '../../store/watchlistStore'
+import { StockWatchlistStarButton } from '../stock/StockWatchlistStarButton'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Modal } from '../ui/Modal'
 import { UnderlineTabNav } from './UnderlineTabNav'
@@ -176,63 +177,65 @@ type StockSearchRowModel = {
   mentionCount?: number
 }
 
+type SearchStockWatchlist = Pick<
+  ReturnType<typeof useServerWatchlist>,
+  'has' | 'toggle' | 'pendingCode'
+>
+
 function StockSearchRow({
   stock,
   onClose,
   showMentionCount,
+  watchlist,
 }: {
   stock: StockSearchRowModel
   onClose: () => void
   showMentionCount?: boolean
+  watchlist: SearchStockWatchlist
 }) {
   const navigate = useNavigate()
-  const { add, remove, has } = useWatchlistStore()
-  const inWatchlist = has(stock.code)
+  const interested = watchlist.has(stock.code)
+  const watchlistPending = watchlist.pendingCode === stock.code
 
   return (
-    <li
-      data-search-nav-item
-      className={clsx(
-        styles.searchRow,
-        showMentionCount ? styles.searchRowWithStat : styles.searchRowTwoCol,
-      )}
-    >
-      <div className={styles.stockIdentity}>
-        <EntityAvatar variant="stock" size="md" name={stock.name} imageUrl={stock.imageUrl} />
-        <div className={styles.stockIdentityText}>
-        <p className={styles.stockName}>{stock.name}</p>
-        <p className={styles.stockMeta}>
-          {stock.code}
-          {stock.market ? ` · ${stock.market}` : ''}
-        </p>
+    <li data-search-nav-item>
+      <button
+        type="button"
+        data-search-nav-primary
+        className={clsx(
+          styles.searchRowBtn,
+          showMentionCount ? styles.searchRowStockWithStat : styles.searchRowStock,
+        )}
+        onClick={() => {
+          navigate(`/stock/${stock.code}`)
+          onClose()
+        }}
+      >
+        <StockWatchlistStarButton
+          interested={interested}
+          pending={watchlistPending}
+          onToggle={() => {
+            void watchlist.toggle({
+              code: stock.code,
+              name: stock.name,
+              imageUrl: stock.imageUrl,
+            })
+          }}
+        />
+        <div className={styles.stockIdentity}>
+          <EntityAvatar variant="stock" size="md" name={stock.name} imageUrl={stock.imageUrl} />
+          <div className={styles.stockIdentityText}>
+            <p className={styles.stockName}>{stock.name}</p>
+            <p className={styles.stockMeta}>
+              {stock.code}
+              {stock.market ? ` · ${stock.market}` : ''}
+            </p>
+          </div>
         </div>
-      </div>
-      {showMentionCount && stock.mentionCount != null ? (
-        <p className={styles.searchRowStat}>{formatMentionCount(stock.mentionCount)}</p>
-      ) : null}
-      <div className={styles.stockActions}>
-        <button
-          type="button"
-          className={styles.actionBtn}
-          onClick={() => {
-            if (inWatchlist) remove(stock.code)
-            else add({ code: stock.code, name: stock.name, imageUrl: stock.imageUrl })
-          }}
-        >
-          {inWatchlist ? '관심해제' : '관심추가'}
-        </button>
-        <button
-          type="button"
-          data-search-nav-primary
-          className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-          onClick={() => {
-            navigate(`/stock/${stock.code}`)
-            onClose()
-          }}
-        >
-          상세보기
-        </button>
-      </div>
+        {showMentionCount && stock.mentionCount != null ? (
+          <p className={styles.searchRowStat}>{formatMentionCount(stock.mentionCount)}</p>
+        ) : null}
+      </button>
     </li>
   )
 }
@@ -246,6 +249,7 @@ function StockRowsBySector({
   onClose: () => void
   showMentionCount?: boolean
 }) {
+  const watchlist = useServerWatchlist()
   const groups = useMemo(() => groupStocksBySector(stocks), [stocks])
 
   if (groups.length === 0) return null
@@ -261,6 +265,7 @@ function StockRowsBySector({
                 stock={stock}
                 onClose={onClose}
                 showMentionCount={showMentionCount}
+                watchlist={watchlist}
               />
             ))}
           </ul>

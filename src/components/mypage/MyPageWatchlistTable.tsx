@@ -83,7 +83,7 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                 감성
               </th>
               <th scope="col" className={styles.colNum}>
-                언급량
+                언급률
               </th>
               <th scope="col" className={styles.colActions}>
                 <span className={styles.srOnly}>관리</span>

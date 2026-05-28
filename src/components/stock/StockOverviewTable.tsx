@@ -1,6 +1,8 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
+import { useServerWatchlist } from '../../hooks/useServerWatchlist'
 import { EntityAvatar } from '../ui/EntityAvatar'
+import { StockWatchlistStarButton } from './StockWatchlistStarButton'
 import type { StockOverviewRow } from '../../data/types/stock'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
 import {
@@ -73,6 +75,7 @@ export function StockOverviewTable({
   onSortChange,
 }: StockOverviewTableProps) {
   const navigate = useNavigate()
+  const { has: inWatchlist, toggle: toggleWatchlist, pendingCode } = useServerWatchlist()
 
   const goToStock = (code: string) => {
     navigate(buildStockDetailPath(code))
@@ -156,6 +159,8 @@ export function StockOverviewTable({
               const mentionUp = row.mentionChangeRate24h != null && row.mentionChangeRate24h >= 0
               const sentKey = buzzSentimentClass(row.sentimentScore24h)
               const delta = formatSentimentDelta24h(row.sentimentDelta24h)
+              const interested = inWatchlist(row.code)
+              const watchlistPending = pendingCode === row.code
               return (
                 <tr
                   key={row.code}
@@ -173,6 +178,17 @@ export function StockOverviewTable({
                 >
                   <td className={styles.stockCell}>
                     <span className={styles.stockLead}>
+                      <StockWatchlistStarButton
+                        interested={interested}
+                        pending={watchlistPending}
+                        onToggle={() => {
+                          void toggleWatchlist({
+                            code: row.code,
+                            name: row.name,
+                            imageUrl: row.imageUrl,
+                          })
+                        }}
+                      />
                       <EntityAvatar
                         variant="stock"
                         size="sm"
