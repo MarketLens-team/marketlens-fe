@@ -141,12 +141,6 @@ export default function OnboardingPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.bgOrbs} aria-hidden>
-        <span className={styles.orbBlue} />
-        <span className={styles.orbGreen} />
-        <span className={styles.orbRed} />
-        <span className={styles.orbPurple} />
-      </div>
       <div className={styles.shell}>
         <div className={`${styles.card} ${styles.cardFill}`}>
           <StepIndicator phase="watchlist" />
