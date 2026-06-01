@@ -57,7 +57,7 @@ function sortRows(
 }
 
 export default function StockListPage() {
-  const { data, loading, error, refreshing } = useStockListPageData()
+  const { data, loading, error } = useStockListPageData()
   const [sectorFilter, setSectorFilter] = useState('all')
   const [sortKey, setSortKey] = useState<StockOverviewSortKey>('mention')
   const [sortDesc, setSortDesc] = useState(true)
@@ -122,11 +122,8 @@ export default function StockListPage() {
 
         {rankings ? <StockRankingCards rankings={rankings} onMoreClick={handleRankingMore} /> : null}
 
-        {sectorOptions.length > 1 ? (
-          <div className={styles.sectorDropdownRow}>
-            <label htmlFor="stock-sector-filter" className={styles.sectorDropdownLabel}>
-              섹터
-            </label>
+        <section className={styles.tableSection}>
+          {sectorOptions.length > 1 ? (
             <div className={styles.sectorSelectWrap}>
               <select
                 id="stock-sector-filter"
@@ -145,30 +142,23 @@ export default function StockListPage() {
                 ▾
               </span>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {rows ? (
-          <p className={clsx(styles.meta, refreshing && styles.metaRefreshing)} aria-live="polite">
-            {sortedRows.length}종목
-            {refreshing ? ' · 갱신 중…' : null}
-          </p>
-        ) : null}
+          {showSkeleton ? (
+            <div className={clsx(skeleton.block, styles.skeletonTable)} aria-busy="true" />
+          ) : null}
 
-        {showSkeleton ? (
-          <div className={clsx(skeleton.block, styles.skeletonTable)} aria-busy="true" />
-        ) : null}
-
-        {rows ? (
-          <div id="stock-overview-table">
-            <StockOverviewTable
-              rows={sortedRows}
-              sortKey={sortKey}
-              sortDesc={sortDesc}
-              onSortChange={handleSortChange}
-            />
-          </div>
-        ) : null}
+          {rows ? (
+            <div id="stock-overview-table">
+              <StockOverviewTable
+                rows={sortedRows}
+                sortKey={sortKey}
+                sortDesc={sortDesc}
+                onSortChange={handleSortChange}
+              />
+            </div>
+          ) : null}
+        </section>
       </div>
     </Layout>
   )
