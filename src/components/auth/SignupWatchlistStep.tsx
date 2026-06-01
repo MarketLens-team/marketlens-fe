@@ -104,7 +104,7 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
 
   const sectorFilterOptions = useMemo(
     () => [
-      { value: 'all', label: '전체 섹터' },
+      { value: 'all', label: '전체' },
       ...directory.map((sector) => ({
         value: sector.sectorCode,
         label: sector.sectorName,
@@ -158,14 +158,15 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
 
   return (
     <div className={styles.root}>
-      <header className={styles.intro}>
-        <h2 className={styles.introTitle}>관심 종목을 골라주세요</h2>
-        <p className={styles.introDescription}>
-          관심 종목을 선택해 주세요. 선택한 종목의 뉴스·감성 분석을 맞춤으로 보여 드립니다.
-        </p>
-      </header>
+      <div className={styles.controls}>
+        <header className={styles.intro}>
+          <h2 className={styles.introTitle}>관심 종목을 골라주세요</h2>
+          <p className={styles.introDescription}>
+            선택한 종목의 뉴스·감성 분석을 맞춤으로 보여 드립니다.
+          </p>
+        </header>
 
-      <section className={styles.summary} aria-live="polite">
+        <section className={styles.summary} aria-live="polite">
         <div className={styles.summaryHead}>
           <div className={styles.summaryHeadRow}>
             <span className={styles.summaryCount}>
@@ -186,13 +187,15 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
             {selected.map((item) => (
               <li key={item.code}>
                 <span className={styles.selectedChip}>
-                  <EntityAvatar
-                    variant="stock"
-                    size="sm"
-                    name={item.name}
-                    imageUrl={item.imageUrl}
-                    className={styles.selectedChipAvatar}
-                  />
+                  <span className={styles.selectedChipAvatarWrap}>
+                    <EntityAvatar
+                      variant="stock"
+                      size="sm"
+                      name={item.name}
+                      imageUrl={item.imageUrl}
+                      className={styles.selectedChipAvatar}
+                    />
+                  </span>
                   {item.name}
                   <button
                     type="button"
@@ -211,42 +214,44 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
         )}
       </section>
 
-      <label className={styles.searchWrap}>
-        <span className={styles.searchIcon} aria-hidden>
-          ⌕
-        </span>
-        <input
-          type="search"
-          className={styles.searchInput}
-          placeholder="종목명·코드 검색 (예: 삼성전자, 005930)"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-      </label>
-
-      {!loading && directory.length > 1 ? (
-        <div className={styles.filterBar}>
+      <div className={styles.filterBar}>
+        {!loading && directory.length > 0 ? (
           <FilterDropdown
             value={sectorFilter}
             options={sectorFilterOptions}
             onChange={setSectorFilter}
             ariaLabel="섹터 필터"
+            className={styles.sectorDropdown}
           />
-        </div>
-      ) : null}
+        ) : null}
+        <label className={styles.searchWrap}>
+          <span className={styles.searchIcon} aria-hidden>
+            ⌕
+          </span>
+          <input
+            type="search"
+            className={styles.searchInput}
+            placeholder="종목명·코드 검색 (예: 삼성전자, 005930)"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+      </div>
 
-      {error ? (
-        <p className={styles.bannerError} role="alert">
-          {error}
-        </p>
-      ) : null}
+        {error ? (
+          <p className={styles.bannerError} role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
 
-      {loading ? (
-        <p className={styles.loading}>종목 목록을 불러오는 중…</p>
-      ) : filteredSectors.length === 0 ? (
-        <p className={styles.loading}>검색 결과가 없습니다.</p>
-      ) : (
-        filteredSectors.map((sector) => {
+      <div className={styles.stockCatalog}>
+        {loading ? (
+          <p className={styles.loading}>종목 목록을 불러오는 중…</p>
+        ) : filteredSectors.length === 0 ? (
+          <p className={styles.loading}>검색 결과가 없습니다.</p>
+        ) : (
+          filteredSectors.map((sector) => {
           const isSectorFiltered = sectorFilter !== 'all'
           const isExpanded =
             isSectorFiltered || Boolean(normalizedQuery) || expandedSectors.has(sector.sectorCode)
@@ -270,25 +275,29 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
                   </button>
                 ) : null}
               </div>
-              <ul className={styles.chipGrid}>
+              <ul className={styles.stockGrid}>
                 {visibleStocks.map((stock) => {
                   const active = isSelected(stock.code)
                   return (
                     <li key={stock.code}>
                       <button
                         type="button"
-                        className={`${styles.stockChip} ${active ? styles.stockChipActive : ''}`.trim()}
+                        className={`${styles.stockCard} ${active ? styles.stockCardActive : ''}`.trim()}
                         onClick={() => toggleStock(stock)}
                         aria-pressed={active}
                       >
-                        <EntityAvatar
-                          variant="stock"
-                          size="sm"
-                          name={stock.name}
-                          imageUrl={stock.imageUrl}
-                          className={styles.stockChipAvatar}
-                        />
-                        <span>{stock.name}</span>
+                        <span className={styles.stockCardCheck} aria-hidden />
+                        <span className={styles.stockCardAvatarWrap}>
+                          <EntityAvatar
+                            variant="stock"
+                            size="sm"
+                            name={stock.name}
+                            imageUrl={stock.imageUrl}
+                            className={styles.stockCardAvatar}
+                          />
+                        </span>
+                        <span className={styles.stockCardName}>{stock.name}</span>
+                        <span className={styles.stockCardCode}>{stock.code}</span>
                       </button>
                     </li>
                   )
@@ -296,8 +305,9 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
               </ul>
             </section>
           )
-        })
-      )}
+          })
+        )}
+      </div>
     </div>
   )
 }
