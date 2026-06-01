@@ -14,19 +14,8 @@
   padding: var(--space-4);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-bg-elevated);
+  background: var(--color-bg-card);
   cursor: pointer;
-  transition: background var(--duration-fast) ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .option:hover {
-    background: color-mix(in srgb, var(--color-bg-elevated) 85%, var(--color-text-primary));
-  }
-}
-
-.option:has(.checkboxInput:checked) {
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-elevated));
 }
 
 .checkboxInput {
@@ -58,8 +47,8 @@
 }
 
 .checkboxInput:checked + .checkboxBox {
-  border-color: var(--color-interactive-active);
-  background: var(--color-interactive-active);
+  border-color: var(--color-primary);
+  background: var(--color-primary);
 }
 
 .checkboxInput:checked + .checkboxBox::after {
