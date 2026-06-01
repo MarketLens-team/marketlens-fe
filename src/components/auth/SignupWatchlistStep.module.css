@@ -102,12 +102,18 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-2);
   border: 1px solid var(--color-interactive-active);
   border-radius: var(--radius-full);
   background: var(--color-interactive-active);
   font-size: var(--font-size-sm);
   color: var(--color-interactive-active-text);
+}
+
+.selectedChipAvatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--font-size-xs);
 }
 
 .chipRemove {
@@ -172,6 +178,11 @@
   outline: none;
 }
 
+.filterBar {
+  display: flex;
+  align-items: center;
+}
+
 .sectorCard {
   display: flex;
   flex-direction: column;
@@ -230,7 +241,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
   background: var(--color-bg-elevated);
@@ -241,6 +252,12 @@
     background var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
     color var(--duration-fast) ease;
+}
+
+.stockChipAvatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--font-size-xs);
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -1,11 +1,54 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { fetchStockDirectory } from '../../data/clients/stockClient'
-import type { StockDirectoryItem, StockSectorGroup } from '../../data/types/stockDirectory'
+import { fetchStockOverview } from '../../data/clients/stockClient'
+import type { StockOverviewRow } from '../../data/types/stock'
 import type { WatchlistItem } from '../../store/watchlistStore'
+import { EntityAvatar } from '../ui/EntityAvatar'
+import { FilterDropdown } from '../ui/FilterDropdown'
 import styles from './SignupWatchlistStep.module.css'
 
 const MAX_SELECTION = 10
 const SECTOR_PREVIEW_COUNT = 5
+
+interface WatchlistPickerStock {
+  code: string
+  name: string
+  market: string
+  imageUrl?: string | null
+}
+
+interface WatchlistSectorGroup {
+  sectorCode: string
+  sectorName: string
+  stocks: WatchlistPickerStock[]
+}
+
+function groupOverviewBySector(rows: StockOverviewRow[]): WatchlistSectorGroup[] {
+  const groups = new Map<string, WatchlistSectorGroup>()
+
+  for (const row of rows) {
+    const sectorCode = row.sectorCode || row.sectorName || 'unknown'
+    const existing = groups.get(sectorCode)
+    const stock: WatchlistPickerStock = {
+      code: row.code,
+      name: row.name,
+      market: row.market,
+      imageUrl: row.imageUrl,
+    }
+
+    if (existing) {
+      existing.stocks.push(stock)
+      continue
+    }
+
+    groups.set(sectorCode, {
+      sectorCode,
+      sectorName: row.sectorName || '—',
+      stocks: [stock],
+    })
+  }
+
+  return [...groups.values()].sort((a, b) => a.sectorName.localeCompare(b.sectorName, 'ko'))
+}
 
 interface SignupWatchlistStepProps {
   selected: WatchlistItem[]
@@ -15,8 +58,9 @@ interface SignupWatchlistStepProps {
 }
 
 export function SignupWatchlistStep({ selected, onSelectedChange, error, onError }: SignupWatchlistStepProps) {
-  const [directory, setDirectory] = useState<StockSectorGroup[]>([])
+  const [directory, setDirectory] = useState<WatchlistSectorGroup[]>([])
   const [expandedSectors, setExpandedSectors] = useState<Set<string>>(() => new Set())
+  const [sectorFilter, setSectorFilter] = useState('all')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -24,8 +68,11 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
     let cancelled = false
     ;(async () => {
       try {
-        const data = await fetchStockDirectory()
-        if (!cancelled) setDirectory(data.sectors)
+        const data = await fetchStockOverview()
+        if (!cancelled) {
+          setDirectory(groupOverviewBySector(data.stocks))
+          onError(null)
+        }
       } catch (err) {
         if (!cancelled) {
           onError(err instanceof Error ? err.message : '종목 목록을 불러오지 못했습니다.')
@@ -55,9 +102,25 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
       .filter((sector) => sector.stocks.length > 0)
   }, [directory, normalizedQuery])
 
+  const sectorFilterOptions = useMemo(
+    () => [
+      { value: 'all', label: '전체 섹터' },
+      ...directory.map((sector) => ({
+        value: sector.sectorCode,
+        label: sector.sectorName,
+      })),
+    ],
+    [directory],
+  )
+
+  const filteredSectors = useMemo(() => {
+    if (sectorFilter === 'all') return visibleSectors
+    return visibleSectors.filter((sector) => sector.sectorCode === sectorFilter)
+  }, [sectorFilter, visibleSectors])
+
   const isSelected = useCallback((code: string) => selected.some((item) => item.code === code), [selected])
 
-  const toggleStock = (stock: StockDirectoryItem) => {
+  const toggleStock = (stock: WatchlistPickerStock) => {
     onError(null)
     if (isSelected(stock.code)) {
       onSelectedChange(selected.filter((item) => item.code !== stock.code))
@@ -67,7 +130,10 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
       onError(`관심 종목은 최대 ${MAX_SELECTION}개까지 선택할 수 있습니다.`)
       return
     }
-    onSelectedChange([...selected, { code: stock.code, name: stock.name }])
+    onSelectedChange([
+      ...selected,
+      { code: stock.code, name: stock.name, imageUrl: stock.imageUrl ?? null },
+    ])
   }
 
   const removeSelected = (code: string) => {
@@ -120,6 +186,13 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
             {selected.map((item) => (
               <li key={item.code}>
                 <span className={styles.selectedChip}>
+                  <EntityAvatar
+                    variant="stock"
+                    size="sm"
+                    name={item.name}
+                    imageUrl={item.imageUrl}
+                    className={styles.selectedChipAvatar}
+                  />
                   {item.name}
                   <button
                     type="button"
@@ -151,6 +224,17 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
         />
       </label>
 
+      {!loading && directory.length > 1 ? (
+        <div className={styles.filterBar}>
+          <FilterDropdown
+            value={sectorFilter}
+            options={sectorFilterOptions}
+            onChange={setSectorFilter}
+            ariaLabel="섹터 필터"
+          />
+        </div>
+      ) : null}
+
       {error ? (
         <p className={styles.bannerError} role="alert">
           {error}
@@ -159,11 +243,13 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
 
       {loading ? (
         <p className={styles.loading}>종목 목록을 불러오는 중…</p>
-      ) : visibleSectors.length === 0 ? (
+      ) : filteredSectors.length === 0 ? (
         <p className={styles.loading}>검색 결과가 없습니다.</p>
       ) : (
-        visibleSectors.map((sector) => {
-          const isExpanded = Boolean(normalizedQuery) || expandedSectors.has(sector.sectorCode)
+        filteredSectors.map((sector) => {
+          const isSectorFiltered = sectorFilter !== 'all'
+          const isExpanded =
+            isSectorFiltered || Boolean(normalizedQuery) || expandedSectors.has(sector.sectorCode)
           const hasMore = sector.stocks.length > SECTOR_PREVIEW_COUNT
           const visibleStocks = isExpanded ? sector.stocks : sector.stocks.slice(0, SECTOR_PREVIEW_COUNT)
 
@@ -174,7 +260,7 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
                   {sector.sectorName}
                   <span className={styles.sectorCount}>{sector.stocks.length}종</span>
                 </h3>
-                {hasMore && !normalizedQuery ? (
+                {hasMore && !normalizedQuery && !isSectorFiltered ? (
                   <button
                     type="button"
                     className={styles.sectorExpand}
@@ -195,6 +281,13 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
                         onClick={() => toggleStock(stock)}
                         aria-pressed={active}
                       >
+                        <EntityAvatar
+                          variant="stock"
+                          size="sm"
+                          name={stock.name}
+                          imageUrl={stock.imageUrl}
+                          className={styles.stockChipAvatar}
+                        />
                         <span className={styles.chipMark} aria-hidden>
                           {active ? '✓' : '+'}
                         </span>
