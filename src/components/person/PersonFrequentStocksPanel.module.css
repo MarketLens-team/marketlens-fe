@@ -1,5 +1,6 @@
 .card {
   height: fit-content;
+  border-radius: var(--radius-lg);
 }
 
 .cardHead {

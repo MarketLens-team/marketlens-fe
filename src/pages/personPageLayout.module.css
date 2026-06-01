@@ -7,7 +7,7 @@
     minmax(14rem, 22rem)
     minmax(0, 1fr)
     minmax(14rem, 22rem);
-  column-gap: var(--space-4);
+  column-gap: var(--space-8);
   row-gap: 0;
   align-items: start;
   width: 100%;
@@ -115,7 +115,7 @@
       minmax(11rem, 16rem)
       minmax(0, 1fr)
       minmax(11rem, 16rem);
-    column-gap: var(--space-3);
+    column-gap: var(--space-5);
   }
 }
 
