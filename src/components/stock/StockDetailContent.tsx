@@ -474,16 +474,19 @@ export function StockDetailContent({
             />
             <h1 className={styles.stockTitle}>{stock.name}</h1>
           </div>
-          <PillButton
-            variant={interested ? 'secondary' : 'primary'}
-            active={interested}
-            disableHover
+          <button
+            type="button"
+            className={styles.watchlistToggle}
             onClick={() => void toggleWatchlist()}
             disabled={watchlistPending}
             aria-pressed={interested}
+            aria-label={interested ? '관심종목 해제' : '관심종목 추가'}
           >
-            {interested ? '★ 관심종목' : '관심종목 추가'}
-          </PillButton>
+            <span className={styles.watchlistStar} aria-hidden>
+              {interested ? '★' : '☆'}
+            </span>
+            <span className={styles.watchlistLabel}>{interested ? '관심종목' : '관심종목 추가'}</span>
+          </button>
         </div>
         <div className={styles.headerBody}>
           <div className={styles.headerLeft}>

@@ -12,6 +12,7 @@ import {
   StockOverviewTable,
   type StockOverviewSortKey,
 } from '../components/stock/StockOverviewTable'
+import { FilterDropdown } from '../components/ui/FilterDropdown'
 import type { StockOverviewRow, StockRankingCategory } from '../data/types/stock'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useStockListPageData } from '../hooks/useStockListPageData'
@@ -57,7 +58,7 @@ function sortRows(
 }
 
 export default function StockListPage() {
-  const { data, loading, error, refreshing } = useStockListPageData()
+  const { data, loading, error } = useStockListPageData()
   const [sectorFilter, setSectorFilter] = useState('all')
   const [sortKey, setSortKey] = useState<StockOverviewSortKey>('mention')
   const [sortDesc, setSortDesc] = useState(true)
@@ -71,6 +72,15 @@ export default function StockListPage() {
     )
     return ['all', ...names]
   }, [rows])
+
+  const sectorFilterOptions = useMemo(
+    () =>
+      sectorOptions.map((sector) => ({
+        value: sector,
+        label: sector === 'all' ? '전체 섹터' : sector,
+      })),
+    [sectorOptions],
+  )
 
   const filteredRows = useMemo(() => {
     const base = rows ?? []
@@ -122,42 +132,31 @@ export default function StockListPage() {
 
         {rankings ? <StockRankingCards rankings={rankings} onMoreClick={handleRankingMore} /> : null}
 
-        {sectorOptions.length > 1 ? (
-          <div className={styles.sectorRow} role="group" aria-label="섹터 필터">
-            {sectorOptions.map((sector) => (
-              <button
-                key={sector}
-                type="button"
-                className={clsx(styles.sectorChip, sectorFilter === sector && styles.sectorChipActive)}
-                onClick={() => setSectorFilter(sector)}
-              >
-                {sector === 'all' ? '전체 섹터' : sector}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {rows ? (
-          <p className={clsx(styles.meta, refreshing && styles.metaRefreshing)} aria-live="polite">
-            {sortedRows.length}종목
-            {refreshing ? ' · 갱신 중…' : null}
-          </p>
-        ) : null}
-
-        {showSkeleton ? (
-          <div className={clsx(skeleton.block, styles.skeletonTable)} aria-busy="true" />
-        ) : null}
-
-        {rows ? (
-          <div id="stock-overview-table">
-            <StockOverviewTable
-              rows={sortedRows}
-              sortKey={sortKey}
-              sortDesc={sortDesc}
-              onSortChange={handleSortChange}
+        <section className={styles.tableSection}>
+          {sectorOptions.length > 1 ? (
+            <FilterDropdown
+              value={sectorFilter}
+              options={sectorFilterOptions}
+              onChange={setSectorFilter}
+              ariaLabel="섹터 필터"
             />
-          </div>
-        ) : null}
+          ) : null}
+
+          {showSkeleton ? (
+            <div className={clsx(skeleton.block, styles.skeletonTable)} aria-busy="true" />
+          ) : null}
+
+          {rows ? (
+            <div id="stock-overview-table">
+              <StockOverviewTable
+                rows={sortedRows}
+                sortKey={sortKey}
+                sortDesc={sortDesc}
+                onSortChange={handleSortChange}
+              />
+            </div>
+          ) : null}
+        </section>
       </div>
     </Layout>
   )

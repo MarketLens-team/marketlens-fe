@@ -11,50 +11,11 @@
   gap: var(--space-4);
 }
 
-.sectorRow {
+.tableSection {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: column;
   gap: var(--space-2);
-  overflow-x: auto;
-  padding-bottom: var(--space-1);
-  scrollbar-width: thin;
-}
-
-.sectorChip {
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-card);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    color var(--duration-fast),
-    border-color var(--duration-fast),
-    background-color var(--duration-fast);
-}
-
-.sectorChip:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
-}
-
-.sectorChipActive {
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-card));
-}
-
-.meta {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.metaRefreshing {
-  opacity: 0.65;
+  padding-top: var(--space-4);
 }
 
 .skeletonGrid {

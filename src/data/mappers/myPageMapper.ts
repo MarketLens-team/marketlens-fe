@@ -9,17 +9,23 @@ import { MY_PAGE_WATCHLIST_MAX } from '../types/myPage'
 
 const ATTENTION_SCORE_THRESHOLD = -30
 
+export interface WatchlistOverviewPrice {
+  price: number
+  changePercent: number
+}
+
 export function mapWatchlistRow(
   item: WatchlistResponse,
   summary?: StockSummaryResponse | null,
+  overviewPrice?: WatchlistOverviewPrice | null,
 ): MyPageWatchlistRow {
   const sentimentScore = toFiniteNumber(summary?.score)
   return {
     code: item.stockCode,
     name: item.stockName,
     imageUrl: normalizeImageUrl(item.imageUrl),
-    price: 0,
-    changePercent: 0,
+    price: toFiniteNumber(overviewPrice?.price),
+    changePercent: toFiniteNumber(overviewPrice?.changePercent),
     sentimentScore,
     mentionSurgePercent: toFiniteNumber(summary?.mentionChangeRate),
   }
@@ -53,11 +59,18 @@ export function mapMemberAccount(member: MemberResponse): MyPageAccount {
 export function mapMyPageData(input: {
   watchlist: WatchlistResponse[]
   summaries: Array<StockSummaryResponse | null>
+  overviewPriceByCode?: Map<string, WatchlistOverviewPrice>
   settings: AlertSettings
   member: MemberResponse
   alertExample?: string
 }): MyPageData {
-  const rows = input.watchlist.map((item, index) => mapWatchlistRow(item, input.summaries[index]))
+  const rows = input.watchlist.map((item, index) =>
+    mapWatchlistRow(
+      item,
+      input.summaries[index],
+      input.overviewPriceByCode?.get(item.stockCode),
+    ),
+  )
   return {
     summary: buildMyPageSummary(rows),
     watchlist: rows,

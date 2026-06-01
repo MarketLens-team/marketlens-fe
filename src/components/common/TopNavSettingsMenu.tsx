@@ -31,7 +31,7 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const { handleLogout } = useAuthFlow()
-  const { theme, language, currency, setTheme } = useUserPreferencesStore()
+  const { language, currency } = useUserPreferencesStore()
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange])
 
@@ -80,21 +80,6 @@ export function TopNavSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: TopN
           <div className={styles.row}>
             <span className={styles.label}>통화</span>
             <span className={styles.value}>{currency}</span>
-          </div>
-          <div className={styles.segmentBlock}>
-            <span className={styles.segmentLabel}>테마</span>
-            <div className={styles.segmented} role="group" aria-label="테마">
-              {(['light', 'dark', 'system'] as const).map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={`${styles.segmentBtn} ${theme === id ? styles.segmentBtnActive : ''}`}
-                  onClick={() => setTheme(id)}
-                >
-                  {id === 'light' ? '라이트' : id === 'dark' ? '다크' : '시스템'}
-                </button>
-              ))}
-            </div>
           </div>
           <div className={styles.linkGroup}>
             <button

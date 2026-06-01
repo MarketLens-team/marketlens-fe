@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { SignupAccountDraft } from '../components/auth/AuthPanel'
-import { Layout } from '../components/common/Layout'
 import { DEFAULT_ALERT_SETTINGS, SignupAlertsStep } from '../components/auth/SignupAlertsStep'
+import { OnboardingFloatField } from '../components/auth/OnboardingFloatField'
 import { SignupWatchlistStep } from '../components/auth/SignupWatchlistStep'
 import { ButtonSpinner } from '../components/ui/ButtonSpinner'
 import { PillButton } from '../components/ui/PillButton'
@@ -69,6 +69,7 @@ export default function OnboardingPage() {
   const [stepError, setStepError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   if (isLoggedIn) {
     return <Navigate to={role === 'ADMIN' ? '/admin' : '/'} replace />
@@ -76,21 +77,19 @@ export default function OnboardingPage() {
 
   if (!accountDraft) {
     return (
-      <Layout>
-        <div className={styles.page}>
-          <div className={styles.missing}>
-            <p>회원가입을 이어하려면 계정 정보가 필요합니다.</p>
-            <div className={styles.missingActions}>
-              <PillButton variant="secondary" onClick={() => openAuthModal()}>
-                로그인
-              </PillButton>
-              <PillButton variant="primary" onClick={() => openAuthModal('signup')}>
-                회원 가입
-              </PillButton>
-            </div>
+      <div className={styles.page}>
+        <div className={styles.missing}>
+          <p>회원가입을 이어하려면 계정 정보가 필요합니다.</p>
+          <div className={styles.missingActions}>
+            <PillButton variant="secondary" onClick={() => openAuthModal()}>
+              로그인
+            </PillButton>
+            <PillButton variant="primary" onClick={() => openAuthModal('signup')}>
+              회원 가입
+            </PillButton>
           </div>
         </div>
-      </Layout>
+      </div>
     )
   }
 
@@ -112,60 +111,66 @@ export default function OnboardingPage() {
 
   if (phase === 'alerts') {
     return (
-      <Layout>
-        <div className={styles.page}>
-          <div className={`${styles.shell} ${styles.shellNarrow}`}>
-            <div className={styles.card}>
-              <StepIndicator phase="alerts" />
-              <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
-              {submitError ? (
-                <p className={styles.error} role="alert">
-                  {submitError}
-                </p>
-              ) : null}
-              <button
-                type="button"
-                className={`${styles.submit} ${styles.submitWide}`}
-                disabled={isSubmitting}
-                aria-busy={isSubmitting}
-                onClick={() => void finishRegistration()}
-              >
-                {isSubmitting ? <ButtonSpinner /> : 'MarketLens 시작하기'}
-              </button>
-            </div>
+      <div className={styles.page}>
+        <OnboardingFloatField occluderRef={cardRef} />
+        <div className={`${styles.shell} ${styles.shellNarrow}`}>
+          <div ref={cardRef} className={styles.card}>
+            <StepIndicator phase="alerts" />
+            <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
+            {submitError ? (
+              <p className={styles.error} role="alert">
+                {submitError}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              className={`${styles.submit} ${styles.submitWide}`}
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              onClick={() => void finishRegistration()}
+            >
+              {isSubmitting ? <ButtonSpinner /> : 'MarketLens 시작하기'}
+            </button>
           </div>
         </div>
-      </Layout>
+      </div>
     )
   }
 
+  const goToAlerts = () => {
+    setStepError(null)
+    setPhase('alerts')
+  }
+
   return (
-    <Layout>
-      <div className={styles.page}>
-        <div className={styles.shell}>
-          <div className={styles.card}>
-            <StepIndicator phase="watchlist" />
+    <div className={styles.page}>
+      <OnboardingFloatField occluderRef={cardRef} />
+      <div className={styles.shell}>
+        <div ref={cardRef} className={`${styles.card} ${styles.cardFill}`}>
+          <StepIndicator phase="watchlist" />
+          <div className={styles.stepBody}>
             <SignupWatchlistStep
               selected={watchlistSelection}
               onSelectedChange={setWatchlistSelection}
               error={stepError}
               onError={setStepError}
             />
-            <div className={styles.footer}>
-              <button
-                type="button"
-                className={styles.submit}
-                onClick={() => {
-                  setStepError(null)
-                  setPhase('alerts')
-                }}
-              >
-                {watchlistSelection.length === 0 ? '건너뛰기' : '다음'}
-              </button>
-            </div>
+          </div>
+          <div className={styles.footer}>
+            <button type="button" className={styles.skipBtn} onClick={goToAlerts}>
+              건너뛰기
+            </button>
+            <button
+              type="button"
+              className={styles.submit}
+              disabled={watchlistSelection.length === 0}
+              onClick={goToAlerts}
+            >
+              다음 단계 →
+            </button>
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   )
 }

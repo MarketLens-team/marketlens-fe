@@ -5,7 +5,7 @@ import { AuthSessionGate } from './AuthSessionGate'
 import { TickerBar } from './TickerBar'
 import styles from './RootLayout.module.css'
 
-const TICKER_HIDDEN_PATHS = new Set(['/login'])
+const TICKER_HIDDEN_PATHS = new Set(['/login', '/onboarding'])
 
 function shouldShowTicker(pathname: string): boolean {
   return !TICKER_HIDDEN_PATHS.has(pathname)

@@ -20,6 +20,8 @@ import DevSidebarCompactPage from '../pages/DevSidebarCompactPage'
 import DevSidebarGlassPage from '../pages/DevSidebarGlassPage'
 import DevSidebarMinimalPage from '../pages/DevSidebarMinimalPage'
 import DevSortButtonPage from '../pages/DevSortButtonPage'
+import DevWatchlistButtonPage from '../pages/DevWatchlistButtonPage'
+import DevSectorFilterPage from '../pages/DevSectorFilterPage'
 import LoginPage from '../pages/LoginPage'
 import OnboardingPage from '../pages/OnboardingPage'
 import MyPage from '../pages/MyPage'
@@ -65,6 +67,8 @@ export const router = createBrowserRouter([
       { path: '/dev/sidebar-glass', element: <DevSidebarGlassPage /> },
       { path: '/dev/sidebar-compact', element: <DevSidebarCompactPage /> },
       { path: '/dev/sort-button', element: <DevSortButtonPage /> },
+      { path: '/dev/watchlist-button', element: <DevWatchlistButtonPage /> },
+      { path: '/dev/sector-filter', element: <DevSectorFilterPage /> },
       {
         path: '/admin',
         element: <PrivateRoute requiredRole="ADMIN" />,
