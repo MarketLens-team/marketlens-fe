@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import type { SignupAccountDraft } from '../components/auth/AuthPanel'
 import { DEFAULT_ALERT_SETTINGS, SignupAlertsStep } from '../components/auth/SignupAlertsStep'
+import { OnboardingFloatField } from '../components/auth/OnboardingFloatField'
 import { SignupWatchlistStep } from '../components/auth/SignupWatchlistStep'
 import { ButtonSpinner } from '../components/ui/ButtonSpinner'
 import { PillButton } from '../components/ui/PillButton'
@@ -68,6 +69,7 @@ export default function OnboardingPage() {
   const [stepError, setStepError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   if (isLoggedIn) {
     return <Navigate to={role === 'ADMIN' ? '/admin' : '/'} replace />
@@ -141,8 +143,9 @@ export default function OnboardingPage() {
 
   return (
     <div className={styles.page}>
+      <OnboardingFloatField occluderRef={cardRef} />
       <div className={styles.shell}>
-        <div className={`${styles.card} ${styles.cardFill}`}>
+        <div ref={cardRef} className={`${styles.card} ${styles.cardFill}`}>
           <StepIndicator phase="watchlist" />
           <div className={styles.stepBody}>
             <SignupWatchlistStep

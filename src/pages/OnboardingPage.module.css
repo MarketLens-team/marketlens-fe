@@ -24,6 +24,8 @@
   min-height: 0;
   width: 100%;
   max-width: 840px;
+  /* 레이아웃만 담당 — 빈 영역은 배경 float에 포인터 통과 */
+  pointer-events: none;
 }
 
 .shellNarrow {
@@ -32,6 +34,7 @@
 
 /* ── Card ── */
 .card {
+  pointer-events: auto;
   padding: var(--space-6);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);

@@ -1,0 +1,198 @@
+.field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.float {
+  position: absolute;
+  pointer-events: none;
+  animation-duration: var(--float-duration, 28s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+.floatAnchorStart {
+  transform: translate(0, -50%);
+}
+
+.floatAnchorCenter {
+  transform: translate(-50%, -50%);
+}
+
+.floatAnchorEnd {
+  transform: translate(-100%, -50%);
+}
+
+.driftStart {
+  animation-name: floatDriftStart;
+}
+
+.driftCenter {
+  animation-name: floatDriftCenter;
+}
+
+.driftEnd {
+  animation-name: floatDriftEnd;
+}
+
+.hitTarget {
+  position: relative;
+  display: block;
+  width: var(--float-size, 3rem);
+  height: var(--float-size, 3rem);
+  border: none;
+  background: transparent;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.hitTarget::before {
+  position: absolute;
+  inset: calc(var(--space-6) * -1);
+  content: '';
+}
+
+.hitTargetNoHover {
+  pointer-events: none;
+  cursor: default;
+}
+
+.avatar {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: var(--float-size, 3rem);
+  height: var(--float-size, 3rem);
+  font-size: var(--font-size-sm);
+  filter: blur(14px);
+  opacity: 0.45;
+  transition:
+    filter var(--duration-moderate) ease,
+    opacity var(--duration-moderate) ease,
+    width var(--duration-moderate) ease,
+    height var(--duration-moderate) ease;
+}
+
+.detail {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + var(--space-3));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  transition:
+    max-width var(--duration-moderate) ease,
+    opacity var(--duration-fast) ease;
+}
+
+.detailExpandLeft {
+  right: calc(100% + var(--space-3));
+  left: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-on-surface);
+  line-height: var(--line-height-tight);
+}
+
+.changeUp,
+.changeDown,
+.changeFlat {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.changeUp {
+  color: var(--color-success);
+}
+
+.changeDown {
+  color: var(--color-danger);
+}
+
+.changeFlat {
+  color: var(--color-text-secondary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hitTarget:not(.hitTargetNoHover):hover .avatar,
+  .hitTarget:not(.hitTargetNoHover):focus-within .avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    filter: blur(0);
+    opacity: 1;
+  }
+
+  .hitTarget:not(.hitTargetNoHover):hover .detail,
+  .hitTarget:not(.hitTargetNoHover):focus-within .detail {
+    max-width: 12rem;
+    opacity: 1;
+  }
+}
+
+@keyframes floatDriftStart {
+  0%,
+  100% {
+    transform: translate(0, -50%) translate(0, 0);
+  }
+
+  33% {
+    transform: translate(0, -50%) translate(6px, -9px);
+  }
+
+  66% {
+    transform: translate(0, -50%) translate(-5px, 7px);
+  }
+}
+
+@keyframes floatDriftCenter {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translate(0, 0);
+  }
+
+  33% {
+    transform: translate(-50%, -50%) translate(6px, -9px);
+  }
+
+  66% {
+    transform: translate(-50%, -50%) translate(-5px, 7px);
+  }
+}
+
+@keyframes floatDriftEnd {
+  0%,
+  100% {
+    transform: translate(-100%, -50%) translate(0, 0);
+  }
+
+  33% {
+    transform: translate(-100%, -50%) translate(6px, -9px);
+  }
+
+  66% {
+    transform: translate(-100%, -50%) translate(-5px, 7px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
+}
