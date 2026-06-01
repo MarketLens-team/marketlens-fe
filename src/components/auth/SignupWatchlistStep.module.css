@@ -168,6 +168,8 @@
 }
 
 .filterBar {
+  --filter-control-bg: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+  --filter-control-border: color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -206,9 +208,9 @@
   width: 100%;
   padding: var(--space-2) var(--space-4);
   padding-left: calc(var(--space-3) + var(--space-4));
-  border: 1px solid color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
+  border: 1px solid var(--filter-control-border);
   border-radius: var(--radius-full);
-  background: var(--color-bg-card);
+  background: var(--filter-control-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
@@ -221,6 +223,13 @@
 
 .searchInput::placeholder {
   color: var(--color-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .searchInput:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+  }
 }
 
 .searchInput:focus {
