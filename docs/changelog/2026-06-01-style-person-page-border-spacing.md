@@ -20,6 +20,7 @@
 | `src/components/person/PersonTop5Panel.module.css` | 사이드 카드 `border-radius: var(--radius-lg)` |
 | `src/components/person/PersonFrequentStocksPanel.module.css` | 동일 radius 오버라이드 |
 | `src/pages/personPageLayout.module.css` | `.mainGrid` `column-gap` `space-8` (1100px 이하 `space-5`) |
+| `src/components/person/PersonPanelRangeToggle.tsx` | `PillButton` secondary compact + 마이페이지 `+ 추가` 버튼과 동일 톤 |
 
 ## 확인
 

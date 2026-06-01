@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import type { PersonMentionsRange } from '../../data/types/person'
+import { PillButton } from '../ui/PillButton'
 import styles from './PersonPanelRangeToggle.module.css'
 
 interface PersonPanelRangeToggleProps {
@@ -27,14 +28,16 @@ export function PersonPanelRangeToggle({
   const label = RANGE_LABEL[range]
 
   return (
-    <button
+    <PillButton
       type="button"
+      variant="secondary"
+      compact
       className={clsx(styles.btn, className)}
       aria-pressed
       aria-label={`${ariaLabel}: ${label}. 클릭하면 기간이 바뀝니다`}
       onClick={() => onChange(nextRange(range))}
     >
       {label}
-    </button>
+    </PillButton>
   )
 }
