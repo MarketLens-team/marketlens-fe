@@ -54,5 +54,5 @@
   scrollbar-gutter: stable;
   overscroll-behavior-y: contain;
   padding: var(--main-pad-block) var(--main-pad-inline);
-  background: var(--color-bg-section);
+  background: var(--color-bg-app);
 }

@@ -288,9 +288,6 @@ export function SignupWatchlistStep({ selected, onSelectedChange, error, onError
                           imageUrl={stock.imageUrl}
                           className={styles.stockChipAvatar}
                         />
-                        <span className={styles.chipMark} aria-hidden>
-                          {active ? '✓' : '+'}
-                        </span>
                         <span>{stock.name}</span>
                       </button>
                     </li>
