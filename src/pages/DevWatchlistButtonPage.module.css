@@ -1,0 +1,192 @@
+.page {
+  height: 100%;
+  overflow-y: auto;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.desc {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-base);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.variantWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+}
+
+.variantLabel {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.starGold {
+  color: var(--color-warning);
+}
+
+/* 공통 pill 버튼 베이스 (dev 실험용) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+/* A — inverted */
+.aOff {
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.aOn {
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-interactive-active-text);
+}
+
+/* B — gold active */
+.bOff {
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-interactive-active-text);
+}
+
+.bOn {
+  border: 1px solid color-mix(in srgb, var(--color-warning) 55%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-bg-section));
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* D — ghost gold */
+.dOff {
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-interactive-active-text);
+}
+
+.dOn {
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* C — star + label unified hover */
+.cButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cStarBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.625rem;
+  height: 2.625rem;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  transition:
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease;
+}
+
+.cLabel {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  transition: color var(--duration-fast) ease;
+}
+
+.cButtonActive .cStarBox {
+  color: var(--color-warning);
+  background: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cButton:hover .cStarBox {
+    color: var(--color-warning);
+    background: transparent;
+  }
+
+  .cButton:hover .cLabel {
+    color: color-mix(in srgb, var(--color-text-primary) 88%, var(--color-warning));
+  }
+}
+
+.cButton:focus-visible {
+  outline: none;
+}
+
+.cButton:focus-visible .cStarBox {
+  box-shadow: var(--interactive-ring-focus);
+}
+
+.cButtonActive .cLabel {
+  color: color-mix(in srgb, var(--color-text-primary) 92%, var(--color-warning));
+}
