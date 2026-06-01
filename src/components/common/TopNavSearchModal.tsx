@@ -425,39 +425,33 @@ function PersonSearchRow({
   const showMentionStat = person.mentionCount != null
 
   return (
-    <li
-      data-search-nav-item
-      className={clsx(
-        styles.searchRow,
-        showMentionStat ? styles.searchRowWithStat : styles.searchRowTwoCol,
-      )}
-    >
-      <div className={styles.stockIdentity}>
-        <EntityAvatar variant="person" size="md" name={person.personName} imageUrl={person.imageUrl} />
-        <div className={styles.stockIdentityText}>
-        <p className={styles.personName}>{person.personName}</p>
-        <p className={styles.personMeta}>
-          {person.organizationName}
-          {person.role ? ` · ${person.role}` : ''}
-        </p>
+    <li data-search-nav-item>
+      <button
+        type="button"
+        data-search-nav-primary
+        className={clsx(
+          styles.searchRowBtn,
+          styles.searchRowTwoCol,
+        )}
+        onClick={() => {
+          navigate(buildPersonDetailPath(person.personId))
+          onClose()
+        }}
+      >
+        <div className={styles.stockIdentity}>
+          <EntityAvatar variant="person" size="md" name={person.personName} imageUrl={person.imageUrl} />
+          <div className={styles.stockIdentityText}>
+            <p className={styles.personName}>{person.personName}</p>
+            <p className={styles.personMeta}>
+              {person.organizationName}
+              {person.role ? ` · ${person.role}` : ''}
+            </p>
+          </div>
         </div>
-      </div>
-      {showMentionStat ? (
-        <p className={styles.searchRowStat}>{formatMentionCount(person.mentionCount!)}</p>
-      ) : null}
-      <div className={styles.stockActions}>
-        <button
-          type="button"
-          data-search-nav-primary
-          className={clsx(styles.actionBtn, styles.actionBtnPrimary)}
-          onClick={() => {
-            navigate('/person')
-            onClose()
-          }}
-        >
-          인물 보기
-        </button>
-      </div>
+        {showMentionStat ? (
+          <p className={styles.searchRowStat}>{formatMentionCount(person.mentionCount!)}</p>
+        ) : null}
+      </button>
     </li>
   )
 }
