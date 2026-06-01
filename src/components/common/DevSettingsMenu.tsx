@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import styles from './DevSettingsMenu.module.css'
 
-type ThemeChoice = 'light' | 'dark' | 'system'
 type AiVisibility = 'show' | 'hide'
 
 interface DevSettingsMenuProps {
@@ -11,7 +10,6 @@ interface DevSettingsMenuProps {
 }
 
 export function DevSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: DevSettingsMenuProps) {
-  const [theme, setTheme] = useState<ThemeChoice>('dark')
   const [aiPanel, setAiPanel] = useState<AiVisibility>('show')
   const wrapRef = useRef<HTMLDivElement>(null)
   const panelId = useId()
@@ -95,28 +93,6 @@ export function DevSettingsMenu({ isOpen, onOpenChange, onRequestOpen }: DevSett
                 ›
               </span>
             </button>
-          </div>
-
-          <div className={styles.segmentBlock}>
-            <span className={styles.segmentLabel}>테마</span>
-            <div className={styles.segmented} role="group" aria-label="테마">
-              {(
-                [
-                  { id: 'light' as const, label: '라이트' },
-                  { id: 'dark' as const, label: '다크' },
-                  { id: 'system' as const, label: '시스템' },
-                ] as const
-              ).map(({ id, label }) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={`${styles.segmentBtn} ${theme === id ? styles.segmentBtnActive : ''}`}
-                  onClick={() => setTheme(id)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className={styles.row}>

@@ -4,6 +4,7 @@ import { buzzSentimentClass, formatSurgePercent } from '../buzz/buzzSurgeScore'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
+import { PillButton } from '../ui/PillButton'
 import { formatPercent, formatPrice, formatStockScore } from '../stock/stockScore'
 import type { MyPageWatchlistRow } from '../../data/types/myPage'
 import { MY_PAGE_WATCHLIST_MAX } from '../../data/types/myPage'
@@ -55,15 +56,16 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
     <Card padding="md" className={styles.card}>
       <div className={styles.header}>
         <CardSectionHeader title="관심 종목 리스트" variant="embedded" />
-        <button
-          type="button"
+        <PillButton
+          variant="secondary"
+          compact
           className={styles.addBtn}
           disabled={atMax}
           onClick={() => navigate('/stock')}
           title={atMax ? `최대 ${MY_PAGE_WATCHLIST_MAX}개까지 등록할 수 있습니다` : '전체 종목에서 관심 종목 추가'}
         >
           + 추가
-        </button>
+        </PillButton>
       </div>
 
       <div className={styles.tableWrap}>

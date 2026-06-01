@@ -5,7 +5,7 @@
 
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
@@ -13,27 +13,18 @@
 
 .addBtn {
   flex-shrink: 0;
-  height: 2.25rem;
-  padding: 0 var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--color-interactive-active) 65%, var(--color-border-strong));
-  border-radius: var(--radius-sm);
-  background: var(--color-interactive-active);
-  color: var(--color-interactive-active-text);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
+  border-color: color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
 }
 
-.addBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-interactive-active) 88%, white);
-}
-
-.addBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+@media (hover: hover) and (pointer: fine) {
+  .addBtn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+    box-shadow: var(--interactive-ring-hover);
+    transform: none;
+  }
 }
 
 .tableWrap {
