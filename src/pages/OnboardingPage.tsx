@@ -112,8 +112,9 @@ export default function OnboardingPage() {
   if (phase === 'alerts') {
     return (
       <div className={styles.page}>
+        <OnboardingFloatField occluderRef={cardRef} />
         <div className={`${styles.shell} ${styles.shellNarrow}`}>
-          <div className={styles.card}>
+          <div ref={cardRef} className={styles.card}>
             <StepIndicator phase="alerts" />
             <SignupAlertsStep settings={alertSettings} onSettingsChange={setAlertSettings} />
             {submitError ? (
