@@ -67,6 +67,8 @@
   display: block;
   width: var(--float-size, 3rem);
   height: var(--float-size, 3rem);
+  max-width: none;
+  max-height: none;
   font-size: var(--font-size-sm);
   filter: blur(14px);
   opacity: 0.45;
@@ -75,6 +77,12 @@
     opacity var(--duration-moderate) ease,
     width var(--duration-moderate) ease,
     height var(--duration-moderate) ease;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .detail {
@@ -133,8 +141,8 @@
 @media (hover: hover) and (pointer: fine) {
   .hitTarget:not(.hitTargetNoHover):hover .avatar,
   .hitTarget:not(.hitTargetNoHover):focus-within .avatar {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: max(2.75rem, var(--float-size, 3rem));
+    height: max(2.75rem, var(--float-size, 3rem));
     filter: blur(0);
     opacity: 1;
   }

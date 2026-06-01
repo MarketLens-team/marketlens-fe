@@ -46,6 +46,14 @@ const MIN_PLACEMENT_DIST_PCT = 14
 /** 카드 안쪽으로 이 정도 들어오면 호버 비활성 (아바타 중심 기준) */
 const OCCLUDER_INSET_PX = 6
 
+/** 블러 상태 크기 — 첫 값이 최소(2.5rem), 위로 단계적으로 키움 */
+const FLOAT_SIZE_STEPS_REM = [2.5, 3.25, 4, 5] as const
+
+function randomFloatSizeRem(): number {
+  const index = Math.floor(Math.random() * FLOAT_SIZE_STEPS_REM.length)
+  return FLOAT_SIZE_STEPS_REM[index] ?? FLOAT_SIZE_STEPS_REM[0]
+}
+
 function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min)
 }
@@ -72,7 +80,7 @@ function generateRandomPlacements(count: number): FloatPlacement[] {
       const candidate: FloatPlacement = {
         left: Math.round(randomBetween(zone.min, zone.max) * 10) / 10,
         top: Math.round(randomBetween(TOP_RANGE.min, TOP_RANGE.max) * 10) / 10,
-        sizeRem: Math.round(randomBetween(2.5, 3.85) * 100) / 100,
+        sizeRem: randomFloatSizeRem(),
         delayS: Math.round(randomBetween(0, 5) * 10) / 10,
         durationS: Math.round(randomBetween(26, 34)),
       }
@@ -90,7 +98,7 @@ function generateRandomPlacements(count: number): FloatPlacement[] {
       placements.push({
         left: randomBetween(fallbackSide.min, fallbackSide.max),
         top: randomBetween(TOP_RANGE.min, TOP_RANGE.max),
-        sizeRem: 3,
+        sizeRem: FLOAT_SIZE_STEPS_REM[0],
         delayS: i * 0.6,
         durationS: 28 + (i % 5),
       })
