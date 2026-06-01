@@ -12,6 +12,7 @@ import {
   StockOverviewTable,
   type StockOverviewSortKey,
 } from '../components/stock/StockOverviewTable'
+import { FilterDropdown } from '../components/ui/FilterDropdown'
 import type { StockOverviewRow, StockRankingCategory } from '../data/types/stock'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useStockListPageData } from '../hooks/useStockListPageData'
@@ -72,6 +73,15 @@ export default function StockListPage() {
     return ['all', ...names]
   }, [rows])
 
+  const sectorFilterOptions = useMemo(
+    () =>
+      sectorOptions.map((sector) => ({
+        value: sector,
+        label: sector === 'all' ? '전체 섹터' : sector,
+      })),
+    [sectorOptions],
+  )
+
   const filteredRows = useMemo(() => {
     const base = rows ?? []
     if (sectorFilter === 'all') return base
@@ -124,24 +134,12 @@ export default function StockListPage() {
 
         <section className={styles.tableSection}>
           {sectorOptions.length > 1 ? (
-            <div className={styles.sectorSelectWrap}>
-              <select
-                id="stock-sector-filter"
-                className={styles.sectorSelect}
-                value={sectorFilter}
-                onChange={(event) => setSectorFilter(event.target.value)}
-                aria-label="섹터 필터"
-              >
-                {sectorOptions.map((sector) => (
-                  <option key={sector} value={sector}>
-                    {sector === 'all' ? '전체 섹터' : sector}
-                  </option>
-                ))}
-              </select>
-              <span className={styles.sectorSelectChevron} aria-hidden>
-                ▾
-              </span>
-            </div>
+            <FilterDropdown
+              value={sectorFilter}
+              options={sectorFilterOptions}
+              onChange={setSectorFilter}
+              ariaLabel="섹터 필터"
+            />
           ) : null}
 
           {showSkeleton ? (
