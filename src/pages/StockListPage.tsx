@@ -123,17 +123,28 @@ export default function StockListPage() {
         {rankings ? <StockRankingCards rankings={rankings} onMoreClick={handleRankingMore} /> : null}
 
         {sectorOptions.length > 1 ? (
-          <div className={styles.sectorRow} role="group" aria-label="섹터 필터">
-            {sectorOptions.map((sector) => (
-              <button
-                key={sector}
-                type="button"
-                className={clsx(styles.sectorChip, sectorFilter === sector && styles.sectorChipActive)}
-                onClick={() => setSectorFilter(sector)}
+          <div className={styles.sectorDropdownRow}>
+            <label htmlFor="stock-sector-filter" className={styles.sectorDropdownLabel}>
+              섹터
+            </label>
+            <div className={styles.sectorSelectWrap}>
+              <select
+                id="stock-sector-filter"
+                className={styles.sectorSelect}
+                value={sectorFilter}
+                onChange={(event) => setSectorFilter(event.target.value)}
+                aria-label="섹터 필터"
               >
-                {sector === 'all' ? '전체 섹터' : sector}
-              </button>
-            ))}
+                {sectorOptions.map((sector) => (
+                  <option key={sector} value={sector}>
+                    {sector === 'all' ? '전체 섹터' : sector}
+                  </option>
+                ))}
+              </select>
+              <span className={styles.sectorSelectChevron} aria-hidden>
+                ▾
+              </span>
+            </div>
           </div>
         ) : null}
 

@@ -11,40 +11,55 @@
   gap: var(--space-4);
 }
 
-.sectorRow {
+.sectorDropdownRow {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: column;
   gap: var(--space-2);
-  overflow-x: auto;
-  padding-bottom: var(--space-1);
-  scrollbar-width: thin;
 }
 
-.sectorChip {
-  flex-shrink: 0;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-card);
-  color: var(--color-text-secondary);
+.sectorDropdownLabel {
+  margin: 0;
   font-size: var(--font-size-sm);
-  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+.sectorSelectWrap {
+  position: relative;
+  width: fit-content;
+  min-width: 14rem;
+}
+
+.sectorSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: var(--space-2) calc(var(--space-4) + 1.2rem) var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition:
-    color var(--duration-fast),
-    border-color var(--duration-fast),
-    background-color var(--duration-fast);
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
 }
 
-.sectorChip:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
+.sectorSelect:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-primary) 65%, var(--color-border-strong));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent);
 }
 
-.sectorChipActive {
-  color: var(--color-text-primary);
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-card));
+.sectorSelectChevron {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
 .meta {
