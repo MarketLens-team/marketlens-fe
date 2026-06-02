@@ -1,7 +1,9 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
+import { useTransientSnackbar } from '../../hooks/useTransientSnackbar'
 import { useServerWatchlist } from '../../hooks/useServerWatchlist'
 import { EntityAvatar } from '../ui/EntityAvatar'
+import { Snackbar } from '../ui/Snackbar'
 import { StockWatchlistStarButton } from './StockWatchlistStarButton'
 import type { StockOverviewRow } from '../../data/types/stock'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
@@ -76,6 +78,7 @@ export function StockOverviewTable({
 }: StockOverviewTableProps) {
   const navigate = useNavigate()
   const { has: inWatchlist, toggle: toggleWatchlist, pendingCode } = useServerWatchlist()
+  const snackbar = useTransientSnackbar()
 
   const goToStock = (code: string) => {
     navigate(buildStockDetailPath(code))
@@ -182,11 +185,50 @@ export function StockOverviewTable({
                         interested={interested}
                         pending={watchlistPending}
                         onToggle={() => {
-                          void toggleWatchlist({
-                            code: row.code,
-                            name: row.name,
-                            imageUrl: row.imageUrl,
-                          })
+                          void (async () => {
+                            const result = await toggleWatchlist({
+                              code: row.code,
+                              name: row.name,
+                              imageUrl: row.imageUrl,
+                            })
+                            if (result === 'added') {
+                              snackbar.show('종목이 저장되었습니다.')
+                              return
+                            }
+                            if (result === 'removed') {
+                              snackbar.show('종목 저장이 취소되었습니다.', {
+                                action: {
+                                  label: '되돌리기',
+                                  onAction: () => {
+                                    void (async () => {
+                                      let undoResult = await toggleWatchlist({
+                                        code: row.code,
+                                        name: row.name,
+                                        imageUrl: row.imageUrl,
+                                      })
+                                      if (undoResult === 'pending') {
+                                        await new Promise<void>((resolve) => {
+                                          window.setTimeout(resolve, 120)
+                                        })
+                                        undoResult = await toggleWatchlist({
+                                          code: row.code,
+                                          name: row.name,
+                                          imageUrl: row.imageUrl,
+                                        })
+                                      }
+                                      if (undoResult === 'added') {
+                                        snackbar.show('종목이 다시 저장되었습니다.')
+                                      }
+                                    })()
+                                  },
+                                },
+                              })
+                              return
+                            }
+                            if (result === 'error') {
+                              snackbar.show('종목 저장 처리에 실패했습니다.')
+                            }
+                          })()
                         }}
                       />
                       <EntityAvatar
@@ -250,6 +292,13 @@ export function StockOverviewTable({
           </tbody>
         </table>
       </div>
+      {snackbar.message ? (
+        <Snackbar
+          message={snackbar.message}
+          actionLabel={snackbar.actionLabel}
+          onAction={snackbar.onAction}
+        />
+      ) : null}
     </section>
   )
 }

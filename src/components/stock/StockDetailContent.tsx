@@ -23,6 +23,7 @@ import {
 } from '../../data/types/anchoredFeed'
 import { useAnchoredFeed } from '../../hooks/useAnchoredFeed'
 import { useNewsBookmarks } from '../../hooks/useNewsBookmarks'
+import { useTransientSnackbar } from '../../hooks/useTransientSnackbar'
 import { mapNewsFeedItems } from '../../data/mappers/stockMapper'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
 import type {
@@ -32,6 +33,7 @@ import type {
   StockSentimentBreakdownRow,
 } from '../../data/types/stock'
 import { EntityAvatar } from '../ui/EntityAvatar'
+import { Snackbar } from '../ui/Snackbar'
 import { StockHeaderAiSummary } from './StockHeaderAiSummary'
 import { StockDetailPeoplePanel } from './StockDetailPeoplePanel'
 import { StockNewsListItem } from './StockNewsListItem'
@@ -118,6 +120,7 @@ export function StockDetailContent({
     toggleBookmark,
     loadError: bookmarkLoadError,
   } = useNewsBookmarks()
+  const snackbar = useTransientSnackbar()
   const useApiNewsFilter = !isMockDataSource()
   const newsSentimentParam = newsFilter === 'all' ? undefined : newsFilter
   const useAnchoredAround = Boolean(focusNewsId) && !suppressAnchored
@@ -399,25 +402,106 @@ export function StockDetailContent({
 
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
+    const wasInterested = interested
     setWatchlistPending(true)
     try {
       if (isMockDataSource()) {
         setInterested((prev) => !prev)
+        if (wasInterested) {
+          snackbar.show('종목 저장이 취소되었습니다.', {
+            action: {
+              label: '되돌리기',
+              onAction: () => {
+                void (async () => {
+                  setWatchlistPending(true)
+                  try {
+                    if (isMockDataSource()) {
+                      setInterested(true)
+                    } else {
+                      await addWatchlistItem(stock.code)
+                      setInterested(true)
+                    }
+                    snackbar.show('종목이 다시 저장되었습니다.')
+                  } finally {
+                    setWatchlistPending(false)
+                  }
+                })()
+              },
+            },
+          })
+        } else {
+          snackbar.show('종목이 저장되었습니다.')
+        }
         return
       }
       if (interested) {
         await removeWatchlistItem(stock.code)
         setInterested(false)
+        snackbar.show('종목 저장이 취소되었습니다.', {
+          action: {
+            label: '되돌리기',
+            onAction: () => {
+              void (async () => {
+                setWatchlistPending(true)
+                try {
+                  if (isMockDataSource()) {
+                    setInterested(true)
+                  } else {
+                    await addWatchlistItem(stock.code)
+                    setInterested(true)
+                  }
+                  snackbar.show('종목이 다시 저장되었습니다.')
+                } finally {
+                  setWatchlistPending(false)
+                }
+              })()
+            },
+          },
+        })
       } else {
         await addWatchlistItem(stock.code)
         setInterested(true)
+        snackbar.show('종목이 저장되었습니다.')
       }
     } catch {
-      /* 상태 유지 */
+      snackbar.show(wasInterested ? '종목 저장 취소에 실패했습니다.' : '종목 저장에 실패했습니다.')
     } finally {
       setWatchlistPending(false)
     }
-  }, [interested, stock.code, watchlistPending])
+  }, [interested, snackbar, stock.code, watchlistPending])
+
+  const handleNewsBookmarkToggle = useCallback(
+    async (newsId: string) => {
+      const wasBookmarked = isBookmarked(newsId)
+      const result = await toggleBookmark(newsId, { type: 'STOCK', stockCode: stock.code })
+      if (result === 'added') {
+        snackbar.show('뉴스가 저장되었습니다.')
+        return
+      }
+      if (result === 'removed') {
+        snackbar.show('뉴스 저장이 취소되었습니다.', {
+          action: {
+            label: '되돌리기',
+            onAction: () => {
+              void (async () => {
+                const undoResult = await toggleBookmark(newsId, { type: 'STOCK', stockCode: stock.code })
+                if (undoResult === 'added') {
+                  snackbar.show('뉴스가 다시 저장되었습니다.')
+                }
+              })()
+            },
+          },
+        })
+        return
+      }
+      if (result === 'error') {
+        snackbar.show(
+          wasBookmarked ? '뉴스 저장 취소에 실패했습니다.' : '뉴스 저장에 실패했습니다.',
+        )
+      }
+    },
+    [isBookmarked, snackbar, stock.code, toggleBookmark],
+  )
 
   const loadingMoreDown = feedMode === 'anchored' ? loadingOlderNews : loadingMoreNews
   const showNewerLoader =
@@ -621,9 +705,7 @@ export function StockDetailContent({
                   showBookmark
                   bookmarked={isBookmarked(item.id)}
                   bookmarkPending={isBookmarkPending(item.id)}
-                  onBookmarkToggle={() =>
-                    void toggleBookmark(item.id, { type: 'STOCK', stockCode: stock.code })
-                  }
+                  onBookmarkToggle={() => void handleNewsBookmarkToggle(item.id)}
                 />
               ))}
               </ul>
@@ -663,6 +745,13 @@ export function StockDetailContent({
         stockDetailMarker
         onBackToTop={handleBackToTop}
       />
+      {snackbar.message ? (
+        <Snackbar
+          message={snackbar.message}
+          actionLabel={snackbar.actionLabel}
+          onAction={snackbar.onAction}
+        />
+      ) : null}
     </div>
   )
 }

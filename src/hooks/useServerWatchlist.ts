@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { isMockDataSource } from '../config/dataSource'
 import { addWatchlistItem, fetchWatchlist, removeWatchlistItem } from '../data/clients/watchlistClient'
 import { useAuthStore } from '../store/authStore'
@@ -10,6 +10,16 @@ export function useServerWatchlist() {
   const openAuthModal = useAuthModalStore((s) => s.open)
   const [codes, setCodes] = useState<Set<string>>(() => new Set())
   const [pendingCode, setPendingCode] = useState<string | null>(null)
+  const codesRef = useRef(codes)
+  const pendingCodeRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    codesRef.current = codes
+  }, [codes])
+
+  useEffect(() => {
+    pendingCodeRef.current = pendingCode
+  }, [pendingCode])
 
   const reload = useCallback(async () => {
     if (!isLoggedIn) {
@@ -32,10 +42,12 @@ export function useServerWatchlist() {
     async (item: WatchlistItem) => {
       if (!isLoggedIn) {
         openAuthModal('login')
-        return
+        return 'auth' as const
       }
-      if (pendingCode) return
+      if (pendingCodeRef.current) return 'pending' as const
 
+      const wasInterested = codesRef.current.has(item.code)
+      pendingCodeRef.current = item.code
       setPendingCode(item.code)
       try {
         if (isMockDataSource()) {
@@ -45,27 +57,31 @@ export function useServerWatchlist() {
             else next.add(item.code)
             return next
           })
-          return
+          return wasInterested ? 'removed' as const : 'added' as const
         }
 
-        if (codes.has(item.code)) {
+        if (wasInterested) {
           await removeWatchlistItem(item.code)
           setCodes((prev) => {
             const next = new Set(prev)
             next.delete(item.code)
             return next
           })
+          return 'removed' as const
         } else {
           await addWatchlistItem(item.code)
           setCodes((prev) => new Set(prev).add(item.code))
+          return 'added' as const
         }
       } catch {
         /* 상태 유지 */
+        return 'error' as const
       } finally {
+        pendingCodeRef.current = null
         setPendingCode(null)
       }
     },
-    [codes, isLoggedIn, openAuthModal, pendingCode],
+    [isLoggedIn, openAuthModal],
   )
 
   return { has, toggle, pendingCode, isLoggedIn }
