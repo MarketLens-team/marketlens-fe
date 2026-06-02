@@ -21,7 +21,7 @@ const SENTIMENT_SCORE_CLASS = {
 
 interface MyPageWatchlistTableProps {
   rows: MyPageWatchlistRow[]
-  onRemove: (code: string) => void
+  onRemove: (code: string, controls: { restore: () => void }) => void
 }
 
 function XIcon() {

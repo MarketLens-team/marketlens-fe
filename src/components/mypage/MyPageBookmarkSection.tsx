@@ -29,7 +29,7 @@ interface MyPageBookmarkSectionProps {
   onDateSelect: (date: string) => void
   onDateClear: () => void
   // 삭제 (fire-and-forget — UI는 낙관적 삭제)
-  onRemove: (id: string) => void
+  onRemove: (item: MyPageBookmarkItem, controls: { restore: () => void }) => void
 }
 
 function formatFilterDateLabel(date: string): string {
@@ -54,9 +54,13 @@ function BookmarkItemsList({
   onRemove,
 }: {
   items: MyPageBookmarkItem[]
-  onRemove: (id: string) => void
+  onRemove: (item: MyPageBookmarkItem, controls: { restore: () => void }) => void
 }) {
-  const { visibleItems, handleRemove, animatingId } = useOptimisticRemove(items, onRemove)
+  const { visibleItems, handleRemove, animatingId } = useOptimisticRemove(items, (id, controls) => {
+    const target = items.find((item) => item.id === id)
+    if (!target) return
+    onRemove(target, controls)
+  })
 
   return (
     <ul className={styles.list}>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const REMOVE_ANIM_MS = 150
 
@@ -18,18 +18,36 @@ const REMOVE_ANIM_MS = 150
  */
 export function useOptimisticRemove<T extends { id: string }>(
   items: T[],
-  onRemove: (id: string) => void,
+  onRemove: (id: string, controls: { restore: () => void }) => void,
 ) {
   const [animatingId, setAnimatingId] = useState<string | null>(null)
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
+  const removeTimersRef = useRef<Map<string, number>>(new Map())
 
   const handleRemove = (id: string) => {
+    const restore = () => {
+      const timerId = removeTimersRef.current.get(id)
+      if (timerId != null) {
+        window.clearTimeout(timerId)
+        removeTimersRef.current.delete(id)
+      }
+      setHiddenIds((prev) => {
+        if (!prev.has(id)) return prev
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+      setAnimatingId((prev) => (prev === id ? null : prev))
+    }
+
     setAnimatingId(id)
-    onRemove(id) // fire-and-forget
-    window.setTimeout(() => {
+    onRemove(id, { restore }) // fire-and-forget
+    const timerId = window.setTimeout(() => {
       setHiddenIds((prev) => new Set(prev).add(id))
       setAnimatingId(null)
+      removeTimersRef.current.delete(id)
     }, REMOVE_ANIM_MS)
+    removeTimersRef.current.set(id, timerId)
   }
 
   const visibleItems = items.filter((item) => !hiddenIds.has(item.id))
