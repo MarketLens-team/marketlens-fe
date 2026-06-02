@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MyPageAccountInfo } from '../components/mypage/MyPageAccountInfo'
 import { MyPageAlertSettings } from '../components/mypage/MyPageAlertSettings'
@@ -12,25 +12,33 @@ import { parseMyPageTab, type MyPageTab } from '../components/mypage/profileTabs
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
+import { Snackbar } from '../components/ui/Snackbar'
 import skeleton from '../components/common/Skeleton.module.css'
 import { removeNewsBookmark } from '../data/clients/bookmarkClient'
 import { updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
 import type { AlertSettings } from '../data/types/member'
+import type { MyPageBookmarkItem } from '../data/types/myPage'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useMyPageBookmarks } from '../hooks/useMyPageBookmarks'
+import { useTransientSnackbar } from '../hooks/useTransientSnackbar'
 import styles from './MyPage.module.css'
+
+const UNDO_WINDOW_MS = 2800
 
 export default function MyPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = parseMyPageTab(searchParams.get('tab'))
 
   const [refreshKey, setRefreshKey] = useState(0)
-  const [bookmarkRefreshKey] = useState(0)
+  const [bookmarkRefreshKey, setBookmarkRefreshKey] = useState(0)
   const [savingAlerts, setSavingAlerts] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  const snackbar = useTransientSnackbar()
+  const pendingWatchlistRemoveRef = useRef<Map<string, number>>(new Map())
+  const pendingBookmarkRemoveRef = useRef<Map<string, number>>(new Map())
 
   const factory = useCallback(() => fetchMyPage(), [refreshKey])
   const { data, loading, error } = useAsyncData(factory, { keepPreviousData: true })
@@ -62,21 +70,85 @@ export default function MyPage() {
     setSearchParams(nextParams, { replace: true })
   }
 
-  const handleBookmarkRemove = (newsId: string) => {
-    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
-    removeNewsBookmark(newsId).catch(() => {
-      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+  useEffect(() => {
+    return () => {
+      pendingWatchlistRemoveRef.current.forEach((timerId) => window.clearTimeout(timerId))
+      pendingWatchlistRemoveRef.current.clear()
+      pendingBookmarkRemoveRef.current.forEach((timerId) => window.clearTimeout(timerId))
+      pendingBookmarkRemoveRef.current.clear()
+    }
+  }, [])
+
+  const handleBookmarkRemove = (
+    item: MyPageBookmarkItem,
+    controls: { restore: () => void },
+  ) => {
+    if (pendingBookmarkRemoveRef.current.has(item.id)) return
+
+    const timerId = window.setTimeout(() => {
+      pendingBookmarkRemoveRef.current.delete(item.id)
+      removeNewsBookmark(item.id)
+        .then(() => {
+          setBookmarkRefreshKey((key) => key + 1)
+        })
+        .catch(() => {
+          setBookmarkRefreshKey((key) => key + 1)
+          snackbar.show('뉴스 저장 취소에 실패했습니다.')
+        })
+    }, UNDO_WINDOW_MS)
+
+    pendingBookmarkRemoveRef.current.set(item.id, timerId)
+    snackbar.show('뉴스 저장이 취소되었습니다.', {
+      durationMs: UNDO_WINDOW_MS,
+      action: {
+        label: '되돌리기',
+        onAction: () => {
+          const pendingTimer = pendingBookmarkRemoveRef.current.get(item.id)
+          if (pendingTimer != null) {
+            window.clearTimeout(pendingTimer)
+            pendingBookmarkRemoveRef.current.delete(item.id)
+          }
+          controls.restore()
+          snackbar.show('뉴스 삭제가 취소되었습니다.')
+        },
+      },
     })
   }
 
-  const handleRemove = (code: string) => {
-    // UI는 낙관적 삭제(컴포넌트 로컬) — API는 fire-and-forget
-    // API 성공 후 데이터 재조회로 카운트 등 갱신 (keepPreviousData: true로 플래시 없음)
-    removeWatchlistItem(code).then(() => {
-      setLocalSettings(null)
-      setRefreshKey((key) => key + 1)
-    }).catch(() => {
-      // 실패해도 UI에서 별도 표시 없음 (페이지 재방문 시 복원됨)
+  const handleRemove = (
+    code: string,
+    controls: { restore: () => void },
+  ) => {
+    if (pendingWatchlistRemoveRef.current.has(code)) return
+
+    const timerId = window.setTimeout(() => {
+      pendingWatchlistRemoveRef.current.delete(code)
+      removeWatchlistItem(code)
+        .then(() => {
+          setLocalSettings(null)
+          setRefreshKey((key) => key + 1)
+        })
+        .catch(() => {
+          setRefreshKey((key) => key + 1)
+          snackbar.show('종목 저장 취소에 실패했습니다.')
+        })
+    }, UNDO_WINDOW_MS)
+
+    pendingWatchlistRemoveRef.current.set(code, timerId)
+    snackbar.show('종목 저장이 취소되었습니다.', {
+      durationMs: UNDO_WINDOW_MS,
+      action: {
+        label: '되돌리기',
+        onAction: () => {
+          const pendingTimer = pendingWatchlistRemoveRef.current.get(code)
+          if (pendingTimer != null) {
+            window.clearTimeout(pendingTimer)
+            pendingWatchlistRemoveRef.current.delete(code)
+          }
+          controls.restore()
+          snackbar.show('종목 삭제가 취소되었습니다.')
+        },
+      },
     })
   }
 
@@ -172,6 +244,13 @@ export default function MyPage() {
               </div>
             ) : null}
           </ProfileLayout>
+        ) : null}
+        {snackbar.message ? (
+          <Snackbar
+            message={snackbar.message}
+            actionLabel={snackbar.actionLabel}
+            onAction={snackbar.onAction}
+          />
         ) : null}
       </div>
     </Layout>

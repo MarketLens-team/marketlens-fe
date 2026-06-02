@@ -31,10 +31,12 @@ import {
   type SearchNewsStockContext,
 } from '../../lib/resolveSearchNewsRoute'
 import { useServerWatchlist } from '../../hooks/useServerWatchlist'
+import { useTransientSnackbar } from '../../hooks/useTransientSnackbar'
 import { formatStockScore, stockSentimentTone } from '../stock/stockScore'
 import { StockWatchlistStarButton } from '../stock/StockWatchlistStarButton'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Modal } from '../ui/Modal'
+import { Snackbar } from '../ui/Snackbar'
 import { UnderlineTabNav } from './UnderlineTabNav'
 import styles from './TopNavSearchModal.module.css'
 
@@ -187,11 +189,16 @@ function StockSearchRow({
   onClose,
   showMentionCount,
   watchlist,
+  onWatchlistAction,
 }: {
   stock: StockSearchRowModel
   onClose: () => void
   showMentionCount?: boolean
   watchlist: SearchStockWatchlist
+  onWatchlistAction: (
+    result: 'added' | 'removed' | 'error',
+    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+  ) => void
 }) {
   const navigate = useNavigate()
   const interested = watchlist.has(stock.code)
@@ -215,11 +222,22 @@ function StockSearchRow({
           interested={interested}
           pending={watchlistPending}
           onToggle={() => {
-            void watchlist.toggle({
-              code: stock.code,
-              name: stock.name,
-              imageUrl: stock.imageUrl,
-            })
+            void (async () => {
+              const result = await watchlist.toggle({
+                code: stock.code,
+                name: stock.name,
+                imageUrl: stock.imageUrl,
+              })
+              if (result === 'added' || result === 'removed' || result === 'error') {
+                onWatchlistAction(result, () =>
+                  watchlist.toggle({
+                    code: stock.code,
+                    name: stock.name,
+                    imageUrl: stock.imageUrl,
+                  })
+                )
+              }
+            })()
           }}
         />
         <div className={styles.stockIdentity}>
@@ -244,10 +262,15 @@ function StockRowsBySector({
   stocks,
   onClose,
   showMentionCount = false,
+  onWatchlistAction,
 }: {
   stocks: StockSearchRowModel[]
   onClose: () => void
   showMentionCount?: boolean
+  onWatchlistAction: (
+    result: 'added' | 'removed' | 'error',
+    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+  ) => void
 }) {
   const watchlist = useServerWatchlist()
   const groups = useMemo(() => groupStocksBySector(stocks), [stocks])
@@ -266,6 +289,7 @@ function StockRowsBySector({
                 onClose={onClose}
                 showMentionCount={showMentionCount}
                 watchlist={watchlist}
+                onWatchlistAction={onWatchlistAction}
               />
             ))}
           </ul>
@@ -401,8 +425,19 @@ function SearchNewsRowContent({
   )
 }
 
-function StockResultList({ stocks, onClose }: { stocks: SearchStockResult[]; onClose: () => void }) {
-  return <StockRowsBySector stocks={stocks} onClose={onClose} />
+function StockResultList({
+  stocks,
+  onClose,
+  onWatchlistAction,
+}: {
+  stocks: SearchStockResult[]
+  onClose: () => void
+  onWatchlistAction: (
+    result: 'added' | 'removed' | 'error',
+    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+  ) => void
+}) {
+  return <StockRowsBySector stocks={stocks} onClose={onClose} onWatchlistAction={onWatchlistAction} />
 }
 
 type PersonRowModel = {
@@ -556,16 +591,21 @@ function StockSearchResults({
   filter,
   onClose,
   singleStock,
+  onWatchlistAction,
 }: {
   stocks: SearchStockResult[]
   searchNews: NewsWithContext[]
   filter: StockFilter
   onClose: () => void
   singleStock?: SearchNewsStockContext | null
+  onWatchlistAction: (
+    result: 'added' | 'removed' | 'error',
+    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+  ) => void
 }) {
   if (filter === 'stock') {
     if (stocks.length === 0) return <p className={styles.empty}>종목 결과가 없습니다.</p>
-    return <StockResultList stocks={stocks} onClose={onClose} />
+    return <StockResultList stocks={stocks} onClose={onClose} onWatchlistAction={onWatchlistAction} />
   }
 
   if (filter === 'news') {
@@ -583,7 +623,13 @@ function StockSearchResults({
 
   return (
     <>
-      {stocks.length > 0 ? <StockResultList stocks={stocks} onClose={onClose} /> : null}
+      {stocks.length > 0 ? (
+        <StockResultList
+          stocks={stocks}
+          onClose={onClose}
+          onWatchlistAction={onWatchlistAction}
+        />
+      ) : null}
       {searchNews.length > 0 ? (
         <ResultSection label="뉴스" variant="rows">
           <SearchNewsRows items={searchNews} onClose={onClose} singleStock={singleStock} />
@@ -617,10 +663,15 @@ function SearchFallbackResults({
   fallback,
   filter,
   onClose,
+  onWatchlistAction,
 }: {
   fallback: SearchFallbackSections
   filter: FallbackFilter
   onClose: () => void
+  onWatchlistAction: (
+    result: 'added' | 'removed' | 'error',
+    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+  ) => void
 }) {
   const latestNewsRows = mapSearchNewsRows(fallback.latestNews, 'fallback-news')
 
@@ -629,7 +680,14 @@ function SearchFallbackResults({
     if (fallbackStocks.length === 0) {
       return <p className={styles.empty}>추천 종목이 없습니다.</p>
     }
-    return <StockRowsBySector stocks={fallbackStocks} onClose={onClose} showMentionCount />
+    return (
+      <StockRowsBySector
+        stocks={fallbackStocks}
+        onClose={onClose}
+        showMentionCount
+        onWatchlistAction={onWatchlistAction}
+      />
+    )
   }
 
   if (filter === 'person') {
@@ -667,7 +725,12 @@ function SearchFallbackResults({
   return (
     <>
       {fallbackStocks.length > 0 ? (
-        <StockRowsBySector stocks={fallbackStocks} onClose={onClose} showMentionCount />
+        <StockRowsBySector
+          stocks={fallbackStocks}
+          onClose={onClose}
+          showMentionCount
+          onWatchlistAction={onWatchlistAction}
+        />
       ) : null}
       {fallback.topPersons.length > 0 ? (
         <ResultSection label="오늘 화제 인물" variant="rows">
@@ -741,6 +804,48 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const scrollRegionRef = useRef<HTMLDivElement | null>(null)
   const skipNextEmptyFetch = useRef(seed.kind === 'success')
   const [selectedRowIndex, setSelectedRowIndex] = useState(-1)
+  const snackbar = useTransientSnackbar()
+
+  const handleWatchlistAction = useCallback(
+    (
+      result: 'added' | 'removed' | 'error',
+      onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
+    ) => {
+      if (result === 'added') {
+        snackbar.show('종목이 저장되었습니다.')
+        return
+      }
+      if (result === 'removed') {
+        snackbar.show('종목 저장이 취소되었습니다.', {
+          action: {
+            label: '되돌리기',
+            onAction: () => {
+              void onUndo().then((undoResult) => {
+                if (undoResult === 'pending') {
+                  void new Promise<void>((resolve) => {
+                    window.setTimeout(resolve, 120)
+                  }).then(() =>
+                    onUndo().then((retryResult) => {
+                      if (retryResult === 'added') {
+                        snackbar.show('종목이 다시 저장되었습니다.')
+                      }
+                    }),
+                  )
+                  return
+                }
+                if (undoResult === 'added') {
+                  snackbar.show('종목이 다시 저장되었습니다.')
+                }
+              })
+            },
+          },
+        })
+        return
+      }
+      snackbar.show('종목 저장 처리에 실패했습니다.')
+    },
+    [snackbar],
+  )
 
   const focusSearchInput = useCallback(() => {
     inputRef.current?.focus()
@@ -1152,6 +1257,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
                   filter={stockFilter}
                   onClose={onClose}
                   singleStock={singleStockContext}
+                  onWatchlistAction={handleWatchlistAction}
                 />
               ) : null}
 
@@ -1169,6 +1275,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
                   fallback={fallback}
                   filter={fallbackFilter}
                   onClose={onClose}
+                  onWatchlistAction={handleWatchlistAction}
                 />
               ) : null}
 
@@ -1187,6 +1294,13 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
           <span>ESC 모달 닫기</span>
         </div>
       </section>
+      {snackbar.message ? (
+        <Snackbar
+          message={snackbar.message}
+          actionLabel={snackbar.actionLabel}
+          onAction={snackbar.onAction}
+        />
+      ) : null}
     </Modal>
   )
 }

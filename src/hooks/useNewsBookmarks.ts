@@ -70,10 +70,10 @@ export function useNewsBookmarks() {
     async (newsId: string, context: NewsBookmarkSaveContext) => {
       if (!isLoggedIn) {
         openAuthModal('login')
-        return
+        return 'auth' as const
       }
 
-      if (pendingIds.has(newsId)) return
+      if (pendingIds.has(newsId)) return 'pending' as const
 
       const wasBookmarked = bookmarkedIdsRef.current.has(newsId)
 
@@ -88,14 +88,16 @@ export function useNewsBookmarks() {
       try {
         if (wasBookmarked) {
           await removeNewsBookmark(newsId)
+          return 'removed' as const
         } else {
           await addNewsBookmark(newsId, context)
+          return 'added' as const
         }
       } catch (error) {
         const code = extractApiErrorCode(error)
         if (code === 'B001' && !wasBookmarked) {
           setBookmarkedIds((prev) => new Set(prev).add(newsId))
-          return
+          return 'added' as const
         }
         if (code === 'B002' && wasBookmarked) {
           setBookmarkedIds((prev) => {
@@ -103,7 +105,7 @@ export function useNewsBookmarks() {
             next.delete(newsId)
             return next
           })
-          return
+          return 'removed' as const
         }
 
         setBookmarkedIds((prev) => {
@@ -113,6 +115,7 @@ export function useNewsBookmarks() {
           return next
         })
         setLoadError(getApiErrorMessage(error, '즐겨찾기 처리에 실패했습니다.'))
+        return 'error' as const
       } finally {
         setPendingIds((prev) => {
           const next = new Set(prev)

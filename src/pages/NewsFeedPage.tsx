@@ -22,8 +22,10 @@ import {
 import { useNewsBookmarks } from '../hooks/useNewsBookmarks'
 import { useNewsFeedFocus } from '../hooks/useNewsFeedFocus'
 import { useNewsFeedPage, type NewsFeedMode } from '../hooks/useNewsFeedPage'
+import { useTransientSnackbar } from '../hooks/useTransientSnackbar'
 import { useTodayNewsStocks } from '../hooks/useTodayNewsStocks'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { Snackbar } from '../components/ui/Snackbar'
 import styles from './NewsFeedPage.module.css'
 
 function resolveInitialNewsFeedMode(searchParams: URLSearchParams): NewsFeedMode {
@@ -65,6 +67,7 @@ export default function NewsFeedPage() {
     toggleBookmark,
     loadError: bookmarkLoadError,
   } = useNewsBookmarks()
+  const snackbar = useTransientSnackbar()
 
   const [skipFocusScroll, setSkipFocusScroll] = useState(false)
 
@@ -129,6 +132,39 @@ export default function NewsFeedPage() {
     mode === 'watchlist'
       ? '관심 등록한 종목과 연결된 기사가 없습니다.'
       : '표시할 기사가 없습니다.'
+
+  const handleNewsBookmarkToggle = useCallback(
+    async (newsId: string) => {
+      const wasBookmarked = isBookmarked(newsId)
+      const result = await toggleBookmark(newsId, { type: 'ALL_NEWS' })
+      if (result === 'added') {
+        snackbar.show('뉴스가 저장되었습니다.')
+        return
+      }
+      if (result === 'removed') {
+        snackbar.show('뉴스 저장이 취소되었습니다.', {
+          action: {
+            label: '되돌리기',
+            onAction: () => {
+              void (async () => {
+                const undoResult = await toggleBookmark(newsId, { type: 'ALL_NEWS' })
+                if (undoResult === 'added') {
+                  snackbar.show('뉴스가 다시 저장되었습니다.')
+                }
+              })()
+            },
+          },
+        })
+        return
+      }
+      if (result === 'error') {
+        snackbar.show(
+          wasBookmarked ? '뉴스 저장 취소에 실패했습니다.' : '뉴스 저장에 실패했습니다.',
+        )
+      }
+    },
+    [isBookmarked, snackbar, toggleBookmark],
+  )
 
   return (
     <Layout>
@@ -212,7 +248,7 @@ export default function NewsFeedPage() {
                         showBookmark
                         bookmarked={isBookmarked(item.id)}
                         bookmarkPending={isBookmarkPending(item.id)}
-                        onBookmarkToggle={() => void toggleBookmark(item.id, { type: 'ALL_NEWS' })}
+                        onBookmarkToggle={() => void handleNewsBookmarkToggle(item.id)}
                       />
                     ))}
                   </ul>
@@ -246,6 +282,13 @@ export default function NewsFeedPage() {
 
         </div>
         <PageFabRail onBackToTop={handleBackToTop} />
+        {snackbar.message ? (
+          <Snackbar
+            message={snackbar.message}
+            actionLabel={snackbar.actionLabel}
+            onAction={snackbar.onAction}
+          />
+        ) : null}
       </div>
     </Layout>
   )
