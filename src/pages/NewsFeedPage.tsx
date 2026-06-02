@@ -180,7 +180,7 @@ export default function NewsFeedPage() {
               />
             ) : null}
 
-            {bookmarkLoadError && mode === 'all' ? (
+            {bookmarkLoadError ? (
               <p className={styles.bookmarkError} role="status">
                 {bookmarkLoadError}
               </p>
@@ -209,7 +209,7 @@ export default function NewsFeedPage() {
                         key={item.id}
                         item={item}
                         highlighted={isNewsFocused(item.id)}
-                        showBookmark={mode === 'all'}
+                        showBookmark
                         bookmarked={isBookmarked(item.id)}
                         bookmarkPending={isBookmarkPending(item.id)}
                         onBookmarkToggle={() => void toggleBookmark(item.id, { type: 'ALL_NEWS' })}
