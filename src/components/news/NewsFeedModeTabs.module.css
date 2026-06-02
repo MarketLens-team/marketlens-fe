@@ -1,19 +1,15 @@
 .root {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border: 1px solid color-mix(in srgb, var(--color-text-primary) 12%, var(--color-border-default));
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-bg-elevated) 92%, var(--color-bg-card));
+  gap: var(--space-2);
 }
 
 .tab {
-  min-height: 2.25rem;
+  min-height: 2rem;
   padding: 0 var(--space-4);
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
   border-radius: var(--radius-full);
-  background: transparent;
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
@@ -28,9 +24,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   .tab:hover {
+    transform: none;
     color: var(--color-text-primary);
-    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border-strong));
-    background: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-card));
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+    box-shadow: var(--interactive-ring-hover);
   }
 }
 
@@ -41,8 +39,9 @@
 }
 
 .tabActive {
-  border-color: color-mix(in srgb, var(--color-primary) 75%, var(--color-border-strong));
-  background: color-mix(in srgb, var(--color-primary) 16%, var(--color-bg-card));
+  border-color: color-mix(in srgb, var(--color-primary) 80%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-primary) 30%, var(--color-bg-section));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent) inset;
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
 }
