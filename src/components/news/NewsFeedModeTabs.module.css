@@ -5,10 +5,11 @@
 }
 
 .tab {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-default);
+  min-height: 2rem;
+  padding: 0 var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
   border-radius: var(--radius-full);
-  background: var(--color-bg-elevated);
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
@@ -16,18 +17,31 @@
   cursor: pointer;
   transition:
     background var(--duration-fast),
+    box-shadow var(--duration-fast),
     color var(--duration-fast),
     border-color var(--duration-fast);
 }
 
-.tab:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover {
+    transform: none;
+    color: var(--color-text-primary);
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+    box-shadow: var(--interactive-ring-hover);
+  }
+}
+
+.tab:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
 }
 
 .tabActive {
-  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border-strong));
-  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-card));
+  border-color: color-mix(in srgb, var(--color-primary) 80%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-primary) 30%, var(--color-bg-section));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 45%, transparent) inset;
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
 }

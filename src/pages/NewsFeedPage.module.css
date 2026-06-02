@@ -12,7 +12,7 @@
     minmax(14rem, 22rem)
     minmax(0, 1fr)
     var(--layout-back-to-top-reserve);
-  column-gap: var(--space-4);
+  column-gap: var(--space-8);
   row-gap: var(--space-5);
   align-items: start;
   width: 100%;
@@ -23,6 +23,8 @@
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
+  /* 상단 탭 높이(2rem) + main 내부 gap(space-4)만큼 내려서 메인 피드 시작선과 정렬 */
+  margin-top: calc(2rem + var(--space-4));
   position: sticky;
   top: var(--space-4);
   max-height: calc(100vh - 4.5rem);
@@ -154,7 +156,7 @@
       minmax(11rem, 16rem)
       minmax(0, 1fr)
       var(--layout-back-to-top-reserve);
-    column-gap: var(--space-3);
+    column-gap: var(--space-5);
   }
 }
 
@@ -171,6 +173,7 @@
   }
 
   .sidebar {
+    margin-top: 0;
     position: static;
     max-height: none;
     overflow: visible;
