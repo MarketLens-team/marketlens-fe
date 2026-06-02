@@ -43,19 +43,31 @@ export default function DevActionButtonPage() {
 
   const handleUndoSnackbarAction = async () => {
     await sleep(500)
+    setPlainSnackbarVisible(false)
+    if (plainTimerRef.current) {
+      window.clearTimeout(plainTimerRef.current)
+      plainTimerRef.current = null
+    }
     setUndoSnackbarVisible(true)
     if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current)
     undoTimerRef.current = window.setTimeout(() => {
       setUndoSnackbarVisible(false)
+      undoTimerRef.current = null
     }, 4000)
   }
 
   const handlePlainSnackbarAction = async () => {
     await sleep(500)
+    setUndoSnackbarVisible(false)
+    if (undoTimerRef.current) {
+      window.clearTimeout(undoTimerRef.current)
+      undoTimerRef.current = null
+    }
     setPlainSnackbarVisible(true)
     if (plainTimerRef.current) window.clearTimeout(plainTimerRef.current)
     plainTimerRef.current = window.setTimeout(() => {
       setPlainSnackbarVisible(false)
+      plainTimerRef.current = null
     }, 3200)
   }
 
@@ -77,10 +89,16 @@ export default function DevActionButtonPage() {
       await sleep(1200)
       setDeleteCount((prev) => prev + 1)
       setIsDeleteAlertOpen(false)
+      setPlainSnackbarVisible(false)
+      if (plainTimerRef.current) {
+        window.clearTimeout(plainTimerRef.current)
+        plainTimerRef.current = null
+      }
       setUndoSnackbarVisible(true)
       if (undoTimerRef.current) window.clearTimeout(undoTimerRef.current)
       undoTimerRef.current = window.setTimeout(() => {
         setUndoSnackbarVisible(false)
+        undoTimerRef.current = null
       }, 4000)
     } finally {
       setIsDeleting(false)
@@ -214,6 +232,10 @@ export default function DevActionButtonPage() {
           actionLabel="되돌리기"
           onAction={() => {
             setUndoSnackbarVisible(false)
+            if (undoTimerRef.current) {
+              window.clearTimeout(undoTimerRef.current)
+              undoTimerRef.current = null
+            }
           }}
         />
       ) : null}
