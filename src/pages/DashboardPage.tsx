@@ -24,11 +24,6 @@ export default function DashboardPage() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const { data: briefing } = useDashboardBriefing(isLoggedIn)
 
-  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
-  if (httpFullscreenPreset) {
-    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
-  }
-
   const aiBrief = useMemo(() => {
     if (!data) return ''
     return resolveDashboardAiBrief(briefing, data, { isLoggedIn })
@@ -50,6 +45,11 @@ export default function DashboardPage() {
     observer.observe(el)
     return () => observer.disconnect()
   }, [data])
+
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
 
   return (
     <Layout>
