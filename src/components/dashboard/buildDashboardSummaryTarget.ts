@@ -2,7 +2,7 @@ import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
 import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
 import { formatPercent, priceChangeDirection } from '../stock/stockScore'
 import {
-  DASHBOARD_SIGNAL_LABEL,
+  DASHBOARD_ALERT_SCOPE_LABEL,
   type DashboardAlertItem,
   type DashboardHeadlineTone,
 } from './pickDashboardAlerts'
@@ -13,7 +13,7 @@ export function buildAlertSummaryTarget(alert: DashboardAlertItem): OpenAnomalyS
     code: alert.code,
     name: alert.name,
     imageUrl: resolveStockImageUrl(alert.code, alert.imageUrl),
-    signalLabel: DASHBOARD_SIGNAL_LABEL[alert.signal],
+    signalLabel: `${DASHBOARD_ALERT_SCOPE_LABEL[alert.scope]} · ${alert.criterion}`,
     headline: alert.headline,
     headlineTone: alert.headlineTone,
   }
@@ -24,7 +24,7 @@ export function buildBuzzSurgeSummaryTarget(item: BuzzSurgeItem): OpenAnomalySum
     code: item.code,
     name: item.name,
     imageUrl: resolveStockImageUrl(item.code, null),
-    signalLabel: '언급 급증',
+    signalLabel: '언급률',
     headline: `+${item.surgePercent}%`,
     headlineTone: 'up',
   }

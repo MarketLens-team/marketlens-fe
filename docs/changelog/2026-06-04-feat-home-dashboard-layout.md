@@ -30,12 +30,10 @@
 
 ### 오늘 이상치 (`DashboardAlertCards` · `pickDashboardAlerts`)
 
-| Before | After |
-|--------|-------|
-| `주의` / `기회` | `등락 하락` · `감성 부정` · `언급 급증` · `시장 급등` |
-| 신호별 카드 색(빨강·노랑·파랑) | 카드 배경 통일, **숫자만** 초록/빨강/중립 |
+상세·후속 변경: [2026-06-04-feat-dashboard-anomaly-cards.md](./2026-06-04-feat-dashboard-anomaly-cards.md)
 
-규칙: 관심종목 등락 최저·감성 -20 미만·언급률 최고 + buzz TOP3(시장).
+- 선정: 등락 최저/최고·감성 최저/최고·뉴스 최다·섹터 감성 최저 (언급률·buzz TOP3는 하단과 중복이라 제외)
+- UI: 로고 + `[관심]`·기준 pill + 숫자 한 줄 정렬
 
 #### 호버 AI 요약 모달 (`DashboardAnomalySummaryModal`)
 

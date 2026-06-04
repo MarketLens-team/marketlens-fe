@@ -78,7 +78,7 @@ export default function DashboardPage() {
               <PortfolioSentimentGauge gauge={data.portfolioSentiment} className={styles.heroGauge} />
               <DashboardAlertCards
                 watchlist={data.watchlist}
-                buzzTop3={data.buzzSurgeTop3}
+                sectorHeatmap={data.sectorHeatmap}
                 isLoggedIn={isLoggedIn}
               />
             </section>

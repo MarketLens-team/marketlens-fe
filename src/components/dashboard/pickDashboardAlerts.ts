@@ -1,39 +1,68 @@
 import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
-import {
-  formatSentimentReadable,
-  formatStockScore,
-  STOCK_SENTIMENT_NEUTRAL_BAND,
-} from '../stock/stockScore'
-import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
+import { formatStockScore, STOCK_SENTIMENT_NEUTRAL_BAND } from '../stock/stockScore'
+import type { DashboardWatchlistRow, SectorHeatmapCell } from '../../data/types/dashboard'
 
 export type DashboardSignalKind =
   | 'price_drop'
   | 'sentiment_low'
-  | 'mention_surge'
-  | 'market_buzz'
+  | 'price_rise'
+  | 'sentiment_high'
+  | 'news_peak'
+  | 'sector_sentiment_low'
 
+/** 호버 AI 모달·접근성용 한 줄 라벨 */
 export const DASHBOARD_SIGNAL_LABEL: Record<DashboardSignalKind, string> = {
-  price_drop: '등락 하락',
+  price_drop: '등락 주의',
   sentiment_low: '감성 부정',
-  mention_surge: '언급 급증',
-  market_buzz: '시장 급등',
+  price_rise: '등락 주목',
+  sentiment_high: '감성 긍정',
+  news_peak: '뉴스 집중',
+  sector_sentiment_low: '섹터 감성',
+}
+
+export const DASHBOARD_ALERT_SCOPE_LABEL = {
+  watchlist: '관심',
+  market: '시장',
+} as const
+
+export type DashboardAlertScope = keyof typeof DASHBOARD_ALERT_SCOPE_LABEL
+
+export type DashboardAlertTargetKind = 'stock' | 'sector'
+
+/** 카드에 표시할 선정 기준 (큰 숫자와 분리) */
+export const DASHBOARD_ALERT_CRITERION: Record<DashboardSignalKind, string> = {
+  price_drop: '등락 최저',
+  sentiment_low: '감성 최저',
+  price_rise: '등락 최고',
+  sentiment_high: '감성 최고',
+  news_peak: '뉴스 최다',
+  sector_sentiment_low: '섹터 감성 최저',
 }
 
 export type DashboardHeadlineTone = 'up' | 'down' | 'neu'
 
 export interface DashboardAlertItem {
   signal: DashboardSignalKind
+  scope: DashboardAlertScope
+  targetKind: DashboardAlertTargetKind
+  to: string
+  criterion: string
   code: string
   name: string
   imageUrl?: string | null
   headline: string
-  detail: string
   headlineTone: DashboardHeadlineTone
+  /** 종목 카드만 AI 요약 호버 */
+  summaryEnabled: boolean
 }
 
 function formatSignedPercent(value: number): string {
   if (value === 0) return '0%'
   return value > 0 ? `+${value}%` : `${value}%`
+}
+
+function formatNewsCount(value: number): string {
+  return `${value.toLocaleString('ko-KR')}건`
 }
 
 function pushUnique(
@@ -46,72 +75,133 @@ function pushUnique(
   items.push(item)
 }
 
+function stockAlert(
+  row: DashboardWatchlistRow,
+  input: Omit<DashboardAlertItem, 'targetKind' | 'to' | 'summaryEnabled' | 'code' | 'name' | 'imageUrl'>,
+): DashboardAlertItem {
+  return {
+    ...input,
+    targetKind: 'stock',
+    to: `/stock/${row.code}`,
+    summaryEnabled: true,
+    code: row.code,
+    name: row.name,
+    imageUrl: resolveStockImageUrl(row.code, row.imageUrl),
+  }
+}
+
 export function pickDashboardAlerts(
   watchlist: DashboardWatchlistRow[],
-  buzzTop3: BuzzSurgeItem[],
+  sectorHeatmap: SectorHeatmapCell[],
   limit = 3,
 ): DashboardAlertItem[] {
   const items: DashboardAlertItem[] = []
   const seen = new Set<string>()
-  const watchByCode = new Map(watchlist.map((row) => [row.code, row]))
 
   const worstDrop = [...watchlist].sort((a, b) => a.changePercent - b.changePercent)[0]
   if (worstDrop && worstDrop.changePercent < 0) {
-    pushUnique(items, seen, {
-      signal: 'price_drop',
-      code: worstDrop.code,
-      name: worstDrop.name,
-      imageUrl: resolveStockImageUrl(worstDrop.code, worstDrop.imageUrl),
-      headline: formatSignedPercent(worstDrop.changePercent),
-      detail: `관심 종목 · ${formatSentimentReadable(worstDrop.sentimentScore)}`,
-      headlineTone: 'down',
-    })
+    pushUnique(
+      items,
+      seen,
+      stockAlert(worstDrop, {
+        signal: 'price_drop',
+        scope: 'watchlist',
+        criterion: DASHBOARD_ALERT_CRITERION.price_drop,
+        headline: formatSignedPercent(worstDrop.changePercent),
+        headlineTone: 'down',
+      }),
+    )
   }
 
   const lowSentiment = [...watchlist]
     .filter((row) => row.sentimentScore < -STOCK_SENTIMENT_NEUTRAL_BAND)
     .sort((a, b) => a.sentimentScore - b.sentimentScore)[0]
   if (lowSentiment) {
-    pushUnique(items, seen, {
-      signal: 'sentiment_low',
-      code: lowSentiment.code,
-      name: lowSentiment.name,
-      imageUrl: resolveStockImageUrl(lowSentiment.code, lowSentiment.imageUrl),
-      headline: formatStockScore(lowSentiment.sentimentScore),
-      detail: `관심 종목 · ${formatSentimentReadable(lowSentiment.sentimentScore)}`,
-      headlineTone: lowSentiment.sentimentScore < 0 ? 'down' : 'neu',
-    })
+    pushUnique(
+      items,
+      seen,
+      stockAlert(lowSentiment, {
+        signal: 'sentiment_low',
+        scope: 'watchlist',
+        criterion: DASHBOARD_ALERT_CRITERION.sentiment_low,
+        headline: formatStockScore(lowSentiment.sentimentScore),
+        headlineTone: 'down',
+      }),
+    )
   }
 
-  const topMention = [...watchlist].sort(
-    (a, b) => b.mentionSurgePercent - a.mentionSurgePercent,
-  )[0]
-  if (topMention && topMention.mentionSurgePercent > 0) {
-    pushUnique(items, seen, {
-      signal: 'mention_surge',
-      code: topMention.code,
-      name: topMention.name,
-      imageUrl: resolveStockImageUrl(topMention.code, topMention.imageUrl),
-      headline: formatSignedPercent(topMention.mentionSurgePercent),
-      detail: `관심 종목 · 전일 대비 뉴스 언급 급증`,
-      headlineTone: topMention.mentionSurgePercent > 0 ? 'up' : topMention.mentionSurgePercent < 0 ? 'down' : 'neu',
-    })
+  const bestRise = [...watchlist]
+    .filter((row) => row.changePercent > 0)
+    .sort((a, b) => b.changePercent - a.changePercent)[0]
+  if (bestRise) {
+    pushUnique(
+      items,
+      seen,
+      stockAlert(bestRise, {
+        signal: 'price_rise',
+        scope: 'watchlist',
+        criterion: DASHBOARD_ALERT_CRITERION.price_rise,
+        headline: formatSignedPercent(bestRise.changePercent),
+        headlineTone: 'up',
+      }),
+    )
   }
 
-  for (const buzz of buzzTop3) {
-    if (items.length >= limit) break
-    pushUnique(items, seen, {
-      signal: 'market_buzz',
-      code: buzz.code,
-      name: buzz.name,
-      imageUrl: resolveStockImageUrl(
-        buzz.code,
-        watchByCode.get(buzz.code)?.imageUrl,
-      ),
-      headline: `+${buzz.surgePercent}%`,
-      detail: `시장 · TOP ${buzz.rank}`,
-      headlineTone: 'up',
-    })
+  const highSentiment = [...watchlist]
+    .filter((row) => row.sentimentScore > STOCK_SENTIMENT_NEUTRAL_BAND)
+    .sort((a, b) => b.sentimentScore - a.sentimentScore)[0]
+  if (highSentiment && items.length < limit) {
+    pushUnique(
+      items,
+      seen,
+      stockAlert(highSentiment, {
+        signal: 'sentiment_high',
+        scope: 'watchlist',
+        criterion: DASHBOARD_ALERT_CRITERION.sentiment_high,
+        headline: formatStockScore(highSentiment.sentimentScore),
+        headlineTone: 'up',
+      }),
+    )
+  }
+
+  const topNews = [...watchlist]
+    .filter((row) => row.newsCount > 0)
+    .sort((a, b) => b.newsCount - a.newsCount)[0]
+  if (topNews && items.length < limit) {
+    pushUnique(
+      items,
+      seen,
+      stockAlert(topNews, {
+        signal: 'news_peak',
+        scope: 'watchlist',
+        criterion: DASHBOARD_ALERT_CRITERION.news_peak,
+        headline: formatNewsCount(topNews.newsCount),
+        headlineTone: 'neu',
+      }),
+    )
+  }
+
+  if (items.length < limit && sectorHeatmap.length > 0) {
+    const weakestSector = [...sectorHeatmap].sort(
+      (a, b) => a.sentimentScore - b.sentimentScore,
+    )[0]
+    const sectorKey = weakestSector.sectorCode ?? weakestSector.name
+    if (!seen.has(sectorKey)) {
+      seen.add(sectorKey)
+      items.push({
+        signal: 'sector_sentiment_low',
+        scope: 'market',
+        targetKind: 'sector',
+        to: '/sector',
+        summaryEnabled: false,
+        code: sectorKey,
+        name: weakestSector.name,
+        imageUrl: null,
+        criterion: DASHBOARD_ALERT_CRITERION.sector_sentiment_low,
+        headline: formatStockScore(weakestSector.sentimentScore),
+        headlineTone: weakestSector.sentimentScore < 0 ? 'down' : 'neu',
+      })
+    }
   }
 
   return items.slice(0, limit)
