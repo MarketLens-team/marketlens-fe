@@ -2,6 +2,7 @@ import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type {
   BuzzSurgeItem,
+  DashboardBriefing,
   DashboardOverview,
   DashboardWatchlistRow,
   SectorHeatmapCell,
@@ -11,7 +12,7 @@ import type {
 import type { TickerStockRow } from '../types/stock'
 import type { StockSummaryResponse } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
-import type { DashboardOverviewResponse } from '../types/dashboardApi'
+import type { DashboardBriefingResponse, DashboardOverviewResponse } from '../types/dashboardApi'
 
 const GAUGE_MIN = -100
 const GAUGE_MAX = 100
@@ -96,6 +97,14 @@ export function mapDashboardWatchlistRow(
     sentimentScore,
     newsCount: toFiniteNumber(summary?.mentionCount),
     mentionSurgePercent,
+  }
+}
+
+export function mapDashboardBriefing(raw: DashboardBriefingResponse): DashboardBriefing {
+  const todaySummary = raw.todaySummary?.trim() ?? null
+  return {
+    todaySummary: todaySummary || null,
+    updatedAt: raw.updatedAt ?? null,
   }
 }
 

@@ -1,0 +1,140 @@
+.card {
+  border-radius: var(--radius-lg);
+}
+
+.headRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* PersonPanelRangeToggle · MyPageWatchlistTable.addBtn 과 동일 필터 pill */
+.viewToggle {
+  flex-shrink: 0;
+  border-color: color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+  color: var(--color-text-primary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .viewToggle:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+    box-shadow: var(--interactive-ring-hover);
+    transform: none;
+  }
+}
+
+.viewToggle:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}
+
+.loginPrompt {
+  margin-top: var(--space-2);
+}
+
+.scroll {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: 0 var(--space-4);
+  -webkit-overflow-scrolling: touch;
+}
+
+.tileList {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 var(--space-1);
+  list-style: none;
+}
+
+.tile {
+  composes: ringRow from '../common/interactiveListRow.module.css';
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 7.5rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+  text-align: center;
+}
+
+.tile:focus {
+  outline: none;
+}
+
+.tileName {
+  width: 100%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tileChange {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.up {
+  color: var(--color-success);
+}
+
+.down {
+  color: var(--color-danger);
+}
+
+.tileSentiment {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sentPos {
+  color: var(--color-success);
+}
+
+.sentWarm {
+  color: var(--color-warning);
+}
+
+.sentNeg {
+  color: var(--color-danger);
+}
+
+.sentNeu {
+  color: var(--color-text-secondary);
+}
+
+.embeddedTable {
+  margin-top: var(--space-1);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-4) 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

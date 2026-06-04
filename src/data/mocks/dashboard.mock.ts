@@ -1,4 +1,10 @@
-import type { DashboardOverview } from '../types/dashboard'
+import type { DashboardBriefing, DashboardOverview } from '../types/dashboard'
+
+export const mockDashboardBriefing: DashboardBriefing = {
+  todaySummary:
+    '오늘 포트폴리오 전반에 긍정적인 이슈가 혼재하고 있습니다. SK하이닉스는 AI 투자 확산과 반도체 밸류체인 주목으로 감성이 개선됐고, 셀트리온은 규제 이슈로 단기 주의가 필요합니다.',
+  updatedAt: '2026-06-04T14:00:03+09:00',
+}
 
 export const mockDashboardOverview: DashboardOverview = {
   portfolioSentiment: {

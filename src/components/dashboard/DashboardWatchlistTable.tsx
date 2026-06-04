@@ -13,6 +13,8 @@ import styles from './DashboardWatchlistTable.module.css'
 interface DashboardWatchlistTableProps {
   rows: DashboardWatchlistRow[]
   className?: string
+  /** Card·헤더 없이 섹션 내부 리스트만 */
+  embedded?: boolean
 }
 
 const SENTIMENT_SCORE_CLASS = {
@@ -35,12 +37,120 @@ function formatMentionSurge(value: number): string {
   return formatPercent(value)
 }
 
-export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistTableProps) {
+function WatchlistTableBody({
+  rows,
+  goToStock,
+  embedded = false,
+}: {
+  rows: DashboardWatchlistRow[]
+  goToStock: (code: string) => void
+  embedded?: boolean
+}) {
+  return (
+    <div className={clsx(styles.list, embedded && styles.listStockDensity)}>
+      <div className={styles.watchHeader}>
+        <div>종목</div>
+        <div>현재가</div>
+        <div>등락</div>
+        <div>감성</div>
+        <div>뉴스</div>
+        <div>언급률</div>
+      </div>
+      {rows.length === 0 ? (
+        <p className={styles.empty}>관심종목이 없습니다. 종목 상세에서 추가해 보세요.</p>
+      ) : (
+        <>
+          {rows.map((row) => {
+            const hasPrice = row.price > 0
+            const priceDirection = priceChangeDirection(row.changePercent)
+            const mentionUp = row.mentionSurgePercent > 0
+            const sentKey = buzzSentimentClass(row.sentimentScore)
+            return (
+              <div
+                key={row.code}
+                className={styles.watchRow}
+                role="link"
+                tabIndex={0}
+                aria-label={`${row.name} 종목 상세 보기`}
+                onClick={() => goToStock(row.code)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    goToStock(row.code)
+                  }
+                }}
+              >
+                <div className={styles.stockCell}>
+                  <span className={styles.stockLead}>
+                    <EntityAvatar
+                      variant="stock"
+                      size="sm"
+                      name={row.name}
+                      imageUrl={row.imageUrl}
+                    />
+                    <span className={styles.stockText}>
+                      <span className={styles.stockName}>{row.name}</span>
+                      <span className={styles.stockCode}>{row.code}</span>
+                    </span>
+                  </span>
+                </div>
+                <div className={styles.mono}>{formatPriceCell(row.price)}</div>
+                <div
+                  className={clsx(
+                    styles.mono,
+                    hasPrice && priceDirection === 'up' && styles.up,
+                    hasPrice && priceDirection === 'down' && styles.down,
+                  )}
+                >
+                  {formatChangeCell(row.changePercent)}
+                </div>
+                <div>
+                  <span
+                    className={clsx(
+                      styles.mono,
+                      styles.sentScore,
+                      SENTIMENT_SCORE_CLASS[sentKey],
+                    )}
+                  >
+                    {formatStockScore(row.sentimentScore)}
+                  </span>
+                </div>
+                <div className={styles.mono}>{row.newsCount.toLocaleString('ko-KR')}</div>
+                <div
+                  className={clsx(
+                    styles.mono,
+                    row.mentionSurgePercent !== 0 && (mentionUp ? styles.up : styles.down),
+                  )}
+                >
+                  {formatMentionSurge(row.mentionSurgePercent)}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  )
+}
+
+export function DashboardWatchlistTable({
+  rows,
+  className,
+  embedded = false,
+}: DashboardWatchlistTableProps) {
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
 
   const goToStock = (code: string) => {
     navigate(`/stock/${code}`)
+  }
+
+  if (embedded) {
+    return (
+      <div className={clsx(styles.listWrapEmbedded, className)}>
+        <WatchlistTableBody rows={rows} goToStock={goToStock} embedded />
+      </div>
+    )
   }
 
   return (
@@ -55,89 +165,7 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
       ) : null}
       {isLoggedIn ? (
         <div className={styles.listWrap}>
-          <div className={styles.list}>
-            <div className={styles.watchHeader}>
-              <div>종목</div>
-              <div>현재가</div>
-              <div>등락</div>
-              <div>감성</div>
-              <div>뉴스</div>
-              <div>언급률</div>
-            </div>
-            {rows.length === 0 ? (
-              <p className={styles.empty}>관심종목이 없습니다. 종목 상세에서 추가해 보세요.</p>
-            ) : (
-              <>
-                {rows.map((row) => {
-                  const hasPrice = row.price > 0
-                  const priceDirection = priceChangeDirection(row.changePercent)
-                  const mentionUp = row.mentionSurgePercent > 0
-                  const sentKey = buzzSentimentClass(row.sentimentScore)
-                  return (
-                    <div
-                      key={row.code}
-                      className={styles.watchRow}
-                      role="link"
-                      tabIndex={0}
-                      aria-label={`${row.name} 종목 상세 보기`}
-                      onClick={() => goToStock(row.code)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          goToStock(row.code)
-                        }
-                      }}
-                    >
-                      <div className={styles.stockCell}>
-                        <span className={styles.stockLead}>
-                          <EntityAvatar
-                            variant="stock"
-                            size="sm"
-                            name={row.name}
-                            imageUrl={row.imageUrl}
-                          />
-                          <span className={styles.stockText}>
-                            <span className={styles.stockName}>{row.name}</span>
-                            <span className={styles.stockCode}>{row.code}</span>
-                          </span>
-                        </span>
-                      </div>
-                      <div className={styles.mono}>{formatPriceCell(row.price)}</div>
-                      <div
-                        className={clsx(
-                          styles.mono,
-                          hasPrice && priceDirection === 'up' && styles.up,
-                          hasPrice && priceDirection === 'down' && styles.down,
-                        )}
-                      >
-                        {formatChangeCell(row.changePercent)}
-                      </div>
-                      <div>
-                        <span
-                          className={clsx(
-                            styles.mono,
-                            styles.sentScore,
-                            SENTIMENT_SCORE_CLASS[sentKey],
-                          )}
-                        >
-                          {formatStockScore(row.sentimentScore)}
-                        </span>
-                      </div>
-                      <div className={styles.mono}>{row.newsCount.toLocaleString('ko-KR')}</div>
-                      <div
-                        className={clsx(
-                          styles.mono,
-                          row.mentionSurgePercent !== 0 && (mentionUp ? styles.up : styles.down),
-                        )}
-                      >
-                        {formatMentionSurge(row.mentionSurgePercent)}
-                      </div>
-                    </div>
-                  )
-                })}
-              </>
-            )}
-          </div>
+          <WatchlistTableBody rows={rows} goToStock={goToStock} />
         </div>
       ) : null}
     </Card>

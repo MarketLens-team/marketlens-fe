@@ -20,6 +20,20 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.listWrapEmbedded {
+  margin: 0;
+  padding: 0;
+  flex: none;
+  min-height: auto;
+  overflow: visible;
+}
+
+/* 좁은 화면에서만 가로 스크롤 (세로는 페이지 스크롤) */
+.listWrapEmbedded .list {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .list {
   --watch-cols:
     minmax(10rem, 1.5fr)
@@ -144,4 +158,29 @@
   text-align: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* 홈 리스트 — StockOverviewTable 과 동일 밀도·타이포 */
+.listStockDensity .stockLead {
+  gap: var(--space-2);
+}
+
+.listStockDensity .watchHeader {
+  position: static;
+  padding: var(--space-3) var(--space-4);
+}
+
+.listStockDensity .watchRow {
+  padding: var(--space-4);
+}
+
+.listStockDensity .stockName {
+  font-size: var(--font-size-base);
+}
+
+.listStockDensity .mono,
+.listStockDensity .sentScore {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
 }

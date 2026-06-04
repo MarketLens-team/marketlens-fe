@@ -42,6 +42,11 @@ export interface SectorHeatmapCell {
   mentionCount: number
 }
 
+export interface DashboardBriefing {
+  todaySummary: string | null
+  updatedAt: string | null
+}
+
 export interface DashboardOverview {
   portfolioSentiment: SentimentGaugeBlock
   stocksToWatch: StockHighlight[]
