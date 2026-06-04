@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
 import { EntityAvatar } from '../ui/EntityAvatar'
-import { useWatchlistStore } from '../../store/watchlistStore'
+import { useServerWatchlist } from '../../hooks/useServerWatchlist'
 import styles from './TopNavWatchlistMenu.module.css'
 
 interface TopNavWatchlistMenuProps {
@@ -10,8 +10,7 @@ interface TopNavWatchlistMenuProps {
 }
 
 export function TopNavWatchlistMenu({ suppressPanel = false, onRequestOpen }: TopNavWatchlistMenuProps) {
-  const items = useWatchlistStore((s) => s.items)
-  const remove = useWatchlistStore((s) => s.remove)
+  const { items, remove, pendingCode } = useServerWatchlist()
 
   return (
     <div
@@ -49,7 +48,12 @@ export function TopNavWatchlistMenu({ suppressPanel = false, onRequestOpen }: To
                   <p className={styles.code}>{item.code}</p>
                 </div>
               </div>
-              <button type="button" className={styles.remove} onClick={() => remove(item.code)}>
+              <button
+                type="button"
+                className={styles.remove}
+                disabled={pendingCode === item.code}
+                onClick={() => void remove(item.code)}
+              >
                 제거
               </button>
             </li>

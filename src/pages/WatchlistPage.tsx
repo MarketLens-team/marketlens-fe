@@ -8,7 +8,7 @@ import {
 import { EntityAvatar } from '../components/ui/EntityAvatar'
 import { Layout } from '../components/common/Layout'
 import { PageHeader } from '../components/common/PageHeader'
-import { useWatchlistStore } from '../store/watchlistStore'
+import { useServerWatchlist } from '../hooks/useServerWatchlist'
 import styles from './WatchlistPage.module.css'
 
 type WatchlistSidebarKey = 'overview' | 'lists' | 'news'
@@ -41,15 +41,14 @@ const watchlistSidebarGroups: DetailAccordionSidebarGroup<WatchlistSidebarKey>[]
 ]
 
 export default function WatchlistPage() {
-  const items = useWatchlistStore((s) => s.items)
-  const remove = useWatchlistStore((s) => s.remove)
+  const { items, remove, pendingCode } = useServerWatchlist()
   const navigate = useNavigate()
 
   return (
     <Layout>
       <DetailSplitShell groups={watchlistSidebarGroups}>
         <DetailMainGroup>
-          <PageHeader title="관심 목록" description="상단 검색/관심목록 메뉴에서 추가한 종목을 관리합니다." />
+          <PageHeader title="관심 목록" description="검색·종목 목록에서 추가한 관심 종목을 관리합니다." />
         </DetailMainGroup>
         <DetailMainGroup>
           <div className={styles.stack}>
@@ -68,7 +67,12 @@ export default function WatchlistPage() {
                     <button type="button" className={styles.btn} onClick={() => navigate(`/stock/${item.code}`)}>
                       상세 보기
                     </button>
-                    <button type="button" className={styles.btn} onClick={() => remove(item.code)}>
+                    <button
+                      type="button"
+                      className={styles.btn}
+                      disabled={pendingCode === item.code}
+                      onClick={() => void remove(item.code)}
+                    >
                       제거
                     </button>
                   </div>

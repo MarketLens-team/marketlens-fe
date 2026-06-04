@@ -10,7 +10,7 @@ import type { AlertSettings } from '../data/types/member'
 import { useAuthFlow } from '../hooks/useAuthFlow'
 import { useAuthModalStore } from '../store/authModalStore'
 import { useAuthStore } from '../store/authStore'
-import type { WatchlistItem } from '../store/watchlistStore'
+import type { WatchlistItem } from '../data/types/watchlist'
 import styles from './OnboardingPage.module.css'
 
 type OnboardingPhase = 'watchlist' | 'alerts'

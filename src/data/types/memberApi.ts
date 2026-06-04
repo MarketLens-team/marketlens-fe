@@ -6,6 +6,11 @@ export interface MemberResponse {
   plan: string
 }
 
+/** OpenAPI `TelegramLinkTokenResponse` */
+export interface TelegramLinkTokenResponse {
+  token: string
+}
+
 /** OpenAPI `WatchlistResponse` */
 export interface WatchlistResponse {
   stockCode: string

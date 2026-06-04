@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fetchStockOverview } from '../../data/clients/stockClient'
 import type { StockOverviewRow } from '../../data/types/stock'
-import type { WatchlistItem } from '../../store/watchlistStore'
+import type { WatchlistItem } from '../../data/types/watchlist'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { FilterDropdown } from '../ui/FilterDropdown'
 import styles from './SignupWatchlistStep.module.css'

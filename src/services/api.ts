@@ -52,8 +52,11 @@ api.interceptors.response.use(
       const status = error.response?.status
       const requestUrl = typeof config?.url === 'string' ? config.url : ''
       if (status === 401 && !isAuthApiPath(requestUrl)) {
+        const wasLoggedIn = useAuthStore.getState().isLoggedIn
         useAuthStore.getState().logout()
-        handleSessionExpired()
+        if (wasLoggedIn) {
+          handleSessionExpired()
+        }
       }
       return Promise.reject(error)
     }
@@ -65,8 +68,11 @@ api.interceptors.response.use(
       config.headers.Authorization = `Bearer ${tokens.accessToken}`
       return api(config)
     } catch (refreshError) {
+      const wasLoggedIn = useAuthStore.getState().isLoggedIn
       useAuthStore.getState().logout()
-      handleSessionExpired()
+      if (wasLoggedIn) {
+        handleSessionExpired()
+      }
       return Promise.reject(refreshError)
     }
   },

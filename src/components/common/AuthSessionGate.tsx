@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { ensureAccessToken } from '../../services/authTokenRefresh'
 import {
   AUTH_REQUIRED_EVENT,
+  consumeAuthPromptPending,
   handleSessionExpired,
-  peekAuthRedirect,
   saveAuthRedirect,
 } from '../../services/authRedirect'
 import { useAuthModalStore } from '../../store/authModalStore'
@@ -33,19 +33,23 @@ export function AuthSessionGate() {
 
   useEffect(() => {
     if (isLoggedIn) return
+    if (consumeAuthPromptPending()) {
+      openAuthModal('login')
+    }
+  }, [isLoggedIn, openAuthModal])
+
+  useEffect(() => {
+    if (isLoggedIn) return
 
     const routeState = location.state as AuthRouteState | null
     if (routeState?.from) {
       saveAuthRedirect(routeState.from)
     }
 
-    const shouldOpen =
-      routeState?.openAuth === true || Boolean(peekAuthRedirect()) || routeState?.from
-
-    if (shouldOpen) {
+    if (routeState?.openAuth === true) {
       openAuthModal('login')
     }
-  }, [isLoggedIn, location.pathname, location.state, openAuthModal])
+  }, [isLoggedIn, location.state, openAuthModal])
 
   useEffect(() => {
     if (isLoggedIn) return

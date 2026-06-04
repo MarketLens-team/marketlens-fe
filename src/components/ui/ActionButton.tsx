@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
 import { ButtonSpinner } from './ButtonSpinner'
 import styles from './ActionButton.module.css'
 
-export type ActionButtonVariant = 'confirm' | 'danger'
+export type ActionButtonVariant = 'confirm' | 'danger' | 'primary'
 
 export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean

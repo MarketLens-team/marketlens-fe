@@ -1,4 +1,4 @@
-import type { WatchlistItem } from '../../store/watchlistStore'
+import type { WatchlistItem } from '../types/watchlist'
 import { useAuthStore } from '../../store/authStore'
 import { completeSignup } from './authClient'
 import { updateAlertSettings } from './memberClient'

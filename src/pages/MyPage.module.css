@@ -14,11 +14,6 @@
   gap: var(--space-3);
 }
 
-.skeletonSummaryCard {
-  height: 6.5rem;
-  border-radius: var(--radius-md);
-}
-
 .tabPanel {
   display: flex;
   flex-direction: column;
