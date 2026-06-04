@@ -26,7 +26,7 @@
 
 - 펼치기 바 제거, 카드/리스트 pill 버튼(필터 pill 톤)으로 보기 전환
 - 리스트: `StockOverviewTable` 밀도, 링 행, **내부 세로 스크롤 없음**(행 수만큼 높이)
-- 타일: 가로 스크롤, 카드 묶음 **가운데 정렬**
+- 타일: 가로 스크롤, 카드 묶음 **가운데 정렬**, 호버 시 AI 요약 모달(로고·등락만 표시)
 
 ### 오늘 이상치 (`DashboardAlertCards` · `pickDashboardAlerts`)
 
@@ -39,8 +39,11 @@
 
 #### 호버 AI 요약 모달 (`DashboardAnomalySummaryModal`)
 
-- 카드 호버 **0.5s** 후 중앙 모달, 검색 모달과 동일 `--color-bg-modal` 팔레트
-- 헤더: 종목 로고(`resolveStockImageUrl` · `Stock{code}.svg` 폴백), 신호 라벨·수치, × / **종목 상세**만
+적용: **오늘 이상치** · **관심종목 타일** · **언급량 급증 TOP 3** (`buildDashboardSummaryTarget`)
+
+- 호버 **1.5s** 후 중앙 모달, 검색 모달과 동일 `--color-bg-modal` 팔레트
+- 헤더: 종목 로고(`resolveStockImageUrl` · `Stock{code}.svg` 폴백), 신호·수치(이상치 신호 / 관심 종목+등락 / 언급 급증+%), ×
+- **종목 상세** primary 버튼 — `disableHover`(scale·색 변화 없음)
 - 본문: `GET /api/v1/stocks/{code}/summary` → `aiSummary` (캐시·stale 응답 무시)
 - 상호작용: 딤 클릭·Esc 닫기, 배경 클릭·선택 차단, **고정 호버 영역** 안이면 유지
 - 타이밍: 표시 후 **3s** 유예 → 영역 이탈 **0.7s** 후 닫기
@@ -69,6 +72,8 @@
 | `src/components/dashboard/DashboardWatchlistSection.tsx` | 타일/리스트 섹션 |
 | `src/components/dashboard/DashboardWatchlistTable.tsx` | embedded 리스트 |
 | `src/components/dashboard/DashboardAlertCards.tsx` | 이상치 카드·호버 바인딩 |
+| `src/components/dashboard/BuzzSurgeTop3.tsx` | 언급 급증 TOP3·호버 바인딩 |
+| `src/components/dashboard/buildDashboardSummaryTarget.ts` | 모달 헤더 타겟 빌더 |
 | `src/components/dashboard/DashboardAnomalySummaryModal.tsx` | AI 요약 모달 |
 | `src/components/dashboard/useDashboardAnomalySummary.ts` | 호버·캐시·타이밍 |
 | `src/components/dashboard/pickDashboardAlerts.ts` | 이상치 선정·imageUrl |
@@ -90,7 +95,7 @@
 - [ ] 비로그인: 브리핑 폴백·포트폴리오 로그인 유도·이상치는 buzz만
 - [ ] 리스트 보기: 세로 스크롤 없이 전체 행 표시
 - [ ] 이상치: `+` 초록 · `-` 빨강 · 라벨만 회색
-- [ ] 이상치 호버 0.5s → 모달, 로고·수치·요약 일치, 딤 클릭·영역 이탈 닫기
+- [ ] 이상치·관심 타일·언급 TOP3 호버 1.5s → 모달, 딤·영역 이탈 닫기
 - [ ] 관심종목 로드 시 `summaries/batch` 1회(네트워크 탭)
 
 ## Notes

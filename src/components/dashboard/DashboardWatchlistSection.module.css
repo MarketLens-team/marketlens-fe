@@ -105,28 +105,6 @@
   color: var(--color-danger);
 }
 
-.tileSentiment {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.sentPos {
-  color: var(--color-success);
-}
-
-.sentWarm {
-  color: var(--color-warning);
-}
-
-.sentNeg {
-  color: var(--color-danger);
-}
-
-.sentNeu {
-  color: var(--color-text-secondary);
-}
-
 .embeddedTable {
   margin-top: var(--space-1);
 }

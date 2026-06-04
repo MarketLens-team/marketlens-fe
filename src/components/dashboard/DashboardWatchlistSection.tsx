@@ -1,15 +1,17 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { buzzSentimentClass, formatStockScore } from '../buzz/buzzSurgeScore'
 import type { DashboardWatchlistRow } from '../../data/types/dashboard'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { PillButton } from '../ui/PillButton'
 import { formatPercent, priceChangeDirection } from '../stock/stockScore'
+import { buildWatchlistSummaryTarget } from './buildDashboardSummaryTarget'
+import { DashboardAnomalySummaryModal } from './DashboardAnomalySummaryModal'
 import { DashboardLoginPrompt } from './DashboardLoginPrompt'
 import { DashboardWatchlistTable } from './DashboardWatchlistTable'
+import { useDashboardAnomalySummary } from './useDashboardAnomalySummary'
 import { useAuthStore } from '../../store/authStore'
 import styles from './DashboardWatchlistSection.module.css'
 
@@ -19,17 +21,24 @@ interface DashboardWatchlistSectionProps {
   rows: DashboardWatchlistRow[]
 }
 
-const SENTIMENT_CLASS = {
-  pos: styles.sentPos,
-  warm: styles.sentWarm,
-  neg: styles.sentNeg,
-  neu: styles.sentNeu,
-} as const
+function bindTileHoverSummary(
+  row: DashboardWatchlistRow,
+  summary: ReturnType<typeof useDashboardAnomalySummary>,
+) {
+  const target = buildWatchlistSummaryTarget(row)
+  return {
+    onMouseEnter: () => summary.scheduleOpen(target),
+    onMouseLeave: () => summary.scheduleClose(),
+    onFocus: () => summary.scheduleOpen(target),
+    onBlur: () => summary.scheduleClose(),
+  }
+}
 
 export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionProps) {
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const [view, setView] = useState<WatchlistView>('tiles')
+  const summaryModal = useDashboardAnomalySummary()
 
   const goToStock = (code: string) => {
     navigate(`/stock/${code}`)
@@ -72,7 +81,6 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
             {rows.map((row) => {
               const priceDirection = priceChangeDirection(row.changePercent)
               const hasPrice = row.price > 0
-              const sentKey = buzzSentimentClass(row.sentimentScore)
               return (
                 <li key={row.code}>
                   <button
@@ -80,6 +88,7 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
                     className={styles.tile}
                     onClick={() => goToStock(row.code)}
                     aria-label={`${row.name} 종목 상세 보기`}
+                    {...bindTileHoverSummary(row, summaryModal)}
                   >
                     <EntityAvatar
                       variant="stock"
@@ -97,9 +106,6 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
                     >
                       {hasPrice ? formatPercent(row.changePercent) : '—'}
                     </span>
-                    <span className={clsx(styles.tileSentiment, SENTIMENT_CLASS[sentKey])}>
-                      {formatStockScore(row.sentimentScore)}
-                    </span>
                   </button>
                 </li>
               )
@@ -111,6 +117,16 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
       {isLoggedIn && rows.length > 0 && view === 'list' ? (
         <DashboardWatchlistTable rows={rows} embedded className={styles.embeddedTable} />
       ) : null}
+
+      <DashboardAnomalySummaryModal
+        target={summaryModal.target}
+        status={summaryModal.status}
+        summaryText={summaryModal.summaryText}
+        isOpen={summaryModal.isOpen}
+        onClose={summaryModal.close}
+        onHoverPaneEnter={summaryModal.cancelClose}
+        onHoverPaneLeave={summaryModal.scheduleModalLeave}
+      />
     </Card>
   )
 }

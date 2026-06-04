@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
+import { buildAlertSummaryTarget } from './buildDashboardSummaryTarget'
 import { DASHBOARD_SIGNAL_LABEL, pickDashboardAlerts } from './pickDashboardAlerts'
 import type { DashboardAlertItem } from './pickDashboardAlerts'
 import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
@@ -26,9 +27,9 @@ function bindHoverSummary(
   summary: ReturnType<typeof useDashboardAnomalySummary>,
 ) {
   return {
-    onMouseEnter: () => summary.scheduleOpen(alert),
+    onMouseEnter: () => summary.scheduleOpen(buildAlertSummaryTarget(alert)),
     onMouseLeave: () => summary.scheduleClose(),
-    onFocus: () => summary.scheduleOpen(alert),
+    onFocus: () => summary.scheduleOpen(buildAlertSummaryTarget(alert)),
     onBlur: () => summary.scheduleClose(),
   }
 }

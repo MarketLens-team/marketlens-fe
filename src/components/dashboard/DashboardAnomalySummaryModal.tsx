@@ -105,9 +105,9 @@ export function DashboardAnomalySummaryModal({
           </div>
 
           <div className={styles.actions}>
-            <PillButton variant="primary" compact type="button" onClick={goToStock}>
-              종목 상세
-            </PillButton>
+          <PillButton variant="primary" compact disableHover type="button" onClick={goToStock}>
+            종목 상세
+          </PillButton>
           </div>
         </div>
       </div>

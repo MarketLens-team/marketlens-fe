@@ -1,10 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { fetchStockSummary } from '../../data/clients/stockClient'
-import {
-  DASHBOARD_SIGNAL_LABEL,
-  type DashboardAlertItem,
-  type DashboardHeadlineTone,
-} from './pickDashboardAlerts'
+import type { DashboardHeadlineTone } from './pickDashboardAlerts'
 
 export type AnomalySummaryStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 
@@ -17,7 +13,7 @@ export interface OpenAnomalySummary {
   headlineTone: DashboardHeadlineTone
 }
 
-const HOVER_OPEN_MS = 500
+const HOVER_OPEN_MS = 1500
 const HOVER_CLOSE_MS = 400
 /** 모달 호버 영역 이탈 후 유지 시간 */
 const MODAL_LEAVE_MS = 700
@@ -76,18 +72,10 @@ export function useDashboardAnomalySummary() {
   }, [close])
 
   const openSummary = useCallback(
-    async (alert: DashboardAlertItem) => {
-      const code = alert.code
+    async (target: OpenAnomalySummary) => {
+      const code = target.code
       activeCodeRef.current = code
-      const signalLabel = DASHBOARD_SIGNAL_LABEL[alert.signal]
-      setTarget({
-        code,
-        name: alert.name,
-        imageUrl: alert.imageUrl,
-        signalLabel,
-        headline: alert.headline,
-        headlineTone: alert.headlineTone,
-      })
+      setTarget(target)
       markOpened()
 
       if (cacheRef.current.has(code)) {
@@ -116,11 +104,11 @@ export function useDashboardAnomalySummary() {
   )
 
   const scheduleOpen = useCallback(
-    (alert: DashboardAlertItem) => {
+    (target: OpenAnomalySummary) => {
       clearCloseTimer()
       clearOpenTimer()
       openTimerRef.current = setTimeout(() => {
-        void openSummary(alert)
+        void openSummary(target)
       }, HOVER_OPEN_MS)
     },
     [clearCloseTimer, clearOpenTimer, openSummary],
