@@ -480,7 +480,7 @@
 }
 
 .middleAside .relatedPanel .panelTitle {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-2);
 }
 
 .middleAside .relatedPanel .simpleListItem {
@@ -489,6 +489,23 @@
 
 .middleAside .relatedPanel .simpleListItem:first-child {
   padding-top: 0;
+}
+
+.middleAside .relatedPanel .stockLink {
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+}
+
+.middleAside .relatedPanel .stockLinkName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.middleAside .relatedPanel .stockLinkTrailing {
+  flex-wrap: nowrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
 }
 
 .rightStack .stockLink {
