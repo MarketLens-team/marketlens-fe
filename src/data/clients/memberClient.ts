@@ -4,7 +4,6 @@ import type { ApiEnvelope } from '../types/api'
 import type { AlertSettings } from '../types/member'
 import type {
   MemberResponse,
-  PasswordChangeRequest,
   TelegramLinkTokenResponse,
 } from '../types/memberApi'
 import { getApiErrorMessage } from '../util/apiError'
@@ -13,7 +12,6 @@ import { mockDelay } from '../util/mockDelay'
 
 const MEMBER_ME_PATH = '/api/members/me'
 const SETTINGS_PATH = '/api/members/me/settings'
-const PASSWORD_PATH = '/api/members/me/password'
 const TELEGRAM_LINK_TOKEN_PATH = '/api/members/me/telegram-link-token'
 
 /** OpenAPI `GET /api/members/me` */
@@ -74,22 +72,5 @@ export async function issueTelegramLinkToken(): Promise<TelegramLinkTokenRespons
     return unwrapApiEnvelope(data, '텔레그램 연동 준비에 실패했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '텔레그램 연동 준비에 실패했습니다.'))
-  }
-}
-
-/** OpenAPI `PUT /api/members/me/password` */
-export async function changeMemberPassword(payload: PasswordChangeRequest): Promise<void> {
-  if (isMockDataSource()) {
-    await mockDelay(160)
-    if (payload.currentPassword !== 'password123') {
-      throw new Error('현재 비밀번호가 올바르지 않습니다.')
-    }
-    return
-  }
-  try {
-    const { data } = await api.put<ApiEnvelope<unknown>>(PASSWORD_PATH, payload)
-    unwrapApiEnvelope(data, '비밀번호 변경에 실패했습니다.')
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.'))
   }
 }

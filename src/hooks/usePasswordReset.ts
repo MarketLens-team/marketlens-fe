@@ -1,26 +1,26 @@
 import { useCallback, useRef, useState } from 'react'
-import { changeMemberPassword } from '../data/clients/memberClient'
+import { resetPassword } from '../data/clients/authClient'
 import { getApiErrorMessage } from '../data/util/apiError'
 
-type PasswordChangeField = 'currentPassword' | 'newPassword' | 'confirmPassword'
+type PasswordResetField = 'newPassword' | 'confirmPassword'
 
-interface UsePasswordChangeOptions {
+interface UsePasswordResetOptions {
+  email: string
   onSuccess?: () => void
   onError?: (message: string) => void
 }
 
-export function usePasswordChange(options?: UsePasswordChangeOptions) {
-  const [currentPassword, setCurrentPassword] = useState('')
+export function usePasswordReset({ email, onSuccess, onError }: UsePasswordResetOptions) {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<PasswordChangeField, string>>>({})
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<PasswordResetField, string>>>({})
   const [saving, setSaving] = useState(false)
-  const onSuccessRef = useRef(options?.onSuccess)
-  const onErrorRef = useRef(options?.onError)
-  onSuccessRef.current = options?.onSuccess
-  onErrorRef.current = options?.onError
+  const onSuccessRef = useRef(onSuccess)
+  const onErrorRef = useRef(onError)
+  onSuccessRef.current = onSuccess
+  onErrorRef.current = onError
 
-  const clearFieldError = useCallback((field: PasswordChangeField) => {
+  const clearFieldError = useCallback((field: PasswordResetField) => {
     setFieldErrors((prev) => {
       if (!prev[field]) return prev
       const next = { ...prev }
@@ -30,7 +30,6 @@ export function usePasswordChange(options?: UsePasswordChangeOptions) {
   }, [])
 
   const resetForm = useCallback(() => {
-    setCurrentPassword('')
     setNewPassword('')
     setConfirmPassword('')
     setFieldErrors({})
@@ -39,10 +38,7 @@ export function usePasswordChange(options?: UsePasswordChangeOptions) {
   const submit = useCallback(async () => {
     if (saving) return
 
-    const nextErrors: Partial<Record<PasswordChangeField, string>> = {}
-    if (!currentPassword.trim()) {
-      nextErrors.currentPassword = '현재 비밀번호를 입력해주세요.'
-    }
+    const nextErrors: Partial<Record<PasswordResetField, string>> = {}
     if (newPassword.length < 8) {
       nextErrors.newPassword = '비밀번호는 8자 이상이어야 합니다.'
     }
@@ -58,31 +54,21 @@ export function usePasswordChange(options?: UsePasswordChangeOptions) {
     setFieldErrors({})
     setSaving(true)
     try {
-      await changeMemberPassword({
-        currentPassword: currentPassword.trim(),
-        newPassword,
-      })
+      await resetPassword({ email: email.trim(), newPassword })
       resetForm()
       onSuccessRef.current?.()
     } catch (error) {
-      const message = getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.')
-      if (message.includes('현재 비밀번호')) {
-        setFieldErrors({ currentPassword: message })
-      } else {
-        onErrorRef.current?.(message)
-      }
+      onErrorRef.current?.(getApiErrorMessage(error, '비밀번호 변경에 실패했습니다.'))
     } finally {
       setSaving(false)
     }
-  }, [confirmPassword, currentPassword, newPassword, resetForm, saving])
+  }, [confirmPassword, email, newPassword, resetForm, saving])
 
   return {
-    currentPassword,
     newPassword,
     confirmPassword,
     fieldErrors,
     saving,
-    setCurrentPassword,
     setNewPassword,
     setConfirmPassword,
     clearFieldError,
