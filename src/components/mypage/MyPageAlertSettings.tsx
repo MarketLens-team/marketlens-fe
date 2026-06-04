@@ -1,7 +1,28 @@
 import type { AlertSettings } from '../../data/types/member'
 import styles from './MyPageAlertSettings.module.css'
 
-const ALERT_OPTIONS: { key: keyof AlertSettings; label: string; description: string }[] = [
+type AlertSettingKey = keyof AlertSettings
+
+interface SettingOption {
+  key: AlertSettingKey
+  label: string
+  description: string
+}
+
+const CHANNEL_OPTIONS: SettingOption[] = [
+  {
+    key: 'emailNotificationEnabled',
+    label: '이메일',
+    description: '가입 이메일로 알림을 받습니다.',
+  },
+  {
+    key: 'telegramNotificationEnabled',
+    label: '텔레그램',
+    description: '연동한 텔레그램 계정으로 알림을 받습니다. 위에서 텔레그램 연동이 필요합니다.',
+  },
+]
+
+const ALERT_OPTIONS: SettingOption[] = [
   {
     key: 'buzzSurgeEnabled',
     label: '언급량 급등',
@@ -30,12 +51,43 @@ interface MyPageAlertSettingsProps {
   onSettingsChange: (settings: AlertSettings) => void
 }
 
+interface AlertSettingToggleProps {
+  option: SettingOption
+  checked: boolean
+  saving: boolean
+  onToggle: (key: AlertSettingKey) => void
+}
+
+function AlertSettingToggle({ option, checked, saving, onToggle }: AlertSettingToggleProps) {
+  return (
+    <li className={styles.option}>
+      <div className={styles.optionText}>
+        <span className={styles.optionLabel}>{option.label}</span>
+        <span className={styles.optionDesc}>{option.description}</span>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        className={styles.toggle}
+        aria-checked={checked}
+        aria-label={option.label}
+        disabled={saving}
+        onClick={() => onToggle(option.key)}
+      >
+        <span className={styles.toggleTrack} data-on={checked ? 'true' : 'false'}>
+          <span className={styles.toggleThumb} />
+        </span>
+      </button>
+    </li>
+  )
+}
+
 export function MyPageAlertSettings({
   settings,
   saving = false,
   onSettingsChange,
 }: MyPageAlertSettingsProps) {
-  const toggle = (key: keyof AlertSettings) => {
+  const toggle = (key: AlertSettingKey) => {
     if (saving) return
     onSettingsChange({ ...settings, [key]: !settings[key] })
   }
@@ -46,32 +98,35 @@ export function MyPageAlertSettings({
         알림 설정
       </h2>
 
-      <div className={styles.section}>
+      <div className={styles.subsection}>
+        <h3 className={styles.sectionTitle}>수신 채널</h3>
         <ul className={styles.optionList}>
-          {ALERT_OPTIONS.map((option) => {
-            const checked = settings[option.key]
-            return (
-              <li key={option.key} className={styles.option}>
-                <div className={styles.optionText}>
-                  <span className={styles.optionLabel}>{option.label}</span>
-                  <span className={styles.optionDesc}>{option.description}</span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  className={styles.toggle}
-                  aria-checked={checked}
-                  aria-label={option.label}
-                  disabled={saving}
-                  onClick={() => toggle(option.key)}
-                >
-                  <span className={styles.toggleTrack} data-on={checked ? 'true' : 'false'}>
-                    <span className={styles.toggleThumb} />
-                  </span>
-                </button>
-              </li>
-            )
-          })}
+          {CHANNEL_OPTIONS.map((option) => (
+            <AlertSettingToggle
+              key={option.key}
+              option={option}
+              checked={settings[option.key]}
+              saving={saving}
+              onToggle={toggle}
+            />
+          ))}
+        </ul>
+      </div>
+
+      <hr className={styles.subsectionDivider} aria-hidden />
+
+      <div className={styles.subsection}>
+        <h3 className={styles.sectionTitle}>알림 종류</h3>
+        <ul className={styles.optionList}>
+          {ALERT_OPTIONS.map((option) => (
+            <AlertSettingToggle
+              key={option.key}
+              option={option}
+              checked={settings[option.key]}
+              saving={saving}
+              onToggle={toggle}
+            />
+          ))}
         </ul>
       </div>
     </section>

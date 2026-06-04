@@ -3,4 +3,6 @@ export interface AlertSettings {
   sentimentChangeEnabled: boolean
   personMentionEnabled: boolean
   dailySummaryEnabled: boolean
+  emailNotificationEnabled: boolean
+  telegramNotificationEnabled: boolean
 }

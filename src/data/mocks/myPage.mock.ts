@@ -69,6 +69,8 @@ export const mockMyPageData: MyPageData = {
     sentimentChangeEnabled: true,
     personMentionEnabled: true,
     dailySummaryEnabled: true,
+    emailNotificationEnabled: true,
+    telegramNotificationEnabled: false,
   },
   alertExample: '삼성전자 감성 점수가 오늘 40점 하락했습니다 (+73 → +33)',
   account: {

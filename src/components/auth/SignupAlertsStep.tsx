@@ -50,4 +50,6 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   sentimentChangeEnabled: true,
   personMentionEnabled: true,
   dailySummaryEnabled: true,
+  emailNotificationEnabled: true,
+  telegramNotificationEnabled: true,
 }
