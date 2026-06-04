@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import GaugeChart from 'react-gauge-chart'
 import type { SentimentGaugeBlock } from '../../data/types/dashboard'
 import {
@@ -10,7 +10,13 @@ import {
   scorePercent,
   sentimentLabel,
 } from './sentimentGaugeShared'
+import { computeGaugeArcDotPosition } from './gaugeArcDotLayout'
 import styles from './SentimentArcGauge.module.css'
+
+const GAUGE_MARGIN_IN_PERCENT = 0.05
+
+/** truthy여야 라이브러리 기본 SVG 바늘이 그려지지 않음 */
+const HIDDEN_NEEDLE = <span aria-hidden className={styles.needleHidden} />
 
 interface SentimentArcGaugeProps {
   chartId: string
@@ -19,25 +25,37 @@ interface SentimentArcGaugeProps {
   ariaLabel?: string
 }
 
-function GaugeArcDot({ percent }: { percent: number }) {
-  const rotation = -90 + percent * 180
-
-  return (
-    <div className={styles.needlePivot} aria-hidden>
-      <div className={styles.needleArm} style={{ transform: `rotate(${rotation}deg)` }}>
-        <span className={styles.arcDot} />
-      </div>
-    </div>
-  )
-}
-
 export function SentimentArcGauge({ chartId, gauge, className, ariaLabel }: SentimentArcGaugeProps) {
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [dotPosition, setDotPosition] = useState<{ left: number; top: number } | null>(null)
+
   const percent = useMemo(
     () => scorePercent(gauge.score, gauge.min, gauge.max),
     [gauge.score, gauge.min, gauge.max],
   )
   const displayScore = String(gauge.score)
   const label = sentimentLabel(gauge.score)
+
+  useLayoutEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+
+    const syncDot = () => {
+      const { width, height } = el.getBoundingClientRect()
+      setDotPosition(
+        computeGaugeArcDotPosition(width, height, {
+          marginInPercent: GAUGE_MARGIN_IN_PERCENT,
+          arcWidth: GAUGE_ARC_WIDTH,
+          percent,
+        }),
+      )
+    }
+
+    syncDot()
+    const observer = new ResizeObserver(syncDot)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [percent])
 
   const centerText = useMemo(
     () => (
@@ -51,6 +69,7 @@ export function SentimentArcGauge({ chartId, gauge, className, ariaLabel }: Sent
 
   return (
     <div
+      ref={wrapRef}
       className={clsx(styles.gaugeWrap, className)}
       role="img"
       aria-label={ariaLabel ?? `감성 ${displayScore}, ${label}`}
@@ -65,18 +84,24 @@ export function SentimentArcGauge({ chartId, gauge, className, ariaLabel }: Sent
         arcPadding={0.06}
         arcWidth={GAUGE_ARC_WIDTH}
         cornerRadius={6}
-        marginInPercent={0.05}
-        needleScale={0.55}
+        marginInPercent={GAUGE_MARGIN_IN_PERCENT}
+        customNeedleComponent={HIDDEN_NEEDLE}
+        customNeedleComponentClassName={styles.needleLayer}
+        customNeedleStyle={{ display: 'none' }}
         hideText
         animate
         animDelay={0}
         animateDuration={1200}
-        customNeedleComponent={<GaugeArcDot percent={percent} />}
-        customNeedleComponentClassName={styles.needleLayer}
-        customNeedleStyle={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
         textComponent={centerText}
         textComponentContainerClassName={styles.textLayer}
       />
+      {dotPosition ? (
+        <span
+          className={styles.arcDot}
+          style={{ left: dotPosition.left, top: dotPosition.top }}
+          aria-hidden
+        />
+      ) : null}
     </div>
   )
 }

@@ -1,33 +1,48 @@
 import clsx from 'clsx'
-import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { DashboardAiBrief } from '../components/dashboard/DashboardAiBrief'
+import { DashboardAlertCards } from '../components/dashboard/DashboardAlertCards'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
-import { DashboardWatchlistTable } from '../components/dashboard/DashboardWatchlistTable'
+import { DashboardKospiChip } from '../components/dashboard/DashboardKospiChip'
+import { DashboardWatchlistSection } from '../components/dashboard/DashboardWatchlistSection'
 import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
 import { PortfolioSentimentGauge } from '../components/dashboard/PortfolioSentimentGauge'
-import { SentimentGaugePanel } from '../components/dashboard/SentimentGaugePanel'
+import { resolveDashboardAiBrief } from '../components/dashboard/buildDashboardAiBrief'
 import { AppErrorPage } from '../components/common/AppErrorPage'
 import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
+import { useDashboardBriefing } from '../hooks/useDashboardBriefing'
 import { useDashboardOverview } from '../hooks/useDashboardOverview'
+import { useAuthStore } from '../store/authStore'
 import skeleton from '../components/common/Skeleton.module.css'
 import styles from './DashboardPage.module.css'
 
 export default function DashboardPage() {
   const { data, loading, error } = useDashboardOverview()
-  const leftAsideRef = useRef<HTMLDivElement>(null)
-  const [leftAsideHeight, setLeftAsideHeight] = useState<number | null>(null)
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
+  const { data: briefing } = useDashboardBriefing(isLoggedIn)
+
+  const aiBrief = useMemo(() => {
+    if (!data) return ''
+    return resolveDashboardAiBrief(briefing, data, { isLoggedIn })
+  }, [briefing, data, isLoggedIn])
+
+  const marketAsideRef = useRef<HTMLDivElement>(null)
+  const [marketAsideHeight, setMarketAsideHeight] = useState(0)
 
   useLayoutEffect(() => {
-    const el = leftAsideRef.current
+    const el = marketAsideRef.current
     if (!el) return
 
-    const syncHeight = () => setLeftAsideHeight(el.offsetHeight)
-    const observer = new ResizeObserver(syncHeight)
-    observer.observe(el)
-    syncHeight()
+    const sync = () => {
+      setMarketAsideHeight(Math.floor(el.getBoundingClientRect().height))
+    }
 
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
     return () => observer.disconnect()
   }, [data])
 
@@ -44,8 +59,8 @@ export default function DashboardPage() {
         ) : null}
 
         {loading && !data && !error ? (
-          <div className={styles.skeletonGrid} aria-busy="true" aria-label="대시보드 로딩">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className={styles.skeletonStack} aria-busy="true" aria-label="대시보드 로딩">
+            {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} padding="lg" className={styles.skeletonCard}>
                 <div className={clsx(skeleton.block, skeleton.stat)} />
               </Card>
@@ -55,29 +70,32 @@ export default function DashboardPage() {
 
         {data ? (
           <>
-            <section
-              className={styles.topGrid}
-              aria-label="포트폴리오·언급량·관심 종목"
-              style={
-                leftAsideHeight != null
-                  ? ({ '--top-row-h': `${leftAsideHeight}px` } as CSSProperties)
-                  : undefined
-              }
-            >
-              <div ref={leftAsideRef} className={styles.leftAside}>
-                <PortfolioSentimentGauge gauge={data.portfolioSentiment} />
-                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
-              </div>
-              <DashboardWatchlistTable rows={data.watchlist} className={styles.watchlistMain} />
+            <section className={styles.aiBriefSection} aria-label="오늘 시장 요약">
+              <DashboardAiBrief summary={aiBrief} updatedAt={briefing?.updatedAt ?? null} />
             </section>
 
-            <section className={styles.marketSection} aria-label="KOSPI·섹터 감성">
-              <div className={styles.marketGrid}>
-                <SentimentGaugePanel
-                  title="KOSPI 종합"
-                  subtitle="참고용"
-                  gauge={data.kospiSentiment}
-                />
+            <section className={styles.heroGrid} aria-label="포트폴리오·이상치">
+              <PortfolioSentimentGauge gauge={data.portfolioSentiment} className={styles.heroGauge} />
+              <DashboardAlertCards
+                watchlist={data.watchlist}
+                sectorHeatmap={data.sectorHeatmap}
+                isLoggedIn={isLoggedIn}
+              />
+            </section>
+
+            <section className={styles.watchlistSection} aria-label="관심 종목">
+              <DashboardWatchlistSection rows={data.watchlist} />
+            </section>
+
+            <section className={styles.marketSection} aria-label="KOSPI·언급량·섹터">
+              <div ref={marketAsideRef} className={styles.marketAside}>
+                <DashboardKospiChip gauge={data.kospiSentiment} />
+                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
+              </div>
+              <div
+                className={styles.heatmapWrap}
+                style={marketAsideHeight > 0 ? { height: marketAsideHeight } : undefined}
+              >
                 <SectorHeatmapGrid cells={data.sectorHeatmap} />
               </div>
             </section>

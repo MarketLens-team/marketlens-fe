@@ -11,7 +11,7 @@ import {
   buzzSentimentClass,
   formatStockScore,
 } from '../buzz/buzzSurgeScore'
-import { formatPercent, formatPrice } from './stockScore'
+import { formatPercent, formatPrice, priceChangeDirection } from './stockScore'
 import { formatSentimentDelta24h } from './sentimentDelta'
 import styles from './StockOverviewTable.module.css'
 
@@ -157,7 +157,7 @@ export function StockOverviewTable({
               </tr>
             ) : null}
             {rows.map((row) => {
-              const priceUp = row.changePercent >= 0
+              const priceDirection = priceChangeDirection(row.changePercent)
               const hasPrice = row.price > 0
               const mentionUp = row.mentionChangeRate24h != null && row.mentionChangeRate24h >= 0
               const sentKey = buzzSentimentClass(row.sentimentScore24h)
@@ -252,7 +252,8 @@ export function StockOverviewTable({
                   <td
                     className={clsx(
                       styles.mono,
-                      hasPrice && (priceUp ? styles.up : styles.down),
+                      hasPrice && priceDirection === 'up' && styles.up,
+                      hasPrice && priceDirection === 'down' && styles.down,
                     )}
                   >
                     {hasPrice ? formatPercent(row.changePercent) : '—'}

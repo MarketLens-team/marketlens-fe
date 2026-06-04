@@ -46,3 +46,9 @@ export interface DashboardOverviewResponse {
   hotStatements: HotStatementApi[]
   lastCrawlInfo: LastCrawlInfoApi
 }
+
+/** OpenAPI `DashboardBriefingResponse` — `GET /api/v1/dashboard/briefing` */
+export interface DashboardBriefingResponse {
+  todaySummary: string | null
+  updatedAt: string | null
+}

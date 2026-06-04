@@ -2,6 +2,7 @@ import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type {
   BuzzSurgeItem,
+  DashboardBriefing,
   DashboardOverview,
   DashboardWatchlistRow,
   SectorHeatmapCell,
@@ -9,9 +10,9 @@ import type {
   StockHighlight,
 } from '../types/dashboard'
 import type { TickerStockRow } from '../types/stock'
-import type { StockSummaryResponse } from '../types/stockApi'
+import type { StockSummaryMetrics } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
-import type { DashboardOverviewResponse } from '../types/dashboardApi'
+import type { DashboardBriefingResponse, DashboardOverviewResponse } from '../types/dashboardApi'
 
 const GAUGE_MIN = -100
 const GAUGE_MAX = 100
@@ -60,6 +61,7 @@ function mapSectorHeatmap(
   items: DashboardOverviewResponse['sectorHeatmap'] | null | undefined,
 ): SectorHeatmapCell[] {
   return (items ?? []).map((item) => ({
+    sectorCode: item.sectorCode,
     name: item.sectorName,
     sentimentScore: Math.round(toFiniteNumber(item.avgScore)),
     mentionCount: toFiniteNumber(item.newsCount),
@@ -82,7 +84,7 @@ function mapHotStatementsToHighlights(
 
 export function mapDashboardWatchlistRow(
   item: WatchlistResponse,
-  summary?: StockSummaryResponse | null,
+  summary?: StockSummaryMetrics | null,
   priceRow?: TickerStockRow | null,
 ): DashboardWatchlistRow {
   const sentimentScore = toFiniteNumber(summary?.score)
@@ -96,6 +98,14 @@ export function mapDashboardWatchlistRow(
     sentimentScore,
     newsCount: toFiniteNumber(summary?.mentionCount),
     mentionSurgePercent,
+  }
+}
+
+export function mapDashboardBriefing(raw: DashboardBriefingResponse): DashboardBriefing {
+  const todaySummary = raw.todaySummary?.trim() ?? null
+  return {
+    todaySummary: todaySummary || null,
+    updatedAt: raw.updatedAt ?? null,
   }
 }
 

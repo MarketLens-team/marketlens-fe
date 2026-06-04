@@ -40,7 +40,7 @@ import { StockNewsListItem } from './StockNewsListItem'
 import { StockSentimentTrendChart } from './StockSentimentTrendChart'
 import { buildStockListPath } from '../../lib/buildStockRoute'
 import { scrollStockNewsItemIntoView } from '../../lib/newsFeedFocus'
-import { formatPercent, formatPrice, formatStockScore, stockSentimentTone } from './stockScore'
+import { formatPercent, formatPrice, formatStockScore, priceChangeDirection, stockSentimentTone } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
 type NewsFilter = 'all' | 'positive' | 'negative'
@@ -537,7 +537,7 @@ export function StockDetailContent({
     onLoadMore: () => void loadMoreNews(),
   })
 
-  const priceUp = stock.price.change >= 0
+  const priceDirection = priceChangeDirection(stock.price.change)
 
   return (
     <div className={styles.page}>
@@ -589,10 +589,15 @@ export function StockDetailContent({
               {stock.price.current > 0 ? (
                 <>
                   <span className={styles.priceCurrent}>{formatPrice(stock.price.current)}</span>
-                  <span className={clsx(styles.priceChange, priceUp ? styles.priceUp : styles.priceDown)}>
-                    {priceUp ? '+' : ''}
-                    {formatPrice(stock.price.change)} ({priceUp ? '+' : ''}
-                    {stock.price.changePercent}%)
+                  <span
+                    className={clsx(
+                      styles.priceChange,
+                      priceDirection === 'up' && styles.priceUp,
+                      priceDirection === 'down' && styles.priceDown,
+                    )}
+                  >
+                    {priceDirection === 'up' ? '+' : ''}
+                    {formatPrice(stock.price.change)} ({formatPercent(stock.price.changePercent)})
                   </span>
                 </>
               ) : (
@@ -844,7 +849,7 @@ const StockDetailMiddleGrid = memo(function StockDetailMiddleGrid({
             </h2>
             <ul className={styles.simpleList}>
               {relatedStocks.slice(0, RELATED_STOCKS_DISPLAY_MAX).map((related) => {
-                const relatedPriceUp = (related.price?.changePercent ?? 0) >= 0
+                const relatedPriceDirection = priceChangeDirection(related.price?.changePercent ?? 0)
                 return (
                   <li key={related.code} className={styles.simpleListItem}>
                     <Link className={styles.stockLink} to={`/stock/${related.code}`}>
@@ -865,7 +870,8 @@ const StockDetailMiddleGrid = memo(function StockDetailMiddleGrid({
                           <span
                             className={clsx(
                               styles.stockLinkChange,
-                              relatedPriceUp ? styles.priceUp : styles.priceDown,
+                              relatedPriceDirection === 'up' && styles.priceUp,
+                              relatedPriceDirection === 'down' && styles.priceDown,
                             )}
                           >
                             {formatPercent(related.price.changePercent)}

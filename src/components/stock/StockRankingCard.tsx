@@ -9,7 +9,7 @@ import {
   buzzSentimentClass,
   formatStockScore,
 } from '../buzz/buzzSurgeScore'
-import { formatPercent, formatPrice } from './stockScore'
+import { formatPercent, formatPrice, priceChangeDirection } from './stockScore'
 import { formatSentimentDelta24h } from './sentimentDelta'
 import styles from './StockRankingCard.module.css'
 
@@ -51,7 +51,7 @@ function formatMentionChangeRate(value: number | null): { text: string; tone?: '
 
 function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric): RankingRowValues {
   const hasPrice = item.price > 0
-  const priceUp = item.changePercent >= 0
+  const priceDirection = priceChangeDirection(item.changePercent)
 
   if (metric === 'mention') {
     const mention = formatMentionChangeRate(item.mentionChangeRate24h)
@@ -78,7 +78,13 @@ function getRankingRowValues(item: StockRankingItem, metric: StockRankingMetric)
   return {
     center: hasPrice ? formatPrice(item.price) : '—',
     trailing: hasPrice ? formatPercent(item.changePercent) : '—',
-    trailingTone: hasPrice ? (priceUp ? 'up' : 'down') : null,
+    trailingTone: hasPrice
+      ? priceDirection === 'up'
+        ? 'up'
+        : priceDirection === 'down'
+          ? 'down'
+          : null
+      : null,
   }
 }
 

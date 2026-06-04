@@ -1,13 +1,22 @@
-import { hierarchy, treemap, type HierarchyRectangularNode } from 'd3-hierarchy'
+import { hierarchy, treemap, treemapSquarify, type HierarchyRectangularNode } from 'd3-hierarchy'
 import type { SectorHeatmapCell } from '../../data/types/dashboard'
 
-export const SECTOR_TREEMAP_PADDING = 4
-const SENTIMENT_RANGE = 50
+/** 섹터 히트맵 — 부호만으로 색 구분 (종목 상세 ±20 중립과 분리) */
+const SECTOR_HEATMAP_NEUTRAL_EPSILON = 0.5
+
+export const SECTOR_TREEMAP_PADDING_INNER = 4
+export const SECTOR_TREEMAP_PADDING_OUTER = 3
+export const SECTOR_TREEMAP_ASPECT = 16 / 9
+const SENTIMENT_INTENSITY_RANGE = 50
+
+export type SectorSentimentTone = 'positive' | 'negative' | 'neutral'
 
 export interface SectorTreemapLeaf {
   name: string
   sentimentScore: number
   mentionCount: number
+  sentimentTone: SectorSentimentTone
+  heatIntensity: number
   x: number
   y: number
   width: number
@@ -20,28 +29,32 @@ function isSectorCell(node: TreemapRoot | SectorHeatmapCell): node is SectorHeat
   return 'mentionCount' in node
 }
 
-function lerpByte(from: number, to: number, t: number) {
-  return Math.round(from + (to - from) * t)
+export function sectorSentimentTone(score: number): SectorSentimentTone {
+  if (score > SECTOR_HEATMAP_NEUTRAL_EPSILON) return 'positive'
+  if (score < -SECTOR_HEATMAP_NEUTRAL_EPSILON) return 'negative'
+  return 'neutral'
 }
 
-/** 감성 -50~+50, 절댓값이 클수록 진한 green/red */
-export function sentimentFill(score: number): string {
-  const clamped = Math.max(-SENTIMENT_RANGE, Math.min(SENTIMENT_RANGE, score))
-  const intensity = Math.abs(clamped) / SENTIMENT_RANGE
-
-  if (clamped > 0) {
-    return `rgb(${lerpByte(0x28, 0x05, intensity)}, ${lerpByte(0x55, 0x6e, intensity)}, ${lerpByte(0x45, 0x48, intensity)})`
-  }
-  if (clamped < 0) {
-    return `rgb(${lerpByte(0x52, 0x82, intensity)}, ${lerpByte(0x2c, 0x18, intensity)}, ${lerpByte(0x34, 0x22, intensity)})`
-  }
-  return '#3a4d62'
+export function sectorHeatIntensity(score: number): number {
+  const clamped = Math.max(-SENTIMENT_INTENSITY_RANGE, Math.min(SENTIMENT_INTENSITY_RANGE, score))
+  return Math.abs(clamped) / SENTIMENT_INTENSITY_RANGE
 }
 
-export function sentimentScoreColor(score: number): string {
-  if (score > 0) return '#9dffd0'
-  if (score < 0) return '#ffc4cc'
-  return '#e8f0f8'
+export function sectorTreemapLayoutSize(
+  containerWidth: number,
+  containerHeight: number,
+): { width: number; height: number } {
+  if (containerWidth <= 0) return { width: 0, height: 0 }
+
+  let width = containerWidth
+  let height = Math.round(width / SECTOR_TREEMAP_ASPECT)
+
+  if (containerHeight > 0 && height > containerHeight) {
+    height = containerHeight
+    width = Math.round(height * SECTOR_TREEMAP_ASPECT)
+  }
+
+  return { width: Math.max(0, width), height: Math.max(0, height) }
 }
 
 export function layoutSectorTreemap(
@@ -51,13 +64,15 @@ export function layoutSectorTreemap(
 ): SectorTreemapLeaf[] {
   if (width <= 0 || height <= 0 || cells.length === 0) return []
 
-  const root = hierarchy<TreemapRoot | SectorHeatmapCell>({ children: cells }).sum((d) =>
-    isSectorCell(d) ? d.mentionCount : 0,
-  )
+  const root = hierarchy<TreemapRoot | SectorHeatmapCell>({ children: cells })
+    .sum((d) => (isSectorCell(d) ? Math.max(d.mentionCount, 1) : 0))
+    .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
 
   treemap<TreemapRoot | SectorHeatmapCell>()
+    .tile(treemapSquarify.ratio(1))
     .size([width, height])
-    .padding(SECTOR_TREEMAP_PADDING)
+    .paddingInner(SECTOR_TREEMAP_PADDING_INNER)
+    .paddingOuter(SECTOR_TREEMAP_PADDING_OUTER)
     .round(true)(root)
 
   return (root.leaves() as HierarchyRectangularNode<SectorHeatmapCell>[]).map((node) => {
@@ -66,6 +81,8 @@ export function layoutSectorTreemap(
       name: cell.name,
       sentimentScore: cell.sentimentScore,
       mentionCount: cell.mentionCount,
+      sentimentTone: sectorSentimentTone(cell.sentimentScore),
+      heatIntensity: sectorHeatIntensity(cell.sentimentScore),
       x: node.x0,
       y: node.y0,
       width: node.x1 - node.x0,
