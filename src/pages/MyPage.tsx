@@ -171,7 +171,7 @@ export default function MyPage() {
 
   const handleTelegramLinkOpened = () => {
     setActionError(null)
-    snackbar.show('Telegram Web에서 로그인 후 봇 채팅의 시작(Start)을 눌러 주세요.', {
+    snackbar.show('텔레그램 앱에서 봇 채팅의 시작(Start)을 눌러 연동을 완료해 주세요.', {
       durationMs: 6000,
     })
   }

@@ -10,7 +10,7 @@ interface MyPageTelegramLinkProps {
 }
 
 export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProps) {
-  const { linking, linkTelegram, webLinkUrl } = useTelegramLink({ onOpened, onError })
+  const { linking, linkTelegram, linkUrls } = useTelegramLink({ onOpened, onError })
   const botUsername = resolveTelegramBotUsername()
 
   return (
@@ -26,26 +26,37 @@ export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProp
             메신저로 받을 수 있습니다.
           </p>
           <p className={styles.note}>
-            연동 버튼을 누르면 <strong>Telegram Web</strong>이 새 탭에서 열립니다. 전화번호로
-            로그인한 뒤 봇 채팅에서 <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요.
-            인증 코드는 5분 동안 유효합니다.
+            연동 버튼을 누르면 텔레그램 앱 또는 t.me 연동 페이지가 열립니다. 봇 채팅에서{' '}
+            <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요. 인증 코드는 5분 동안
+            유효합니다.
           </p>
-          <p className={styles.noteMuted}>
-            Mac 앱이 설치되어 있으면 앱으로 열릴 수도 있습니다. 탭이 닫혔다면 아래 링크로 다시
-            열어 주세요.
-          </p>
-          {webLinkUrl ? (
+          {linkUrls ? (
             <p className={styles.noteMuted}>
+              앱이 열리지 않으면{' '}
               <a
                 className={styles.webFallbackLink}
-                href={webLinkUrl}
+                href={linkUrls.tme}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                텔레그램 연동 페이지 다시 열기
+                t.me에서 연동
+              </a>
+              {' · '}
+              <a
+                className={styles.webFallbackLink}
+                href={linkUrls.webClient}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Telegram Web에서 연동
               </a>
             </p>
-          ) : null}
+          ) : (
+            <p className={styles.noteMuted}>
+              Mac·Windows에 텔레그램 앱이 설치되어 있어야 합니다. 앱이 없으면 연동 후 아래 링크가
+              표시됩니다.
+            </p>
+          )}
         </div>
 
         <ActionButton
