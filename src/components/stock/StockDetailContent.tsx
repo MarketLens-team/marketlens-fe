@@ -877,14 +877,6 @@ const StockDetailMiddleGrid = memo(function StockDetailMiddleGrid({
                             {formatPercent(related.price.changePercent)}
                           </span>
                         ) : null}
-                        <span
-                          className={clsx(
-                            styles.stockLinkScore,
-                            scoreToneClass(related.sentimentScore),
-                          )}
-                        >
-                          {formatStockScore(related.sentimentScore)}
-                        </span>
                       </span>
                     </Link>
                   </li>
