@@ -139,7 +139,7 @@
 }
 
 .sentWarm {
-  color: #b8860b;
+  color: var(--color-warning);
 }
 
 .sentNeg {

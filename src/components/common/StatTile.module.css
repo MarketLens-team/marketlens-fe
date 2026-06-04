@@ -31,6 +31,14 @@
   letter-spacing: -0.02em;
 }
 
+.valuePositive {
+  color: var(--color-success);
+}
+
+.valueNegative {
+  color: var(--color-danger);
+}
+
 .delta {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);

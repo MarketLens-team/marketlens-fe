@@ -1,15 +1,19 @@
 import clsx from 'clsx'
 import styles from './StatTile.module.css'
 
+export type StatValueTone = 'default' | 'positive' | 'negative'
+
 export interface StatTileProps {
   label: string
   value: string
   /** 등락률(%) — 양수 초록, 음수 빨강, 0은 보조색 */
   changePercent?: number | null
   hint?: string
+  /** 주요 수치 색상 — 긍정/부정 강조 */
+  valueTone?: StatValueTone
 }
 
-export function StatTile({ label, value, changePercent, hint }: StatTileProps) {
+export function StatTile({ label, value, changePercent, hint, valueTone = 'default' }: StatTileProps) {
   let deltaClass = styles.flat
   let deltaText = ''
   if (changePercent != null) {
@@ -28,7 +32,15 @@ export function StatTile({ label, value, changePercent, hint }: StatTileProps) {
     <div className={styles.root}>
       <div className={styles.label}>{label}</div>
       <div className={styles.valueRow}>
-        <span className={styles.value}>{value}</span>
+        <span
+          className={clsx(
+            styles.value,
+            valueTone === 'positive' && styles.valuePositive,
+            valueTone === 'negative' && styles.valueNegative,
+          )}
+        >
+          {value}
+        </span>
         {changePercent != null ? (
           <span className={clsx(styles.delta, deltaClass)}>{deltaText}</span>
         ) : null}

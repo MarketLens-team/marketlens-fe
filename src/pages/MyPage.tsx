@@ -12,6 +12,7 @@ import { ProfileLayout } from '../components/mypage/ProfileLayout'
 import { ProfileSideNav } from '../components/mypage/ProfileSideNav'
 import { parseMyPageTab, type MyPageTab } from '../components/mypage/profileTabs'
 import { AppErrorPage } from '../components/common/AppErrorPage'
+import { Card } from '../components/common/Card'
 import { Layout } from '../components/common/Layout'
 import { PageFetchError } from '../components/common/PageFetchError'
 import { Snackbar } from '../components/ui/Snackbar'
@@ -202,11 +203,13 @@ export default function MyPage() {
 
         {loading && !data && !error ? (
           <div aria-busy="true" aria-label="마이페이지 로딩">
-            <div className={styles.summarySkeleton}>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className={clsx(skeleton.block, styles.skeletonSummaryCard)} />
-              ))}
-            </div>
+            <Card padding="md">
+              <div className={styles.summarySkeleton}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className={clsx(skeleton.block, skeleton.stat)} aria-hidden />
+                ))}
+              </div>
+            </Card>
             <div className={styles.tabPanel}>
               <div className={clsx(skeleton.block, styles.skeletonTable)} />
             </div>
