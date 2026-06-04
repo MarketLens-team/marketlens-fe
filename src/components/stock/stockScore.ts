@@ -1,6 +1,14 @@
 /** stockSentimentZones 중립 구간(±20)과 동일 */
 export const STOCK_SENTIMENT_NEUTRAL_BAND = 20
 
+export type PriceChangeDirection = 'up' | 'down' | 'flat'
+
+export function priceChangeDirection(value: number): PriceChangeDirection {
+  if (value > 0) return 'up'
+  if (value < 0) return 'down'
+  return 'flat'
+}
+
 export type StockSentimentTone = 'positive' | 'negative' | 'neutral'
 
 export function stockSentimentTone(score: number): StockSentimentTone {

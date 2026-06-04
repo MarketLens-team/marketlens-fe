@@ -4,7 +4,7 @@ import { Card } from '../common/Card'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import type { StockMarketRow } from '../../data/types/stock'
 import { buildStockDetailPath } from '../../lib/buildStockRoute'
-import { formatPercent, formatPrice } from './stockScore'
+import { formatPercent, formatPrice, priceChangeDirection } from './stockScore'
 import styles from './StockMarketTable.module.css'
 
 export type StockMarketSortKey = 'name' | 'price' | 'change'
@@ -99,7 +99,7 @@ export function StockMarketTable({ rows, sortKey, sortDesc, onSortChange }: Stoc
               </tr>
             ) : null}
             {rows.map((row, index) => {
-              const priceUp = row.changePercent >= 0
+              const priceDirection = priceChangeDirection(row.changePercent)
               const hasPrice = row.price > 0
               return (
                 <tr
@@ -139,7 +139,8 @@ export function StockMarketTable({ rows, sortKey, sortDesc, onSortChange }: Stoc
                   <td
                     className={clsx(
                       styles.mono,
-                      hasPrice && (priceUp ? styles.up : styles.down),
+                      hasPrice && priceDirection === 'up' && styles.up,
+                      hasPrice && priceDirection === 'down' && styles.down,
                     )}
                   >
                     {hasPrice ? formatPercent(row.changePercent) : '—'}

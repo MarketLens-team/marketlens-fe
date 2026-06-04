@@ -37,7 +37,6 @@ function formatPriceCell(price: number): string {
 }
 
 function formatChangeCell(changePercent: number): string {
-  if (changePercent === 0) return '—'
   return formatPercent(changePercent)
 }
 

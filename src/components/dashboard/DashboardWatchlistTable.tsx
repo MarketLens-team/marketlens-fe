@@ -4,7 +4,7 @@ import { buzzSentimentClass, formatStockScore } from '../buzz/buzzSurgeScore'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
-import { formatPercent, formatPrice } from '../stock/stockScore'
+import { formatPercent, formatPrice, priceChangeDirection } from '../stock/stockScore'
 import { useAuthStore } from '../../store/authStore'
 import type { DashboardWatchlistRow } from '../../data/types/dashboard'
 import { DashboardLoginPrompt } from './DashboardLoginPrompt'
@@ -27,7 +27,6 @@ function formatPriceCell(price: number): string {
 }
 
 function formatChangeCell(changePercent: number): string {
-  if (changePercent === 0) return '—'
   return formatPercent(changePercent)
 }
 
@@ -71,8 +70,8 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
               <>
                 {rows.map((row) => {
                   const hasPrice = row.price > 0
-                  const priceUp = row.changePercent >= 0
-                  const mentionUp = row.mentionSurgePercent >= 0
+                  const priceDirection = priceChangeDirection(row.changePercent)
+                  const mentionUp = row.mentionSurgePercent > 0
                   const sentKey = buzzSentimentClass(row.sentimentScore)
                   return (
                     <div
@@ -107,7 +106,8 @@ export function DashboardWatchlistTable({ rows, className }: DashboardWatchlistT
                       <div
                         className={clsx(
                           styles.mono,
-                          hasPrice && (priceUp ? styles.up : styles.down),
+                          hasPrice && priceDirection === 'up' && styles.up,
+                          hasPrice && priceDirection === 'down' && styles.down,
                         )}
                       >
                         {formatChangeCell(row.changePercent)}
