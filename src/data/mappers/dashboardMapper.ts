@@ -61,6 +61,7 @@ function mapSectorHeatmap(
   items: DashboardOverviewResponse['sectorHeatmap'] | null | undefined,
 ): SectorHeatmapCell[] {
   return (items ?? []).map((item) => ({
+    sectorCode: item.sectorCode,
     name: item.sectorName,
     sentimentScore: Math.round(toFiniteNumber(item.avgScore)),
     mentionCount: toFiniteNumber(item.newsCount),

@@ -37,6 +37,7 @@ export interface BuzzSurgeItem {
 }
 
 export interface SectorHeatmapCell {
+  sectorCode?: string
   name: string
   sentimentScore: number
   mentionCount: number

@@ -1,11 +1,12 @@
+import clsx from 'clsx'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { SectorHeatmapCell } from '../../data/types/dashboard'
 import {
   layoutSectorTreemap,
-  sentimentFill,
-  sentimentScoreColor,
+  sectorTreemapLayoutSize,
+  type SectorTreemapLeaf,
 } from './sectorTreemap'
 import styles from './SectorHeatmapGrid.module.css'
 
@@ -13,83 +14,117 @@ interface SectorHeatmapGridProps {
   cells: SectorHeatmapCell[]
 }
 
-interface SectorTreemapCellProps {
-  leaf: ReturnType<typeof layoutSectorTreemap>[number]
-}
+const TONE_RECT_CLASS = {
+  positive: styles.cellRectPositive,
+  negative: styles.cellRectNegative,
+  neutral: styles.cellRectNeutral,
+} as const
 
-function SectorTreemapCell({ leaf }: SectorTreemapCellProps) {
-  const { x, y, width, height, name, sentimentScore, mentionCount } = leaf
+const TONE_SCORE_CLASS = {
+  positive: styles.cellScoreOnFill,
+  negative: styles.cellScoreOnFill,
+  neutral: styles.cellScoreNeutral,
+} as const
+
+const TONE_LABEL_CLASS = {
+  positive: styles.cellLabelOnFill,
+  negative: styles.cellLabelOnFill,
+  neutral: styles.cellLabelNeutral,
+} as const
+
+function SectorTreemapCell({ leaf }: { leaf: SectorTreemapLeaf }) {
+  const { x, y, width, height, name, sentimentScore, mentionCount, sentimentTone, heatIntensity } =
+    leaf
   const scoreText = `${sentimentScore > 0 ? '+' : ''}${sentimentScore}`
-  const showDetail = width >= 52 && height >= 44
-  const showMentions = width >= 52 && height >= 60
   const cx = x + width / 2
-  const nameY = y + height / 2 - (showMentions ? 10 : showDetail ? 4 : 0)
-  const scoreY = y + height / 2 + (showMentions ? 6 : 10)
-  const mentionY = y + height / 2 + 22
+  const cy = y + height / 2
+  const compact = width < 52 || height < 36
+  const showScore = width >= 44 && height >= 32
+  const showMentions = width >= 72 && height >= 52
+  const nameSize = width < 72 ? 10 : width < 120 ? 11 : 12
+  const scoreSize = width < 72 ? 11 : width < 120 ? 13 : 15
+  const lineGap = showMentions ? 14 : 12
+  const blockOffset = showMentions ? lineGap : lineGap / 2
+
+  if (compact) {
+    return (
+      <g
+        className={styles.cell}
+        style={{ ['--heat' as string]: heatIntensity }}
+        aria-label={`${name} 감성 ${scoreText}, 언급 ${mentionCount}건`}
+      >
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          rx={4}
+          ry={4}
+          className={clsx(styles.cellRect, TONE_RECT_CLASS[sentimentTone])}
+        />
+        <text
+          x={cx}
+          y={cy}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className={clsx(styles.cellNameCompact, TONE_LABEL_CLASS[sentimentTone])}
+          fontSize={9}
+        >
+          {name}
+        </text>
+      </g>
+    )
+  }
 
   return (
-    <g aria-label={`${name} 감성 ${scoreText}, 언급 ${mentionCount}건`}>
+    <g
+      className={styles.cell}
+      style={{ ['--heat' as string]: heatIntensity }}
+      aria-label={`${name} 감성 ${scoreText}, 언급 ${mentionCount}건`}
+    >
       <rect
         x={x}
         y={y}
         width={width}
         height={height}
-        rx={6}
-        ry={6}
-        fill={sentimentFill(sentimentScore)}
+        rx={4}
+        ry={4}
+        className={clsx(styles.cellRect, TONE_RECT_CLASS[sentimentTone])}
       />
-      {showDetail ? (
-        <>
-          <text
-            x={cx}
-            y={nameY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#ffffff"
-            fontSize={width < 72 ? 10 : 11}
-            fontWeight={600}
-          >
-            {name}
-          </text>
-          <text
-            x={cx}
-            y={scoreY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill={sentimentScoreColor(sentimentScore)}
-            fontSize={width < 72 ? 12 : 14}
-            fontWeight={700}
-            fontFamily="var(--font-mono)"
-          >
-            {scoreText}
-          </text>
-          {showMentions ? (
-            <text
-              x={cx}
-              y={mentionY}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="#d8e2ee"
-              fontSize={10}
-              fontWeight={500}
-            >
-              {mentionCount}건
-            </text>
-          ) : null}
-        </>
-      ) : (
+      <text
+        x={cx}
+        y={cy - blockOffset}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        className={clsx(styles.cellName, TONE_LABEL_CLASS[sentimentTone])}
+        fontSize={nameSize}
+      >
+        {name}
+      </text>
+      {showScore ? (
         <text
           x={cx}
-          y={y + height / 2}
+          y={cy + (showMentions ? 2 : blockOffset)}
           textAnchor="middle"
           dominantBaseline="middle"
-          fill="#ffffff"
-          fontSize={9}
-          fontWeight={600}
+          className={clsx(styles.cellScore, TONE_SCORE_CLASS[sentimentTone])}
+          fontSize={scoreSize}
         >
-          {name}
+          {scoreText}
         </text>
-      )}
+      ) : null}
+      {showMentions ? (
+        <text
+          x={cx}
+          y={cy + blockOffset + 10}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className={clsx(styles.cellMentions, TONE_LABEL_CLASS[sentimentTone])}
+          fontSize={10}
+        >
+          {mentionCount.toLocaleString('ko-KR')}건
+        </text>
+      ) : null}
     </g>
   )
 }
@@ -113,25 +148,49 @@ export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
     return () => observer.disconnect()
   }, [])
 
+  const layoutSize = useMemo(
+    () => sectorTreemapLayoutSize(size.width, size.height),
+    [size.width, size.height],
+  )
+
   const leaves = useMemo(
-    () => layoutSectorTreemap(cells, size.width, size.height),
-    [cells, size.width, size.height],
+    () => layoutSectorTreemap(cells, layoutSize.width, layoutSize.height),
+    [cells, layoutSize.width, layoutSize.height],
   )
 
   return (
     <Card padding="md" className={styles.card}>
-      <CardSectionHeader
-        title="섹터 감성 히트맵"
-        subtitle="섹터별 감성 · 언급 건수"
-        variant="embedded"
-      />
+      <div className={styles.head}>
+        <CardSectionHeader
+          title="섹터 감성 히트맵"
+          subtitle="면적=언급량 · 색=감성"
+          variant="embedded"
+          className={styles.title}
+        />
+        <ul className={styles.legend} aria-label="감성 범례">
+          <li className={styles.legendItem}>
+            <span className={clsx(styles.legendSwatch, styles.legendSwatchPositive)} aria-hidden />
+            긍정
+          </li>
+          <li className={styles.legendItem}>
+            <span className={clsx(styles.legendSwatch, styles.legendSwatchNeutral)} aria-hidden />
+            중립
+          </li>
+          <li className={styles.legendItem}>
+            <span className={clsx(styles.legendSwatch, styles.legendSwatchNegative)} aria-hidden />
+            부정
+          </li>
+        </ul>
+      </div>
       <div ref={chartRef} className={styles.chartWrap} role="img" aria-label="섹터 감성 히트맵">
-        {size.width > 0 && size.height > 0 ? (
+        {cells.length === 0 ? (
+          <p className={styles.empty}>표시할 섹터 데이터가 없습니다.</p>
+        ) : layoutSize.width > 0 && layoutSize.height > 0 ? (
           <svg
             className={styles.svg}
-            width={size.width}
-            height={size.height}
-            viewBox={`0 0 ${size.width} ${size.height}`}
+            width={layoutSize.width}
+            height={layoutSize.height}
+            viewBox={`0 0 ${layoutSize.width} ${layoutSize.height}`}
             aria-hidden
           >
             {leaves.map((leaf) => (
