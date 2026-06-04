@@ -1,9 +1,12 @@
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { DASHBOARD_SIGNAL_LABEL, pickDashboardAlerts } from './pickDashboardAlerts'
+import type { DashboardAlertItem } from './pickDashboardAlerts'
 import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
+import { DashboardAnomalySummaryModal } from './DashboardAnomalySummaryModal'
+import { useDashboardAnomalySummary } from './useDashboardAnomalySummary'
 import styles from './DashboardAlertCards.module.css'
 
 interface DashboardAlertCardsProps {
@@ -18,10 +21,24 @@ const HEADLINE_TONE_CLASS = {
   neu: styles.headlineNeu,
 } as const
 
+function bindHoverSummary(
+  alert: DashboardAlertItem,
+  summary: ReturnType<typeof useDashboardAnomalySummary>,
+) {
+  return {
+    onMouseEnter: () => summary.scheduleOpen(alert),
+    onMouseLeave: () => summary.scheduleClose(),
+    onFocus: () => summary.scheduleOpen(alert),
+    onBlur: () => summary.scheduleClose(),
+  }
+}
+
 export function DashboardAlertCards({ watchlist, buzzTop3, isLoggedIn }: DashboardAlertCardsProps) {
   const alerts = isLoggedIn && watchlist.length > 0
     ? pickDashboardAlerts(watchlist, buzzTop3)
     : pickDashboardAlerts([], buzzTop3)
+
+  const summaryModal = useDashboardAnomalySummary()
 
   return (
     <Card padding="md" className={styles.card}>
@@ -32,7 +49,12 @@ export function DashboardAlertCards({ watchlist, buzzTop3, isLoggedIn }: Dashboa
         <ul className={styles.list}>
           {alerts.map((alert) => (
             <li key={`${alert.signal}-${alert.code}`}>
-              <Link to={`/stock/${alert.code}`} className={styles.item}>
+              <Link
+                to={`/stock/${alert.code}`}
+                className={styles.item}
+                aria-label={`${alert.name} 종목 상세 보기`}
+                {...bindHoverSummary(alert, summaryModal)}
+              >
                 <span className={styles.signal}>{DASHBOARD_SIGNAL_LABEL[alert.signal]}</span>
                 <span className={styles.body}>
                   <span className={styles.name}>{alert.name}</span>
@@ -46,6 +68,16 @@ export function DashboardAlertCards({ watchlist, buzzTop3, isLoggedIn }: Dashboa
           ))}
         </ul>
       )}
+
+      <DashboardAnomalySummaryModal
+        target={summaryModal.target}
+        status={summaryModal.status}
+        summaryText={summaryModal.summaryText}
+        isOpen={summaryModal.isOpen}
+        onClose={summaryModal.close}
+        onHoverPaneEnter={summaryModal.cancelClose}
+        onHoverPaneLeave={summaryModal.scheduleModalLeave}
+      />
     </Card>
   )
 }

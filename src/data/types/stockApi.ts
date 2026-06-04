@@ -26,6 +26,19 @@ export interface StockSummaryResponse {
   aiSummary: string | null
 }
 
+/** `GET /api/v1/stocks/summaries/batch` — JWT 관심종목 메트릭 (aiSummary 제외) */
+export interface StockSummaryBatchItemResponse {
+  stockCode: string
+  score: number
+  mentionCount: number
+  mentionChangeRate: number
+}
+
+export type StockSummaryMetrics = Pick<
+  StockSummaryResponse,
+  'score' | 'mentionCount' | 'mentionChangeRate'
+>
+
 export interface DailyPointResponse {
   recordedAt: string
   score: number

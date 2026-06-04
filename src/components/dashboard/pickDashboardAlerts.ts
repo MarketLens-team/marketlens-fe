@@ -1,3 +1,4 @@
+import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
 import { STOCK_SENTIMENT_NEUTRAL_BAND } from '../stock/stockScore'
 import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
 
@@ -20,6 +21,7 @@ export interface DashboardAlertItem {
   signal: DashboardSignalKind
   code: string
   name: string
+  imageUrl?: string | null
   headline: string
   detail: string
   headlineTone: DashboardHeadlineTone
@@ -47,6 +49,7 @@ export function pickDashboardAlerts(
 ): DashboardAlertItem[] {
   const items: DashboardAlertItem[] = []
   const seen = new Set<string>()
+  const watchByCode = new Map(watchlist.map((row) => [row.code, row]))
 
   const worstDrop = [...watchlist].sort((a, b) => a.changePercent - b.changePercent)[0]
   if (worstDrop && worstDrop.changePercent < 0) {
@@ -54,6 +57,7 @@ export function pickDashboardAlerts(
       signal: 'price_drop',
       code: worstDrop.code,
       name: worstDrop.name,
+      imageUrl: resolveStockImageUrl(worstDrop.code, worstDrop.imageUrl),
       headline: formatSignedPercent(worstDrop.changePercent),
       detail: `관심 종목 · 감성 ${worstDrop.sentimentScore > 0 ? '+' : ''}${worstDrop.sentimentScore}`,
       headlineTone: 'down',
@@ -68,6 +72,7 @@ export function pickDashboardAlerts(
       signal: 'sentiment_low',
       code: lowSentiment.code,
       name: lowSentiment.name,
+      imageUrl: resolveStockImageUrl(lowSentiment.code, lowSentiment.imageUrl),
       headline: `${lowSentiment.sentimentScore > 0 ? '+' : ''}${lowSentiment.sentimentScore}`,
       detail: '관심 종목',
       headlineTone: lowSentiment.sentimentScore < 0 ? 'down' : 'neu',
@@ -82,6 +87,7 @@ export function pickDashboardAlerts(
       signal: 'mention_surge',
       code: topMention.code,
       name: topMention.name,
+      imageUrl: resolveStockImageUrl(topMention.code, topMention.imageUrl),
       headline: formatSignedPercent(topMention.mentionSurgePercent),
       detail: '관심 종목',
       headlineTone: topMention.mentionSurgePercent > 0 ? 'up' : topMention.mentionSurgePercent < 0 ? 'down' : 'neu',
@@ -94,6 +100,10 @@ export function pickDashboardAlerts(
       signal: 'market_buzz',
       code: buzz.code,
       name: buzz.name,
+      imageUrl: resolveStockImageUrl(
+        buzz.code,
+        watchByCode.get(buzz.code)?.imageUrl,
+      ),
       headline: `+${buzz.surgePercent}%`,
       detail: `시장 · TOP ${buzz.rank}`,
       headlineTone: 'up',

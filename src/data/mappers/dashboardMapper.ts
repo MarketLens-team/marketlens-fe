@@ -10,7 +10,7 @@ import type {
   StockHighlight,
 } from '../types/dashboard'
 import type { TickerStockRow } from '../types/stock'
-import type { StockSummaryResponse } from '../types/stockApi'
+import type { StockSummaryMetrics } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
 import type { DashboardBriefingResponse, DashboardOverviewResponse } from '../types/dashboardApi'
 
@@ -83,7 +83,7 @@ function mapHotStatementsToHighlights(
 
 export function mapDashboardWatchlistRow(
   item: WatchlistResponse,
-  summary?: StockSummaryResponse | null,
+  summary?: StockSummaryMetrics | null,
   priceRow?: TickerStockRow | null,
 ): DashboardWatchlistRow {
   const sentimentScore = toFiniteNumber(summary?.score)

@@ -34,6 +34,7 @@ import type {
   StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
+  StockSummaryBatchItemResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
@@ -54,6 +55,7 @@ import {
 } from '../mocks/stockOverview.mock'
 import { buildMockStockTodayNews } from '../mocks/stockTodayNews.mock'
 import { buildMockStockPricesForDirectory, buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
+import { mockWatchlistSummariesBatch } from '../mocks/stockSummariesBatch.mock'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
@@ -412,6 +414,18 @@ export async function fetchStockSummary(
     stockPath(code, '/summary'),
     '종목 요약을 불러오지 못했습니다.',
     dateQuery,
+  )
+}
+
+/** OpenAPI `GET /api/v1/stocks/summaries/batch` — JWT 관심종목 메트릭 (aiSummary 제외) */
+export async function fetchWatchlistSummariesBatch(): Promise<StockSummaryBatchItemResponse[]> {
+  if (isMockDataSource()) {
+    await mockDelay(80)
+    return structuredClone(mockWatchlistSummariesBatch)
+  }
+  return getApiData<StockSummaryBatchItemResponse[]>(
+    `${STOCKS_BASE}/summaries/batch`,
+    '관심종목 지표를 불러오지 못했습니다.',
   )
 }
 
