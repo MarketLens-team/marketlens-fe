@@ -9,6 +9,7 @@ import {
   mapStockOverviewResponse,
   mapStockPeopleTimeline,
   mapStockRankingsResponse,
+  mapStockSummaryBatchItems,
   mapStockTodayNewsResponse,
 } from '../mappers/stockMapper'
 import { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
@@ -34,6 +35,7 @@ import type {
   StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
+  StockSummaryBatchItemApiResponse,
   StockSummaryBatchItemResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
@@ -423,10 +425,11 @@ export async function fetchWatchlistSummariesBatch(): Promise<StockSummaryBatchI
     await mockDelay(80)
     return structuredClone(mockWatchlistSummariesBatch)
   }
-  return getApiData<StockSummaryBatchItemResponse[]>(
+  const raw = await getApiData<StockSummaryBatchItemApiResponse[]>(
     `${STOCKS_BASE}/summaries/batch`,
     '관심종목 지표를 불러오지 못했습니다.',
   )
+  return mapStockSummaryBatchItems(raw)
 }
 
 export async function fetchStockDetail(stockCode: string, recordedAt?: string): Promise<StockDetail> {

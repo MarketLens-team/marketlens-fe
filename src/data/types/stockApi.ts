@@ -34,6 +34,14 @@ export interface StockSummaryBatchItemResponse {
   mentionChangeRate: number
 }
 
+/** BE `StockSummaryBatchResponse` — JSON 필드명은 `code` */
+export interface StockSummaryBatchItemApiResponse {
+  code: string
+  score?: number
+  mentionCount?: number
+  mentionChangeRate?: number
+}
+
 export type StockSummaryMetrics = Pick<
   StockSummaryResponse,
   'score' | 'mentionCount' | 'mentionChangeRate'

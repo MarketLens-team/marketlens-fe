@@ -1,5 +1,9 @@
 import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
-import { STOCK_SENTIMENT_NEUTRAL_BAND } from '../stock/stockScore'
+import {
+  formatSentimentReadable,
+  formatStockScore,
+  STOCK_SENTIMENT_NEUTRAL_BAND,
+} from '../stock/stockScore'
 import type { BuzzSurgeItem, DashboardWatchlistRow } from '../../data/types/dashboard'
 
 export type DashboardSignalKind =
@@ -59,7 +63,7 @@ export function pickDashboardAlerts(
       name: worstDrop.name,
       imageUrl: resolveStockImageUrl(worstDrop.code, worstDrop.imageUrl),
       headline: formatSignedPercent(worstDrop.changePercent),
-      detail: `관심 종목 · 감성 ${worstDrop.sentimentScore > 0 ? '+' : ''}${worstDrop.sentimentScore}`,
+      detail: `관심 종목 · ${formatSentimentReadable(worstDrop.sentimentScore)}`,
       headlineTone: 'down',
     })
   }
@@ -73,8 +77,8 @@ export function pickDashboardAlerts(
       code: lowSentiment.code,
       name: lowSentiment.name,
       imageUrl: resolveStockImageUrl(lowSentiment.code, lowSentiment.imageUrl),
-      headline: `${lowSentiment.sentimentScore > 0 ? '+' : ''}${lowSentiment.sentimentScore}`,
-      detail: '관심 종목',
+      headline: formatStockScore(lowSentiment.sentimentScore),
+      detail: `관심 종목 · ${formatSentimentReadable(lowSentiment.sentimentScore)}`,
       headlineTone: lowSentiment.sentimentScore < 0 ? 'down' : 'neu',
     })
   }
@@ -89,7 +93,7 @@ export function pickDashboardAlerts(
       name: topMention.name,
       imageUrl: resolveStockImageUrl(topMention.code, topMention.imageUrl),
       headline: formatSignedPercent(topMention.mentionSurgePercent),
-      detail: '관심 종목',
+      detail: `관심 종목 · 전일 대비 뉴스 언급 급증`,
       headlineTone: topMention.mentionSurgePercent > 0 ? 'up' : topMention.mentionSurgePercent < 0 ? 'down' : 'neu',
     })
   }

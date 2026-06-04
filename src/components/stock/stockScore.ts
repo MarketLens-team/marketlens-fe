@@ -22,6 +22,21 @@ export function formatStockScore(score: number): string {
   return score > 0 ? `+${score}` : String(score)
 }
 
+const SENTIMENT_TONE_LABEL: Record<StockSentimentTone, string> = {
+  positive: '긍정',
+  negative: '부정',
+  neutral: '중립',
+}
+
+/** UI 보조 문장 — 예: 뉴스 감성 중립(0) · 뉴스 감성 부정 -32 */
+export function formatSentimentReadable(score: number): string {
+  const tone = stockSentimentTone(score)
+  const label = SENTIMENT_TONE_LABEL[tone]
+  const value = formatStockScore(score)
+  if (tone === 'neutral' && score === 0) return `뉴스 감성 ${label}`
+  return `뉴스 감성 ${label} ${value}`
+}
+
 export function formatPercent(value: number, signed = true): string {
   const prefix = signed && value > 0 ? '+' : ''
   return `${prefix}${value}%`
