@@ -20,6 +20,8 @@ import type {
   StockTodayNewsResponse,
   StockSentimentBreakdownResponse,
   StockSentimentTrendResponse,
+  StockSummaryBatchItemApiResponse,
+  StockSummaryBatchItemResponse,
   StockSummaryResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
@@ -254,6 +256,20 @@ export function mapStockDetailPage(
     relatedStocks: extras?.relatedStocks ?? [],
     peopleTimeline: extras?.peopleTimeline ?? [],
   }
+}
+
+/** `GET /api/v1/stocks/summaries/batch` — BE는 `code`, FE는 `stockCode`로 통일 */
+export function mapStockSummaryBatchItems(
+  items: StockSummaryBatchItemApiResponse[] | null | undefined,
+): StockSummaryBatchItemResponse[] {
+  return (items ?? [])
+    .map((item) => ({
+      stockCode: item.code?.trim() ?? '',
+      score: toFiniteNumber(item.score),
+      mentionCount: toFiniteNumber(item.mentionCount),
+      mentionChangeRate: toFiniteNumber(item.mentionChangeRate),
+    }))
+    .filter((item) => item.stockCode.length > 0)
 }
 
 function mapOverviewItem(item: StockOverviewItemResponse): StockOverviewRow {

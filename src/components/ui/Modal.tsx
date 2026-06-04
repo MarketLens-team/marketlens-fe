@@ -24,6 +24,9 @@ export interface ModalProps {
   contentClassOnly?: boolean
   /** 오버레이 래퍼에 추가 클래스 (검색 모달 상·하단 여백 등) */
   overlayClassName?: string
+  /** 호버 모달 등 — 딤 영역 진입·이탈 (배경 차단 + 카드→모달 이동) */
+  onOverlayMouseEnter?: () => void
+  onOverlayMouseLeave?: () => void
 }
 
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
@@ -57,6 +60,8 @@ export function Modal({
   contentClassName,
   contentClassOnly = false,
   overlayClassName,
+  onOverlayMouseEnter,
+  onOverlayMouseLeave,
 }: ModalProps) {
   useModal(isOpen && lockBackgroundScroll)
   const titleId = useId()
@@ -130,6 +135,8 @@ export function Modal({
     <div
       className={clsx('modal-overlay', overlayClassName)}
       role="presentation"
+      onMouseEnter={onOverlayMouseEnter}
+      onMouseLeave={onOverlayMouseLeave}
       onMouseDown={(e) => {
         overlayPointerDownRef.current = e.target === e.currentTarget
       }}

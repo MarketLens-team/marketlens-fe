@@ -33,3 +33,15 @@ export function resolveImageUrl(url?: string | null): string | null {
 export function normalizeImageUrl(url?: string | null): string | null {
   return resolveImageUrl(url)
 }
+
+/** API imageUrl 없을 때 `public/images/stocks/Stock{code}.svg` 폴백 */
+export function resolveStockImageUrl(
+  stockCode: string,
+  imageUrl?: string | null,
+): string | null {
+  const fromApi = resolveImageUrl(imageUrl)
+  if (fromApi) return fromApi
+  const code = stockCode.trim()
+  if (!/^\d{6}$/.test(code)) return null
+  return resolveImageUrl(`/images/stocks/Stock${code}.svg`)
+}

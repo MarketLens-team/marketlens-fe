@@ -5,9 +5,9 @@ import { mockMyPageData } from '../mocks/myPage.mock'
 import type { ApiEnvelope } from '../types/api'
 import type { MyPageData } from '../types/myPage'
 import type { WatchlistResponse } from '../types/memberApi'
-import type { StockSummaryResponse } from '../types/stockApi'
+import type { StockSummaryBatchItemResponse, StockSummaryMetrics } from '../types/stockApi'
 import { fetchAlertSettings, fetchMemberProfile } from './memberClient'
-import { fetchStockOverview, fetchStockSummary } from './stockClient'
+import { fetchStockOverview, fetchWatchlistSummariesBatch } from './stockClient'
 import type { WatchlistOverviewPrice } from '../mappers/myPageMapper'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
@@ -20,18 +20,12 @@ async function fetchWatchlistRows(): Promise<WatchlistResponse[]> {
   return unwrapApiEnvelope(data, '관심종목을 불러오지 못했습니다.') ?? []
 }
 
-async function fetchSummariesForWatchlist(
+function summariesForWatchlist(
   watchlist: WatchlistResponse[],
-): Promise<Array<StockSummaryResponse | null>> {
-  return Promise.all(
-    watchlist.map(async (item) => {
-      try {
-        return await fetchStockSummary(item.stockCode)
-      } catch {
-        return null
-      }
-    }),
-  )
+  batch: StockSummaryBatchItemResponse[],
+): Array<StockSummaryMetrics | null> {
+  const byCode = new Map(batch.map((item) => [item.stockCode, item]))
+  return watchlist.map((item) => byCode.get(item.stockCode) ?? null)
 }
 
 async function fetchOverviewPriceByCode(): Promise<Map<string, WatchlistOverviewPrice>> {
@@ -55,13 +49,14 @@ export async function fetchMyPage(): Promise<MyPageData> {
   }
 
   try {
-    const [watchlist, settings, member, overviewPriceByCode] = await Promise.all([
+    const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
       fetchWatchlistRows(),
       fetchAlertSettings(),
       fetchMemberProfile(),
       fetchOverviewPriceByCode(),
+      fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
     ])
-    const summaries = await fetchSummariesForWatchlist(watchlist)
+    const summaries = summariesForWatchlist(watchlist, batchMetrics)
     return mapMyPageData({ watchlist, summaries, overviewPriceByCode, settings, member })
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '마이페이지를 불러오지 못했습니다.'))

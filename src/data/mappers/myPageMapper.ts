@@ -2,7 +2,7 @@ import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
 import type { AlertSettings } from '../types/member'
 import type { MemberResponse } from '../types/memberApi'
-import type { StockSummaryResponse } from '../types/stockApi'
+import type { StockSummaryMetrics } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
 import type { MyPageAccount, MyPageData, MyPageSummary, MyPageWatchlistRow } from '../types/myPage'
 import { MY_PAGE_WATCHLIST_MAX } from '../types/myPage'
@@ -16,7 +16,7 @@ export interface WatchlistOverviewPrice {
 
 export function mapWatchlistRow(
   item: WatchlistResponse,
-  summary?: StockSummaryResponse | null,
+  summary?: StockSummaryMetrics | null,
   overviewPrice?: WatchlistOverviewPrice | null,
 ): MyPageWatchlistRow {
   const sentimentScore = toFiniteNumber(summary?.score)
@@ -58,7 +58,7 @@ export function mapMemberAccount(member: MemberResponse): MyPageAccount {
 
 export function mapMyPageData(input: {
   watchlist: WatchlistResponse[]
-  summaries: Array<StockSummaryResponse | null>
+  summaries: Array<StockSummaryMetrics | null>
   overviewPriceByCode?: Map<string, WatchlistOverviewPrice>
   settings: AlertSettings
   member: MemberResponse

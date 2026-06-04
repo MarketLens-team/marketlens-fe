@@ -1,77 +1,75 @@
 .page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   width: 100%;
   max-width: var(--layout-page-max);
   margin-inline: auto;
   padding-bottom: var(--space-8);
 }
 
-.skeletonGrid {
-  display: grid;
-  grid-template-columns: minmax(260px, 22rem) minmax(0, 1fr);
+.skeletonStack {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  align-items: start;
 }
 
 .skeletonCard {
   border-radius: var(--radius-lg);
 }
 
-.topGrid {
+.aiBriefSection {
+  width: 100%;
+}
+
+.heroGrid {
   display: grid;
-  grid-template-columns: minmax(260px, 22rem) minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: start;
-  margin-bottom: var(--space-5);
-}
-
-.leftAside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  align-self: start;
-}
-
-.watchlistMain {
-  align-self: start;
-  height: var(--top-row-h);
-  max-height: var(--top-row-h);
-  min-height: 0;
-  overflow: hidden;
-}
-
-.marketSection {
-  margin-top: var(--space-2);
-}
-
-.marketGrid {
-  display: grid;
-  grid-template-columns: minmax(260px, 22rem) minmax(0, 1fr);
+  grid-template-columns: minmax(240px, 17rem) minmax(0, 1fr);
   gap: var(--space-3);
   align-items: stretch;
 }
 
-.marketGrid > * {
+.heroGauge {
   height: 100%;
-  min-height: 0;
+}
+
+.watchlistSection {
+  width: 100%;
   min-width: 0;
 }
 
+.marketSection {
+  display: grid;
+  grid-template-columns: minmax(260px, 22rem) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.marketAside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.heatmapWrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.heatmapWrap > * {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
 @media (max-width: 1100px) {
-  .topGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .watchlistMain {
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .marketGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .skeletonGrid {
+  .heroGrid,
+  .marketSection {
     grid-template-columns: 1fr;
   }
 }
