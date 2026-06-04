@@ -1,4 +1,4 @@
-import { AUTH_REDIRECT_KEY } from '../constants/storage'
+import { AUTH_PROMPT_KEY, AUTH_REDIRECT_KEY } from '../constants/storage'
 
 export const AUTH_REQUIRED_EVENT = 'marketlens:auth-required'
 
@@ -39,6 +39,17 @@ export function clearAuthRedirect() {
   sessionStorage.removeItem(AUTH_REDIRECT_KEY)
 }
 
+/** `window.location.assign('/')` 직후 마운트 시 로그인 모달 1회 표시 */
+export function markAuthPromptPending() {
+  sessionStorage.setItem(AUTH_PROMPT_KEY, '1')
+}
+
+export function consumeAuthPromptPending(): boolean {
+  const pending = sessionStorage.getItem(AUTH_PROMPT_KEY) === '1'
+  if (pending) sessionStorage.removeItem(AUTH_PROMPT_KEY)
+  return pending
+}
+
 /** 세션 만료·재발급 실패 시: 돌아갈 경로 저장 후 홈으로 이동(또는 로그인 모달 트리거) */
 export function handleSessionExpired() {
   const returnPath = `${window.location.pathname}${window.location.search}`
@@ -51,5 +62,6 @@ export function handleSessionExpired() {
     return
   }
 
+  markAuthPromptPending()
   window.location.assign('/')
 }

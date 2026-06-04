@@ -6,7 +6,6 @@ import { completeRegistration } from '../data/clients/completeRegistration'
 import type { CompleteRegistrationInput } from '../data/clients/completeRegistration'
 import { useAuthModalStore } from '../store/authModalStore'
 import { useAuthStore, type UserRole } from '../store/authStore'
-import { useWatchlistStore } from '../store/watchlistStore'
 import {
   clearAuthRedirect,
   consumeAuthRedirect,
@@ -50,7 +49,6 @@ export function useAuthFlow() {
   const location = useLocation()
   const login = useAuthStore((state) => state.login)
   const logout = useAuthStore((state) => state.logout)
-  const addToWatchlist = useWatchlistStore((state) => state.add)
 
   const handleLogin = useCallback(
     async (email: string, password: string) => {
@@ -87,12 +85,11 @@ export function useAuthFlow() {
     async (input: CompleteRegistrationInput) => {
       const tokens = await completeRegistration(input)
       login(tokens.accessToken, tokens.refreshToken, 'USER')
-      input.watchlist.forEach((item) => addToWatchlist(item))
       clearAuthRedirect()
       useAuthModalStore.getState().close()
       navigate('/', { replace: true, state: undefined })
     },
-    [addToWatchlist, login, navigate],
+    [login, navigate],
   )
 
   return { handleLogin, handleLogout, handleCompleteRegistration }
