@@ -3,7 +3,6 @@ import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { truncateText } from '../../lib/truncateText'
 import { personStatementRelatesToStock as rowRelatesToStock } from '../../lib/personStatementStockMatch'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
-import { toNullableNumber } from '../../lib/toNullableNumber'
 
 export { personStatementRelatesToStock } from '../../lib/personStatementStockMatch'
 import type { PersonStatementResponse } from '../types/personApi'
@@ -283,9 +282,9 @@ function mapOverviewItem(item: StockOverviewItemResponse): StockOverviewRow {
     price: toFiniteNumber(item.currentPrice),
     changePercent: toFiniteNumber(item.changeRate),
     mentionCount24h: toFiniteNumber(item.mentionCount24h),
-    mentionChangeRate24h: toNullableNumber(item.mentionChangeRate24h),
+    mentionChangeRate24h: toFiniteNumber(item.mentionChangeRate24h),
     sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
-    sentimentDelta24h: toNullableNumber(item.sentimentDelta24h),
+    sentimentDelta24h: toFiniteNumber(item.sentimentDelta24h),
   }
 }
 
@@ -297,9 +296,9 @@ function mapRankingItem(item: StockRankingItemResponse): StockRankingItem {
     price: toFiniteNumber(item.currentPrice),
     changePercent: toFiniteNumber(item.changeRate),
     mentionCount24h: toFiniteNumber(item.mentionCount24h),
-    mentionChangeRate24h: toNullableNumber(item.mentionChangeRate24h),
+    mentionChangeRate24h: toFiniteNumber(item.mentionChangeRate24h),
     sentimentScore24h: toFiniteNumber(item.sentimentScore24h),
-    sentimentDelta24h: toNullableNumber(item.sentimentDelta24h),
+    sentimentDelta24h: toFiniteNumber(item.sentimentDelta24h),
   }
 }
 

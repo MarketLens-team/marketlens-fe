@@ -40,8 +40,7 @@ interface RankingRowValues {
   trailingTitle?: string
 }
 
-function formatMentionChangeRate(value: number | null): { text: string; tone?: 'up' | 'down' } {
-  if (value === null) return { text: '—' }
+function formatMentionChangeRate(value: number): { text: string; tone?: 'up' | 'down' } {
   if (value === 0) return { text: '0%' }
   return {
     text: formatPercent(value),
