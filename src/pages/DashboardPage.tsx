@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { DashboardAiBrief } from '../components/dashboard/DashboardAiBrief'
 import { DashboardAlertCards } from '../components/dashboard/DashboardAlertCards'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
@@ -33,6 +33,23 @@ export default function DashboardPage() {
     if (!data) return ''
     return resolveDashboardAiBrief(briefing, data, { isLoggedIn })
   }, [briefing, data, isLoggedIn])
+
+  const marketAsideRef = useRef<HTMLDivElement>(null)
+  const [marketAsideHeight, setMarketAsideHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    const el = marketAsideRef.current
+    if (!el) return
+
+    const sync = () => {
+      setMarketAsideHeight(Math.floor(el.getBoundingClientRect().height))
+    }
+
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [data])
 
   return (
     <Layout>
@@ -71,11 +88,14 @@ export default function DashboardPage() {
             </section>
 
             <section className={styles.marketSection} aria-label="KOSPI·언급량·섹터">
-              <div className={styles.marketAside}>
+              <div ref={marketAsideRef} className={styles.marketAside}>
                 <DashboardKospiChip gauge={data.kospiSentiment} />
                 <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
               </div>
-              <div className={styles.heatmapWrap}>
+              <div
+                className={styles.heatmapWrap}
+                style={marketAsideHeight > 0 ? { height: marketAsideHeight } : undefined}
+              >
                 <SectorHeatmapGrid cells={data.sectorHeatmap} />
               </div>
             </section>

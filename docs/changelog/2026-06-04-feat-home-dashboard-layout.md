@@ -82,6 +82,8 @@
 | `src/components/dashboard/buildDashboardAiBrief.ts` | 브리핑 폴백 문장 |
 | `src/components/dashboard/SentimentArcGauge.tsx` | 아크·점 |
 | `src/components/dashboard/gaugeArcDotLayout.ts` | 점 좌표 |
+| `src/components/dashboard/SectorHeatmapGrid.tsx` | 섹터 treemap (상세는 style changelog) |
+| `src/components/dashboard/sectorTreemap.ts` | d3 squarify 레이아웃 |
 | `src/components/ui/Modal.tsx` | 오버레이 호버 콜백 |
 | `src/data/clients/dashboardClient.ts` | briefing·watchlist 로드 |
 | `src/data/clients/stockClient.ts` | batch·summary API |
@@ -105,4 +107,5 @@
 
 ## 연관
 
+- [2026-06-04-style-sector-heatmap-dashboard.md](./2026-06-04-style-sector-heatmap-dashboard.md) — 섹터 히트맵 treemap·레이아웃·가독성
 - [2026-06-04-fix-zero-price-change-display.md](./2026-06-04-fix-zero-price-change-display.md) — 동일 브랜치 선행 커밋

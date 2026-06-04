@@ -165,7 +165,7 @@ export function SectorHeatmapGrid({ cells }: SectorHeatmapGridProps) {
           title="섹터 감성 히트맵"
           subtitle="면적=언급량 · 색=감성"
           variant="embedded"
-          className={styles.title}
+          className={styles.headerBlock}
         />
         <ul className={styles.legend} aria-label="감성 범례">
           <li className={styles.legendItem}>
