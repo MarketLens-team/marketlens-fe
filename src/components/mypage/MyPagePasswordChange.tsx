@@ -24,7 +24,7 @@ export function MyPagePasswordChange({ email, onSuccess, onError }: MyPagePasswo
         <p className={styles.lead}>
           보안을 위해 등록된 이메일로 인증한 뒤 비밀번호를 변경할 수 있습니다.
         </p>
-        <ActionButton type="button" className={styles.action} onClick={() => setVerifyOpen(true)}>
+        <ActionButton type="button" variant="primary" className={styles.action} onClick={() => setVerifyOpen(true)}>
           비밀번호 변경
         </ActionButton>
       </div>

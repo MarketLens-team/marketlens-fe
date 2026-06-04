@@ -1,6 +1,7 @@
 import { useTelegramLink } from '../../hooks/useTelegramLink'
 import { resolveTelegramBotUsername } from '../../constants/telegram'
 import { ActionButton } from '../ui/ActionButton'
+import { TelegramIcon } from '../ui/TelegramIcon'
 import styles from './MyPageTelegramLink.module.css'
 
 interface MyPageTelegramLinkProps {
@@ -31,10 +32,12 @@ export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProp
 
         <ActionButton
           type="button"
+          variant="primary"
           className={styles.action}
           loading={linking}
           onClick={() => void linkTelegram()}
         >
+          <TelegramIcon className={styles.telegramIcon} />
           텔레그램 연동
         </ActionButton>
       </div>
