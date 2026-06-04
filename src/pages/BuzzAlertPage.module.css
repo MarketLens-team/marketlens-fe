@@ -1,0 +1,39 @@
+.page {
+  max-width: var(--layout-page-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-6);
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.summaryCol {
+  min-width: 0;
+}
+
+.tableCol {
+  min-width: 0;
+}
+
+.skeletonCard {
+  height: 7.5rem;
+  border-radius: var(--radius-md);
+}
+
+.skeletonTable {
+  height: 24rem;
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 900px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+}

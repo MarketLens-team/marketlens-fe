@@ -1,0 +1,12 @@
+.wrap {
+  width: 100%;
+  min-width: 72px;
+}
+
+.empty {
+  width: 100%;
+  min-width: 72px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-default);
+}

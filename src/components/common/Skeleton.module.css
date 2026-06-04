@@ -1,0 +1,47 @@
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.block {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-bg-card) 25%, var(--color-bg-elevated) 50%, var(--color-bg-card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.stat {
+  min-height: 72px;
+}
+
+.rowNews {
+  height: 148px;
+}
+
+.rowMd {
+  height: 96px;
+}
+
+.rowLg {
+  height: 120px;
+}
+
+.tableLine {
+  height: 40px;
+  width: 100%;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-12) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: center;
+}

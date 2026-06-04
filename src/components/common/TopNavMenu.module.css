@@ -1,0 +1,87 @@
+.menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--space-1);
+  min-width: 0;
+  height: 100%;
+}
+
+/* 현재 페이지 — 항상 고정 */
+.menuItemActive::after,
+.menuItem[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  pointer-events: none;
+}
+
+/* 다른 메뉴 호버 — 커서 따라 이동 */
+.indicatorHover {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform var(--duration-base) ease,
+    width var(--duration-base) ease,
+    opacity var(--duration-fast) ease;
+}
+
+.indicatorHoverVisible {
+  opacity: 1;
+}
+
+.menuItem {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  white-space: nowrap;
+  transition: color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menuItem:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.menuItem:focus {
+  outline: none;
+}
+
+.menuItem:focus-visible {
+  outline: none;
+  color: var(--color-text-primary);
+}
+
+.menuItemActive,
+.menuItem[aria-current='page'] {
+  color: var(--color-primary);
+}
+
+@media (max-width: 980px) {
+  .menu {
+    display: none;
+  }
+}

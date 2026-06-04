@@ -1,0 +1,58 @@
+/* 패턴 A: 링 행 — docs/design/interactive-surfaces.md */
+
+.ringRow {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-sizing: border-box;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+
+.ringRow:focus {
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ringRow:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+  }
+}
+
+.ringRow:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}
+
+/* 칩형 링크 (연관 종목 태그 등) */
+.ringChip {
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
+  box-sizing: border-box;
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.ringChip:focus {
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ringChip:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.ringChip:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}

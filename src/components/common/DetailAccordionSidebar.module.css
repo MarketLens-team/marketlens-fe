@@ -1,0 +1,107 @@
+.sidebar {
+  background: var(--color-bg-section);
+  padding: var(--space-3) var(--space-3);
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - var(--layout-top-strip-height));
+  max-height: calc(100dvh - var(--layout-top-strip-height));
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+}
+
+.group {
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.item,
+.itemActive {
+  border-radius: var(--radius-lg);
+  text-align: left;
+  padding: var(--space-3) var(--space-3);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+}
+
+.item {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.groupToggle {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-2) var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .groupToggle:hover {
+    border: 1px solid var(--color-primary);
+    box-shadow: var(--interactive-ring-hover);
+    background: var(--interactive-surface-bg-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.chevron {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.itemActive {
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.groupIcon {
+  font-size: var(--font-size-base);
+  opacity: 0.85;
+}
+
+.menuRail {
+  border-left: 1px solid color-mix(in srgb, var(--color-border-strong) 40%, transparent);
+  margin-left: var(--space-2);
+  padding-left: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    border-bottom: 1px solid var(--color-border-default);
+  }
+}

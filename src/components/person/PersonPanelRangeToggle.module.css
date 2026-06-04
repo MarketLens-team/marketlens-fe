@@ -1,0 +1,16 @@
+/* MyPageWatchlistTable .addBtn 과 동일 톤 */
+.btn {
+  flex-shrink: 0;
+  border-color: color-mix(in srgb, var(--color-text-primary) 18%, var(--color-border-strong));
+  background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-bg-elevated) 86%, var(--color-text-primary));
+    box-shadow: var(--interactive-ring-hover);
+    transform: none;
+  }
+}

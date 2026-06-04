@@ -1,0 +1,13 @@
+.root {
+  display: block;
+  text-align: inherit;
+}
+
+.sentence {
+  display: block;
+  text-align: inherit;
+}
+
+.sentence + .sentence {
+  margin-top: 0.35em;
+}

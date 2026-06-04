@@ -1,0 +1,97 @@
+/* splitRoot는 뷰포트에 맞춰 늘리지 않고(flex:0) 본문 길이만큼만 커짐 → 스크롤 전체 높이에 세로선 */
+.splitRoot {
+  flex: 0 1 auto;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: calc(100% + 2 * var(--main-pad-block, var(--space-5)));
+}
+
+.split {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  position: relative;
+  border: none;
+  border-radius: 0;
+  background: var(--color-bg-section);
+  display: grid;
+  grid-template-columns: var(--layout-sidebar-accordion) 1fr;
+  align-items: stretch;
+  column-gap: 0;
+  margin: calc(-1 * var(--main-pad-block, var(--space-5))) calc(-1 * var(--main-pad-inline, var(--space-6)));
+  width: calc(100% + 2 * var(--main-pad-inline, var(--space-6)));
+}
+
+.splitNoSidebar {
+  grid-template-columns: 1fr;
+}
+
+.split::after {
+  content: '';
+  position: absolute;
+  left: var(--layout-sidebar-accordion);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border-default);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.splitNoSidebar::after {
+  display: none;
+}
+
+.content {
+  padding: var(--space-6) 0;
+  min-width: 0;
+}
+
+.mainGroup {
+  min-width: 0;
+  width: 100%;
+}
+
+.mainGroupInner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--layout-page-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.mainGroup + .mainGroup {
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.mainGroupPlaceholder {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 860px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .split::after {
+    display: none;
+  }
+
+  .splitRoot {
+    flex: 0 1 auto;
+  }
+
+  .mainGroup + .mainGroup {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+  }
+}

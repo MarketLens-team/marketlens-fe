@@ -1,0 +1,77 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 120px;
+  height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    transform var(--duration-instant) ease,
+    filter var(--duration-instant) ease,
+    opacity var(--duration-instant) ease;
+}
+
+.button:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.confirm {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-success) 88%, transparent),
+    color-mix(in srgb, var(--color-success) 72%, transparent)
+  );
+}
+
+.danger {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-danger) 88%, transparent),
+    color-mix(in srgb, var(--color-danger) 72%, transparent)
+  );
+}
+
+.primary {
+  border: none;
+  background: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.primary:disabled {
+  background: color-mix(in srgb, var(--color-primary) 28%, var(--color-bg-elevated));
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: 1;
+}
+
+.button[data-loading='true'] .label {
+  opacity: 0;
+}

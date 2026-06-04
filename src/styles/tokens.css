@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+:root {
+  /* Color (semantic) */
+  /* 배경: 레퍼런스처럼 바탕과 거의 같고 한 단계만 밝게 (Coinness/거래소 톤) */
+  --color-bg-app: #0a0f16;
+  --color-bg-section: #0c121a;
+  /*
+   * 모달: 셸(회색 트레이) + inset(안쪽 필드·입력) — 페이지 카드(#0f151e)와 별도.
+   */
+  --color-bg-modal: #212630;
+  --color-bg-modal-inset: #282e3a;
+  --color-bg-card: #0f151e;
+  --color-bg-elevated: #141c27;
+
+  --color-border-default: #1c2734;
+  --color-border-strong: #263445;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d0d8e2;
+  --color-text-muted: #8fa3b6;
+
+  --color-primary: #3b82f6;
+  /* 어두운 배경 위 텍스트·아이콘 — solid primary(토글 ON)과 체감 맞춤 */
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 84%, #ffffff);
+  --color-success: #02c076;
+  --color-danger: #f6465d;
+  --color-danger-muted: color-mix(in srgb, var(--color-danger) 82%, #0a0f16);
+  --color-danger-surface: color-mix(in srgb, var(--color-danger) 10%, var(--color-bg-card));
+  --color-warning: #f0b429;
+  --color-interactive-active: #283f88;
+  --color-interactive-active-text: #ecf2ff;
+  --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
+
+  /* Typography — font family */
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Pretendard', sans-serif;
+
+  /* Typography — size (8-step; 1470px 기준, clamp로 375px~2560px 대응) */
+  --font-size-xs:   clamp(0.5625rem, 0.68vw, 0.75rem);   /* 9–10–12px */
+  --font-size-sm:   clamp(0.6875rem, 0.82vw, 0.875rem);  /* 11–12–14px */
+  --font-size-base: clamp(0.75rem,   0.88vw, 1rem);      /* 12–13–16px */
+  --font-size-lg:   clamp(0.8125rem, 0.95vw, 1.125rem);  /* 13–14–18px */
+  --font-size-xl:   clamp(0.875rem,  1.09vw, 1.25rem);   /* 14–16–20px */
+  --font-size-2xl:  clamp(1rem,      1.22vw, 1.5rem);    /* 16–18–24px */
+  --font-size-3xl:  clamp(1.125rem,  1.36vw, 1.75rem);   /* 18–20–28px */
+  --font-size-4xl:  clamp(1.25rem,   1.5vw,  2rem);      /* 20–22–32px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+  --line-height-loose: 1.75;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-12: 3rem; /* 48px */
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Layout (shared shell / modal widths) */
+  /* 본문 좌우 여백 — 작은 화면 24px, 넓을수록 최대 48px */
+  --layout-main-pad-inline: clamp(var(--space-6), 2.5vw, var(--space-12));
+  /* 본문: .main 안에서는 100%로 채움. 초광폭만 --layout-page-wide-cap 으로 상한 */
+  --layout-page-wide-cap: 160rem; /* 2560px — 4K 대응 */
+  --layout-page-max: min(var(--layout-page-wide-cap), 100%);
+  /* 긴 본문·뉴스 피드 — 초광폭에서 시선 이동 거리 제한 (~50rem ≈ 800px) */
+  --layout-page-read-max: 50rem;
+  --layout-sidebar-width: clamp(196px, 13vw, 260px); /* 196–254–260px — 1470px 기준 */
+  --layout-modal-search: clamp(20rem, 57vw, 90rem); /* 320–832–1440px — 통합 검색 모달 */
+  --layout-top-strip-height: 82px; /* ticker 26 + topbar 56 */
+  /* 검색 모달: 상단 41px · 하단 82px */
+  --layout-search-modal-top: 2.5625rem; /* 41px */
+  --layout-search-modal-bottom: var(--layout-top-strip-height); /* 82px */
+  --layout-sidebar-accordion: clamp(16.25rem, 14vw, 22rem); /* 260–205–352px */
+  /* 종목 상세 fixed 맨 위로 — BackToTopButton.module.css 와 동일 */
+  --layout-back-to-top-size: 2.75rem;
+  --layout-back-to-top-bottom: var(--space-6);
+  --layout-back-to-top-reserve: calc(
+    var(--layout-back-to-top-size) + var(--layout-back-to-top-bottom) + var(--space-2)
+  );
+  /* 종목 상세 — 최신 인물 발언 타임라인 카드 높이 */
+  --layout-stock-people-panel-height: 32rem;
+
+  /* FAB 맨 위로 — CMC 톤(다크 UI: 밝은 회색 면) */
+  --color-fab-surface: #5a6578;
+  --color-fab-on-surface: #f2f6fa;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
+  --color-fab-surface-hover: #6b778c;
+
+  /*
+   * Interactive surfaces — 패턴 정의: docs/design/interactive-surfaces.md
+   * 링 행(검색·TOP3) / 테이블 행(interactiveTableRow) / 텍스트만(뉴스) 구분
+   */
+  --interactive-surface-border: color-mix(in srgb, var(--color-border-default) 75%, transparent);
+  --interactive-ring-hover: 0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  --interactive-ring-focus: 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  --interactive-surface-bg-hover: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-card));
+
+  /* Motion */
+  --duration-instant: 120ms;
+  --duration-fast: 160ms;
+  --duration-base: 180ms;
+  --duration-moderate: 200ms;
+
+  /* Layer (global stacking) */
+  --z-popover: 20;
+  --z-dropdown: 40;
+  --z-overlay: 1000;
+  --z-overlay-stacked: 1100;
+  --z-toast: 1250;
+}
+
+:root[data-theme='light'] {
+  --color-bg-app: #f4f7fb;
+  --color-bg-section: #ffffff;
+  --color-bg-modal: #eceff4;
+  --color-bg-modal-inset: #f4f6fa;
+  --color-bg-card: #f7f9fc;
+  --color-bg-elevated: #edf2f8;
+  --color-border-default: #d7e0ea;
+  --color-border-strong: #c5d3e2;
+  --color-text-primary: #101828;
+  --color-text-secondary: #475467;
+  --color-text-muted: #667085;
+  --color-primary: #2563eb;
+  --color-primary-on-surface: color-mix(in srgb, var(--color-primary) 88%, #ffffff);
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-danger-muted: color-mix(in srgb, var(--color-danger) 88%, #ffffff);
+  --color-danger-surface: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-card));
+  --color-warning: #ca8a04;
+  --color-interactive-active: #2563eb;
+  --color-interactive-active-text: #ffffff;
+  --color-interactive-hover: color-mix(in srgb, var(--color-interactive-active) 40%, transparent);
+
+  /* FAB 맨 위로 — 라이트 UI */
+  --color-fab-surface: #475467;
+  --color-fab-on-surface: #ffffff;
+  --color-fab-border: color-mix(in srgb, var(--color-border-strong) 70%, transparent);
+  --color-fab-surface-hover: #344054;
+}

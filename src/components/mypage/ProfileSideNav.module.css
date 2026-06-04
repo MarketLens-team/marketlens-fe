@@ -1,0 +1,85 @@
+.nav {
+  width: 100%;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.item {
+  composes: ringRow from '../common/interactiveListRow.module.css';
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item:not(.itemActive):hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.itemActive,
+.item.itemActive:focus,
+.item.itemActive:focus-visible {
+  background: transparent;
+  color: var(--color-primary-on-surface);
+  font-weight: var(--font-weight-semibold);
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item.itemActive:hover {
+    background: transparent;
+    color: var(--color-primary-on-surface);
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 720px) {
+  .list {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: var(--space-2);
+    padding-bottom: var(--space-1);
+    scrollbar-width: none;
+  }
+
+  .list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .item {
+    width: auto;
+    flex-shrink: 0;
+  }
+}

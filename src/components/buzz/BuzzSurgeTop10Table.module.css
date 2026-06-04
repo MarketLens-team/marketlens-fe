@@ -1,0 +1,99 @@
+.card {
+  overflow: hidden;
+  height: 100%;
+}
+
+.tableWrap {
+  overflow: auto;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: 0 var(--space-4);
+}
+
+.table {
+  composes: tableBase from '../common/interactiveTableRow.module.css';
+  font-size: var(--font-size-base);
+}
+
+.table th {
+  text-align: center;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-default);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--space-3);
+  vertical-align: middle;
+  text-align: center;
+}
+
+.rowClickable {
+  composes: rowRing from '../common/interactiveTableRow.module.css';
+}
+
+.colRank {
+  width: 2.5rem;
+}
+
+.colNum {
+  width: 6.5rem;
+}
+
+.colSentiment {
+  width: 5rem;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.rank {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stockName {
+  font-weight: var(--font-weight-semibold);
+}
+
+.surge {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.table th.colStock,
+.table td.stockCell,
+.table th.colSummary,
+.table td.summary {
+  text-align: left;
+}
+
+.summary {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.sentScore {
+  font-weight: var(--font-weight-semibold);
+}
+
+.sentPos {
+  color: var(--color-success);
+}
+
+.sentWarm {
+  color: var(--color-warning);
+}
+
+.sentNeg {
+  color: var(--color-danger);
+}
+
+.sentNeu {
+  color: var(--color-text-secondary);
+}

@@ -1,0 +1,212 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* 트리거 너비만: 넓은 가상 브릿지는 상단바 옆까지 호버가 퍼짐 */
+.wrap::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 14px;
+}
+
+.trigger {
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-base);
+  line-height: 1;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.trigger:hover {
+  color: var(--color-interactive-active-text);
+  background: var(--color-interactive-hover);
+}
+
+.trigger:visited {
+  color: var(--color-text-primary);
+}
+
+.triggerActive {
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+}
+
+.star {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  border: 1px solid color-mix(in srgb, var(--color-border-strong) 75%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  padding: 16px;
+  z-index: var(--z-popover);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--color-bg-app) 76%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--duration-moderate) ease 0.5s,
+    visibility 0s linear 0.7s;
+}
+
+.panelSuppressed {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--color-bg-card);
+  border-left: 1px solid color-mix(in srgb, var(--color-border-strong) 75%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--color-border-strong) 75%, transparent);
+}
+
+.wrap:hover .panel,
+.wrap:focus-within .panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s, 0s;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header button {
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs {
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.tab,
+.tabActive {
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: 7px 8px;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.tabActive {
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+}
+
+.tab:hover {
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
+}
+
+.body {
+  margin-top: 18px;
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.chips {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.chips button {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  padding: 7px 11px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+
+.chips button:hover {
+  background: var(--color-interactive-hover);
+  border-color: var(--color-interactive-active);
+}
+
+@media (max-width: 860px) {
+  .panel {
+    width: min(90vw, 520px);
+  }
+
+  .tab,
+  .tabActive {
+    font-size: var(--font-size-2xl);
+    padding: 10px 8px;
+  }
+
+  .lead {
+    font-size: 2rem;
+  }
+
+  .chips button {
+    font-size: var(--font-size-xl);
+  }
+}

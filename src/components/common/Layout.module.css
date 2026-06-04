@@ -1,0 +1,58 @@
+.layout {
+  /* RootLayout 티커 아래 영역 — 본문 스크롤은 .main 에서만 */
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+}
+
+.topStrip {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbarSlot {
+  min-height: 56px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  min-width: 0;
+}
+
+.sidebar {
+  width: var(--layout-sidebar-width);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-section);
+  border-right: 1px solid var(--color-border-default);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  --main-pad-block: var(--space-5);
+  --main-pad-inline: var(--layout-main-pad-inline);
+  /* 고정 83rem 대신 main 가용 너비 사용 (큰 모니터 여백 방지) */
+  --layout-page-max: min(var(--layout-page-wide-cap), 100%);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
+  padding: var(--main-pad-block) var(--main-pad-inline);
+  background: var(--color-bg-app);
+}

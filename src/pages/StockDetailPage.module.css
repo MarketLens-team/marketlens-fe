@@ -1,0 +1,6 @@
+.page {
+  width: 100%;
+  max-width: var(--layout-page-max);
+  margin-inline: auto;
+  padding-bottom: var(--space-8);
+}

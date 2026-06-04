@@ -1,0 +1,95 @@
+.dock {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 종목 상세 — 뉴스·인물 FAB 레일과 동일한 page-max 우측 정렬 */
+.wrapFixed {
+  --main-inner: calc(100vw - 2 * var(--main-pad-inline, var(--layout-main-pad-inline)));
+  --page-w: min(var(--layout-page-wide-cap, 120rem), var(--main-inner));
+  position: fixed;
+  bottom: calc(var(--layout-back-to-top-bottom) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-dropdown);
+  left: calc(
+    var(--main-pad-inline, var(--layout-main-pad-inline)) + var(--page-w) -
+      calc(var(--layout-back-to-top-reserve) / 2) + var(--back-to-top-offset-x, 0px)
+  );
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.wrapFixed .btnWrap {
+  pointer-events: auto;
+}
+
+.btnWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.tooltip {
+  position: absolute;
+  left: calc(100% + var(--space-2));
+  top: 50%;
+  transform: translateY(-50%);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--color-bg-elevated);
+  border-left: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.btnWrap:hover .tooltip,
+.btnWrap:focus-within .tooltip {
+  opacity: 1;
+}
+
+.tooltipLeft {
+  left: auto;
+  right: calc(100% + var(--space-2));
+}
+
+.tooltipLeft::before {
+  left: auto;
+  right: -5px;
+  border-left: none;
+  border-right: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+@media (max-width: 960px) {
+  .wrapFixed {
+    left: calc(50vw + var(--back-to-top-offset-x, 0px));
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .tooltip {
+    display: none;
+  }
+}

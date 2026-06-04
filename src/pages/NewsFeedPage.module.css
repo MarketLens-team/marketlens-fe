@@ -1,0 +1,185 @@
+.page {
+  width: 100%;
+  max-width: var(--layout-page-max);
+  margin: 0 auto;
+  padding-bottom: var(--layout-back-to-top-reserve);
+}
+
+/* 좌 사이드바 · 피드 · 우측 FAB 레일(CMC형 빈 여백) */
+.layout {
+  display: grid;
+  grid-template-columns:
+    minmax(14rem, 22rem)
+    minmax(0, 1fr)
+    var(--layout-back-to-top-reserve);
+  column-gap: var(--space-8);
+  row-gap: var(--space-5);
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebar {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  /* 상단 탭 높이(2rem) + main 내부 gap(space-4)만큼 내려서 메인 피드 시작선과 정렬 */
+  margin-top: calc(2rem + var(--space-4));
+  position: sticky;
+  top: var(--space-4);
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+
+.main {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fabRail {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.tabs {
+  align-self: flex-start;
+}
+
+.feed {
+  position: relative;
+  min-width: 0;
+}
+
+.feedWrap {
+  position: relative;
+  contain: layout style;
+}
+
+.scrollNewerOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: var(--space-2) 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-bg-card) 88%, transparent);
+}
+
+.scrollHead {
+  list-style: none;
+}
+
+.scrollFootLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: var(--space-2) 0;
+  pointer-events: none;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-card);
+  overflow-anchor: none;
+}
+
+.scrollHead,
+.list [data-scroll-anchor-item] {
+  overflow-anchor: none;
+}
+
+.scrollFoot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 3.5rem;
+  padding: var(--space-4) 0 var(--space-2);
+  overflow-anchor: none;
+}
+
+.sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.bookmarkError {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.loadMoreError {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeletonRow {
+  height: 8.5rem;
+  border-radius: var(--radius-md);
+}
+
+.empty,
+.loginPrompt {
+  margin-top: 0;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns:
+      minmax(11rem, 16rem)
+      minmax(0, 1fr)
+      var(--layout-back-to-top-reserve);
+    column-gap: var(--space-5);
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .main,
+  .fabRail {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .sidebar {
+    margin-top: 0;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+    width: 100%;
+    max-width: 17.5rem;
+  }
+
+}

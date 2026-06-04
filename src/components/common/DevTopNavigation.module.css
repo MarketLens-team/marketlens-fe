@@ -1,0 +1,110 @@
+.appTopbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-section);
+  margin-bottom: var(--space-3);
+}
+
+.brandWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.brandLogo {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.brand {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.homeNav {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.homeNav button {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.homeNav button:hover {
+  background: var(--color-interactive-hover);
+  color: var(--color-interactive-active-text);
+}
+
+.homeNav .navActive {
+  background: var(--color-interactive-active);
+  color: var(--color-interactive-active-text);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.searchWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-app);
+  padding: 0 var(--space-3);
+  min-width: 220px;
+  cursor: text;
+}
+
+.searchIcon {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.searchPlaceholder {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) 0;
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 860px) {
+  .appTopbar {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    border-radius: var(--radius-lg);
+  }
+
+  .searchWrap {
+    min-width: 180px;
+  }
+}

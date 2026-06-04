@@ -1,0 +1,41 @@
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  /* 넓은 화면에서 본문 폭 상한 → 좌우 여백 확보 */
+  max-width: var(--layout-page-max);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+  padding-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.skeletonCard {
+  height: 11rem;
+  border-radius: var(--radius-lg);
+}
+
+.skeletonTable {
+  height: 24rem;
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 900px) {
+  .skeletonGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

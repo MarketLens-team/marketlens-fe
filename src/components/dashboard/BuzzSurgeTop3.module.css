@@ -1,0 +1,43 @@
+.card {
+  width: 100%;
+  border-radius: var(--radius-lg);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.item {
+  composes: ringRow from '../common/interactiveListRow.module.css';
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  font-size: var(--font-size-base);
+  text-decoration: none;
+  color: inherit;
+}
+
+.rank {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+.name {
+  font-weight: var(--font-weight-semibold);
+}
+
+.surge {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}

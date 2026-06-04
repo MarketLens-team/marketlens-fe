@@ -1,0 +1,48 @@
+.snackbar {
+  position: fixed;
+  top: calc(var(--layout-top-strip-height) + var(--space-4));
+  right: var(--space-5);
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--interactive-surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-modal-inset);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  padding: var(--space-3);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--color-bg-app) 62%, transparent);
+}
+
+.action {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-primary) 72%, white);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-semibold);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+}
+
+.actionIcon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+.action:hover {
+  color: color-mix(in srgb, var(--color-primary) 82%, white);
+}
+
+@media (max-width: 760px) {
+  .snackbar {
+    top: calc(var(--layout-top-strip-height) + var(--space-3));
+    right: var(--space-4);
+    width: calc(100vw - var(--space-8));
+    justify-content: space-between;
+  }
+}
