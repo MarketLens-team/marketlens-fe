@@ -74,6 +74,6 @@ export function withAlpha(color: string, alpha: number): string {
 }
 
 /** Y축 눈금은 HTML 오버레이로 통일 (라이브러리 눈금 비활성) */
-export function formatChartAxisPrice(_price: number): string {
+export function formatChartAxisPrice(): string {
   return ''
 }

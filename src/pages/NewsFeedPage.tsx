@@ -119,20 +119,6 @@ export default function NewsFeedPage() {
     onLoadMore: () => void loadMore(),
   })
 
-  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(new Error(error)) : null
-  if (httpFullscreenPreset) {
-    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
-  }
-
-  const showSkeleton = loading && items.length === 0 && !error && !needsLogin
-  const feedTitle = mode === 'watchlist' ? '관심종목 뉴스' : '전체 뉴스'
-  const emptyTitle =
-    mode === 'watchlist' ? '관심종목 뉴스가 없어요' : '뉴스가 없어요'
-  const emptyMessage =
-    mode === 'watchlist'
-      ? '관심 등록한 종목과 연결된 기사가 없습니다.'
-      : '표시할 기사가 없습니다.'
-
   const handleNewsBookmarkToggle = useCallback(
     async (newsId: string) => {
       const wasBookmarked = isBookmarked(newsId)
@@ -165,6 +151,20 @@ export default function NewsFeedPage() {
     },
     [isBookmarked, snackbar, toggleBookmark],
   )
+
+  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(new Error(error)) : null
+  if (httpFullscreenPreset) {
+    return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
+  }
+
+  const showSkeleton = loading && items.length === 0 && !error && !needsLogin
+  const feedTitle = mode === 'watchlist' ? '관심종목 뉴스' : '전체 뉴스'
+  const emptyTitle =
+    mode === 'watchlist' ? '관심종목 뉴스가 없어요' : '뉴스가 없어요'
+  const emptyMessage =
+    mode === 'watchlist'
+      ? '관심 등록한 종목과 연결된 기사가 없습니다.'
+      : '표시할 기사가 없습니다.'
 
   return (
     <Layout>

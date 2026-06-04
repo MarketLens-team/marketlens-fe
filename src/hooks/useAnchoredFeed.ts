@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import {
-  ANCHORED_FEED_PAGE_LIMIT,
   ANCHORED_LOAD_MIN_INTERVAL_MS,
   ANCHORED_LOAD_MIN_VISIBLE_MS,
   EMPTY_ANCHORED_PAGINATION,
@@ -82,7 +81,6 @@ export function useAnchoredFeed<TItem extends { id: string; publishedAt: string 
   initialItems,
   initialLatestPagination,
   anchoredEnabled = true,
-  pageLimit: _pageLimit = ANCHORED_FEED_PAGE_LIMIT,
   fetchAround,
   fetchNewer,
   fetchOlder,
