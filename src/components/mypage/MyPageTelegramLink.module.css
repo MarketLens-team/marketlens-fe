@@ -48,6 +48,23 @@
   color: var(--color-text-muted);
 }
 
+.noteMuted {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+.webFallbackLink {
+  color: var(--color-primary-on-surface);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.webFallbackLink:hover {
+  color: var(--color-text-primary);
+}
+
 .action {
   flex-shrink: 0;
 }

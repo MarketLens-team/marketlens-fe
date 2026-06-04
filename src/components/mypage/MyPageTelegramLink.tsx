@@ -10,7 +10,7 @@ interface MyPageTelegramLinkProps {
 }
 
 export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProps) {
-  const { linking, linkTelegram } = useTelegramLink({ onOpened, onError })
+  const { linking, linkTelegram, webLinkUrl } = useTelegramLink({ onOpened, onError })
   const botUsername = resolveTelegramBotUsername()
 
   return (
@@ -26,8 +26,26 @@ export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProp
             메신저로 받을 수 있습니다.
           </p>
           <p className={styles.note}>
-            연동 버튼을 누른 뒤 텔레그램에서 시작을 선택해 주세요. 인증 코드는 5분 동안 유효합니다.
+            연동 버튼을 누르면 <strong>Telegram Web</strong>이 새 탭에서 열립니다. 전화번호로
+            로그인한 뒤 봇 채팅에서 <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요.
+            인증 코드는 5분 동안 유효합니다.
           </p>
+          <p className={styles.noteMuted}>
+            Mac 앱이 설치되어 있으면 앱으로 열릴 수도 있습니다. 탭이 닫혔다면 아래 링크로 다시
+            열어 주세요.
+          </p>
+          {webLinkUrl ? (
+            <p className={styles.noteMuted}>
+              <a
+                className={styles.webFallbackLink}
+                href={webLinkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                텔레그램 연동 페이지 다시 열기
+              </a>
+            </p>
+          ) : null}
         </div>
 
         <ActionButton
