@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
-import { buzzSentimentClass, formatSurgePercent } from '../buzz/buzzSurgeScore'
+import { buzzSentimentClass } from '../buzz/buzzSurgeScore'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
@@ -39,6 +39,11 @@ function formatPriceCell(price: number): string {
 function formatChangeCell(changePercent: number): string {
   if (changePercent === 0) return '—'
   return formatPercent(changePercent)
+}
+
+function formatMentionSurgeCell(value: number): string {
+  if (value === 0) return '0%'
+  return formatPercent(value)
 }
 
 export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTableProps) {
@@ -96,7 +101,13 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
             {visibleItems.map((row) => {
               const sentKey = buzzSentimentClass(row.sentimentScore)
               const changeClass =
-                row.changePercent > 0 ? styles.changeUp : row.changePercent < 0 ? styles.changeDown : undefined
+                row.changePercent > 0 ? styles.up : row.changePercent < 0 ? styles.down : undefined
+              const mentionClass =
+                row.mentionSurgePercent > 0
+                  ? styles.up
+                  : row.mentionSurgePercent < 0
+                    ? styles.down
+                    : undefined
               const isAnimating = animatingId === row.id
               return (
                 <tr
@@ -118,8 +129,8 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                       </span>
                     </div>
                   </td>
-                  <td className={clsx(styles.mono, styles.numCell)}>{formatPriceCell(row.price)}</td>
-                  <td className={clsx(styles.mono, styles.numCell, changeClass)}>
+                  <td className={styles.mono}>{formatPriceCell(row.price)}</td>
+                  <td className={clsx(styles.mono, changeClass)}>
                     {formatChangeCell(row.changePercent)}
                   </td>
                   <td className={styles.sentimentCell}>
@@ -127,10 +138,8 @@ export function MyPageWatchlistTable({ rows, onRemove }: MyPageWatchlistTablePro
                       {formatStockScore(row.sentimentScore)}
                     </span>
                   </td>
-                  <td className={clsx(styles.mono, styles.numCell, styles.surge)}>
-                    {row.mentionSurgePercent > 0
-                      ? formatSurgePercent(row.mentionSurgePercent)
-                      : '—'}
+                  <td className={clsx(styles.mono, mentionClass)}>
+                    {formatMentionSurgeCell(row.mentionSurgePercent)}
                   </td>
                   <td className={styles.actionsCell}>
                     <button
