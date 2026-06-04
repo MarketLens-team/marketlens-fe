@@ -233,6 +233,7 @@ export default function MyPage() {
                 />
                 <hr className={styles.sectionDivider} aria-hidden />
                 <MyPagePasswordChange
+                  email={data.account.email}
                   onSuccess={handlePasswordChangeSuccess}
                   onError={handleAccountActionError}
                 />

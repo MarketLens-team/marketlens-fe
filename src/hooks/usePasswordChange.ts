@@ -87,5 +87,6 @@ export function usePasswordChange(options?: UsePasswordChangeOptions) {
     setConfirmPassword,
     clearFieldError,
     submit,
+    resetForm,
   }
 }
