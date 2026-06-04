@@ -6,6 +6,17 @@ export interface MemberResponse {
   plan: string
 }
 
+/** OpenAPI `TelegramLinkTokenResponse` */
+export interface TelegramLinkTokenResponse {
+  token: string
+}
+
+/** OpenAPI `PasswordChangeRequest` */
+export interface PasswordChangeRequest {
+  currentPassword: string
+  newPassword: string
+}
+
 /** OpenAPI `WatchlistResponse` */
 export interface WatchlistResponse {
   stockCode: string

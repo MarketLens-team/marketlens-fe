@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MyPageAccountInfo } from '../components/mypage/MyPageAccountInfo'
 import { MyPageAlertSettings } from '../components/mypage/MyPageAlertSettings'
+import { MyPagePasswordChange } from '../components/mypage/MyPagePasswordChange'
+import { MyPageTelegramLink } from '../components/mypage/MyPageTelegramLink'
 import { MyPageSummaryCards } from '../components/mypage/MyPageSummaryCards'
 import { MyPageBookmarkSection } from '../components/mypage/MyPageBookmarkSection'
 import { MyPageWatchlistTable } from '../components/mypage/MyPageWatchlistTable'
@@ -167,6 +169,20 @@ export default function MyPage() {
     }
   }
 
+  const handleTelegramLinkOpened = () => {
+    setActionError(null)
+    snackbar.show('텔레그램 앱에서 시작 버튼을 눌러 연동을 완료해 주세요.', { durationMs: 5000 })
+  }
+
+  const handleAccountActionError = (message: string) => {
+    setActionError(message)
+  }
+
+  const handlePasswordChangeSuccess = () => {
+    setActionError(null)
+    snackbar.show('비밀번호가 변경되었습니다.')
+  }
+
   const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
   if (httpFullscreenPreset) {
     return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
@@ -210,6 +226,16 @@ export default function MyPage() {
             {tab === 'account' ? (
               <div className={clsx(styles.tabPanel, styles.tabPanelSections)}>
                 <MyPageAccountInfo account={data.account} />
+                <hr className={styles.sectionDivider} aria-hidden />
+                <MyPageTelegramLink
+                  onOpened={handleTelegramLinkOpened}
+                  onError={handleAccountActionError}
+                />
+                <hr className={styles.sectionDivider} aria-hidden />
+                <MyPagePasswordChange
+                  onSuccess={handlePasswordChangeSuccess}
+                  onError={handleAccountActionError}
+                />
                 <hr className={styles.sectionDivider} aria-hidden />
                 <MyPageAlertSettings
                   settings={alertSettings}
