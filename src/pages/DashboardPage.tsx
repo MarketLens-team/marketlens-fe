@@ -2,7 +2,9 @@ import clsx from 'clsx'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { DashboardAiBrief } from '../components/dashboard/DashboardAiBrief'
 import { DashboardAlertCards } from '../components/dashboard/DashboardAlertCards'
+import { DashboardAnomalySummaryModal } from '../components/dashboard/DashboardAnomalySummaryModal'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
+import { useDashboardAnomalySummary } from '../components/dashboard/useDashboardAnomalySummary'
 import { DashboardKospiChip } from '../components/dashboard/DashboardKospiChip'
 import { DashboardWatchlistSection } from '../components/dashboard/DashboardWatchlistSection'
 import { SectorHeatmapGrid } from '../components/dashboard/SectorHeatmapGrid'
@@ -23,6 +25,7 @@ export default function DashboardPage() {
   const { data, loading, error } = useDashboardOverview()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const { data: briefing } = useDashboardBriefing(isLoggedIn)
+  const anomalySummary = useDashboardAnomalySummary()
 
   const aiBrief = useMemo(() => {
     if (!data) return ''
@@ -86,6 +89,7 @@ export default function DashboardPage() {
                   marketOutlierRows={data.marketOutlierRows}
                   sectorHeatmap={data.sectorHeatmap}
                   isLoggedIn={isLoggedIn}
+                  anomalySummary={anomalySummary}
                 />
               </section>
             ) : (
@@ -95,20 +99,21 @@ export default function DashboardPage() {
                   marketOutlierRows={data.marketOutlierRows}
                   sectorHeatmap={data.sectorHeatmap}
                   isLoggedIn={isLoggedIn}
+                  anomalySummary={anomalySummary}
                 />
               </section>
             )}
 
             {isLoggedIn ? (
               <section className={styles.watchlistSection} aria-label="관심 종목">
-                <DashboardWatchlistSection rows={data.watchlist} />
+                <DashboardWatchlistSection rows={data.watchlist} anomalySummary={anomalySummary} />
               </section>
             ) : null}
 
             <section className={styles.marketSection} aria-label="KOSPI·언급량·섹터">
               <div ref={marketAsideRef} className={styles.marketAside}>
                 <DashboardKospiChip gauge={data.kospiSentiment} />
-                <BuzzSurgeTop3 items={data.buzzSurgeTop3} />
+                <BuzzSurgeTop3 items={data.buzzSurgeTop3} anomalySummary={anomalySummary} />
               </div>
               <div
                 className={styles.heatmapWrap}
@@ -117,6 +122,16 @@ export default function DashboardPage() {
                 <SectorHeatmapGrid cells={data.sectorHeatmap} />
               </div>
             </section>
+
+            <DashboardAnomalySummaryModal
+              target={anomalySummary.target}
+              status={anomalySummary.status}
+              summaryText={anomalySummary.summaryText}
+              isOpen={anomalySummary.isOpen}
+              onClose={anomalySummary.close}
+              onHoverPaneEnter={anomalySummary.cancelClose}
+              onHoverPaneLeave={anomalySummary.scheduleModalLeave}
+            />
           </>
         ) : null}
       </div>

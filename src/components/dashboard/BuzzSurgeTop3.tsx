@@ -4,18 +4,18 @@ import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import type { BuzzSurgeItem } from '../../data/types/dashboard'
 import { buildBuzzSurgeSummaryTarget } from './buildDashboardSummaryTarget'
-import { DashboardAnomalySummaryModal } from './DashboardAnomalySummaryModal'
-import { useDashboardAnomalySummary } from './useDashboardAnomalySummary'
+import type { DashboardAnomalySummaryController } from './useDashboardAnomalySummary'
 import styles from './BuzzSurgeTop3.module.css'
 
 interface BuzzSurgeTop3Props {
   items: BuzzSurgeItem[]
   className?: string
+  anomalySummary: DashboardAnomalySummaryController
 }
 
 function bindHoverSummary(
   item: BuzzSurgeItem,
-  summary: ReturnType<typeof useDashboardAnomalySummary>,
+  summary: DashboardAnomalySummaryController,
 ) {
   const target = buildBuzzSurgeSummaryTarget(item)
   return {
@@ -26,9 +26,7 @@ function bindHoverSummary(
   }
 }
 
-export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
-  const summaryModal = useDashboardAnomalySummary()
-
+export function BuzzSurgeTop3({ items, className, anomalySummary }: BuzzSurgeTop3Props) {
   return (
     <Card padding="md" className={clsx(styles.card, className)}>
       <CardSectionHeader
@@ -43,7 +41,7 @@ export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
               to={`/stock/${item.code}`}
               className={styles.item}
               aria-label={`${item.name} 종목 상세 보기`}
-              {...bindHoverSummary(item, summaryModal)}
+              {...bindHoverSummary(item, anomalySummary)}
             >
               <span className={styles.rank}>{item.rank}</span>
               <span className={styles.name}>{item.name}</span>
@@ -52,16 +50,6 @@ export function BuzzSurgeTop3({ items, className }: BuzzSurgeTop3Props) {
           </li>
         ))}
       </ol>
-
-      <DashboardAnomalySummaryModal
-        target={summaryModal.target}
-        status={summaryModal.status}
-        summaryText={summaryModal.summaryText}
-        isOpen={summaryModal.isOpen}
-        onClose={summaryModal.close}
-        onHoverPaneEnter={summaryModal.cancelClose}
-        onHoverPaneLeave={summaryModal.scheduleModalLeave}
-      />
     </Card>
   )
 }
