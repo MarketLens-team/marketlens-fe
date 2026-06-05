@@ -14,6 +14,7 @@ import styles from './DashboardAlertCards.module.css'
 
 interface DashboardAlertCardsProps {
   watchlist: DashboardWatchlistRow[]
+  marketOutlierRows: DashboardWatchlistRow[]
   sectorHeatmap: SectorHeatmapCell[]
   isLoggedIn: boolean
 }
@@ -48,19 +49,24 @@ function bindHoverSummary(
 
 export function DashboardAlertCards({
   watchlist,
+  marketOutlierRows,
   sectorHeatmap,
   isLoggedIn,
 }: DashboardAlertCardsProps) {
   const alerts =
     isLoggedIn && watchlist.length > 0
       ? pickDashboardAlerts(watchlist, sectorHeatmap)
-      : pickDashboardAlerts([], sectorHeatmap)
+      : pickDashboardAlerts(marketOutlierRows, sectorHeatmap, 3, 'market')
 
   const summaryModal = useDashboardAnomalySummary()
 
   return (
     <Card padding="md" className={styles.card}>
-      <CardSectionHeader title="오늘 이상치" subtitle="관심·시장" variant="embedded" />
+      <CardSectionHeader
+        title="오늘 이상치"
+        subtitle={isLoggedIn ? '관심·시장' : '시장'}
+        variant="embedded"
+      />
       {alerts.length === 0 ? (
         <p className={styles.empty}>표시할 이상치가 없습니다.</p>
       ) : (

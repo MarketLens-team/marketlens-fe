@@ -1,7 +1,8 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
 import type { ApiEnvelope } from '../types/api'
-import type { AlertSettings } from '../types/member'
+import type { AlertSettings, AlertSettingsResponse } from '../types/member'
+import { needsTelegramNotificationSync, toAlertSettings } from '../types/member'
 import type {
   MemberResponse,
   TelegramLinkTokenResponse,
@@ -34,31 +35,42 @@ export async function fetchMemberProfile(): Promise<MemberResponse> {
   }
 }
 
-export async function fetchAlertSettings(): Promise<AlertSettings> {
+export async function fetchAlertSettings(): Promise<AlertSettingsResponse> {
   if (isMockDataSource()) {
     await mockDelay(100)
     const { mockMyPageData } = await import('../mocks/myPage.mock')
     return { ...mockMyPageData.alertSettings }
   }
   try {
-    const { data } = await api.get<ApiEnvelope<AlertSettings>>(SETTINGS_PATH)
+    const { data } = await api.get<ApiEnvelope<AlertSettingsResponse>>(SETTINGS_PATH)
     return unwrapApiEnvelope(data, '알림 설정을 불러오지 못했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '알림 설정을 불러오지 못했습니다.'))
   }
 }
 
-export async function updateAlertSettings(settings: AlertSettings): Promise<AlertSettings> {
+export async function updateAlertSettings(settings: AlertSettings): Promise<AlertSettingsResponse> {
   if (isMockDataSource()) {
     await mockDelay(120)
-    return settings
+    const { mockMyPageData } = await import('../mocks/myPage.mock')
+    const telegramLinked = mockMyPageData.alertSettings.telegramLinked
+    const normalized = telegramLinked ? settings : { ...settings, telegramNotificationEnabled: false }
+    return { ...normalized, telegramLinked }
   }
   try {
-    const { data } = await api.put<ApiEnvelope<AlertSettings>>(SETTINGS_PATH, settings)
+    const { data } = await api.put<ApiEnvelope<AlertSettingsResponse>>(SETTINGS_PATH, settings)
     return unwrapApiEnvelope(data, '알림 설정 저장에 실패했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '알림 설정 저장에 실패했습니다.'))
   }
+}
+
+/** 미연동 상태에서 텔레그램 알림이 켜져 있으면 서버에 끄도록 맞춤 */
+export async function syncAlertSettingsIfNeeded(
+  settings: AlertSettingsResponse,
+): Promise<AlertSettingsResponse> {
+  if (!needsTelegramNotificationSync(settings)) return settings
+  return updateAlertSettings({ ...toAlertSettings(settings), telegramNotificationEnabled: false })
 }
 
 /** OpenAPI `POST /api/members/me/telegram-link-token` */

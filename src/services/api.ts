@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { AUTH_TOKEN_KEY } from '../constants/storage'
 import { ensureAccessToken, refreshSession } from './authTokenRefresh'
-import { handleSessionExpired } from './authRedirect'
+import { handleSessionExpired, isIntentionalLogoutInProgress } from './authRedirect'
 import { useAuthStore } from '../store/authStore'
 
 /** 개발: Vite proxy로 same-origin `/api`. 프로덕션: `VITE_API_URL` 직접 호출 */
@@ -54,7 +54,7 @@ api.interceptors.response.use(
       if (status === 401 && !isAuthApiPath(requestUrl)) {
         const wasLoggedIn = useAuthStore.getState().isLoggedIn
         useAuthStore.getState().logout()
-        if (wasLoggedIn) {
+        if (wasLoggedIn && !isIntentionalLogoutInProgress()) {
           handleSessionExpired()
         }
       }
@@ -70,7 +70,7 @@ api.interceptors.response.use(
     } catch (refreshError) {
       const wasLoggedIn = useAuthStore.getState().isLoggedIn
       useAuthStore.getState().logout()
-      if (wasLoggedIn) {
+      if (wasLoggedIn && !isIntentionalLogoutInProgress()) {
         handleSessionExpired()
       }
       return Promise.reject(refreshError)

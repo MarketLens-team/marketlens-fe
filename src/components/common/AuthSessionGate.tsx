@@ -5,6 +5,7 @@ import {
   AUTH_REQUIRED_EVENT,
   consumeAuthPromptPending,
   handleSessionExpired,
+  isIntentionalLogoutInProgress,
   saveAuthRedirect,
 } from '../../services/authRedirect'
 import { useAuthModalStore } from '../../store/authModalStore'
@@ -26,20 +27,22 @@ export function AuthSessionGate() {
     void ensureAccessToken().then((ok) => {
       if (hadRefresh && !ok && !useAuthStore.getState().token?.trim()) {
         useAuthStore.getState().logout()
-        handleSessionExpired()
+        if (!isIntentionalLogoutInProgress()) {
+          handleSessionExpired()
+        }
       }
     })
   }, [location.pathname])
 
   useEffect(() => {
-    if (isLoggedIn) return
+    if (isLoggedIn || isIntentionalLogoutInProgress()) return
     if (consumeAuthPromptPending()) {
       openAuthModal('login')
     }
   }, [isLoggedIn, openAuthModal])
 
   useEffect(() => {
-    if (isLoggedIn) return
+    if (isLoggedIn || isIntentionalLogoutInProgress()) return
 
     const routeState = location.state as AuthRouteState | null
     if (routeState?.from) {
@@ -55,6 +58,7 @@ export function AuthSessionGate() {
     if (isLoggedIn) return
 
     const onAuthRequired = () => {
+      if (isIntentionalLogoutInProgress()) return
       openAuthModal('login')
     }
 

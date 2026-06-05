@@ -3,6 +3,7 @@ import { issueTelegramLinkToken } from '../data/clients/memberClient'
 import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
+  isMobileUserAgent,
   openTelegramAssistWindow,
   openTelegramBotLink,
   type TelegramLinkUrls,
@@ -24,8 +25,8 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const linkTelegram = useCallback(async () => {
     if (linking) return
 
-    // await 전 동기 호출 — Chrome이 사용자 클릭으로 인식해 t.me·tg:// 허용
-    const assistWindow = openTelegramAssistWindow()
+    // 모바일만 await 전 assist 탭 — tg:// 실패 시 t.me 폴백용
+    const assistWindow = isMobileUserAgent() ? openTelegramAssistWindow() : null
 
     setLinking(true)
     try {

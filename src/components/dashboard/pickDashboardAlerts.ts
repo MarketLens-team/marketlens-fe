@@ -78,9 +78,11 @@ function pushUnique(
 function stockAlert(
   row: DashboardWatchlistRow,
   input: Omit<DashboardAlertItem, 'targetKind' | 'to' | 'summaryEnabled' | 'code' | 'name' | 'imageUrl'>,
+  scope: DashboardAlertScope,
 ): DashboardAlertItem {
   return {
     ...input,
+    scope,
     targetKind: 'stock',
     to: `/stock/${row.code}`,
     summaryEnabled: true,
@@ -94,6 +96,7 @@ export function pickDashboardAlerts(
   watchlist: DashboardWatchlistRow[],
   sectorHeatmap: SectorHeatmapCell[],
   limit = 3,
+  stockScope: DashboardAlertScope = 'watchlist',
 ): DashboardAlertItem[] {
   const items: DashboardAlertItem[] = []
   const seen = new Set<string>()
@@ -105,11 +108,10 @@ export function pickDashboardAlerts(
       seen,
       stockAlert(worstDrop, {
         signal: 'price_drop',
-        scope: 'watchlist',
         criterion: DASHBOARD_ALERT_CRITERION.price_drop,
         headline: formatSignedPercent(worstDrop.changePercent),
         headlineTone: 'down',
-      }),
+      }, stockScope),
     )
   }
 
@@ -122,11 +124,10 @@ export function pickDashboardAlerts(
       seen,
       stockAlert(lowSentiment, {
         signal: 'sentiment_low',
-        scope: 'watchlist',
         criterion: DASHBOARD_ALERT_CRITERION.sentiment_low,
         headline: formatStockScore(lowSentiment.sentimentScore),
         headlineTone: 'down',
-      }),
+      }, stockScope),
     )
   }
 
@@ -139,11 +140,10 @@ export function pickDashboardAlerts(
       seen,
       stockAlert(bestRise, {
         signal: 'price_rise',
-        scope: 'watchlist',
         criterion: DASHBOARD_ALERT_CRITERION.price_rise,
         headline: formatSignedPercent(bestRise.changePercent),
         headlineTone: 'up',
-      }),
+      }, stockScope),
     )
   }
 
@@ -156,11 +156,10 @@ export function pickDashboardAlerts(
       seen,
       stockAlert(highSentiment, {
         signal: 'sentiment_high',
-        scope: 'watchlist',
         criterion: DASHBOARD_ALERT_CRITERION.sentiment_high,
         headline: formatStockScore(highSentiment.sentimentScore),
         headlineTone: 'up',
-      }),
+      }, stockScope),
     )
   }
 
@@ -173,15 +172,30 @@ export function pickDashboardAlerts(
       seen,
       stockAlert(topNews, {
         signal: 'news_peak',
-        scope: 'watchlist',
         criterion: DASHBOARD_ALERT_CRITERION.news_peak,
         headline: formatNewsCount(topNews.newsCount),
         headlineTone: 'neu',
-      }),
+      }, stockScope),
     )
   }
 
-  if (items.length < limit && sectorHeatmap.length > 0) {
+  const topMentionSurge = [...watchlist]
+    .filter((row) => row.mentionSurgePercent > 0)
+    .sort((a, b) => b.mentionSurgePercent - a.mentionSurgePercent)[0]
+  if (topMentionSurge && items.length < limit && stockScope === 'market') {
+    pushUnique(
+      items,
+      seen,
+      stockAlert(topMentionSurge, {
+        signal: 'news_peak',
+        criterion: '언급 급증',
+        headline: formatSignedPercent(topMentionSurge.mentionSurgePercent),
+        headlineTone: 'up',
+      }, stockScope),
+    )
+  }
+
+  if (items.length < limit && sectorHeatmap.length > 0 && stockScope === 'watchlist') {
     const weakestSector = [...sectorHeatmap].sort(
       (a, b) => a.sentimentScore - b.sentimentScore,
     )[0]

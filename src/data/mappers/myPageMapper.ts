@@ -1,6 +1,6 @@
 import { normalizeImageUrl } from '../../lib/normalizeImageUrl'
 import { toFiniteNumber } from '../../lib/toFiniteNumber'
-import type { AlertSettings } from '../types/member'
+import type { AlertSettingsResponse } from '../types/member'
 import type { MemberResponse } from '../types/memberApi'
 import type { StockSummaryMetrics } from '../types/stockApi'
 import type { WatchlistResponse } from '../types/memberApi'
@@ -60,7 +60,7 @@ export function mapMyPageData(input: {
   watchlist: WatchlistResponse[]
   summaries: Array<StockSummaryMetrics | null>
   overviewPriceByCode?: Map<string, WatchlistOverviewPrice>
-  settings: AlertSettings
+  settings: AlertSettingsResponse
   member: MemberResponse
   alertExample?: string
 }): MyPageData {
