@@ -34,14 +34,9 @@ const ALERT_OPTIONS: SettingOption[] = [
     description: '감성 점수가 ±30점 이상 변동하면 알려드립니다.',
   },
   {
-    key: 'personMentionEnabled',
-    label: '관심 인물 발언',
-    description: '등록한 핵심 인물의 발언이 감지되면 알려드립니다.',
-  },
-  {
     key: 'dailySummaryEnabled',
     label: '일간 요약',
-    description: '매일 오전 8시, 관심 종목·뉴스 요약을 보내드립니다.',
+    description: '매일 오전 9시, 관심 종목·뉴스 요약을 보내드립니다.',
   },
 ]
 

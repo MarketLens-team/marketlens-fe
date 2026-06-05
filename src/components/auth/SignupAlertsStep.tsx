@@ -8,8 +8,7 @@ const ALERT_OPTIONS: { key: keyof AlertSettings; label: string; description: str
     label: '감성 급락',
     description: '관심 종목 감성 점수가 급격히 하락했을 때',
   },
-  { key: 'personMentionEnabled', label: '인물 발언', description: '핵심 인물의 새로운 발언이 등록됐을 때' },
-  { key: 'dailySummaryEnabled', label: '일간 요약', description: '하루 시장·종목 요약 리포트' },
+  { key: 'dailySummaryEnabled', label: '일간 요약', description: '매일 오전 9시 시장·종목 요약 리포트' },
 ]
 
 interface SignupAlertsStepProps {
