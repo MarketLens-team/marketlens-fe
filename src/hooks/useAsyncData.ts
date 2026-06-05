@@ -28,7 +28,8 @@ export function useAsyncData<T>(
   const minLoadingMs = options?.minLoadingMs ?? MIN_LOADING_MS
   const keepPreviousData = options?.keepPreviousData === true
   const initialDataRef = useRef(options?.initialData ?? null)
-  const authToken = useAuthStore((state) => state.token)
+  // token 재발급 시 문자열만 바뀌므로 isLoggedIn으로 로그인 상태 전환만 refetch
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
   const [data, setData] = useState<T | null>(() => initialDataRef.current)
   const [loading, setLoading] = useState(enabled && initialDataRef.current == null)
   const [refreshing, setRefreshing] = useState(false)
@@ -74,7 +75,7 @@ export function useAsyncData<T>(
     return () => {
       cancelled = true
     }
-  }, [authToken, enabled, factory, minLoadingMs, keepPreviousData])
+  }, [isLoggedIn, enabled, factory, minLoadingMs, keepPreviousData])
 
   return { data, loading, error, refreshing }
 }
