@@ -8,10 +8,9 @@ import { EntityAvatar } from '../ui/EntityAvatar'
 import { PillButton } from '../ui/PillButton'
 import { formatPercent, priceChangeDirection } from '../stock/stockScore'
 import { buildWatchlistSummaryTarget } from './buildDashboardSummaryTarget'
-import { DashboardAnomalySummaryModal } from './DashboardAnomalySummaryModal'
 import { DashboardLoginPrompt } from './DashboardLoginPrompt'
 import { DashboardWatchlistTable } from './DashboardWatchlistTable'
-import { useDashboardAnomalySummary } from './useDashboardAnomalySummary'
+import type { DashboardAnomalySummaryController } from './useDashboardAnomalySummary'
 import { useAuthStore } from '../../store/authStore'
 import styles from './DashboardWatchlistSection.module.css'
 
@@ -19,11 +18,12 @@ type WatchlistView = 'tiles' | 'list'
 
 interface DashboardWatchlistSectionProps {
   rows: DashboardWatchlistRow[]
+  anomalySummary: DashboardAnomalySummaryController
 }
 
 function bindTileHoverSummary(
   row: DashboardWatchlistRow,
-  summary: ReturnType<typeof useDashboardAnomalySummary>,
+  summary: DashboardAnomalySummaryController,
 ) {
   const target = buildWatchlistSummaryTarget(row)
   return {
@@ -34,11 +34,10 @@ function bindTileHoverSummary(
   }
 }
 
-export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionProps) {
+export function DashboardWatchlistSection({ rows, anomalySummary }: DashboardWatchlistSectionProps) {
   const navigate = useNavigate()
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const [view, setView] = useState<WatchlistView>('tiles')
-  const summaryModal = useDashboardAnomalySummary()
 
   const goToStock = (code: string) => {
     navigate(`/stock/${code}`)
@@ -88,7 +87,7 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
                     className={styles.tile}
                     onClick={() => goToStock(row.code)}
                     aria-label={`${row.name} 종목 상세 보기`}
-                    {...bindTileHoverSummary(row, summaryModal)}
+                    {...bindTileHoverSummary(row, anomalySummary)}
                   >
                     <EntityAvatar
                       variant="stock"
@@ -117,16 +116,6 @@ export function DashboardWatchlistSection({ rows }: DashboardWatchlistSectionPro
       {isLoggedIn && rows.length > 0 && view === 'list' ? (
         <DashboardWatchlistTable rows={rows} embedded className={styles.embeddedTable} />
       ) : null}
-
-      <DashboardAnomalySummaryModal
-        target={summaryModal.target}
-        status={summaryModal.status}
-        summaryText={summaryModal.summaryText}
-        isOpen={summaryModal.isOpen}
-        onClose={summaryModal.close}
-        onHoverPaneEnter={summaryModal.cancelClose}
-        onHoverPaneLeave={summaryModal.scheduleModalLeave}
-      />
     </Card>
   )
 }
