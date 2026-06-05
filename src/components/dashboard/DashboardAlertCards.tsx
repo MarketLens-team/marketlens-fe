@@ -8,8 +8,7 @@ import type { DashboardWatchlistRow, SectorHeatmapCell } from '../../data/types/
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
-import { DashboardAnomalySummaryModal } from './DashboardAnomalySummaryModal'
-import { useDashboardAnomalySummary } from './useDashboardAnomalySummary'
+import type { DashboardAnomalySummaryController } from './useDashboardAnomalySummary'
 import styles from './DashboardAlertCards.module.css'
 
 interface DashboardAlertCardsProps {
@@ -17,6 +16,7 @@ interface DashboardAlertCardsProps {
   marketOutlierRows: DashboardWatchlistRow[]
   sectorHeatmap: SectorHeatmapCell[]
   isLoggedIn: boolean
+  anomalySummary: DashboardAnomalySummaryController
 }
 
 const HEADLINE_TONE_CLASS = {
@@ -36,7 +36,7 @@ const CRITERION_TONE_CLASS: Record<DashboardSignalKind, string | undefined> = {
 
 function bindHoverSummary(
   alert: DashboardAlertItem,
-  summary: ReturnType<typeof useDashboardAnomalySummary>,
+  summary: DashboardAnomalySummaryController,
 ) {
   if (!alert.summaryEnabled) return {}
   return {
@@ -52,13 +52,12 @@ export function DashboardAlertCards({
   marketOutlierRows,
   sectorHeatmap,
   isLoggedIn,
+  anomalySummary,
 }: DashboardAlertCardsProps) {
   const alerts =
     isLoggedIn && watchlist.length > 0
       ? pickDashboardAlerts(watchlist, sectorHeatmap)
       : pickDashboardAlerts(marketOutlierRows, sectorHeatmap, 3, 'market')
-
-  const summaryModal = useDashboardAnomalySummary()
 
   return (
     <Card padding="md" className={styles.card}>
@@ -77,7 +76,7 @@ export function DashboardAlertCards({
                 to={alert.to}
                 className={styles.item}
                 aria-label={`${alert.name} ${DASHBOARD_ALERT_SCOPE_LABEL[alert.scope]} ${alert.criterion} ${alert.headline}`}
-                {...bindHoverSummary(alert, summaryModal)}
+                {...bindHoverSummary(alert, anomalySummary)}
               >
                 {alert.targetKind === 'stock' ? (
                   <EntityAvatar
@@ -118,16 +117,6 @@ export function DashboardAlertCards({
           ))}
         </ul>
       )}
-
-      <DashboardAnomalySummaryModal
-        target={summaryModal.target}
-        status={summaryModal.status}
-        summaryText={summaryModal.summaryText}
-        isOpen={summaryModal.isOpen}
-        onClose={summaryModal.close}
-        onHoverPaneEnter={summaryModal.cancelClose}
-        onHoverPaneLeave={summaryModal.scheduleModalLeave}
-      />
     </Card>
   )
 }

@@ -144,3 +144,5 @@ export function useDashboardAnomalySummary() {
     cancelClose,
   }
 }
+
+export type DashboardAnomalySummaryController = ReturnType<typeof useDashboardAnomalySummary>
