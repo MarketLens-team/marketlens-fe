@@ -4,6 +4,6 @@ import type { MyPageData } from '../data/types/myPage'
 import { useAsyncData } from './useAsyncData'
 
 export function useMyPage() {
-  const factory = useCallback(() => fetchMyPage('watchlist'), [])
+  const factory = useCallback(() => fetchMyPage('account'), [])
   return useAsyncData<MyPageData>(factory)
 }

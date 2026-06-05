@@ -45,9 +45,15 @@ export default function MyPage() {
   const pendingWatchlistRemoveRef = useRef<Map<string, number>>(new Map())
   const pendingBookmarkRemoveRef = useRef<Map<string, number>>(new Map())
 
-  const myPageScope = tab === 'watchlist' ? 'watchlist' : 'shell'
-  const factory = useCallback(() => fetchMyPage(myPageScope), [refreshKey, myPageScope])
-  const { data, loading, error } = useAsyncData(factory, { keepPreviousData: true })
+  const myPageScope = tab === 'watchlist' ? 'watchlist' : tab === 'account' ? 'account' : null
+  const factory = useCallback(
+    () => fetchMyPage(myPageScope!),
+    [refreshKey, myPageScope],
+  )
+  const { data, loading, error } = useAsyncData(factory, {
+    keepPreviousData: true,
+    enabled: myPageScope != null,
+  })
 
   const {
     items: bookmarkItems,
@@ -88,6 +94,7 @@ export default function MyPage() {
   }, [])
 
   useEffect(() => {
+    if (tab !== 'account') return
     const settings = data?.alertSettings
     if (!settings || localSettings != null) return
 
@@ -106,7 +113,7 @@ export default function MyPage() {
     return () => {
       cancelled = true
     }
-  }, [data?.alertSettings, localSettings])
+  }, [tab, data?.alertSettings, localSettings])
 
   useEffect(() => {
     if (tab !== 'account') return
@@ -171,7 +178,6 @@ export default function MyPage() {
       removeWatchlistItem(code)
         .then(async () => {
           await invalidateWatchlistQueries()
-          setLocalSettings(null)
           setRefreshKey((key) => key + 1)
         })
         .catch(async () => {
@@ -200,7 +206,7 @@ export default function MyPage() {
   }
 
   const handleSettingsChange = async (next: AlertSettingsResponse) => {
-    if (!data) return
+    if (!data?.alertSettings) return
     setActionError(null)
     setLocalSettings(next)
     setSavingAlerts(true)
@@ -239,39 +245,54 @@ export default function MyPage() {
     snackbar.show('비밀번호가 변경되었습니다.')
   }
 
-  const httpFullscreenPreset = error ? fullscreenPresetFromAppError(error) : null
+  const httpFullscreenPreset =
+    myPageScope != null && error ? fullscreenPresetFromAppError(error) : null
   if (httpFullscreenPreset) {
     return <AppErrorPage layout="fullscreen" preset={httpFullscreenPreset} homeHref="/" />
   }
 
+  const showFetchLoading = myPageScope != null && loading && !data && !error
+  const profileReady =
+    tab === 'news' ||
+    (tab === 'watchlist' && data != null) ||
+    (tab === 'account' && data != null && alertSettings != null)
+
   return (
     <Layout>
       <div className={styles.page}>
-        {error ? (
+        {myPageScope != null && error ? (
           <PageFetchError title="마이페이지를 불러오지 못했어요" message={error.message} />
         ) : null}
         {actionError ? (
           <PageFetchError title="작업에 실패했어요" message={actionError} />
         ) : null}
 
-        {loading && !data && !error ? (
+        {showFetchLoading ? (
           <div aria-busy="true" aria-label="마이페이지 로딩">
-            <Card padding="md">
-              <div className={styles.summarySkeleton}>
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className={clsx(skeleton.block, skeleton.stat)} aria-hidden />
-                ))}
+            {tab === 'watchlist' ? (
+              <>
+                <Card padding="md">
+                  <div className={styles.summarySkeleton}>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className={clsx(skeleton.block, skeleton.stat)} aria-hidden />
+                    ))}
+                  </div>
+                </Card>
+                <div className={styles.tabPanel}>
+                  <div className={clsx(skeleton.block, styles.skeletonTable)} />
+                </div>
+              </>
+            ) : (
+              <div className={styles.tabPanel}>
+                <div className={clsx(skeleton.block, styles.skeletonTable)} />
               </div>
-            </Card>
-            <div className={styles.tabPanel}>
-              <div className={clsx(skeleton.block, styles.skeletonTable)} />
-            </div>
+            )}
           </div>
         ) : null}
 
-        {data && alertSettings ? (
+        {profileReady ? (
           <ProfileLayout nav={<ProfileSideNav active={tab} onChange={handleTabChange} />}>
-            {tab === 'watchlist' ? (
+            {tab === 'watchlist' && data ? (
               <div className={styles.tabPanel}>
                 <MyPageSummaryCards summary={data.summary} />
                 <MyPageWatchlistTable
@@ -281,7 +302,7 @@ export default function MyPage() {
               </div>
             ) : null}
 
-            {tab === 'account' ? (
+            {tab === 'account' && data?.account && alertSettings ? (
               <div className={clsx(styles.tabPanel, styles.tabPanelSections)}>
                 <MyPageAccountInfo account={data.account} />
                 <hr className={styles.sectionDivider} aria-hidden />

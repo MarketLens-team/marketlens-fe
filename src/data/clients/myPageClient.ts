@@ -1,6 +1,6 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { getCachedWatchlistResponses } from '../../lib/queryCache'
-import { mapMyPageData } from '../mappers/myPageMapper'
+import { mapMyPageAccountData, mapMyPageWatchlistData } from '../mappers/myPageMapper'
 import { mockMyPageData } from '../mocks/myPage.mock'
 import type { MyPageData } from '../types/myPage'
 import type { WatchlistResponse } from '../types/memberApi'
@@ -12,8 +12,7 @@ import type { WatchlistOverviewPrice } from '../mappers/myPageMapper'
 import { getApiErrorMessage } from '../util/apiError'
 import { mockDelay } from '../util/mockDelay'
 
-/** watchlist 탭만 overview·batch·관심종목 로드. account·news는 settings·me만 */
-export type MyPageFetchScope = 'watchlist' | 'shell'
+export type MyPageFetchScope = 'watchlist' | 'account'
 
 async function resolveWatchlistRows(): Promise<WatchlistResponse[]> {
   const cached = getCachedWatchlistResponses()
@@ -43,32 +42,30 @@ async function fetchOverviewPriceByCode(): Promise<Map<string, WatchlistOverview
   }
 }
 
-async function fetchMyPageShell(): Promise<MyPageData> {
+async function fetchMyPageAccount(): Promise<MyPageData> {
   const [settings, member] = await Promise.all([fetchAlertSettings(), fetchMemberProfile()])
-  return mapMyPageData({ watchlist: [], summaries: [], settings, member })
+  return mapMyPageAccountData({ settings, member })
 }
 
 async function fetchMyPageWatchlist(): Promise<MyPageData> {
-  const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
+  const [watchlist, overviewPriceByCode, batchMetrics] = await Promise.all([
     resolveWatchlistRows(),
-    fetchAlertSettings(),
-    fetchMemberProfile(),
     fetchOverviewPriceByCode(),
     fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
   ])
   const summaries = summariesForWatchlist(watchlist, batchMetrics)
-  return mapMyPageData({ watchlist, summaries, overviewPriceByCode, settings, member })
+  return mapMyPageWatchlistData({ watchlist, summaries, overviewPriceByCode })
 }
 
-export async function fetchMyPage(scope: MyPageFetchScope = 'watchlist'): Promise<MyPageData> {
+export async function fetchMyPage(scope: MyPageFetchScope): Promise<MyPageData> {
   if (isMockDataSource()) {
     await mockDelay(140)
     return structuredClone(mockMyPageData)
   }
 
   try {
-    if (scope === 'shell') {
-      return await fetchMyPageShell()
+    if (scope === 'account') {
+      return await fetchMyPageAccount()
     }
     return await fetchMyPageWatchlist()
   } catch (error) {

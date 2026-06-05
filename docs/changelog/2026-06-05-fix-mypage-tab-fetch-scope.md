@@ -1,4 +1,4 @@
-# Change Log — 2026-06-05 · fix · 마이페이지 탭별 fetchMyPage scope
+# Change Log — 2026-06-05 · fix · 마이페이지 탭별 fetch scope
 
 ## 메타
 
@@ -8,24 +8,34 @@
 
 ## 요약
 
-뉴스·계정 탭에서 관심종목 UI에 쓰이지 않는 `overview`·`batch`·`watchlist`가 `fetchMyPage`로 함께 나가던 문제를, 탭별 `scope`로 분리했다.
+마이페이지 API를 탭별로 완전 분리했다. 관심종목은 watchlist·overview·batch만, 계정은 settings·me만, 뉴스는 `fetchMyPage` 없이 북마크 훅만 사용한다.
 
 ## Changed
 
-| 탭 | Before (`fetchMyPage` 항상 full) | After |
-|----|----------------------------------|-------|
-| 관심종목 | settings · me · overview · batch · watchlist | 동일 (`scope: watchlist`) |
-| 뉴스 · 계정 | 위 full + bookmarks 별도 | `scope: shell` — settings · me만 |
+| 탭 | API |
+|----|-----|
+| 관심종목 | `watchlist`(캐시) · `overview` · `batch` |
+| 계정 | `settings` · `me` |
+| 뉴스 | `bookmarks` · `dates` (`useMyPageBookmarks`만) |
+
+| 항목 | Before | After |
+|------|--------|-------|
+| 관심종목 `fetchMyPage` | settings · me · overview · batch · watchlist | overview · batch · watchlist |
+| 뉴스 탭 | settings · me (shell) | `fetchMyPage` 비활성 |
+| `syncAlertSettingsIfNeeded` | 모든 탭 | 계정 탭만 |
+| 렌더 게이트 | `data && alertSettings` 공통 | 탭별 `profileReady` |
 
 ## 파일
 
+- `src/data/types/myPage.ts`
+- `src/data/mappers/myPageMapper.ts`
 - `src/data/clients/myPageClient.ts`
+- `src/data/clients/memberClient.ts`
 - `src/pages/MyPage.tsx`
-- `src/hooks/useMyPage.ts`
 
 ## 확인
 
-- [ ] `/mypage?tab=news` — `overview`·`batch`·`watchlist` 0회, `bookmarks`·`dates`만
-- [ ] `/mypage` 관심종목 탭 — summary·watchlist 테이블 정상
-- [ ] 계정 탭 — 프로필·알림 설정 정상
-- [ ] 관심종목 탭 전환 시 watchlist 데이터 로드
+- [ ] `/mypage` — `settings`·`me` 0회
+- [ ] `/mypage?tab=news` — `settings`·`me`·`overview`·`batch` 0회
+- [ ] `/mypage?tab=account` — `settings`·`me`만
+- [ ] 탭 전환·관심종목 삭제·알림 설정 정상
