@@ -45,7 +45,8 @@ export default function MyPage() {
   const pendingWatchlistRemoveRef = useRef<Map<string, number>>(new Map())
   const pendingBookmarkRemoveRef = useRef<Map<string, number>>(new Map())
 
-  const factory = useCallback(() => fetchMyPage(), [refreshKey])
+  const myPageScope = tab === 'watchlist' ? 'watchlist' : 'shell'
+  const factory = useCallback(() => fetchMyPage(myPageScope), [refreshKey, myPageScope])
   const { data, loading, error } = useAsyncData(factory, { keepPreviousData: true })
 
   const {

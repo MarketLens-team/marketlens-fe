@@ -12,6 +12,9 @@ import type { WatchlistOverviewPrice } from '../mappers/myPageMapper'
 import { getApiErrorMessage } from '../util/apiError'
 import { mockDelay } from '../util/mockDelay'
 
+/** watchlist 탭만 overview·batch·관심종목 로드. account·news는 settings·me만 */
+export type MyPageFetchScope = 'watchlist' | 'shell'
+
 async function resolveWatchlistRows(): Promise<WatchlistResponse[]> {
   const cached = getCachedWatchlistResponses()
   if (cached) return cached
@@ -40,22 +43,34 @@ async function fetchOverviewPriceByCode(): Promise<Map<string, WatchlistOverview
   }
 }
 
-export async function fetchMyPage(): Promise<MyPageData> {
+async function fetchMyPageShell(): Promise<MyPageData> {
+  const [settings, member] = await Promise.all([fetchAlertSettings(), fetchMemberProfile()])
+  return mapMyPageData({ watchlist: [], summaries: [], settings, member })
+}
+
+async function fetchMyPageWatchlist(): Promise<MyPageData> {
+  const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
+    resolveWatchlistRows(),
+    fetchAlertSettings(),
+    fetchMemberProfile(),
+    fetchOverviewPriceByCode(),
+    fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
+  ])
+  const summaries = summariesForWatchlist(watchlist, batchMetrics)
+  return mapMyPageData({ watchlist, summaries, overviewPriceByCode, settings, member })
+}
+
+export async function fetchMyPage(scope: MyPageFetchScope = 'watchlist'): Promise<MyPageData> {
   if (isMockDataSource()) {
     await mockDelay(140)
     return structuredClone(mockMyPageData)
   }
 
   try {
-    const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
-      resolveWatchlistRows(),
-      fetchAlertSettings(),
-      fetchMemberProfile(),
-      fetchOverviewPriceByCode(),
-      fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
-    ])
-    const summaries = summariesForWatchlist(watchlist, batchMetrics)
-    return mapMyPageData({ watchlist, summaries, overviewPriceByCode, settings, member })
+    if (scope === 'shell') {
+      return await fetchMyPageShell()
+    }
+    return await fetchMyPageWatchlist()
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '마이페이지를 불러오지 못했습니다.'))
   }
