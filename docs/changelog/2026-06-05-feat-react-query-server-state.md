@@ -47,5 +47,8 @@
 ## 제외 (후속)
 
 - `useAsyncData` 훅 점진적 `useQuery` 이전
-- `useTodayNewsStocks`·`useNewsFeedPage` 등 수동 `useEffect` fetch
 - `dedupeAsync`·`stockPricesCache` RQ 흡수 검토
+
+## 후속 (같은 브랜치)
+
+- [2026-06-05-fix-news-feed-effect-dedupe.md](./2026-06-05-fix-news-feed-effect-dedupe.md) — `useTodayNewsStocks`·`useNewsFeedPage` StrictMode dedupe

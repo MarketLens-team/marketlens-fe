@@ -1,10 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { dedupeAsync } from '../lib/dedupeAsync'
+import { dedupeAsync, STRICT_MODE_DEDUPE_TTL_MS } from '../lib/dedupeAsync'
 import { MIN_LOADING_MS, withMinDuration } from '../lib/withMinDuration'
 import { useAuthStore } from '../store/authStore'
-
-/** React 18 StrictMode 이중 mount·근접 재실행 병합 */
-const ASYNC_DATA_DEDUPE_TTL_MS = 5_000
 
 export interface AsyncState<T> {
   data: T | null
@@ -72,7 +69,7 @@ export function useAsyncData<T>(
     void dedupeAsync(
       dedupeKey,
       () => withMinDuration(factory, minLoadingMs),
-      { ttlMs: ASYNC_DATA_DEDUPE_TTL_MS },
+      { ttlMs: STRICT_MODE_DEDUPE_TTL_MS },
     )
       .then((value) => {
         if (!cancelled) {
