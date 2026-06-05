@@ -77,7 +77,10 @@ function pushUnique(
 
 function stockAlert(
   row: DashboardWatchlistRow,
-  input: Omit<DashboardAlertItem, 'targetKind' | 'to' | 'summaryEnabled' | 'code' | 'name' | 'imageUrl'>,
+  input: Omit<
+    DashboardAlertItem,
+    'scope' | 'targetKind' | 'to' | 'summaryEnabled' | 'code' | 'name' | 'imageUrl'
+  >,
   scope: DashboardAlertScope,
 ): DashboardAlertItem {
   return {
