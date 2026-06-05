@@ -1,4 +1,5 @@
 import { isMockDataSource } from '../../config/dataSource'
+import { dedupeAsync } from '../../lib/dedupeAsync'
 import { api } from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import { buildMarketOutlierRows } from '../mappers/dashboardMarketOutliers'
@@ -11,16 +12,23 @@ import { mockDashboardBriefing, mockDashboardOverview } from '../mocks/dashboard
 import type { ApiEnvelope } from '../types/api'
 import type { DashboardBriefing, DashboardOverview } from '../types/dashboard'
 import type { DashboardBriefingResponse, DashboardOverviewResponse } from '../types/dashboardApi'
-import type { WatchlistResponse } from '../types/memberApi'
 import type { StockSummaryBatchItemResponse } from '../types/stockApi'
 import { fetchStockPrices, fetchStockRankings, fetchWatchlistSummariesBatch } from './stockClient'
+import { fetchWatchlistResponses } from './watchlistClient'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
 const OVERVIEW_PATH = '/api/v1/dashboard/overview'
 const BRIEFING_PATH = '/api/v1/dashboard/briefing'
-const WATCHLIST_PATH = '/api/v1/watchlist'
+
+/** 로그인 직후 StrictMode 이중 mount 병합 */
+const DASHBOARD_DEDUPE_TTL_MS = 5_000
+
+function dashboardOverviewKey(): string {
+  const isLoggedIn = useAuthStore.getState().isLoggedIn
+  return `dashboard:overview:${isLoggedIn ? 'member' : 'guest'}`
+}
 
 function metricsByStockCode(
   items: StockSummaryBatchItemResponse[],
@@ -29,8 +37,7 @@ function metricsByStockCode(
 }
 
 async function fetchWatchlistForDashboard(): Promise<DashboardOverview['watchlist']> {
-  const { data } = await api.get<ApiEnvelope<WatchlistResponse[]>>(WATCHLIST_PATH)
-  const rows = unwrapApiEnvelope(data, '관심종목을 불러오지 못했습니다.') ?? []
+  const rows = await fetchWatchlistResponses()
   if (rows.length === 0) return []
 
   const codes = rows.map((item) => item.stockCode)
@@ -52,17 +59,29 @@ export async function fetchDashboardBriefing(): Promise<DashboardBriefing | null
     return structuredClone(mockDashboardBriefing)
   }
 
-  try {
-    const { data } = await api.get<ApiEnvelope<DashboardBriefingResponse>>(BRIEFING_PATH)
-    const raw = unwrapApiEnvelope(data, '오늘 브리핑을 불러오지 못했습니다.')
-    return mapDashboardBriefing(raw)
-  } catch {
-    return null
-  }
+  return dedupeAsync(
+    'dashboard:briefing',
+    async () => {
+      try {
+        const { data } = await api.get<ApiEnvelope<DashboardBriefingResponse>>(BRIEFING_PATH)
+        const raw = unwrapApiEnvelope(data, '오늘 브리핑을 불러오지 못했습니다.')
+        return mapDashboardBriefing(raw)
+      } catch {
+        return null
+      }
+    },
+    { ttlMs: DASHBOARD_DEDUPE_TTL_MS },
+  )
 }
 
 /** OpenAPI `getOverview` — `GET /api/v1/dashboard/overview` */
 export async function fetchDashboardOverview(): Promise<DashboardOverview> {
+  return dedupeAsync(dashboardOverviewKey(), fetchDashboardOverviewUncached, {
+    ttlMs: DASHBOARD_DEDUPE_TTL_MS,
+  })
+}
+
+async function fetchDashboardOverviewUncached(): Promise<DashboardOverview> {
   if (isMockDataSource()) {
     await mockDelay()
     const overview = structuredClone(mockDashboardOverview)
@@ -90,10 +109,12 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   }
 
   let watchlist: DashboardOverview['watchlist'] = []
-  try {
-    watchlist = await fetchWatchlistForDashboard()
-  } catch {
-    watchlist = []
+  if (useAuthStore.getState().isLoggedIn) {
+    try {
+      watchlist = await fetchWatchlistForDashboard()
+    } catch {
+      watchlist = []
+    }
   }
 
   const mapped = mapDashboardOverview(overview, watchlist)
