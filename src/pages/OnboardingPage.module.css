@@ -53,6 +53,42 @@
   overflow: hidden;
 }
 
+.cardNav {
+  margin-bottom: var(--space-2);
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: calc(-1 * var(--space-1)) 0 0 calc(-1 * var(--space-1));
+  padding: var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .backBtn:not(:disabled):hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.backBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.backIcon {
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
 .stepBody {
   display: flex;
   flex: 1;
@@ -114,6 +150,16 @@
 .stepItem[data-active="true"] .stepLabel {
   color: var(--color-text-primary);
   font-weight: var(--font-weight-semibold);
+}
+
+.stepItem[data-upcoming="true"] .stepDot {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: transparent;
+}
+
+.stepItem[data-upcoming="true"] .stepLabel {
+  color: var(--color-text-secondary);
 }
 
 .stepLine {

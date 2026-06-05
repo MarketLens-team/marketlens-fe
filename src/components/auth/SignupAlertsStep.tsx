@@ -18,8 +18,8 @@ const CHANNEL_OPTIONS: SettingOption[] = [
   },
   {
     key: 'telegramNotificationEnabled',
-    label: '텔레그램 알림 (연동)',
-    description: `가입 완료 후 다음 화면에서 @${resolveTelegramBotUsername()} 연동할 수 있습니다.`,
+    label: '텔레그램 알림',
+    description: `텔레그램 ON이면 가입 후 3단계에서 @${resolveTelegramBotUsername()} 연동합니다.`,
   },
 ]
 
