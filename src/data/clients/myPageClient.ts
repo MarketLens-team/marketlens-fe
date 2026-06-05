@@ -1,23 +1,21 @@
 import { isMockDataSource } from '../../config/dataSource'
-import { api } from '../../services/api'
+import { getCachedWatchlistResponses } from '../../store/watchlistStore'
 import { mapMyPageData } from '../mappers/myPageMapper'
 import { mockMyPageData } from '../mocks/myPage.mock'
-import type { ApiEnvelope } from '../types/api'
 import type { MyPageData } from '../types/myPage'
 import type { WatchlistResponse } from '../types/memberApi'
 import type { StockSummaryBatchItemResponse, StockSummaryMetrics } from '../types/stockApi'
 import { fetchAlertSettings, fetchMemberProfile } from './memberClient'
 import { fetchStockOverview, fetchWatchlistSummariesBatch } from './stockClient'
+import { fetchWatchlistResponses } from './watchlistClient'
 import type { WatchlistOverviewPrice } from '../mappers/myPageMapper'
 import { getApiErrorMessage } from '../util/apiError'
-import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
-const WATCHLIST_PATH = '/api/v1/watchlist'
-
-async function fetchWatchlistRows(): Promise<WatchlistResponse[]> {
-  const { data } = await api.get<ApiEnvelope<WatchlistResponse[]>>(WATCHLIST_PATH)
-  return unwrapApiEnvelope(data, '관심종목을 불러오지 못했습니다.') ?? []
+async function resolveWatchlistRows(): Promise<WatchlistResponse[]> {
+  const cached = getCachedWatchlistResponses()
+  if (cached) return cached
+  return fetchWatchlistResponses()
 }
 
 function summariesForWatchlist(
@@ -50,7 +48,7 @@ export async function fetchMyPage(): Promise<MyPageData> {
 
   try {
     const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
-      fetchWatchlistRows(),
+      resolveWatchlistRows(),
       fetchAlertSettings(),
       fetchMemberProfile(),
       fetchOverviewPriceByCode(),
