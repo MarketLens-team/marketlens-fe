@@ -21,6 +21,7 @@ import { removeNewsBookmark } from '../data/clients/bookmarkClient'
 import { syncAlertSettingsIfNeeded, updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
+import { useWatchlistStore } from '../store/watchlistStore'
 import type { AlertSettingsResponse } from '../data/types/member'
 import { toAlertSettings } from '../data/types/member'
 import type { MyPageBookmarkItem } from '../data/types/myPage'
@@ -165,11 +166,13 @@ export default function MyPage() {
     const timerId = window.setTimeout(() => {
       pendingWatchlistRemoveRef.current.delete(code)
       removeWatchlistItem(code)
-        .then(() => {
+        .then(async () => {
+          await useWatchlistStore.getState().reload()
           setLocalSettings(null)
           setRefreshKey((key) => key + 1)
         })
-        .catch(() => {
+        .catch(async () => {
+          await useWatchlistStore.getState().reload()
           setRefreshKey((key) => key + 1)
           snackbar.show('종목 저장 취소에 실패했습니다.')
         })

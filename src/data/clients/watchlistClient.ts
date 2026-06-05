@@ -20,7 +20,7 @@ function watchlistDedupeKey(): string {
   return `watchlist:rows:${isLoggedIn ? 'member' : 'guest'}`
 }
 
-function mapWatchlistItem(dto: WatchlistResponse): WatchlistItem {
+export function mapWatchlistItem(dto: WatchlistResponse): WatchlistItem {
   return {
     code: dto.stockCode,
     name: dto.stockName,
@@ -52,9 +52,13 @@ export async function fetchWatchlistResponses(): Promise<WatchlistResponse[]> {
   )
 }
 
+export function watchlistResponsesToItems(rows: WatchlistResponse[]): WatchlistItem[] {
+  return rows.map(mapWatchlistItem)
+}
+
 export async function fetchWatchlist(): Promise<WatchlistItem[]> {
   const rows = await fetchWatchlistResponses()
-  return rows.map(mapWatchlistItem)
+  return watchlistResponsesToItems(rows)
 }
 
 export async function addWatchlistItem(stockCode: string): Promise<void> {
