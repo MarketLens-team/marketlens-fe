@@ -21,6 +21,7 @@ import { removeNewsBookmark } from '../data/clients/bookmarkClient'
 import { syncAlertSettingsIfNeeded, updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
+import { useNewsBookmarkStore } from '../store/newsBookmarkStore'
 import { useWatchlistStore } from '../store/watchlistStore'
 import type { AlertSettingsResponse } from '../data/types/member'
 import { toAlertSettings } from '../data/types/member'
@@ -63,7 +64,7 @@ export default function MyPage() {
     clearDateFilter: clearBookmarkDateFilter,
     dateSummaries: bookmarkDateSummaries,
     dateSummariesLoading: bookmarkDateSummariesLoading,
-  } = useMyPageBookmarks(bookmarkRefreshKey)
+  } = useMyPageBookmarks(bookmarkRefreshKey, tab === 'news')
 
   const [localSettings, setLocalSettings] = useState<AlertSettingsResponse | null>(null)
   const alertSettings = localSettings ?? data?.alertSettings
@@ -130,10 +131,12 @@ export default function MyPage() {
     const timerId = window.setTimeout(() => {
       pendingBookmarkRemoveRef.current.delete(item.id)
       removeNewsBookmark(item.id)
-        .then(() => {
+        .then(async () => {
+          await useNewsBookmarkStore.getState().reload()
           setBookmarkRefreshKey((key) => key + 1)
         })
-        .catch(() => {
+        .catch(async () => {
+          await useNewsBookmarkStore.getState().reload()
           setBookmarkRefreshKey((key) => key + 1)
           snackbar.show('뉴스 저장 취소에 실패했습니다.')
         })
