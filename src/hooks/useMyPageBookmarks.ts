@@ -7,7 +7,7 @@ import { useAsyncData } from './useAsyncData'
 
 const PAGE_SIZE = 10
 
-export function useMyPageBookmarks(refreshKey: number) {
+export function useMyPageBookmarks(refreshKey: number, enabled = true) {
   const [sortOrder, setSortOrder] = useState<BookmarkSortOrder>('LATEST')
   const [page, setPage] = useState(0)
   const [filterDate, setFilterDate] = useState<string | null>(null)
@@ -33,8 +33,8 @@ export function useMyPageBookmarks(refreshKey: number) {
     return mapBookmarkDateSummaryList(rows)
   }, [refreshKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const listState = useAsyncData(listFactory, { keepPreviousData: true })
-  const dateSummariesState = useAsyncData(dateSummariesFactory)
+  const listState = useAsyncData(listFactory, { keepPreviousData: true, enabled })
+  const dateSummariesState = useAsyncData(dateSummariesFactory, { enabled })
 
   const selectDate = useCallback((date: string) => { setFilterDate(date) }, [])
   const clearDateFilter = useCallback(() => { setFilterDate(null) }, [])

@@ -1,5 +1,7 @@
 import { isMockDataSource } from '../../config/dataSource'
+import { dedupeAsync } from '../../lib/dedupeAsync'
 import { api } from '../../services/api'
+import { useAuthStore } from '../../store/authStore'
 import type { ApiEnvelope } from '../types/api'
 import type {
   BookmarkDateSummaryDto,
@@ -12,6 +14,14 @@ import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
 const BOOKMARKS_PATH = '/api/v1/bookmarks'
+
+/** 로그인 직후 뉴스 피드·종목 상세 동시 호출 병합 */
+const BOOKMARK_IDS_DEDUPE_TTL_MS = 5_000
+
+function bookmarkIdsDedupeKey(): string {
+  const isLoggedIn = useAuthStore.getState().isLoggedIn
+  return `bookmarks:ids:${isLoggedIn ? 'member' : 'guest'}`
+}
 
 interface MockBookmarkRow {
   context: NewsBookmarkSaveContext
@@ -147,10 +157,20 @@ export async function fetchBookmarkIds(): Promise<number[]> {
     await mockDelay(80)
     return Array.from(mockBookmarks.keys())
   }
-  try {
-    const { data } = await api.get<ApiEnvelope<number[]>>(`${BOOKMARKS_PATH}/ids`)
-    return unwrapApiEnvelope(data, '즐겨찾기 목록을 불러오지 못했습니다.') ?? []
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error, '즐겨찾기 목록을 불러오지 못했습니다.'))
+  if (!useAuthStore.getState().isLoggedIn) {
+    return []
   }
+
+  return dedupeAsync(
+    bookmarkIdsDedupeKey(),
+    async () => {
+      try {
+        const { data } = await api.get<ApiEnvelope<number[]>>(`${BOOKMARKS_PATH}/ids`)
+        return unwrapApiEnvelope(data, '즐겨찾기 목록을 불러오지 못했습니다.') ?? []
+      } catch (error) {
+        throw new Error(getApiErrorMessage(error, '즐겨찾기 목록을 불러오지 못했습니다.'))
+      }
+    },
+    { ttlMs: BOOKMARK_IDS_DEDUPE_TTL_MS },
+  )
 }
