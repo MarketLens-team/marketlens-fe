@@ -172,7 +172,7 @@ export default function MyPage() {
 
   const handleTelegramLinkOpened = () => {
     setActionError(null)
-    snackbar.show('텔레그램 앱에서 봇 채팅의 시작(Start)을 눌러 연동을 완료해 주세요.', {
+    snackbar.show('브라우저에서 Telegram 열기를 허용한 뒤, 봇 채팅에서 시작(Start)을 눌러 연동을 완료해 주세요.', {
       durationMs: 6000,
     })
   }
@@ -232,14 +232,14 @@ export default function MyPage() {
               <div className={clsx(styles.tabPanel, styles.tabPanelSections)}>
                 <MyPageAccountInfo account={data.account} />
                 <hr className={styles.sectionDivider} aria-hidden />
-                <MyPageTelegramLink
-                  onOpened={handleTelegramLinkOpened}
-                  onError={handleAccountActionError}
-                />
-                <hr className={styles.sectionDivider} aria-hidden />
                 <MyPagePasswordChange
                   email={data.account.email}
                   onSuccess={handlePasswordChangeSuccess}
+                  onError={handleAccountActionError}
+                />
+                <hr className={styles.sectionDivider} aria-hidden />
+                <MyPageTelegramLink
+                  onOpened={handleTelegramLinkOpened}
                   onError={handleAccountActionError}
                 />
                 <hr className={styles.sectionDivider} aria-hidden />

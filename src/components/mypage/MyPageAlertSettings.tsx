@@ -18,7 +18,7 @@ const CHANNEL_OPTIONS: SettingOption[] = [
   {
     key: 'telegramNotificationEnabled',
     label: '텔레그램',
-    description: '연동한 텔레그램 계정으로 알림을 받습니다. 위에서 텔레그램 연동이 필요합니다.',
+    description: '연동한 텔레그램 계정으로 알림을 받습니다. 연동은 위 텔레그램 연동에서 진행해 주세요.',
   },
 ]
 

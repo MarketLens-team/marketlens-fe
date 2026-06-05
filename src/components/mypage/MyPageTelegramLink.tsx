@@ -26,7 +26,7 @@ export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProp
             메신저로 받을 수 있습니다.
           </p>
           <p className={styles.note}>
-            연동 버튼을 누르면 텔레그램 앱 또는 t.me 연동 페이지가 열립니다. 봇 채팅에서{' '}
+            연동 버튼을 누르면 브라우저에서 Telegram 앱 열기를 확인합니다. 앱이 열리면 봇 채팅에서{' '}
             <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요. 인증 코드는 5분 동안
             유효합니다.
           </p>
@@ -51,12 +51,7 @@ export function MyPageTelegramLink({ onOpened, onError }: MyPageTelegramLinkProp
                 Telegram Web에서 연동
               </a>
             </p>
-          ) : (
-            <p className={styles.noteMuted}>
-              Mac·Windows에 텔레그램 앱이 설치되어 있어야 합니다. 앱이 없으면 연동 후 아래 링크가
-              표시됩니다.
-            </p>
-          )}
+          ) : null}
         </div>
 
         <ActionButton

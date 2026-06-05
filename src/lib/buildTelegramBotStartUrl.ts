@@ -44,13 +44,14 @@ function tryOpenAppDeepLink(appUrl: string): void {
 }
 
 interface OpenTelegramBotLinkOptions {
-  /** 클릭 직후(동기) 연 blank 탭 — await 이후 t.me 이동용 */
+  /** 클릭 직후(동기) 연 blank 탭 — await 이후 t.me 이동용 (모바일 폴백) */
   assistWindow?: Window | null
 }
 
 /**
- * 데스크톱: tg:// 앱 시도 + t.me 탭(assistWindow 또는 새 탭).
+ * 데스크톱(앱 설치 가정): tg:// 앱 딥링크만 — 브라우저 "Telegram 열기" 확인 후 앱 실행.
  * 모바일: tg:// → t.me 폴백.
+ * t.me·Web 클라이언트는 UI 폴백 링크로만 제공한다.
  */
 export function openTelegramBotLink(
   token: string,
@@ -63,20 +64,17 @@ export function openTelegramBotLink(
   if (isMobileUserAgent()) {
     window.location.assign(appUrl)
     window.setTimeout(() => {
+      const assistWindow = options?.assistWindow
+      if (assistWindow && !assistWindow.closed) {
+        assistWindow.location.href = tmeUrl
+        return
+      }
       window.open(tmeUrl, '_blank', 'noopener,noreferrer')
     }, 1200)
     return
   }
 
   tryOpenAppDeepLink(appUrl)
-
-  const assistWindow = options?.assistWindow
-  if (assistWindow && !assistWindow.closed) {
-    assistWindow.location.href = tmeUrl
-    return
-  }
-
-  window.open(tmeUrl, '_blank', 'noopener,noreferrer')
 }
 
 export interface TelegramLinkUrls {
