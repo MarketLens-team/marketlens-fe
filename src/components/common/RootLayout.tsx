@@ -1,4 +1,6 @@
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Outlet, useLocation } from 'react-router-dom'
+import { queryClient } from '../../lib/queryClient'
 import { AuthLoginModal } from '../auth/AuthLoginModal'
 import { useAuthModalStore } from '../../store/authModalStore'
 import { AuthSessionGate } from './AuthSessionGate'
@@ -18,7 +20,7 @@ export function RootLayout() {
   const showTicker = shouldShowTicker(pathname)
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <AuthSessionGate />
       <div className={styles.shell}>
         {showTicker ? (
@@ -31,6 +33,6 @@ export function RootLayout() {
         </div>
       </div>
       <AuthLoginModal isOpen={isOpen} onClose={close} />
-    </>
+    </QueryClientProvider>
   )
 }

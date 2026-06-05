@@ -21,8 +21,7 @@ import { removeNewsBookmark } from '../data/clients/bookmarkClient'
 import { syncAlertSettingsIfNeeded, updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
-import { useNewsBookmarkStore } from '../store/newsBookmarkStore'
-import { useWatchlistStore } from '../store/watchlistStore'
+import { invalidateBookmarkIdsQueries, invalidateWatchlistQueries } from '../lib/queryCache'
 import type { AlertSettingsResponse } from '../data/types/member'
 import { toAlertSettings } from '../data/types/member'
 import type { MyPageBookmarkItem } from '../data/types/myPage'
@@ -132,11 +131,11 @@ export default function MyPage() {
       pendingBookmarkRemoveRef.current.delete(item.id)
       removeNewsBookmark(item.id)
         .then(async () => {
-          await useNewsBookmarkStore.getState().reload()
+          await invalidateBookmarkIdsQueries()
           setBookmarkRefreshKey((key) => key + 1)
         })
         .catch(async () => {
-          await useNewsBookmarkStore.getState().reload()
+          await invalidateBookmarkIdsQueries()
           setBookmarkRefreshKey((key) => key + 1)
           snackbar.show('뉴스 저장 취소에 실패했습니다.')
         })
@@ -170,12 +169,12 @@ export default function MyPage() {
       pendingWatchlistRemoveRef.current.delete(code)
       removeWatchlistItem(code)
         .then(async () => {
-          await useWatchlistStore.getState().reload()
+          await invalidateWatchlistQueries()
           setLocalSettings(null)
           setRefreshKey((key) => key + 1)
         })
         .catch(async () => {
-          await useWatchlistStore.getState().reload()
+          await invalidateWatchlistQueries()
           setRefreshKey((key) => key + 1)
           snackbar.show('종목 저장 취소에 실패했습니다.')
         })

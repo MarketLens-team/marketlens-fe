@@ -1,5 +1,5 @@
 import { isMockDataSource } from '../../config/dataSource'
-import { getCachedWatchlistResponses } from '../../store/watchlistStore'
+import { getCachedWatchlistResponses } from '../../lib/queryCache'
 import { mapMyPageData } from '../mappers/myPageMapper'
 import { mockMyPageData } from '../mocks/myPage.mock'
 import type { MyPageData } from '../types/myPage'
