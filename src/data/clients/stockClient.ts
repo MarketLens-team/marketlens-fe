@@ -20,6 +20,7 @@ import { mockStockDirectory } from '../mocks/stockDirectory.mock'
 import { mockDefaultStockCode, mockStockDetails } from '../mocks/stock.mock'
 import type { ApiEnvelope } from '../types/api'
 import { appendNewsCursorParam } from '../../lib/encodeNewsCursor'
+import { loadStockPricesResponse } from '../../lib/stockPricesCache'
 import type {
   NewsFeedAroundResponse,
   NewsFeedCursorResponse,
@@ -551,9 +552,11 @@ export async function fetchStockMarketList(): Promise<StockMarketRow[]> {
     const prices = buildMockStockPricesForDirectory(directory)
     return mapDirectoryToStockMarketRows(directory, prices)
   }
-  const prices = await getApiData<StockPricesResponse>(
-    `${STOCKS_BASE}/prices`,
-    '종목 시세를 불러오지 못했습니다.',
+  const prices = await loadStockPricesResponse(() =>
+    getApiData<StockPricesResponse>(
+      `${STOCKS_BASE}/prices`,
+      '종목 시세를 불러오지 못했습니다.',
+    ),
   )
   return mapDirectoryToStockMarketRows(directory, prices)
 }
@@ -566,9 +569,11 @@ export async function fetchStockPrices(
     await mockDelay(80)
     return mapStockPricesToTickerRows(buildMockStockPricesResponse(), codes)
   }
-  const data = await getApiData<StockPricesResponse>(
-    `${STOCKS_BASE}/prices`,
-    '종목 시세를 불러오지 못했습니다.',
+  const data = await loadStockPricesResponse(() =>
+    getApiData<StockPricesResponse>(
+      `${STOCKS_BASE}/prices`,
+      '종목 시세를 불러오지 못했습니다.',
+    ),
   )
   return mapStockPricesToTickerRows(data, codes)
 }
