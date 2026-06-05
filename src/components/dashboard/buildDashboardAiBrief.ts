@@ -1,4 +1,5 @@
 import { sentimentLabel } from './sentimentGaugeShared'
+import { pickDashboardAlerts } from './pickDashboardAlerts'
 import { STOCK_SENTIMENT_NEUTRAL_BAND, formatStockScore } from '../stock/stockScore'
 import type { DashboardBriefing, DashboardOverview } from '../../data/types/dashboard'
 
@@ -16,11 +17,18 @@ export function buildDashboardAiBrief(
   overview: DashboardOverview,
   options: { isLoggedIn: boolean },
 ): string {
-  const { watchlist, portfolioSentiment, buzzSurgeTop3, kospiSentiment } = overview
+  const { watchlist, portfolioSentiment, buzzSurgeTop3, kospiSentiment, marketOutlierRows, sectorHeatmap } =
+    overview
   const { isLoggedIn } = options
 
   if (!isLoggedIn) {
-    return '로그인하면 관심 종목 기준으로 오늘 시장 흐름을 한눈에 볼 수 있어요.'
+    const alerts = pickDashboardAlerts(marketOutlierRows, sectorHeatmap, 3, 'market')
+    const stockNames = alerts.filter((alert) => alert.targetKind === 'stock').map((alert) => alert.name)
+    if (stockNames.length > 0) {
+      const lead = stockNames.slice(0, 2).join('·')
+      return `오늘 ${lead} 등 시장 이상치가 두드러집니다. 로그인하면 관심 종목 기준 맞춤 브리핑을 받을 수 있어요.`
+    }
+    return '오늘 시장 이상치를 확인해 보세요. 로그인하면 관심 종목 기준으로 맞춤 요약을 받을 수 있어요.'
   }
 
   if (watchlist.length === 0) {

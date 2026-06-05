@@ -74,18 +74,32 @@ export default function DashboardPage() {
               <DashboardAiBrief summary={aiBrief} updatedAt={briefing?.updatedAt ?? null} />
             </section>
 
-            <section className={styles.heroGrid} aria-label="포트폴리오·이상치">
-              <PortfolioSentimentGauge gauge={data.portfolioSentiment} className={styles.heroGauge} />
-              <DashboardAlertCards
-                watchlist={data.watchlist}
-                sectorHeatmap={data.sectorHeatmap}
-                isLoggedIn={isLoggedIn}
-              />
-            </section>
+            {isLoggedIn ? (
+              <section className={styles.heroGrid} aria-label="포트폴리오·이상치">
+                <PortfolioSentimentGauge gauge={data.portfolioSentiment} className={styles.heroGauge} />
+                <DashboardAlertCards
+                  watchlist={data.watchlist}
+                  marketOutlierRows={data.marketOutlierRows}
+                  sectorHeatmap={data.sectorHeatmap}
+                  isLoggedIn={isLoggedIn}
+                />
+              </section>
+            ) : (
+              <section className={styles.guestAlertSection} aria-label="오늘 이상치">
+                <DashboardAlertCards
+                  watchlist={data.watchlist}
+                  marketOutlierRows={data.marketOutlierRows}
+                  sectorHeatmap={data.sectorHeatmap}
+                  isLoggedIn={isLoggedIn}
+                />
+              </section>
+            )}
 
-            <section className={styles.watchlistSection} aria-label="관심 종목">
-              <DashboardWatchlistSection rows={data.watchlist} />
-            </section>
+            {isLoggedIn ? (
+              <section className={styles.watchlistSection} aria-label="관심 종목">
+                <DashboardWatchlistSection rows={data.watchlist} />
+              </section>
+            ) : null}
 
             <section className={styles.marketSection} aria-label="KOSPI·언급량·섹터">
               <div ref={marketAsideRef} className={styles.marketAside}>

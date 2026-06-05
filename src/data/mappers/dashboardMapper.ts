@@ -117,6 +117,7 @@ export function mapDashboardOverview(
     portfolioSentiment: mapSentimentGauge(overview.portfolio ?? EMPTY_SENTIMENT_BLOCK),
     stocksToWatch: mapHotStatementsToHighlights(overview.hotStatements),
     watchlist: watchlistRows,
+    marketOutlierRows: [],
     kospiSentiment: mapSentimentGauge(overview.marketSentiment ?? overview.portfolio ?? EMPTY_SENTIMENT_BLOCK),
     buzzSurgeTop3: mapBuzzTop3(overview.buzzTop3),
     sectorHeatmap: mapSectorHeatmap(overview.sectorHeatmap),

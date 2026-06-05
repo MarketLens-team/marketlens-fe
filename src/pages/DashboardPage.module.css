@@ -33,6 +33,11 @@
   height: 100%;
 }
 
+.guestAlertSection {
+  width: 100%;
+  min-width: 0;
+}
+
 .watchlistSection {
   width: 100%;
   min-width: 0;

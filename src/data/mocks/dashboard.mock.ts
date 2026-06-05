@@ -18,6 +18,7 @@ export const mockDashboardOverview: DashboardOverview = {
     { name: '셀트리온', metricLabel: '감성', metricValue: '-34', tone: 'negative' },
     { name: '카카오', metricLabel: '언급량', metricValue: '+84%', tone: 'positive' },
   ],
+  marketOutlierRows: [],
   watchlist: [
     {
       name: '셀트리온',
