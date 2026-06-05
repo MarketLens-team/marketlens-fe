@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 브랜치 | `fix/dashboard-anomaly-summary-lift` |
-| 커밋 | (커밋 후 갱신) |
+| 커밋 | `fee5b81` |
 
 ## 요약
 
