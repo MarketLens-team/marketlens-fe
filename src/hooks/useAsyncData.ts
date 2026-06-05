@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { dedupeAsync, STRICT_MODE_DEDUPE_TTL_MS } from '../lib/dedupeAsync'
 import { MIN_LOADING_MS, withMinDuration } from '../lib/withMinDuration'
 import { useAuthStore } from '../store/authStore'
 
@@ -24,10 +25,17 @@ export function useAsyncData<T>(
   factory: () => Promise<T>,
   options?: UseAsyncDataOptions<T>,
 ): AsyncState<T> {
+  const hookId = useId()
   const enabled = options?.enabled !== false
   const minLoadingMs = options?.minLoadingMs ?? MIN_LOADING_MS
   const keepPreviousData = options?.keepPreviousData === true
   const initialDataRef = useRef(options?.initialData ?? null)
+  const factoryGenerationRef = useRef(0)
+  const prevFactoryRef = useRef(factory)
+  if (prevFactoryRef.current !== factory) {
+    factoryGenerationRef.current += 1
+    prevFactoryRef.current = factory
+  }
   // token 재발급 시 문자열만 바뀌므로 isLoggedIn으로 로그인 상태 전환만 refetch
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn)
   const [data, setData] = useState<T | null>(() => initialDataRef.current)
@@ -56,7 +64,13 @@ export function useAsyncData<T>(
       setRefreshing(false)
     }
 
-    void withMinDuration(factory, minLoadingMs)
+    const dedupeKey = `useAsyncData:${hookId}:${enabled}:${isLoggedIn}:${factoryGenerationRef.current}`
+
+    void dedupeAsync(
+      dedupeKey,
+      () => withMinDuration(factory, minLoadingMs),
+      { ttlMs: STRICT_MODE_DEDUPE_TTL_MS },
+    )
       .then((value) => {
         if (!cancelled) {
           setData(value)
@@ -75,7 +89,7 @@ export function useAsyncData<T>(
     return () => {
       cancelled = true
     }
-  }, [isLoggedIn, enabled, factory, minLoadingMs, keepPreviousData])
+  }, [hookId, isLoggedIn, enabled, factory, minLoadingMs, keepPreviousData])
 
   return { data, loading, error, refreshing }
 }

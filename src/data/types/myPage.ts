@@ -69,7 +69,9 @@ export interface MyPageAccount {
 export interface MyPageData {
   summary: MyPageSummary
   watchlist: MyPageWatchlistRow[]
-  alertSettings: AlertSettingsResponse
-  alertExample: string
-  account: MyPageAccount
+  /** 계정 탭에서만 로드 */
+  alertSettings?: AlertSettingsResponse
+  alertExample?: string
+  /** 계정 탭에서만 로드 */
+  account?: MyPageAccount
 }

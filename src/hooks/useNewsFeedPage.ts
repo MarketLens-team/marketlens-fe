@@ -22,6 +22,7 @@ import {
   registerNewsFeedLiveSnapshot,
   type NewsFeedMode,
 } from '../lib/newsFeedSession'
+import { dedupeAsync, STRICT_MODE_DEDUPE_TTL_MS } from '../lib/dedupeAsync'
 import { useAuthStore } from '../store/authStore'
 import { useAnchoredFeed } from './useAnchoredFeed'
 
@@ -129,6 +130,9 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     fetchOlder,
   })
 
+  const replaceLatestItemsRef = useRef(replaceLatestItems)
+  replaceLatestItemsRef.current = replaceLatestItems
+
   useEffect(() => {
     if (needsLogin) {
       clearNewsFeedLiveSnapshot()
@@ -163,7 +167,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
 
     const run = async () => {
       if (needsLogin) {
-        replaceLatestItems([], EMPTY_PAGINATION)
+        replaceLatestItemsRef.current([], EMPTY_PAGINATION)
         setError(null)
         setLoadMoreError(null)
         setRestoredScrollTop(null)
@@ -176,7 +180,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
         const session = consumeNewsFeedSession(focusNewsIdRef.current, mode)
         if (session) {
           restoredOnceRef.current = true
-          replaceLatestItems(session.items, session.pagination)
+          replaceLatestItemsRef.current(session.items, session.pagination)
           setRestoredScrollTop(session.scrollTop)
           setError(null)
           setLoadMoreError(null)
@@ -201,9 +205,14 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
       try {
         const fetchPage =
           mode === 'watchlist' ? fetchWatchlistNewsFeedCursor : fetchAllNewsFeedCursor
-        const page = await fetchPage({ limit: ANCHORED_FEED_PAGE_LIMIT })
+        const dedupeKey = `newsFeed:cursor:${mode}:${needsLogin}:${focusNewsIdRef.current ?? ''}`
+        const page = await dedupeAsync(
+          dedupeKey,
+          () => fetchPage({ limit: ANCHORED_FEED_PAGE_LIMIT }),
+          { ttlMs: STRICT_MODE_DEDUPE_TTL_MS },
+        )
         if (cancelled || requestId !== requestIdRef.current) return
-        replaceLatestItems(page.items, page.pagination)
+        replaceLatestItemsRef.current(page.items, page.pagination)
       } catch (e) {
         if (cancelled || requestId !== requestIdRef.current) return
         const fallback =
@@ -211,7 +220,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
             ? '관심종목 뉴스를 불러오지 못했습니다.'
             : '전체 뉴스를 불러오지 못했습니다.'
         setError(e instanceof Error ? e.message : fallback)
-        replaceLatestItems([], EMPTY_PAGINATION)
+        replaceLatestItemsRef.current([], EMPTY_PAGINATION)
       } finally {
         if (!cancelled && requestId === requestIdRef.current) {
           setLoading(false)
@@ -223,7 +232,7 @@ export function useNewsFeedPage(mode: NewsFeedMode) {
     return () => {
       cancelled = true
     }
-  }, [mode, needsLogin, focusNewsId, replaceLatestItems])
+  }, [mode, needsLogin, focusNewsId])
 
   const loadNewerWithError = useCallback(async () => {
     setLoadMoreError(null)
