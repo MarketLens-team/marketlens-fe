@@ -1,3 +1,4 @@
 #!/bin/sh
 set -e
 npm run lint:js
+npm run typecheck
