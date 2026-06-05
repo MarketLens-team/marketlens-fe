@@ -8,6 +8,7 @@ import { SignupWatchlistStep } from '../components/auth/SignupWatchlistStep'
 import { ButtonSpinner } from '../components/ui/ButtonSpinner'
 import { PillButton } from '../components/ui/PillButton'
 import { completeRegistration } from '../data/clients/completeRegistration'
+import { fetchAlertSettings, syncAlertSettingsIfNeeded } from '../data/clients/memberClient'
 import type { AlertSettings } from '../data/types/member'
 import { useAuthModalStore } from '../store/authModalStore'
 import { useAuthStore } from '../store/authStore'
@@ -95,6 +96,22 @@ export default function OnboardingPage() {
     navigate('/', { replace: true, state: undefined })
   }
 
+  const finishOnboardingFromTelegramStep = async () => {
+    setIsSubmitting(true)
+    setTelegramLinkHint(null)
+    try {
+      const settings = await fetchAlertSettings()
+      await syncAlertSettingsIfNeeded(settings)
+      goHome()
+    } catch (error) {
+      setTelegramLinkHint(
+        error instanceof Error ? error.message : '알림 설정을 저장하지 못했습니다.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (isLoggedIn && phase !== 'telegram') {
     return <Navigate to={role === 'ADMIN' ? '/admin' : '/'} replace />
   }
@@ -173,10 +190,20 @@ export default function OnboardingPage() {
               </p>
             ) : null}
             <div className={styles.telegramFooter}>
-              <button type="button" className={styles.skipBtn} disabled={isSubmitting} onClick={goHome}>
+              <button
+                type="button"
+                className={styles.skipBtn}
+                disabled={isSubmitting}
+                onClick={() => void finishOnboardingFromTelegramStep()}
+              >
                 나중에 하기
               </button>
-              <button type="button" className={styles.submit} disabled={isSubmitting} onClick={goHome}>
+              <button
+                type="button"
+                className={styles.submit}
+                disabled={isSubmitting}
+                onClick={() => void finishOnboardingFromTelegramStep()}
+              >
                 완료
               </button>
             </div>
