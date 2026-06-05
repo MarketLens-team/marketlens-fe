@@ -1,10 +1,13 @@
 import { Card } from '../common/Card'
 import { AiSummaryText } from '../common/AiSummaryText'
+import { PillButton } from '../ui/PillButton'
+import { useAuthModalStore } from '../../store/authModalStore'
 import styles from './DashboardAiBrief.module.css'
 
 interface DashboardAiBriefProps {
   summary: string
   updatedAt?: string | null
+  showLoginAction?: boolean
 }
 
 function formatBriefingUpdatedAt(iso: string): string {
@@ -18,7 +21,8 @@ function formatBriefingUpdatedAt(iso: string): string {
   })
 }
 
-export function DashboardAiBrief({ summary, updatedAt }: DashboardAiBriefProps) {
+export function DashboardAiBrief({ summary, updatedAt, showLoginAction = false }: DashboardAiBriefProps) {
+  const openAuthModal = useAuthModalStore((s) => s.open)
   const updatedLabel = updatedAt ? formatBriefingUpdatedAt(updatedAt) : ''
 
   return (
@@ -30,6 +34,13 @@ export function DashboardAiBrief({ summary, updatedAt }: DashboardAiBriefProps) 
       <p className={styles.text}>
         <AiSummaryText text={summary} />
       </p>
+      {showLoginAction ? (
+        <div className={styles.loginAction}>
+          <PillButton variant="primary" type="button" onClick={() => openAuthModal('login')}>
+            로그인
+          </PillButton>
+        </div>
+      ) : null}
     </Card>
   )
 }

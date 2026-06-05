@@ -71,7 +71,11 @@ export default function DashboardPage() {
         {data ? (
           <>
             <section className={styles.aiBriefSection} aria-label="오늘 시장 요약">
-              <DashboardAiBrief summary={aiBrief} updatedAt={briefing?.updatedAt ?? null} />
+              <DashboardAiBrief
+                summary={aiBrief}
+                updatedAt={briefing?.updatedAt ?? null}
+                showLoginAction={!isLoggedIn}
+              />
             </section>
 
             {isLoggedIn ? (
