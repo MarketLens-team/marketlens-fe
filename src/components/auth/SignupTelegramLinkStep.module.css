@@ -1,0 +1,46 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.lead {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+.botName {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+}
+
+.note,
+.noteMuted {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+.fallbackLink {
+  color: var(--color-primary-on-surface);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.fallbackLink:hover {
+  color: var(--color-text-primary);
+}
+
+.action {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.telegramIcon {
+  flex-shrink: 0;
+}
