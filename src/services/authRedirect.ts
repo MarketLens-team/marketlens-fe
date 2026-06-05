@@ -39,6 +39,25 @@ export function clearAuthRedirect() {
   sessionStorage.removeItem(AUTH_REDIRECT_KEY)
 }
 
+export function clearAuthPromptPending() {
+  sessionStorage.removeItem(AUTH_PROMPT_KEY)
+}
+
+/** 사용자가 직접 로그아웃할 때 in-flight 401이 세션 만료 모달을 띄우지 않도록 */
+let intentionalLogout = false
+
+export function beginIntentionalLogout() {
+  intentionalLogout = true
+}
+
+export function clearIntentionalLogout() {
+  intentionalLogout = false
+}
+
+export function isIntentionalLogoutInProgress(): boolean {
+  return intentionalLogout
+}
+
 /** `window.location.assign('/')` 직후 마운트 시 로그인 모달 1회 표시 */
 export function markAuthPromptPending() {
   sessionStorage.setItem(AUTH_PROMPT_KEY, '1')
@@ -52,6 +71,8 @@ export function consumeAuthPromptPending(): boolean {
 
 /** 세션 만료·재발급 실패 시: 돌아갈 경로 저장 후 홈으로 이동(또는 로그인 모달 트리거) */
 export function handleSessionExpired() {
+  if (isIntentionalLogoutInProgress()) return
+
   const returnPath = `${window.location.pathname}${window.location.search}`
   if (pathRequiresAuth(window.location.pathname)) {
     saveAuthRedirect(returnPath)

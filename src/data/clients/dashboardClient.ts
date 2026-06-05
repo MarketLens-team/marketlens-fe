@@ -1,5 +1,7 @@
 import { isMockDataSource } from '../../config/dataSource'
 import { api } from '../../services/api'
+import { useAuthStore } from '../../store/authStore'
+import { buildMarketOutlierRows } from '../mappers/dashboardMarketOutliers'
 import {
   mapDashboardBriefing,
   mapDashboardOverview,
@@ -11,7 +13,7 @@ import type { DashboardBriefing, DashboardOverview } from '../types/dashboard'
 import type { DashboardBriefingResponse, DashboardOverviewResponse } from '../types/dashboardApi'
 import type { WatchlistResponse } from '../types/memberApi'
 import type { StockSummaryBatchItemResponse } from '../types/stockApi'
-import { fetchStockPrices, fetchWatchlistSummariesBatch } from './stockClient'
+import { fetchStockPrices, fetchStockRankings, fetchWatchlistSummariesBatch } from './stockClient'
 import { getApiErrorMessage } from '../util/apiError'
 import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
@@ -63,7 +65,20 @@ export async function fetchDashboardBriefing(): Promise<DashboardBriefing | null
 export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   if (isMockDataSource()) {
     await mockDelay()
-    return structuredClone(mockDashboardOverview)
+    const overview = structuredClone(mockDashboardOverview)
+    const isLoggedIn = Boolean(useAuthStore.getState().token?.trim())
+    if (!isLoggedIn) {
+      overview.watchlist = []
+      try {
+        const rankings = await fetchStockRankings()
+        overview.marketOutlierRows = buildMarketOutlierRows(overview.buzzSurgeTop3, rankings)
+      } catch {
+        overview.marketOutlierRows = buildMarketOutlierRows(overview.buzzSurgeTop3, null)
+      }
+    } else {
+      overview.marketOutlierRows = []
+    }
+    return overview
   }
 
   let overview: DashboardOverviewResponse
@@ -81,5 +96,17 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
     watchlist = []
   }
 
-  return mapDashboardOverview(overview, watchlist)
+  const mapped = mapDashboardOverview(overview, watchlist)
+  let marketOutlierRows = mapped.marketOutlierRows
+
+  if (watchlist.length === 0) {
+    try {
+      const rankings = await fetchStockRankings()
+      marketOutlierRows = buildMarketOutlierRows(mapped.buzzSurgeTop3, rankings)
+    } catch {
+      marketOutlierRows = buildMarketOutlierRows(mapped.buzzSurgeTop3, null)
+    }
+  }
+
+  return { ...mapped, marketOutlierRows }
 }

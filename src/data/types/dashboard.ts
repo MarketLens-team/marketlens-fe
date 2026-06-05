@@ -52,6 +52,8 @@ export interface DashboardOverview {
   portfolioSentiment: SentimentGaugeBlock
   stocksToWatch: StockHighlight[]
   watchlist: DashboardWatchlistRow[]
+  /** 비로그인 이상치 선정용 — rankings·buzzTop3 기반 */
+  marketOutlierRows: DashboardWatchlistRow[]
   kospiSentiment: SentimentGaugeBlock
   buzzSurgeTop3: BuzzSurgeItem[]
   sectorHeatmap: SectorHeatmapCell[]
