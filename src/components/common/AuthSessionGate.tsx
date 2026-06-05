@@ -22,6 +22,7 @@ export function AuthSessionGate() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const openAuthModal = useAuthModalStore((s) => s.open)
 
+  // 앱 최초 마운트 시 1회만 선제 reissue. 이후는 api 인터셉터·401 재시도가 담당.
   useEffect(() => {
     const hadRefresh = Boolean(useAuthStore.getState().refreshToken)
     void ensureAccessToken().then((ok) => {
@@ -32,7 +33,7 @@ export function AuthSessionGate() {
         }
       }
     })
-  }, [location.pathname])
+  }, [])
 
   useEffect(() => {
     if (isLoggedIn || isIntentionalLogoutInProgress()) return
