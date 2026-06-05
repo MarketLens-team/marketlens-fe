@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchStockTodayNews } from '../data/clients/stockClient'
 import type { StockTodayNewsItem } from '../data/types/stock'
+import { dedupeAsync, STRICT_MODE_DEDUPE_TTL_MS } from '../lib/dedupeAsync'
+
+const TODAY_NEWS_DEDUPE_KEY = 'todayNews:stocks'
 
 export function useTodayNewsStocks() {
   const [items, setItems] = useState<StockTodayNewsItem[]>([])
@@ -16,7 +19,11 @@ export function useTodayNewsStocks() {
       setLoading(true)
       setError(null)
       try {
-        const data = await fetchStockTodayNews()
+        const data = await dedupeAsync(
+          TODAY_NEWS_DEDUPE_KEY,
+          () => fetchStockTodayNews(),
+          { ttlMs: STRICT_MODE_DEDUPE_TTL_MS },
+        )
         if (cancelled || requestId !== requestIdRef.current) return
         setItems(data.items)
       } catch (e) {

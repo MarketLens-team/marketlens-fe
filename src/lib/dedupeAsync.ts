@@ -6,6 +6,9 @@ type CacheEntry<T> = {
 const inFlight = new Map<string, CacheEntry<unknown>>()
 const settled = new Map<string, CacheEntry<unknown>>()
 
+/** React 18 StrictMode 이중 mount·근접 effect 재실행 병합 */
+export const STRICT_MODE_DEDUPE_TTL_MS = 5_000
+
 export interface DedupeAsyncOptions {
   /** resolve 후 재사용(ms). StrictMode 이중 mount 병합용 */
   ttlMs?: number

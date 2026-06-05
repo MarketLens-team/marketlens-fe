@@ -1,6 +1,6 @@
 import { isMockDataSource } from '../../config/dataSource'
-import { getCachedWatchlistResponses } from '../../store/watchlistStore'
-import { mapMyPageData } from '../mappers/myPageMapper'
+import { getCachedWatchlistResponses } from '../../lib/queryCache'
+import { mapMyPageAccountData, mapMyPageWatchlistData } from '../mappers/myPageMapper'
 import { mockMyPageData } from '../mocks/myPage.mock'
 import type { MyPageData } from '../types/myPage'
 import type { WatchlistResponse } from '../types/memberApi'
@@ -11,6 +11,8 @@ import { fetchWatchlistResponses } from './watchlistClient'
 import type { WatchlistOverviewPrice } from '../mappers/myPageMapper'
 import { getApiErrorMessage } from '../util/apiError'
 import { mockDelay } from '../util/mockDelay'
+
+export type MyPageFetchScope = 'watchlist' | 'account'
 
 async function resolveWatchlistRows(): Promise<WatchlistResponse[]> {
   const cached = getCachedWatchlistResponses()
@@ -40,22 +42,32 @@ async function fetchOverviewPriceByCode(): Promise<Map<string, WatchlistOverview
   }
 }
 
-export async function fetchMyPage(): Promise<MyPageData> {
+async function fetchMyPageAccount(): Promise<MyPageData> {
+  const [settings, member] = await Promise.all([fetchAlertSettings(), fetchMemberProfile()])
+  return mapMyPageAccountData({ settings, member })
+}
+
+async function fetchMyPageWatchlist(): Promise<MyPageData> {
+  const [watchlist, overviewPriceByCode, batchMetrics] = await Promise.all([
+    resolveWatchlistRows(),
+    fetchOverviewPriceByCode(),
+    fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
+  ])
+  const summaries = summariesForWatchlist(watchlist, batchMetrics)
+  return mapMyPageWatchlistData({ watchlist, summaries, overviewPriceByCode })
+}
+
+export async function fetchMyPage(scope: MyPageFetchScope): Promise<MyPageData> {
   if (isMockDataSource()) {
     await mockDelay(140)
     return structuredClone(mockMyPageData)
   }
 
   try {
-    const [watchlist, settings, member, overviewPriceByCode, batchMetrics] = await Promise.all([
-      resolveWatchlistRows(),
-      fetchAlertSettings(),
-      fetchMemberProfile(),
-      fetchOverviewPriceByCode(),
-      fetchWatchlistSummariesBatch().catch(() => [] as StockSummaryBatchItemResponse[]),
-    ])
-    const summaries = summariesForWatchlist(watchlist, batchMetrics)
-    return mapMyPageData({ watchlist, summaries, overviewPriceByCode, settings, member })
+    if (scope === 'account') {
+      return await fetchMyPageAccount()
+    }
+    return await fetchMyPageWatchlist()
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '마이페이지를 불러오지 못했습니다.'))
   }

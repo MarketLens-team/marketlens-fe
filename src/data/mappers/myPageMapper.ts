@@ -56,24 +56,38 @@ export function mapMemberAccount(member: MemberResponse): MyPageAccount {
   }
 }
 
-export function mapMyPageData(input: {
+function mapWatchlistRows(
+  watchlist: WatchlistResponse[],
+  summaries: Array<StockSummaryMetrics | null>,
+  overviewPriceByCode?: Map<string, WatchlistOverviewPrice>,
+): MyPageWatchlistRow[] {
+  return watchlist.map((item, index) =>
+    mapWatchlistRow(item, summaries[index], overviewPriceByCode?.get(item.stockCode)),
+  )
+}
+
+/** 관심종목 탭 — watchlist · overview · batch만 */
+export function mapMyPageWatchlistData(input: {
   watchlist: WatchlistResponse[]
   summaries: Array<StockSummaryMetrics | null>
   overviewPriceByCode?: Map<string, WatchlistOverviewPrice>
+}): MyPageData {
+  const rows = mapWatchlistRows(input.watchlist, input.summaries, input.overviewPriceByCode)
+  return {
+    summary: buildMyPageSummary(rows),
+    watchlist: rows,
+  }
+}
+
+/** 계정 탭 — settings · me */
+export function mapMyPageAccountData(input: {
   settings: AlertSettingsResponse
   member: MemberResponse
   alertExample?: string
 }): MyPageData {
-  const rows = input.watchlist.map((item, index) =>
-    mapWatchlistRow(
-      item,
-      input.summaries[index],
-      input.overviewPriceByCode?.get(item.stockCode),
-    ),
-  )
   return {
-    summary: buildMyPageSummary(rows),
-    watchlist: rows,
+    summary: buildMyPageSummary([]),
+    watchlist: [],
     alertSettings: input.settings,
     alertExample:
       input.alertExample ??

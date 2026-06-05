@@ -20,11 +20,12 @@ export async function fetchMemberProfile(): Promise<MemberResponse> {
   if (isMockDataSource()) {
     await mockDelay(100)
     const { mockMyPageData } = await import('../mocks/myPage.mock')
+    const account = mockMyPageData.account!
     return {
-      nickname: mockMyPageData.account.nickname,
-      email: mockMyPageData.account.email,
-      createdAt: mockMyPageData.account.joinedAt,
-      plan: mockMyPageData.account.plan,
+      nickname: account.nickname,
+      email: account.email,
+      createdAt: account.joinedAt,
+      plan: account.plan,
     }
   }
   try {
@@ -39,7 +40,7 @@ export async function fetchAlertSettings(): Promise<AlertSettingsResponse> {
   if (isMockDataSource()) {
     await mockDelay(100)
     const { mockMyPageData } = await import('../mocks/myPage.mock')
-    return { ...mockMyPageData.alertSettings }
+    return { ...mockMyPageData.alertSettings! }
   }
   try {
     const { data } = await api.get<ApiEnvelope<AlertSettingsResponse>>(SETTINGS_PATH)
@@ -53,7 +54,7 @@ export async function updateAlertSettings(settings: AlertSettings): Promise<Aler
   if (isMockDataSource()) {
     await mockDelay(120)
     const { mockMyPageData } = await import('../mocks/myPage.mock')
-    const telegramLinked = mockMyPageData.alertSettings.telegramLinked
+    const telegramLinked = mockMyPageData.alertSettings!.telegramLinked
     const normalized = telegramLinked ? settings : { ...settings, telegramNotificationEnabled: false }
     return { ...normalized, telegramLinked }
   }
