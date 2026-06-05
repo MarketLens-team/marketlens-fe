@@ -7,7 +7,10 @@ import type { CompleteRegistrationInput } from '../data/clients/completeRegistra
 import { useAuthModalStore } from '../store/authModalStore'
 import { useAuthStore, type UserRole } from '../store/authStore'
 import {
+  beginIntentionalLogout,
+  clearAuthPromptPending,
   clearAuthRedirect,
+  clearIntentionalLogout,
   consumeAuthRedirect,
   isRedirectablePath,
   pathRequiresAuth,
@@ -63,6 +66,7 @@ export function useAuthFlow() {
         resolvedRole,
       )
       clearAuthRedirect()
+      clearIntentionalLogout()
       useAuthModalStore.getState().close()
       navigate(redirectTo, { replace: true, state: undefined })
     },
@@ -70,14 +74,17 @@ export function useAuthFlow() {
   )
 
   const handleLogout = useCallback(() => {
+    beginIntentionalLogout()
+    clearAuthRedirect()
+    clearAuthPromptPending()
+    useAuthModalStore.getState().close()
+
+    if (pathRequiresAuth(location.pathname)) {
+      navigate('/', { replace: true, state: undefined })
+    }
+
     void logoutSession().finally(() => {
       logout()
-      useAuthModalStore.getState().close()
-
-      // 로그인 필요 페이지는 홈으로. 공개 페이지는 유지하며 useAsyncData가 토큰 변경으로 재요청.
-      if (pathRequiresAuth(location.pathname)) {
-        navigate('/', { replace: true, state: undefined })
-      }
     })
   }, [location.pathname, logout, navigate])
 
@@ -86,6 +93,7 @@ export function useAuthFlow() {
       const tokens = await completeRegistration(input)
       login(tokens.accessToken, tokens.refreshToken, 'USER')
       clearAuthRedirect()
+      clearIntentionalLogout()
       useAuthModalStore.getState().close()
       navigate('/', { replace: true, state: undefined })
     },

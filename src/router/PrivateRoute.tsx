@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { ensureAccessToken } from '../services/authTokenRefresh'
+import { isIntentionalLogoutInProgress } from '../services/authRedirect'
 import { useAuthStore } from '../store/authStore'
 
 export interface PrivateRouteProps {
@@ -28,14 +29,19 @@ export function PrivateRoute({ requiredRole }: PrivateRouteProps) {
   }
 
   if (!isLoggedIn) {
+    const intentionalLogout = isIntentionalLogoutInProgress()
     return (
       <Navigate
         to="/"
         replace
-        state={{
-          from: location.pathname + location.search,
-          openAuth: true,
-        }}
+        state={
+          intentionalLogout
+            ? undefined
+            : {
+                from: location.pathname + location.search,
+                openAuth: true,
+              }
+        }
       />
     )
   }
