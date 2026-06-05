@@ -18,10 +18,11 @@ import { PageFetchError } from '../components/common/PageFetchError'
 import { Snackbar } from '../components/ui/Snackbar'
 import skeleton from '../components/common/Skeleton.module.css'
 import { removeNewsBookmark } from '../data/clients/bookmarkClient'
-import { updateAlertSettings } from '../data/clients/memberClient'
+import { syncAlertSettingsIfNeeded, updateAlertSettings } from '../data/clients/memberClient'
 import { fetchMyPage } from '../data/clients/myPageClient'
 import { removeWatchlistItem } from '../data/clients/watchlistClient'
-import type { AlertSettings } from '../data/types/member'
+import type { AlertSettingsResponse } from '../data/types/member'
+import { toAlertSettings } from '../data/types/member'
 import type { MyPageBookmarkItem } from '../data/types/myPage'
 import { fullscreenPresetFromAppError } from '../data/util/httpErrorPage'
 import { useAsyncData } from '../hooks/useAsyncData'
@@ -63,8 +64,10 @@ export default function MyPage() {
     dateSummariesLoading: bookmarkDateSummariesLoading,
   } = useMyPageBookmarks(bookmarkRefreshKey)
 
-  const [localSettings, setLocalSettings] = useState<AlertSettings | null>(null)
+  const [localSettings, setLocalSettings] = useState<AlertSettingsResponse | null>(null)
   const alertSettings = localSettings ?? data?.alertSettings
+  const telegramSectionRef = useRef<HTMLElement>(null)
+  const awaitingTelegramLinkRef = useRef(false)
 
   const handleTabChange = (next: MyPageTab) => {
     const nextParams = new URLSearchParams(searchParams)
@@ -81,6 +84,41 @@ export default function MyPage() {
       pendingBookmarkRemoveRef.current.clear()
     }
   }, [])
+
+  useEffect(() => {
+    const settings = data?.alertSettings
+    if (!settings || localSettings != null) return
+
+    let cancelled = false
+
+    void syncAlertSettingsIfNeeded(settings)
+      .then((updated) => {
+        if (cancelled || updated === settings) return
+        setLocalSettings(updated)
+      })
+      .catch((e) => {
+        if (cancelled) return
+        setActionError(e instanceof Error ? e.message : '알림 설정 동기화에 실패했습니다.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [data?.alertSettings, localSettings])
+
+  useEffect(() => {
+    if (tab !== 'account') return
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible' || !awaitingTelegramLinkRef.current) return
+      awaitingTelegramLinkRef.current = false
+      setLocalSettings(null)
+      setRefreshKey((key) => key + 1)
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [tab])
 
   const handleBookmarkRemove = (
     item: MyPageBookmarkItem,
@@ -155,13 +193,14 @@ export default function MyPage() {
     })
   }
 
-  const handleSettingsChange = async (next: AlertSettings) => {
+  const handleSettingsChange = async (next: AlertSettingsResponse) => {
     if (!data) return
     setActionError(null)
     setLocalSettings(next)
     setSavingAlerts(true)
     try {
-      await updateAlertSettings(next)
+      const updated = await updateAlertSettings(toAlertSettings(next))
+      setLocalSettings(updated)
     } catch (e) {
       setLocalSettings(data.alertSettings)
       setActionError(e instanceof Error ? e.message : '알림 설정 저장에 실패했습니다.')
@@ -170,7 +209,15 @@ export default function MyPage() {
     }
   }
 
+  const handleTelegramLinkRequired = () => {
+    snackbar.show('텔레그램 알림을 받으려면 위에서 텔레그램 연동을 먼저 완료해 주세요.', {
+      durationMs: 5000,
+    })
+    telegramSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const handleTelegramLinkOpened = () => {
+    awaitingTelegramLinkRef.current = true
     setActionError(null)
     snackbar.show('브라우저에서 Telegram 열기를 허용한 뒤, 봇 채팅에서 시작(Start)을 눌러 연동을 완료해 주세요.', {
       durationMs: 6000,
@@ -238,15 +285,19 @@ export default function MyPage() {
                   onError={handleAccountActionError}
                 />
                 <hr className={styles.sectionDivider} aria-hidden />
-                <MyPageTelegramLink
-                  onOpened={handleTelegramLinkOpened}
-                  onError={handleAccountActionError}
-                />
+                <section ref={telegramSectionRef}>
+                  <MyPageTelegramLink
+                    linked={alertSettings.telegramLinked}
+                    onOpened={handleTelegramLinkOpened}
+                    onError={handleAccountActionError}
+                  />
+                </section>
                 <hr className={styles.sectionDivider} aria-hidden />
                 <MyPageAlertSettings
                   settings={alertSettings}
                   saving={savingAlerts}
                   onSettingsChange={handleSettingsChange}
+                  onTelegramLinkRequired={handleTelegramLinkRequired}
                 />
               </div>
             ) : null}

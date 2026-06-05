@@ -1,7 +1,7 @@
-import type { AlertSettings } from '../../data/types/member'
+import type { AlertSettingsResponse } from '../../data/types/member'
 import styles from './MyPageAlertSettings.module.css'
 
-type AlertSettingKey = keyof AlertSettings
+type AlertSettingKey = keyof AlertSettingsResponse
 
 interface SettingOption {
   key: AlertSettingKey
@@ -41,19 +41,23 @@ const ALERT_OPTIONS: SettingOption[] = [
 ]
 
 interface MyPageAlertSettingsProps {
-  settings: AlertSettings
+  settings: AlertSettingsResponse
   saving?: boolean
-  onSettingsChange: (settings: AlertSettings) => void
+  onSettingsChange: (settings: AlertSettingsResponse) => void
+  onTelegramLinkRequired?: () => void
 }
 
 interface AlertSettingToggleProps {
   option: SettingOption
   checked: boolean
   saving: boolean
+  disabled?: boolean
   onToggle: (key: AlertSettingKey) => void
 }
 
-function AlertSettingToggle({ option, checked, saving, onToggle }: AlertSettingToggleProps) {
+function AlertSettingToggle({ option, checked, saving, disabled = false, onToggle }: AlertSettingToggleProps) {
+  const isDisabled = saving || disabled
+
   return (
     <li className={styles.option}>
       <div className={styles.optionText}>
@@ -66,7 +70,8 @@ function AlertSettingToggle({ option, checked, saving, onToggle }: AlertSettingT
         className={styles.toggle}
         aria-checked={checked}
         aria-label={option.label}
-        disabled={saving}
+        aria-disabled={isDisabled}
+        disabled={isDisabled}
         onClick={() => onToggle(option.key)}
       >
         <span className={styles.toggleTrack} data-on={checked ? 'true' : 'false'}>
@@ -81,10 +86,23 @@ export function MyPageAlertSettings({
   settings,
   saving = false,
   onSettingsChange,
+  onTelegramLinkRequired,
 }: MyPageAlertSettingsProps) {
   const toggle = (key: AlertSettingKey) => {
-    if (saving) return
-    onSettingsChange({ ...settings, [key]: !settings[key] })
+    if (saving || key === 'telegramLinked') return
+
+    const nextChecked = !settings[key]
+
+    if (
+      key === 'telegramNotificationEnabled' &&
+      nextChecked &&
+      !settings.telegramLinked
+    ) {
+      onTelegramLinkRequired?.()
+      return
+    }
+
+    onSettingsChange({ ...settings, [key]: nextChecked })
   }
 
   return (

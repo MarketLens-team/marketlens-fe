@@ -1,4 +1,4 @@
-import type { AlertSettings } from './member'
+import type { AlertSettingsResponse } from './member'
 import type { NewsBookmarkContextType } from './bookmark'
 import type { SentimentPolarity } from './stock'
 
@@ -69,7 +69,7 @@ export interface MyPageAccount {
 export interface MyPageData {
   summary: MyPageSummary
   watchlist: MyPageWatchlistRow[]
-  alertSettings: AlertSettings
+  alertSettings: AlertSettingsResponse
   alertExample: string
   account: MyPageAccount
 }
