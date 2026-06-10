@@ -20,11 +20,11 @@ export function SignupTelegramLinkStep({ onLinkOpened, onLinkError }: SignupTele
         받을 수 있습니다.
       </p>
       <p className={styles.note}>
-        연동 버튼을 누르면 Telegram Web이 열립니다. <strong>QR로 로그인</strong>하면 봇 채팅으로
-        이동하니 <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요.
+        연동 버튼을 누르면 <strong>t.me</strong> 봇 페이지가 열립니다. <strong>시작(Start)</strong>
+        을 한 번만 눌러 연동을 완료해 주세요.
       </p>
       {linkUrls ? (
-        <p className={styles.noteMuted}>
+        <p key={linkUrls.tme} className={styles.noteMuted}>
           빈 화면이면{' '}
           <a className={styles.fallbackLink} href={linkUrls.webLogin} target="_blank" rel="noopener noreferrer">
             QR 로그인만

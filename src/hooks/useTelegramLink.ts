@@ -18,16 +18,21 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const [linking, setLinking] = useState(false)
   const [unlinking, setUnlinking] = useState(false)
   const [linkUrls, setLinkUrls] = useState<TelegramLinkUrls | null>(null)
+  const linkingRef = useRef(false)
+  const assistWindowRef = useRef<Window | null>(null)
   const onOpenedRef = useRef(options?.onOpened)
   const onErrorRef = useRef(options?.onError)
   onOpenedRef.current = options?.onOpened
   onErrorRef.current = options?.onError
 
   const linkTelegram = useCallback(async () => {
-    if (linking) return
+    if (linkingRef.current) return
 
+    assistWindowRef.current?.close()
     const assistWindow = openTelegramAssistWindow()
+    assistWindowRef.current = assistWindow
 
+    linkingRef.current = true
     setLinkUrls(null)
     setLinking(true)
     try {
@@ -37,12 +42,14 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
       onOpenedRef.current?.()
     } catch (error) {
       assistWindow?.close()
+      assistWindowRef.current = null
       setLinkUrls(null)
       onErrorRef.current?.(getApiErrorMessage(error, '텔레그램 연동 준비에 실패했습니다.'))
     } finally {
+      linkingRef.current = false
       setLinking(false)
     }
-  }, [linking])
+  }, [])
 
   const unlinkTelegram = useCallback(async (): Promise<AlertSettingsResponse | null> => {
     if (unlinking) return null

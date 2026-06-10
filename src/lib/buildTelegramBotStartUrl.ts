@@ -48,22 +48,22 @@ interface OpenTelegramBotLinkOptions {
   assistWindow?: Window | null
 }
 
-function openTelegramWebBotTab(
+function openTelegramTmeTab(
   token: string,
   assistWindow?: Window | null,
   botUsername = resolveTelegramBotUsername(),
 ): void {
-  const webBotUrl = buildTelegramWebBotStartUrl(token, botUsername)
+  const tmeUrl = buildTelegramWebStartUrl(token, botUsername)
   if (assistWindow && !assistWindow.closed) {
-    assistWindow.location.replace(webBotUrl)
+    assistWindow.location.replace(tmeUrl)
     return
   }
-  window.open(webBotUrl, '_blank', 'noopener,noreferrer')
+  window.open(tmeUrl, '_blank', 'noopener,noreferrer')
 }
 
 /**
- * 데스크톱: Web A QR + tgaddr 딥링크 한 URL.
- * 모바일: tg:// → t.me 폴백.
+ * 데스크톱: t.me (주소창에 start= 토큰 노출 — API 응답과 대조 가능).
+ * 모바일: tg:// → t.me 폴백. Web A tgaddr는 폴백 링크로만 제공.
  */
 export function openTelegramBotLink(
   token: string,
@@ -86,7 +86,7 @@ export function openTelegramBotLink(
     return
   }
 
-  openTelegramWebBotTab(token, options?.assistWindow, botUsername)
+  openTelegramTmeTab(token, options?.assistWindow, botUsername)
 }
 
 export interface TelegramLinkUrls {
