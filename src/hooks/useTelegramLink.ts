@@ -5,7 +5,7 @@ import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
   openTelegramAssistWindow,
-  openTelegramLink,
+  openTelegramBotLink,
   type TelegramLinkUrls,
 } from '../lib/buildTelegramBotStartUrl'
 
@@ -28,11 +28,12 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
 
     const assistWindow = openTelegramAssistWindow()
 
+    setLinkUrls(null)
     setLinking(true)
     try {
       const { token } = await issueTelegramLinkToken()
       setLinkUrls(buildTelegramLinkUrls(token))
-      openTelegramLink(token, { assistWindow })
+      openTelegramBotLink(token, { assistWindow })
       onOpenedRef.current?.()
     } catch (error) {
       assistWindow?.close()
@@ -48,7 +49,9 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
 
     setUnlinking(true)
     try {
-      return await unlinkTelegramAccount()
+      const updated = await unlinkTelegramAccount()
+      setLinkUrls(null)
+      return updated
     } catch (error) {
       onErrorRef.current?.(getApiErrorMessage(error, '텔레그램 연동 해제에 실패했습니다.'))
       return null
@@ -57,5 +60,5 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
     }
   }, [unlinking])
 
-  return { linking, linkTelegram, unlinking, unlinkTelegram, linkUrls }
+  return { linking, unlinking, linkTelegram, unlinkTelegram, linkUrls }
 }

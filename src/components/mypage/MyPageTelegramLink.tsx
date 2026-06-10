@@ -15,7 +15,7 @@ interface MyPageTelegramLinkProps {
 }
 
 export function MyPageTelegramLink({ linked, onOpened, onError, onUnlinked }: MyPageTelegramLinkProps) {
-  const { linking, linkTelegram, unlinking, unlinkTelegram, linkUrls } = useTelegramLink({
+  const { linking, unlinking, linkTelegram, unlinkTelegram, linkUrls } = useTelegramLink({
     onOpened,
     onError,
   })
@@ -47,24 +47,38 @@ export function MyPageTelegramLink({ linked, onOpened, onError, onUnlinked }: My
                 메신저로 받을 수 있습니다.
               </p>
               <p className={styles.note}>
-                연동 버튼을 누르면 설치된 Telegram 앱을 먼저 시도합니다. 앱이 없거나 열리지 않으면
-                Telegram Web(QR)으로 이어집니다. 봇 채팅에서 <strong>시작(Start)</strong>을 눌러
-                연동을 완료해 주세요. 인증 코드는 5분 동안 유효합니다.
+                연동 버튼을 누르면 Telegram Web이 열립니다. <strong>QR로 로그인</strong>하면 봇
+                채팅으로 이동하니 <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요. 인증
+                코드는 5분 동안 유효합니다.
               </p>
               {linkUrls ? (
                 <p className={styles.noteMuted}>
-                  창이 닫혔다면{' '}
+                  빈 화면이면{' '}
                   <a
                     className={styles.webFallbackLink}
-                    href={linkUrls.webClient}
+                    href={linkUrls.webLogin}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Telegram Web에서 연동
+                    QR 로그인만
+                  </a>
+                  {' → 로그인 후 '}
+                  <a
+                    className={styles.webFallbackLink}
+                    href={linkUrls.webBot}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    봇 열기
                   </a>
                   {' · '}
-                  <a className={styles.webFallbackLink} href={linkUrls.tme} target="_blank" rel="noopener noreferrer">
-                    t.me에서 연동
+                  <a
+                    className={styles.webFallbackLink}
+                    href={linkUrls.tme}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    t.me (앱)
                   </a>
                 </p>
               ) : null}
