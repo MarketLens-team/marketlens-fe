@@ -4,7 +4,6 @@ import type { AlertSettingsResponse } from '../data/types/member'
 import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
-  isMobileUserAgent,
   openTelegramAssistWindow,
   openTelegramBotLink,
   type TelegramLinkUrls,
@@ -27,8 +26,8 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const linkTelegram = useCallback(async () => {
     if (linking) return
 
-    // 모바일만 await 전 assist 탭 — tg:// 실패 시 t.me 폴백용
-    const assistWindow = isMobileUserAgent() ? openTelegramAssistWindow() : null
+    // 클릭 직후 blank 탭 — await 이후 Telegram Web/t.me 이동용 (팝업 차단 회피)
+    const assistWindow = openTelegramAssistWindow()
 
     setLinking(true)
     try {

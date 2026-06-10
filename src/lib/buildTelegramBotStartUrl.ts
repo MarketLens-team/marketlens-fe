@@ -49,9 +49,9 @@ interface OpenTelegramBotLinkOptions {
 }
 
 /**
- * 데스크톱(앱 설치 가정): tg:// 앱 딥링크만 — 브라우저 "Telegram 열기" 확인 후 앱 실행.
+ * 데스크톱: tg:// 시도 후 앱 전환(blur)이 없으면 Telegram Web 폴백.
  * 모바일: tg:// → t.me 폴백.
- * t.me·Web 클라이언트는 UI 폴백 링크로만 제공한다.
+ * t.me·Web 클라이언트 재오픈 링크는 UI 폴백으로도 제공한다.
  */
 export function openTelegramBotLink(
   token: string,
@@ -60,21 +60,44 @@ export function openTelegramBotLink(
 ): void {
   const appUrl = buildTelegramAppStartUrl(token, botUsername)
   const tmeUrl = buildTelegramWebStartUrl(token, botUsername)
+  const webClientUrl = buildTelegramWebClientStartUrl(token, botUsername)
+
+  const openFallback = (url: string) => {
+    const assistWindow = options?.assistWindow
+    if (assistWindow && !assistWindow.closed) {
+      assistWindow.location.href = url
+      return
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   if (isMobileUserAgent()) {
     window.location.assign(appUrl)
-    window.setTimeout(() => {
-      const assistWindow = options?.assistWindow
-      if (assistWindow && !assistWindow.closed) {
-        assistWindow.location.href = tmeUrl
-        return
-      }
-      window.open(tmeUrl, '_blank', 'noopener,noreferrer')
-    }, 1200)
+    window.setTimeout(() => openFallback(tmeUrl), 1200)
     return
   }
 
+  let cancelled = false
+  const cancelFallback = () => {
+    cancelled = true
+  }
+
+  const onBlur = () => cancelFallback()
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') cancelFallback()
+  }
+
+  window.addEventListener('blur', onBlur)
+  document.addEventListener('visibilitychange', onVisibilityChange)
+
   tryOpenAppDeepLink(appUrl)
+
+  window.setTimeout(() => {
+    window.removeEventListener('blur', onBlur)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    if (cancelled) return
+    openFallback(webClientUrl)
+  }, 1500)
 }
 
 export interface TelegramLinkUrls {
