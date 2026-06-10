@@ -1,0 +1,82 @@
+/* 마이페이지 북마크 sortBar와 동일 패턴 */
+.bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-bottom: 2px solid var(--color-border-strong);
+}
+
+.barMd {
+  margin-bottom: var(--space-4);
+}
+
+.barEmbedded {
+  border-bottom: none;
+}
+
+.barEmbedded .tab {
+  margin-bottom: 0;
+  padding-bottom: var(--space-3);
+}
+
+.tab {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4) var(--space-2);
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.tabMd {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-lg);
+}
+
+.tab:hover:not([aria-selected='true']) {
+  color: var(--color-text-primary);
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: var(--interactive-ring-focus);
+}
+
+.tabPositive {
+  color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
+}
+
+.tabNegative {
+  color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
+}
+
+.tabAllActive {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-primary);
+}
+
+.tabPositiveActive {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-success);
+}
+
+.tabNegativeActive {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+  border-bottom-color: var(--color-danger);
+}

@@ -196,6 +196,9 @@ export default function DevActionButtonPage() {
               <Link className={styles.devLink} to="/dev/sector-filter">
                 Sector filter (섹터 칩)
               </Link>
+              <Link className={styles.devLink} to="/dev/news-sentiment-filter">
+                News sentiment filter (긍정/부정)
+              </Link>
             </div>
             <p className={styles.meta}>
               세련된 톤(여백·계층·흰 pill)과 풀스크린 에러 페이지를 각각 확인합니다.

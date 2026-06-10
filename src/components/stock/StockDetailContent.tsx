@@ -7,7 +7,10 @@ import { BackToTopButton } from '../common/BackToTopButton'
 import { Breadcrumb } from '../common/Breadcrumb'
 import { EmptyState } from '../common/EmptyState'
 import { FeedLoadingSpinner } from '../common/FeedLoadingSpinner'
-import { PillButton } from '../ui/PillButton'
+import {
+  NewsSentimentUnderlineFilter,
+  type NewsSentimentFilterValue,
+} from './NewsSentimentUnderlineFilter'
 import {
   fetchStockNewsFeedAround,
   fetchStockNewsFeedCursor,
@@ -43,7 +46,7 @@ import { scrollStockNewsItemIntoView } from '../../lib/newsFeedFocus'
 import { formatPercent, formatPrice, formatStockScore, priceChangeDirection, stockSentimentTone } from './stockScore'
 import styles from './StockDetailContent.module.css'
 
-type NewsFilter = 'all' | 'positive' | 'negative'
+type NewsFilter = NewsSentimentFilterValue
 
 /** 연관 종목 UI 노출 상한 (API 응답은 그대로, 프론트에서 일시 제한) */
 const RELATED_STOCKS_DISPLAY_MAX = 3
@@ -636,30 +639,16 @@ export function StockDetailContent({
 
       <div className={styles.bottomGrid}>
         <section className={styles.panel} aria-labelledby="stock-news-title">
-          <div className={styles.panelHeadRow}>
+          <div className={styles.panelNewsHead}>
             <h2 id="stock-news-title" className={styles.panelTitle}>
               관련 뉴스
             </h2>
-            <div className={styles.filterGroup} role="group" aria-label="뉴스 감성 필터">
-              {(
-                [
-                  ['all', '전체'],
-                  ['positive', '긍정'],
-                  ['negative', '부정'],
-                ] as const
-              ).map(([key, label]) => (
-                <PillButton
-                  key={key}
-                  variant="secondary"
-                  compact
-                  active={newsFilter === key}
-                  aria-pressed={newsFilter === key}
-                  onClick={() => setNewsFilter(key)}
-                >
-                  {label}
-                </PillButton>
-              ))}
-            </div>
+            <NewsSentimentUnderlineFilter
+              embedded
+              className={styles.newsSentimentFilter}
+              value={newsFilter}
+              onChange={setNewsFilter}
+            />
           </div>
           {loadingNewsFilter || (loadingAnchoredNews && focusNewsId && displayNews.length === 0) ? (
             <div className={styles.newsFilterLoading} aria-busy="true">
