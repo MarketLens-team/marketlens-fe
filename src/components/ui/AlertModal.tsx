@@ -38,6 +38,7 @@ export function AlertModal({
       showCloseButton={false}
       closeOnOverlay={!confirmLoading}
       closeOnEsc={!confirmLoading}
+      contentClassOnly
       footer={
         <div className={styles.actions}>
           <ActionButton

@@ -14,6 +14,7 @@ import { mockDelay } from '../util/mockDelay'
 const MEMBER_ME_PATH = '/api/members/me'
 const SETTINGS_PATH = '/api/members/me/settings'
 const TELEGRAM_LINK_TOKEN_PATH = '/api/members/me/telegram-link-token'
+const TELEGRAM_LINK_PATH = '/api/members/me/telegram-link'
 
 /** OpenAPI `GET /api/members/me` */
 export async function fetchMemberProfile(): Promise<MemberResponse> {
@@ -85,5 +86,26 @@ export async function issueTelegramLinkToken(): Promise<TelegramLinkTokenRespons
     return unwrapApiEnvelope(data, '텔레그램 연동 준비에 실패했습니다.')
   } catch (error) {
     throw new Error(getApiErrorMessage(error, '텔레그램 연동 준비에 실패했습니다.'))
+  }
+}
+
+/** OpenAPI `DELETE /api/members/me/telegram-link` */
+export async function unlinkTelegram(): Promise<AlertSettingsResponse> {
+  if (isMockDataSource()) {
+    await mockDelay(120)
+    const { mockMyPageData } = await import('../mocks/myPage.mock')
+    const updated: AlertSettingsResponse = {
+      ...mockMyPageData.alertSettings!,
+      telegramLinked: false,
+      telegramNotificationEnabled: false,
+    }
+    mockMyPageData.alertSettings = updated
+    return { ...updated }
+  }
+  try {
+    const { data } = await api.delete<ApiEnvelope<AlertSettingsResponse>>(TELEGRAM_LINK_PATH)
+    return unwrapApiEnvelope(data, '텔레그램 연동 해제에 실패했습니다.')
+  } catch (error) {
+    throw new Error(getApiErrorMessage(error, '텔레그램 연동 해제에 실패했습니다.'))
   }
 }
