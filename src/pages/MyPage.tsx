@@ -236,6 +236,12 @@ export default function MyPage() {
     })
   }
 
+  const handleTelegramUnlinked = (updated: AlertSettingsResponse) => {
+    setActionError(null)
+    setLocalSettings(updated)
+    snackbar.show('텔레그램 연동이 해제되었습니다.')
+  }
+
   const handleAccountActionError = (message: string) => {
     setActionError(message)
   }
@@ -317,6 +323,7 @@ export default function MyPage() {
                     linked={alertSettings.telegramLinked}
                     onOpened={handleTelegramLinkOpened}
                     onError={handleAccountActionError}
+                    onUnlinked={handleTelegramUnlinked}
                   />
                 </section>
                 <hr className={styles.sectionDivider} aria-hidden />

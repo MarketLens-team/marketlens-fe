@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
-import { issueTelegramLinkToken } from '../data/clients/memberClient'
+import { issueTelegramLinkToken, unlinkTelegram as unlinkTelegramAccount } from '../data/clients/memberClient'
+import type { AlertSettingsResponse } from '../data/types/member'
 import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
@@ -16,6 +17,7 @@ interface UseTelegramLinkOptions {
 
 export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const [linking, setLinking] = useState(false)
+  const [unlinking, setUnlinking] = useState(false)
   const [linkUrls, setLinkUrls] = useState<TelegramLinkUrls | null>(null)
   const onOpenedRef = useRef(options?.onOpened)
   const onErrorRef = useRef(options?.onError)
@@ -43,5 +45,19 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
     }
   }, [linking])
 
-  return { linking, linkTelegram, linkUrls }
+  const unlinkTelegram = useCallback(async (): Promise<AlertSettingsResponse | null> => {
+    if (unlinking) return null
+
+    setUnlinking(true)
+    try {
+      return await unlinkTelegramAccount()
+    } catch (error) {
+      onErrorRef.current?.(getApiErrorMessage(error, '텔레그램 연동 해제에 실패했습니다.'))
+      return null
+    } finally {
+      setUnlinking(false)
+    }
+  }, [unlinking])
+
+  return { linking, unlinking, linkTelegram, unlinkTelegram, linkUrls }
 }
