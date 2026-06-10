@@ -44,14 +44,20 @@ function tryOpenAppDeepLink(appUrl: string): void {
 }
 
 interface OpenTelegramBotLinkOptions {
-  /** 클릭 직후(동기) 연 blank 탭 — await 이후 t.me 이동용 (모바일 폴백) */
+  /** 클릭 직후(동기) 연 blank 탭 — await 이후 Telegram Web 이동용 (팝업 차단 회피) */
   assistWindow?: Window | null
 }
 
+function navigateAssistWindow(assistWindow: Window, url: string): void {
+  if (assistWindow.closed) return
+  assistWindow.location.href = url
+}
+
 /**
- * 데스크톱: tg:// 시도 후 앱 전환(blur)이 없으면 Telegram Web 폴백.
+ * 브라우저는 텔레그램 앱 설치 여부를 reliably 판별할 수 없다.
+ * 데스크톱: tg:// 시도(앱 있으면 OS 핸드오프) + assist 탭은 항상 Telegram Web(QR)으로 연다.
+ * assist 탭을 미리 열면 부모 탭이 hidden/blur 되므로, visibility·blur로 폴백을 취소하지 않는다.
  * 모바일: tg:// → t.me 폴백.
- * t.me·Web 클라이언트 재오픈 링크는 UI 폴백으로도 제공한다.
  */
 export function openTelegramBotLink(
   token: string,
@@ -65,7 +71,7 @@ export function openTelegramBotLink(
   const openFallback = (url: string) => {
     const assistWindow = options?.assistWindow
     if (assistWindow && !assistWindow.closed) {
-      assistWindow.location.href = url
+      navigateAssistWindow(assistWindow, url)
       return
     }
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -77,27 +83,8 @@ export function openTelegramBotLink(
     return
   }
 
-  let cancelled = false
-  const cancelFallback = () => {
-    cancelled = true
-  }
-
-  const onBlur = () => cancelFallback()
-  const onVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') cancelFallback()
-  }
-
-  window.addEventListener('blur', onBlur)
-  document.addEventListener('visibilitychange', onVisibilityChange)
-
   tryOpenAppDeepLink(appUrl)
-
-  window.setTimeout(() => {
-    window.removeEventListener('blur', onBlur)
-    document.removeEventListener('visibilitychange', onVisibilityChange)
-    if (cancelled) return
-    openFallback(webClientUrl)
-  }, 1500)
+  openFallback(webClientUrl)
 }
 
 export interface TelegramLinkUrls {
