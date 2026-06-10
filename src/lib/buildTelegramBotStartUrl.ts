@@ -19,28 +19,28 @@ export function buildTelegramAppStartUrl(
   return `tg://resolve?domain=${botUsername}&start=${encodedToken}`
 }
 
-/** 앱 미설치·브라우저: Telegram Web에서 봇 /start 로 연동 */
-export function buildTelegramWebClientStartUrl(
+export const TELEGRAM_WEB_LOGIN_URL = 'https://web.telegram.org/a/'
+
+/** QR만 — Web A 빈 화면 폴백용 */
+export function buildTelegramWebLoginUrl(): string {
+  return TELEGRAM_WEB_LOGIN_URL
+}
+
+/** Web A: QR 로그인 + 로그인 후 봇 /start 딥링크 (tgaddr) */
+export function buildTelegramWebBotStartUrl(
   token: string,
   botUsername = resolveTelegramBotUsername(),
 ): string {
   const trimmed = token.trim()
-  const tgAddr = `tg://resolve?domain=${botUsername}&start=${encodeURIComponent(trimmed)}`
-  return `https://web.telegram.org/k/#?tgaddr=${encodeURIComponent(tgAddr)}`
+  const tgAddr = `tg://resolve?domain=${botUsername}&start=${trimmed}`
+  return `${TELEGRAM_WEB_LOGIN_URL}#?tgaddr=${encodeURIComponent(tgAddr)}`
 }
+
+/** @deprecated buildTelegramWebBotStartUrl */
+export const buildTelegramWebClientStartUrl = buildTelegramWebBotStartUrl
 
 export function isMobileUserAgent(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-}
-
-/** tg:// 을 window.open 으로 열면 about:blank 가 남는다. */
-function tryOpenAppDeepLink(appUrl: string): void {
-  const link = document.createElement('a')
-  link.href = appUrl
-  link.style.display = 'none'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
 }
 
 interface OpenTelegramBotLinkOptions {
@@ -48,10 +48,22 @@ interface OpenTelegramBotLinkOptions {
   assistWindow?: Window | null
 }
 
+function openTelegramWebBotTab(
+  token: string,
+  assistWindow?: Window | null,
+  botUsername = resolveTelegramBotUsername(),
+): void {
+  const webBotUrl = buildTelegramWebBotStartUrl(token, botUsername)
+  if (assistWindow && !assistWindow.closed) {
+    assistWindow.location.replace(webBotUrl)
+    return
+  }
+  window.open(webBotUrl, '_blank', 'noopener,noreferrer')
+}
+
 /**
- * 데스크톱(앱 설치 가정): tg:// 앱 딥링크만 — 브라우저 "Telegram 열기" 확인 후 앱 실행.
+ * 데스크톱: Web A QR + tgaddr 딥링크 한 URL.
  * 모바일: tg:// → t.me 폴백.
- * t.me·Web 클라이언트는 UI 폴백 링크로만 제공한다.
  */
 export function openTelegramBotLink(
   token: string,
@@ -74,12 +86,13 @@ export function openTelegramBotLink(
     return
   }
 
-  tryOpenAppDeepLink(appUrl)
+  openTelegramWebBotTab(token, options?.assistWindow, botUsername)
 }
 
 export interface TelegramLinkUrls {
   tme: string
-  webClient: string
+  webLogin: string
+  webBot: string
 }
 
 export function buildTelegramLinkUrls(
@@ -88,12 +101,13 @@ export function buildTelegramLinkUrls(
 ): TelegramLinkUrls {
   return {
     tme: buildTelegramWebStartUrl(token, botUsername),
-    webClient: buildTelegramWebClientStartUrl(token, botUsername),
+    webLogin: buildTelegramWebLoginUrl(),
+    webBot: buildTelegramWebBotStartUrl(token, botUsername),
   }
 }
 
-/** await 전 클릭 핸들러 안에서 호출 — 사용자 제스처 유지 */
+/** await 전 클릭 핸들러 안에서 호출 — noopener 없이 열어야 토큰 후 location.replace 가능 */
 export function openTelegramAssistWindow(): Window | null {
   if (isMobileUserAgent()) return null
-  return window.open('', '_blank', 'noopener,noreferrer')
+  return window.open('', '_blank')
 }

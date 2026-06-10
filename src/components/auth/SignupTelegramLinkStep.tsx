@@ -20,23 +20,22 @@ export function SignupTelegramLinkStep({ onLinkOpened, onLinkError }: SignupTele
         받을 수 있습니다.
       </p>
       <p className={styles.note}>
-        연동 버튼을 누르면 브라우저에서 Telegram 앱 열기를 확인합니다. 앱이 열리면 봇 채팅에서{' '}
-        <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요.
+        연동 버튼을 누르면 Telegram Web이 열립니다. <strong>QR로 로그인</strong>하면 봇 채팅으로
+        이동하니 <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요.
       </p>
       {linkUrls ? (
         <p className={styles.noteMuted}>
-          앱이 열리지 않으면{' '}
-          <a className={styles.fallbackLink} href={linkUrls.tme} target="_blank" rel="noopener noreferrer">
-            t.me에서 연동
+          빈 화면이면{' '}
+          <a className={styles.fallbackLink} href={linkUrls.webLogin} target="_blank" rel="noopener noreferrer">
+            QR 로그인만
+          </a>
+          {' → 로그인 후 '}
+          <a className={styles.fallbackLink} href={linkUrls.webBot} target="_blank" rel="noopener noreferrer">
+            봇 열기
           </a>
           {' · '}
-          <a
-            className={styles.fallbackLink}
-            href={linkUrls.webClient}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Telegram Web에서 연동
+          <a className={styles.fallbackLink} href={linkUrls.tme} target="_blank" rel="noopener noreferrer">
+            t.me (앱)
           </a>
         </p>
       ) : null}

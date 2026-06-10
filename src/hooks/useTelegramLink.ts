@@ -4,7 +4,6 @@ import type { AlertSettingsResponse } from '../data/types/member'
 import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
-  isMobileUserAgent,
   openTelegramAssistWindow,
   openTelegramBotLink,
   type TelegramLinkUrls,
@@ -27,9 +26,9 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const linkTelegram = useCallback(async () => {
     if (linking) return
 
-    // 모바일만 await 전 assist 탭 — tg:// 실패 시 t.me 폴백용
-    const assistWindow = isMobileUserAgent() ? openTelegramAssistWindow() : null
+    const assistWindow = openTelegramAssistWindow()
 
+    setLinkUrls(null)
     setLinking(true)
     try {
       const { token } = await issueTelegramLinkToken()
@@ -50,7 +49,9 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
 
     setUnlinking(true)
     try {
-      return await unlinkTelegramAccount()
+      const updated = await unlinkTelegramAccount()
+      setLinkUrls(null)
+      return updated
     } catch (error) {
       onErrorRef.current?.(getApiErrorMessage(error, '텔레그램 연동 해제에 실패했습니다.'))
       return null
