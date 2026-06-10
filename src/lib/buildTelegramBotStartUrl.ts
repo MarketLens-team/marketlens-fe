@@ -33,58 +33,67 @@ export function isMobileUserAgent(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 }
 
-/** tg:// 을 window.open 으로 열면 about:blank 가 남는다. */
-function tryOpenAppDeepLink(appUrl: string): void {
-  const link = document.createElement('a')
-  link.href = appUrl
-  link.style.display = 'none'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-}
-
-interface OpenTelegramBotLinkOptions {
+interface OpenTelegramWebLinkOptions {
   /** 클릭 직후(동기) 연 blank 탭 — await 이후 Telegram Web 이동용 (팝업 차단 회피) */
   assistWindow?: Window | null
 }
 
+const DESKTOP_APP_TRY_MS = 1500
+
+function isAssistWindowBlank(assistWindow: Window): boolean {
+  try {
+    return assistWindow.location.href === 'about:blank'
+  } catch {
+    return false
+  }
+}
+
 function navigateAssistWindow(assistWindow: Window, url: string): void {
   if (assistWindow.closed) return
-  assistWindow.location.href = url
+  assistWindow.location.replace(url)
 }
 
 /**
- * 브라우저는 텔레그램 앱 설치 여부를 reliably 판별할 수 없다.
- * 데스크톱: tg:// 시도(앱 있으면 OS 핸드오프) + assist 탭은 항상 Telegram Web(QR)으로 연다.
- * assist 탭을 미리 열면 부모 탭이 hidden/blur 되므로, visibility·blur로 폴백을 취소하지 않는다.
- * 모바일: tg:// → t.me 폴백.
+ * 단일 연동 진입점.
+ * 데스크톱: assist 탭에서 tg:// 앱 시도 → 여전히 blank면 Telegram Web(QR) 폴백.
+ * 메인 탭이 아닌 assist 탭에서 tg://를 쓰면 QR 다녀온 뒤 「Telegram 열기」가 늦게 뜨지 않는다.
+ * 모바일: tg:// 앱 시도 후 t.me 폴백.
  */
-export function openTelegramBotLink(
+export function openTelegramLink(
   token: string,
-  options?: OpenTelegramBotLinkOptions,
+  options?: OpenTelegramWebLinkOptions,
   botUsername = resolveTelegramBotUsername(),
 ): void {
   const appUrl = buildTelegramAppStartUrl(token, botUsername)
   const tmeUrl = buildTelegramWebStartUrl(token, botUsername)
   const webClientUrl = buildTelegramWebClientStartUrl(token, botUsername)
 
-  const openFallback = (url: string) => {
-    const assistWindow = options?.assistWindow
-    if (assistWindow && !assistWindow.closed) {
-      navigateAssistWindow(assistWindow, url)
-      return
-    }
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
   if (isMobileUserAgent()) {
     window.location.assign(appUrl)
-    window.setTimeout(() => openFallback(tmeUrl), 1200)
+    window.setTimeout(() => {
+      window.open(tmeUrl, '_blank', 'noopener,noreferrer')
+    }, 1200)
     return
   }
 
-  tryOpenAppDeepLink(appUrl)
-  openFallback(webClientUrl)
+  const assistWindow = options?.assistWindow
+  if (!assistWindow || assistWindow.closed) {
+    window.open(webClientUrl, '_blank', 'noopener,noreferrer')
+    return
+  }
+
+  try {
+    assistWindow.location.assign(appUrl)
+  } catch {
+    navigateAssistWindow(assistWindow, webClientUrl)
+    return
+  }
+
+  window.setTimeout(() => {
+    if (assistWindow.closed) return
+    if (!isAssistWindowBlank(assistWindow)) return
+    navigateAssistWindow(assistWindow, webClientUrl)
+  }, DESKTOP_APP_TRY_MS)
 }
 
 export interface TelegramLinkUrls {
@@ -102,8 +111,8 @@ export function buildTelegramLinkUrls(
   }
 }
 
-/** await 전 클릭 핸들러 안에서 호출 — 사용자 제스처 유지 */
+/** await 전 클릭 핸들러 안에서 호출 — noopener 없이 열어야 토큰 후 location.replace 가능 */
 export function openTelegramAssistWindow(): Window | null {
   if (isMobileUserAgent()) return null
-  return window.open('', '_blank', 'noopener,noreferrer')
+  return window.open('', '_blank')
 }

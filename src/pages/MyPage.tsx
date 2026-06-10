@@ -231,7 +231,7 @@ export default function MyPage() {
   const handleTelegramLinkOpened = () => {
     awaitingTelegramLinkRef.current = true
     setActionError(null)
-    snackbar.show('브라우저에서 Telegram 열기를 허용한 뒤, 봇 채팅에서 시작(Start)을 눌러 연동을 완료해 주세요.', {
+    snackbar.show('열린 Telegram 화면(앱 또는 Web)에서 봇 채팅의 시작(Start)을 눌러 연동을 완료해 주세요.', {
       durationMs: 6000,
     })
   }

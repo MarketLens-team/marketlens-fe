@@ -5,7 +5,7 @@ import { getApiErrorMessage } from '../data/util/apiError'
 import {
   buildTelegramLinkUrls,
   openTelegramAssistWindow,
-  openTelegramBotLink,
+  openTelegramLink,
   type TelegramLinkUrls,
 } from '../lib/buildTelegramBotStartUrl'
 
@@ -26,14 +26,13 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
   const linkTelegram = useCallback(async () => {
     if (linking) return
 
-    // 클릭 직후 blank 탭 — await 이후 Telegram Web/t.me 이동용 (팝업 차단 회피)
     const assistWindow = openTelegramAssistWindow()
 
     setLinking(true)
     try {
       const { token } = await issueTelegramLinkToken()
       setLinkUrls(buildTelegramLinkUrls(token))
-      openTelegramBotLink(token, { assistWindow })
+      openTelegramLink(token, { assistWindow })
       onOpenedRef.current?.()
     } catch (error) {
       assistWindow?.close()
@@ -58,5 +57,5 @@ export function useTelegramLink(options?: UseTelegramLinkOptions) {
     }
   }, [unlinking])
 
-  return { linking, unlinking, linkTelegram, unlinkTelegram, linkUrls }
+  return { linking, linkTelegram, unlinking, unlinkTelegram, linkUrls }
 }

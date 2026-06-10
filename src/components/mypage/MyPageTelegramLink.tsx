@@ -15,7 +15,7 @@ interface MyPageTelegramLinkProps {
 }
 
 export function MyPageTelegramLink({ linked, onOpened, onError, onUnlinked }: MyPageTelegramLinkProps) {
-  const { linking, unlinking, linkTelegram, unlinkTelegram, linkUrls } = useTelegramLink({
+  const { linking, linkTelegram, unlinking, unlinkTelegram, linkUrls } = useTelegramLink({
     onOpened,
     onError,
   })
@@ -47,22 +47,13 @@ export function MyPageTelegramLink({ linked, onOpened, onError, onUnlinked }: My
                 메신저로 받을 수 있습니다.
               </p>
               <p className={styles.note}>
-                연동 버튼을 누르면 브라우저에서 Telegram 앱 열기를 확인합니다. 앱이 열리면 봇 채팅에서{' '}
-                <strong>시작(Start)</strong>을 눌러 연동을 완료해 주세요. 인증 코드는 5분 동안
-                유효합니다.
+                연동 버튼을 누르면 설치된 Telegram 앱을 먼저 시도합니다. 앱이 없거나 열리지 않으면
+                Telegram Web(QR)으로 이어집니다. 봇 채팅에서 <strong>시작(Start)</strong>을 눌러
+                연동을 완료해 주세요. 인증 코드는 5분 동안 유효합니다.
               </p>
               {linkUrls ? (
                 <p className={styles.noteMuted}>
-                  앱이 열리지 않으면{' '}
-                  <a
-                    className={styles.webFallbackLink}
-                    href={linkUrls.tme}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    t.me에서 연동
-                  </a>
-                  {' · '}
+                  창이 닫혔다면{' '}
                   <a
                     className={styles.webFallbackLink}
                     href={linkUrls.webClient}
@@ -70,6 +61,10 @@ export function MyPageTelegramLink({ linked, onOpened, onError, onUnlinked }: My
                     rel="noopener noreferrer"
                   >
                     Telegram Web에서 연동
+                  </a>
+                  {' · '}
+                  <a className={styles.webFallbackLink} href={linkUrls.tme} target="_blank" rel="noopener noreferrer">
+                    t.me에서 연동
                   </a>
                 </p>
               ) : null}
