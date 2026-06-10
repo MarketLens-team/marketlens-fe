@@ -1,8 +1,12 @@
 import clsx from 'clsx'
 import { useState } from 'react'
+import {
+  NewsSentimentUnderlineFilter,
+  type NewsSentimentFilterValue,
+} from '../components/stock/NewsSentimentUnderlineFilter'
 import styles from './DevNewsSentimentFilterPage.module.css'
 
-type SentimentFilter = 'all' | 'positive' | 'negative'
+type SentimentFilter = NewsSentimentFilterValue
 
 const FILTER_LABEL: Record<SentimentFilter, string> = {
   all: '전체',
@@ -147,49 +151,13 @@ function UnderlineMypageVariant() {
 
   return (
     <section className={styles.variantWrap}>
-      <p className={styles.variantLabel}>버전 4 — 마이페이지 언더라인 (북마크 정렬 탭)</p>
+      <p className={styles.variantLabel}>버전 4 — 마이페이지 언더라인 (프로덕션 반영)</p>
       <p className={styles.variantDesc}>
-        구분선 위 탭 + 하단 보더. 마이페이지 「최신순 / 오래된순」과 동일 패턴.
+        NewsSentimentUnderlineFilter — 종목 상세·마이페이지 북마크 정렬 탭과 동일 패턴.
       </p>
       <div className={styles.mockPanel}>
         <h3 className={styles.mockPanelTitle}>관련 뉴스</h3>
-        <div className={styles.v4SortBar} role="tablist" aria-label="뉴스 감성 필터">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={value === 'all'}
-            className={clsx(styles.v4Tab, value === 'all' && styles.v4TabAllActive)}
-            onClick={() => setValue('all')}
-          >
-            전체
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={value === 'positive'}
-            className={clsx(
-              styles.v4Tab,
-              styles.v4TabPositive,
-              value === 'positive' && styles.v4TabPositiveActive,
-            )}
-            onClick={() => setValue('positive')}
-          >
-            긍정
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={value === 'negative'}
-            className={clsx(
-              styles.v4Tab,
-              styles.v4TabNegative,
-              value === 'negative' && styles.v4TabNegativeActive,
-            )}
-            onClick={() => setValue('negative')}
-          >
-            부정
-          </button>
-        </div>
+        <NewsSentimentUnderlineFilter size="md" value={value} onChange={setValue} />
         <ul className={styles.mockNewsList} aria-hidden>
           <li className={styles.mockNewsItem}>
             <span className={styles.mockNewsTitle}>뉴스 제목 플레이스홀더</span>
@@ -213,8 +181,8 @@ function CurrentVariant() {
 
   return (
     <section className={styles.variantWrap}>
-      <p className={styles.variantLabel}>Current — 종목 상세 (PillButton secondary)</p>
-      <p className={styles.variantDesc}>프로덕션 현재 스타일. 비교용.</p>
+      <p className={styles.variantLabel}>Legacy — PillButton secondary</p>
+      <p className={styles.variantDesc}>이전 종목 상세 스타일. 비교용.</p>
       <div className={styles.currentRow} role="group" aria-label="뉴스 감성 필터 현재">
         {(['all', 'positive', 'negative'] as const).map((key) => (
           <button

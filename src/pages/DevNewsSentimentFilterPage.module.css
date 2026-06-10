@@ -310,7 +310,6 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* —— V4 마이페이지 언더라인 (MyPageBookmarkSection.sortBar) —— */
 .mockPanel {
   padding: var(--space-5);
   border-radius: var(--radius-lg);
@@ -319,68 +318,10 @@
 }
 
 .mockPanelTitle {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-2);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-}
-
-.v4SortBar {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  margin-bottom: var(--space-4);
-  border-bottom: 2px solid var(--color-border-strong);
-}
-
-.v4Tab {
-  position: relative;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
-  border: none;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color var(--duration-fast) ease, border-color var(--duration-fast) ease;
-}
-
-.v4Tab:hover:not([aria-selected='true']) {
-  color: var(--color-text-primary);
-}
-
-.v4TabPositive {
-  color: color-mix(in srgb, var(--color-success) 55%, var(--color-text-secondary));
-}
-
-.v4TabNegative {
-  color: color-mix(in srgb, var(--color-danger) 55%, var(--color-text-secondary));
-}
-
-.v4TabAllActive {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-  border-bottom-color: var(--color-primary);
-}
-
-.v4TabPositiveActive {
-  color: var(--color-success);
-  font-weight: var(--font-weight-semibold);
-  border-bottom-color: var(--color-success);
-}
-
-.v4TabNegativeActive {
-  color: var(--color-danger);
-  font-weight: var(--font-weight-semibold);
-  border-bottom-color: var(--color-danger);
 }
 
 .mockNewsList {
