@@ -21,7 +21,6 @@ export interface OpenAnomalySummary {
 }
 
 const HOVER_REVEAL_MS = 400
-const HOVER_CLOSE_MS = 400
 /** 패널·FAB 영역 이탈 후 닫기까지 유지 시간 */
 const DOCK_LEAVE_MS = 700
 
@@ -111,16 +110,10 @@ export function useDashboardAnomalySummary() {
     [activateDock, clearCloseTimer, clearRevealTimer],
   )
 
-  const scheduleClose = useCallback(
-    (delayMs: number = HOVER_CLOSE_MS) => {
-      clearRevealTimer()
-      clearCloseTimer()
-      closeTimerRef.current = setTimeout(() => {
-        setHighlight(null)
-      }, delayMs)
-    },
-    [clearCloseTimer, clearRevealTimer],
-  )
+  const scheduleClose = useCallback(() => {
+    clearRevealTimer()
+    setHighlight(null)
+  }, [clearRevealTimer])
 
   const isHighlighted = useCallback(
     (source: AnomalySummarySource, code: string) =>
@@ -136,7 +129,7 @@ export function useDashboardAnomalySummary() {
     }, DOCK_LEAVE_MS)
   }, [clearCloseTimer, dismissDock, panelExpanded])
 
-  const cancelClose = useCallback(() => {
+  const cancelDockLeave = useCallback(() => {
     clearCloseTimer()
   }, [clearCloseTimer])
 
@@ -156,7 +149,7 @@ export function useDashboardAnomalySummary() {
     scheduleOpen,
     scheduleClose,
     scheduleDockLeave,
-    cancelClose,
+    cancelDockLeave,
   }
 }
 
