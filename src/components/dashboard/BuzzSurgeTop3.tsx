@@ -19,9 +19,9 @@ function bindHoverSummary(
 ) {
   const target = buildBuzzSurgeSummaryTarget(item)
   return {
-    onMouseEnter: () => summary.scheduleOpen(target),
+    onMouseEnter: () => summary.scheduleOpen(target, 'buzz'),
     onMouseLeave: () => summary.scheduleClose(),
-    onFocus: () => summary.scheduleOpen(target),
+    onFocus: () => summary.scheduleOpen(target, 'buzz'),
     onBlur: () => summary.scheduleClose(),
   }
 }
@@ -39,7 +39,10 @@ export function BuzzSurgeTop3({ items, className, anomalySummary }: BuzzSurgeTop
           <li key={item.rank}>
             <Link
               to={`/stock/${item.code}`}
-              className={styles.item}
+              className={clsx(
+                styles.item,
+                anomalySummary.isHighlighted('buzz', item.code) && styles.itemHighlight,
+              )}
               aria-label={`${item.name} 종목 상세 보기`}
               {...bindHoverSummary(item, anomalySummary)}
             >

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { DashboardAiBrief } from '../components/dashboard/DashboardAiBrief'
 import { DashboardAlertCards } from '../components/dashboard/DashboardAlertCards'
-import { DashboardAnomalySummaryModal } from '../components/dashboard/DashboardAnomalySummaryModal'
+import { DashboardAnomalySummaryDock } from '../components/dashboard/DashboardAnomalySummaryDock'
 import { BuzzSurgeTop3 } from '../components/dashboard/BuzzSurgeTop3'
 import { useDashboardAnomalySummary } from '../components/dashboard/useDashboardAnomalySummary'
 import { DashboardKospiChip } from '../components/dashboard/DashboardKospiChip'
@@ -121,14 +121,16 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <DashboardAnomalySummaryModal
+            <DashboardAnomalySummaryDock
+              lastTarget={anomalySummary.lastTarget}
               target={anomalySummary.target}
               status={anomalySummary.status}
               summaryText={anomalySummary.summaryText}
-              isOpen={anomalySummary.isOpen}
-              onClose={anomalySummary.close}
+              isPanelOpen={anomalySummary.isPanelOpen}
+              isVisible={anomalySummary.isDockVisible}
+              onDismiss={anomalySummary.dismissDock}
               onHoverPaneEnter={anomalySummary.cancelClose}
-              onHoverPaneLeave={anomalySummary.scheduleModalLeave}
+              onHoverPaneLeave={anomalySummary.scheduleDockLeave}
             />
           </>
         ) : null}

@@ -37,10 +37,11 @@ function bindHoverSummary(
   summary: DashboardAnomalySummaryController,
 ) {
   if (!alert.summaryEnabled) return {}
+  const target = buildAlertSummaryTarget(alert)
   return {
-    onMouseEnter: () => summary.scheduleOpen(buildAlertSummaryTarget(alert)),
+    onMouseEnter: () => summary.scheduleOpen(target, 'alert'),
     onMouseLeave: () => summary.scheduleClose(),
-    onFocus: () => summary.scheduleOpen(buildAlertSummaryTarget(alert)),
+    onFocus: () => summary.scheduleOpen(target, 'alert'),
     onBlur: () => summary.scheduleClose(),
   }
 }
@@ -71,7 +72,10 @@ export function DashboardAlertCards({
             <li key={`${alert.signal}-${alert.code}`}>
               <Link
                 to={alert.to}
-                className={styles.item}
+                className={clsx(
+                  styles.item,
+                  anomalySummary.isHighlighted('alert', alert.code) && styles.itemHighlight,
+                )}
                 aria-label={`${alert.name} ${DASHBOARD_ALERT_SCOPE_LABEL[alert.scope]} ${alert.criterion} ${alert.headline}`}
                 {...bindHoverSummary(alert, anomalySummary)}
               >
