@@ -17,6 +17,19 @@
   gap: var(--space-2);
 }
 
+.titleGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.helpSlot {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
 .headEmbedded .title {
   margin: 0;
 }

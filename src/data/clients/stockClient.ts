@@ -1,9 +1,11 @@
 import { isMockDataSource } from '../../config/dataSource'
+import { dedupeAsync } from '../../lib/dedupeAsync'
 import { api } from '../../services/api'
 import {
   mapNewsFeedItems,
   enrichRelatedStocksWithPrices,
   mapDirectoryToStockMarketRows,
+  mapKospiIndexResponse,
   mapRelatedStocks,
   mapStockDetailPage,
   mapStockOverviewResponse,
@@ -30,6 +32,7 @@ import type {
   StockBuzzSurgeResponse,
   StockDetailResponse,
   StockDirectoryResponse,
+  KospiIndexResponse,
   StockOverviewResponse,
   StockPricesResponse,
   StockRankingsResponse,
@@ -43,6 +46,7 @@ import type {
 import type { StockDirectory } from '../types/stockDirectory'
 import type {
   StockDetail,
+  KospiIndexQuote,
   StockMarketRow,
   StockOverview,
   StockRankings,
@@ -55,6 +59,7 @@ import { mapStockPricesToTickerRows } from '../mappers/stockMapper'
 import {
   buildMockStockOverview,
   buildMockStockRankings,
+  mockKospiIndexQuote,
 } from '../mocks/stockOverview.mock'
 import { buildMockStockTodayNews } from '../mocks/stockTodayNews.mock'
 import { buildMockStockPricesForDirectory, buildMockStockPricesResponse } from '../mocks/stockPrices.mock'
@@ -64,6 +69,8 @@ import { unwrapApiEnvelope } from '../util/apiEnvelope'
 import { mockDelay } from '../util/mockDelay'
 
 const STOCKS_BASE = '/api/v1/stocks'
+
+const KOSPI_INDEX_DEDUPE_TTL_MS = 5_000
 
 function stockPath(code: string, suffix = '') {
   return `${STOCKS_BASE}/${encodeURIComponent(code)}${suffix}`
@@ -576,6 +583,26 @@ export async function fetchStockPrices(
     ),
   )
   return mapStockPricesToTickerRows(data, codes)
+}
+
+/** OpenAPI `GET /api/v1/stocks/kospi-index` — KOSPI 지수·등락률 */
+export async function fetchKospiIndex(): Promise<KospiIndexQuote> {
+  return dedupeAsync('stocks:kospi-index', fetchKospiIndexUncached, {
+    ttlMs: KOSPI_INDEX_DEDUPE_TTL_MS,
+  })
+}
+
+async function fetchKospiIndexUncached(): Promise<KospiIndexQuote> {
+  if (isMockDataSource()) {
+    await mockDelay(60)
+    return structuredClone(mockKospiIndexQuote)
+  }
+
+  const data = await getApiData<KospiIndexResponse>(
+    `${STOCKS_BASE}/kospi-index`,
+    'KOSPI 지수를 불러오지 못했습니다.',
+  )
+  return mapKospiIndexResponse(data)
 }
 
 /** OpenAPI `getBuzzSurge` — `GET /api/v1/stocks/buzz-surge` */

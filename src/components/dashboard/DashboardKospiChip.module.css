@@ -5,3 +5,33 @@
   min-height: 0;
   border-radius: var(--radius-lg);
 }
+
+.indexLine {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.changeUp {
+  color: var(--color-success);
+}
+
+.changeDown {
+  color: var(--color-danger);
+}
+
+.changeFlat {
+  color: var(--color-text-secondary);
+}
+
+.helpNote {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-muted);
+}
