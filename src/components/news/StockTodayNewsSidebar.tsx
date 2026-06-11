@@ -27,9 +27,10 @@ export function StockTodayNewsSidebar({
   className,
 }: StockTodayNewsSidebarProps) {
   const [expanded, setExpanded] = useState(false)
+  const rankedItems = items.filter((item) => item.todayNewsCount > 0)
   const visibleCount = expanded ? EXPANDED_VISIBLE_COUNT : DEFAULT_VISIBLE_COUNT
-  const visibleItems = items.slice(0, visibleCount)
-  const canToggle = items.length > DEFAULT_VISIBLE_COUNT
+  const visibleItems = rankedItems.slice(0, visibleCount)
+  const canToggle = rankedItems.length > DEFAULT_VISIBLE_COUNT
   const showExpand = canToggle && !expanded
   const showCollapse = canToggle && expanded
 
@@ -52,7 +53,7 @@ export function StockTodayNewsSidebar({
         {!loading && !error ? (
           <>
             {visibleItems.length === 0 ? (
-              <p className={styles.empty}>오늘 등록된 뉴스가 없습니다.</p>
+              <p className={styles.empty}>오늘 뉴스 데이터가 없습니다</p>
             ) : (
               <ol className={styles.list}>
                 {visibleItems.map((item, index) => (
