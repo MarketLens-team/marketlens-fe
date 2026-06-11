@@ -27,12 +27,22 @@ export type WatchlistActionHandler = (
   onUndo: () => Promise<WatchlistActionUndoResult>,
 ) => void
 
+function isWatchlistLimitApiBody(body: unknown): boolean {
+  if (!body || typeof body !== 'object' || !('error' in body)) return false
+  const apiError = (body as { error?: { code?: string; message?: string } }).error
+  if (apiError?.code === 'W002') return true
+  const message = apiError?.message?.trim() ?? ''
+  return message.includes('최대 10개') || message.includes('최대 10')
+}
+
 export function isWatchlistLimitError(error: unknown): boolean {
-  if (!axios.isAxiosError(error)) return false
-  const body = error.response?.data
-  if (body && typeof body === 'object' && 'error' in body) {
-    const apiError = (body as { error?: { code?: string } }).error
-    if (apiError?.code === 'W002') return true
+  if (axios.isAxiosError(error)) {
+    if (isWatchlistLimitApiBody(error.response?.data)) return true
+  }
+  if (error instanceof Error) {
+    const message = error.message.trim()
+    if (message === WATCHLIST_LIMIT_MESSAGE) return true
+    if (message.includes('최대 10개') || message.includes('최대 10')) return true
   }
   return false
 }

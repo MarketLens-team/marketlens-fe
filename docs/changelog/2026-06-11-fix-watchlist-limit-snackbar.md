@@ -20,6 +20,11 @@
 | `useServerWatchlist.toggle` | `'error'`만 반환 | `'limit'` 분기 (선검사 + `W002`) |
 | 기타 실패 | 「종목 저장 처리에 실패했습니다」 | 「종목 저장에 실패했습니다」 |
 
+## 후속 (종목 상세)
+
+- `StockDetailContent` — `addWatchlistItem` 직접 호출 제거 → `useServerWatchlist.toggle` 통일
+- `isWatchlistLimitError` — `watchlistClient`가 감싼 `Error.message`·W002 본문도 인식
+
 ## 파일
 
 - `src/lib/watchlistError.ts`
