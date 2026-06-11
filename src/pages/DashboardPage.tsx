@@ -129,7 +129,7 @@ export default function DashboardPage() {
               isPanelOpen={anomalySummary.isPanelOpen}
               isVisible={anomalySummary.isDockVisible}
               onDismiss={anomalySummary.dismissDock}
-              onHoverPaneEnter={anomalySummary.cancelClose}
+              onHoverPaneEnter={anomalySummary.cancelDockLeave}
               onHoverPaneLeave={anomalySummary.scheduleDockLeave}
             />
           </>
