@@ -80,6 +80,11 @@
   outline: none;
 }
 
+.tileHighlight {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}
+
 .tileName {
   width: 100%;
   font-size: var(--font-size-sm);

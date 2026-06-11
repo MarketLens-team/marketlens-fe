@@ -137,6 +137,12 @@ export interface TickerStockRow {
   changePercent: number
 }
 
+/** OpenAPI `GET /api/v1/stocks/kospi-index` */
+export interface KospiIndexQuote {
+  index: number
+  changePercent: number
+}
+
 /** 전체 종목 시세 테이블 — `GET /api/v1/stocks/prices` + directory 병합 */
 export interface StockMarketRow {
   code: string

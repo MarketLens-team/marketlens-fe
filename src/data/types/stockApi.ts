@@ -187,6 +187,12 @@ export interface StockPricesResponse {
   items: StockPriceItemResponse[]
 }
 
+/** OpenAPI `KospiIndexResponse` — `GET /api/v1/stocks/kospi-index` */
+export interface KospiIndexResponse {
+  index: number
+  changeRate: number
+}
+
 /** OpenAPI `StockBuzzSurgeResponse` — `GET /api/v1/stocks/buzz-surge` */
 export interface StockBuzzSurgeResponse {
   updatedAt: string

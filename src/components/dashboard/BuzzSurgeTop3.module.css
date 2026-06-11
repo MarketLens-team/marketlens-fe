@@ -24,6 +24,11 @@
   color: inherit;
 }
 
+.itemHighlight {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-ring-focus);
+}
+
 .rank {
   font-family: var(--font-mono);
   font-size: var(--font-size-lg);

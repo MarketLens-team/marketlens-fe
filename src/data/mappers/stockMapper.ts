@@ -22,12 +22,14 @@ import type {
   StockSummaryBatchItemApiResponse,
   StockSummaryBatchItemResponse,
   StockSummaryResponse,
+  KospiIndexResponse,
 } from '../types/stockApi'
 import type { StockDirectory } from '../types/stockDirectory'
 import type {
   NewsRelatedStock,
   SentimentPolarity,
   StockDetail,
+  KospiIndexQuote,
   StockMarketRow,
   StockOverview,
   StockOverviewRow,
@@ -321,6 +323,14 @@ export function mapStockRankingsResponse(response: StockRankingsResponse): Stock
     topMentionCount: (response.topMentionCount ?? []).map(mapRankingItem),
     topSentimentScore: (response.topSentimentScore ?? []).map(mapRankingItem),
     topChangeRate: (response.topChangeRate ?? []).map(mapRankingItem),
+  }
+}
+
+/** `GET /api/v1/stocks/kospi-index` */
+export function mapKospiIndexResponse(response: KospiIndexResponse): KospiIndexQuote {
+  return {
+    index: toFiniteNumber(response.index),
+    changePercent: toFiniteNumber(response.changeRate),
   }
 }
 

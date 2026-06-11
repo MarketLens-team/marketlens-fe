@@ -27,9 +27,9 @@ function bindTileHoverSummary(
 ) {
   const target = buildWatchlistSummaryTarget(row)
   return {
-    onMouseEnter: () => summary.scheduleOpen(target),
+    onMouseEnter: () => summary.scheduleOpen(target, 'watchlist'),
     onMouseLeave: () => summary.scheduleClose(),
-    onFocus: () => summary.scheduleOpen(target),
+    onFocus: () => summary.scheduleOpen(target, 'watchlist'),
     onBlur: () => summary.scheduleClose(),
   }
 }
@@ -84,7 +84,10 @@ export function DashboardWatchlistSection({ rows, anomalySummary }: DashboardWat
                 <li key={row.code}>
                   <button
                     type="button"
-                    className={styles.tile}
+                    className={clsx(
+                      styles.tile,
+                      anomalySummary.isHighlighted('watchlist', row.code) && styles.tileHighlight,
+                    )}
                     onClick={() => goToStock(row.code)}
                     aria-label={`${row.name} 종목 상세 보기`}
                     {...bindTileHoverSummary(row, anomalySummary)}

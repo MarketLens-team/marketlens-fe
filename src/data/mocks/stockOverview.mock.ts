@@ -1,4 +1,5 @@
 import { mapStockOverviewResponse, mapStockRankingsResponse } from '../mappers/stockMapper'
+import type { KospiIndexQuote } from '../types/stock'
 import type { StockOverviewResponse, StockRankingsResponse } from '../types/stockApi'
 import { buildMockStockPricesForDirectory } from './stockPrices.mock'
 import { mockStockDirectory } from './stockDirectory.mock'
@@ -75,4 +76,9 @@ export function buildMockStockOverview() {
 
 export function buildMockStockRankings() {
   return mapStockRankingsResponse(buildMockStockRankingsResponse())
+}
+
+export const mockKospiIndexQuote: KospiIndexQuote = {
+  index: 2658.42,
+  changePercent: 0.42,
 }
