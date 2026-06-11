@@ -105,6 +105,18 @@ function isEditableTarget(target: EventTarget | null) {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
 }
 
+/** 스크롤 끝 — 휠만으로 올릴 때 pointermove 없이도 첫·마지막 행 선택 */
+function resolveSearchNavEdgeIndex(region: HTMLElement): number | null {
+  const items = region.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
+  const itemCount = items.length
+  if (itemCount === 0) return null
+
+  const { scrollTop, scrollHeight, clientHeight } = region
+  if (scrollTop <= 1) return 0
+  if (scrollTop + clientHeight >= scrollHeight - 1) return itemCount - 1
+  return null
+}
+
 function formatNewsMeta(iso: string) {
   return `${formatNewsDateLong(iso)} · ${formatNewsTimeBadge(iso)}`
 }
@@ -1076,8 +1088,17 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       if (index >= 0) setSelectedRowIndex(index)
     }
 
+    const syncSelectionFromScroll = () => {
+      const edgeIndex = resolveSearchNavEdgeIndex(region)
+      if (edgeIndex != null) setSelectedRowIndex(edgeIndex)
+    }
+
     region.addEventListener('pointermove', syncSelectionFromPointer)
-    return () => region.removeEventListener('pointermove', syncSelectionFromPointer)
+    region.addEventListener('scroll', syncSelectionFromScroll, { passive: true })
+    return () => {
+      region.removeEventListener('pointermove', syncSelectionFromPointer)
+      region.removeEventListener('scroll', syncSelectionFromScroll)
+    }
   }, [isOpen, results, stockFilter, personFilter, fallbackFilter, domain, effectiveDomain, showFallback, showSearchFilters])
 
   useEffect(() => {
@@ -1134,10 +1155,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
             if (prev < 0) return 0
             return Math.min(prev + 1, itemCount - 1)
           }
-          if (prev <= 0) {
-            window.requestAnimationFrame(() => focusSearchInput())
-            return -1
-          }
+          if (prev <= 0) return 0
           return prev - 1
         })
         return
