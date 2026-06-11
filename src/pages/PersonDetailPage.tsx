@@ -316,7 +316,7 @@ export default function PersonDetailPage() {
           </div>
         ) : null}
 
-        {pageReady ? <PageFabRail alwaysVisible onBackToTop={handleBackToTop} /> : null}
+        {pageReady ? <PageFabRail onBackToTop={handleBackToTop} /> : null}
       </div>
     </Layout>
   )

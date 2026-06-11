@@ -16,9 +16,15 @@
   flex: 1;
 }
 
-.listDimmed {
+.contentDimmed {
   opacity: 0.55;
   pointer-events: none;
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .list {
