@@ -87,7 +87,6 @@ export default function DashboardPage() {
                 <DashboardAlertCards
                   watchlist={data.watchlist}
                   marketOutlierRows={data.marketOutlierRows}
-                  sectorHeatmap={data.sectorHeatmap}
                   isLoggedIn={isLoggedIn}
                   anomalySummary={anomalySummary}
                 />
@@ -97,7 +96,6 @@ export default function DashboardPage() {
                 <DashboardAlertCards
                   watchlist={data.watchlist}
                   marketOutlierRows={data.marketOutlierRows}
-                  sectorHeatmap={data.sectorHeatmap}
                   isLoggedIn={isLoggedIn}
                   anomalySummary={anomalySummary}
                 />
