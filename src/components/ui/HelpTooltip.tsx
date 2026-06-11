@@ -6,13 +6,15 @@ export interface HelpTooltipProps {
   label: string
   children: ReactNode
   className?: string
+  /** 기본보다 큰 트리거·팝오버 (대시보드 KOSPI 등) */
+  size?: 'sm' | 'md'
 }
 
-export function HelpTooltip({ label, children, className }: HelpTooltipProps) {
+export function HelpTooltip({ label, children, className, size = 'sm' }: HelpTooltipProps) {
   const tooltipId = useId()
 
   return (
-    <span className={clsx(styles.wrap, className)}>
+    <span className={clsx(styles.wrap, size === 'md' && styles.sizeMd, className)}>
       <button
         type="button"
         className={styles.trigger}
