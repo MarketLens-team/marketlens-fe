@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { useTransientSnackbar } from '../../hooks/useTransientSnackbar'
 import { useServerWatchlist } from '../../hooks/useServerWatchlist'
+import { WATCHLIST_LIMIT_MESSAGE } from '../../lib/watchlistError'
 import { EntityAvatar } from '../ui/EntityAvatar'
 import { Snackbar } from '../ui/Snackbar'
 import { StockWatchlistStarButton } from './StockWatchlistStarButton'
@@ -224,8 +225,12 @@ export function StockOverviewTable({
                               })
                               return
                             }
+                            if (result === 'limit') {
+                              snackbar.show(WATCHLIST_LIMIT_MESSAGE)
+                              return
+                            }
                             if (result === 'error') {
-                              snackbar.show('종목 저장 처리에 실패했습니다.')
+                              snackbar.show('종목 저장에 실패했습니다.')
                             }
                           })()
                         }}

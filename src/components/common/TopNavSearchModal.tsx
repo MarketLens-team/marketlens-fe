@@ -31,6 +31,11 @@ import {
   type SearchNewsStockContext,
 } from '../../lib/resolveSearchNewsRoute'
 import { useServerWatchlist } from '../../hooks/useServerWatchlist'
+import {
+  WATCHLIST_LIMIT_MESSAGE,
+  type WatchlistActionHandler,
+  type WatchlistActionUndoResult,
+} from '../../lib/watchlistError'
 import { useTransientSnackbar } from '../../hooks/useTransientSnackbar'
 import { formatStockScore, stockSentimentTone } from '../stock/stockScore'
 import { StockWatchlistStarButton } from '../stock/StockWatchlistStarButton'
@@ -195,10 +200,7 @@ function StockSearchRow({
   onClose: () => void
   showMentionCount?: boolean
   watchlist: SearchStockWatchlist
-  onWatchlistAction: (
-    result: 'added' | 'removed' | 'error',
-    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-  ) => void
+  onWatchlistAction: WatchlistActionHandler
 }) {
   const navigate = useNavigate()
   const interested = watchlist.has(stock.code)
@@ -228,7 +230,12 @@ function StockSearchRow({
                 name: stock.name,
                 imageUrl: stock.imageUrl,
               })
-              if (result === 'added' || result === 'removed' || result === 'error') {
+              if (
+                result === 'added' ||
+                result === 'removed' ||
+                result === 'error' ||
+                result === 'limit'
+              ) {
                 onWatchlistAction(result, () =>
                   watchlist.toggle({
                     code: stock.code,
@@ -267,10 +274,7 @@ function StockRowsBySector({
   stocks: StockSearchRowModel[]
   onClose: () => void
   showMentionCount?: boolean
-  onWatchlistAction: (
-    result: 'added' | 'removed' | 'error',
-    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-  ) => void
+  onWatchlistAction: WatchlistActionHandler
 }) {
   const watchlist = useServerWatchlist()
   const groups = useMemo(() => groupStocksBySector(stocks), [stocks])
@@ -432,10 +436,7 @@ function StockResultList({
 }: {
   stocks: SearchStockResult[]
   onClose: () => void
-  onWatchlistAction: (
-    result: 'added' | 'removed' | 'error',
-    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-  ) => void
+  onWatchlistAction: WatchlistActionHandler
 }) {
   return <StockRowsBySector stocks={stocks} onClose={onClose} onWatchlistAction={onWatchlistAction} />
 }
@@ -598,10 +599,7 @@ function StockSearchResults({
   filter: StockFilter
   onClose: () => void
   singleStock?: SearchNewsStockContext | null
-  onWatchlistAction: (
-    result: 'added' | 'removed' | 'error',
-    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-  ) => void
+  onWatchlistAction: WatchlistActionHandler
 }) {
   if (filter === 'stock') {
     if (stocks.length === 0) return <p className={styles.empty}>종목 결과가 없습니다.</p>
@@ -668,10 +666,7 @@ function SearchFallbackResults({
   fallback: SearchFallbackSections
   filter: FallbackFilter
   onClose: () => void
-  onWatchlistAction: (
-    result: 'added' | 'removed' | 'error',
-    onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-  ) => void
+  onWatchlistAction: WatchlistActionHandler
 }) {
   const latestNewsRows = mapSearchNewsRows(fallback.latestNews, 'fallback-news')
 
@@ -807,10 +802,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const snackbar = useTransientSnackbar()
 
   const handleWatchlistAction = useCallback(
-    (
-      result: 'added' | 'removed' | 'error',
-      onUndo: () => Promise<'added' | 'removed' | 'error' | 'auth' | 'pending' | undefined>,
-    ) => {
+    (result: Parameters<WatchlistActionHandler>[0], onUndo: () => Promise<WatchlistActionUndoResult>) => {
       if (result === 'added') {
         snackbar.show('종목이 저장되었습니다.')
         return
@@ -842,7 +834,11 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
         })
         return
       }
-      snackbar.show('종목 저장 처리에 실패했습니다.')
+      if (result === 'limit') {
+        snackbar.show(WATCHLIST_LIMIT_MESSAGE)
+        return
+      }
+      snackbar.show('종목 저장에 실패했습니다.')
     },
     [snackbar],
   )

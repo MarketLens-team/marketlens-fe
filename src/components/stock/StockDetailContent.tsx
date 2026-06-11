@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
 import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
+import { isWatchlistLimitError, WATCHLIST_LIMIT_MESSAGE } from '../../lib/watchlistError'
 import { BackToTopButton } from '../common/BackToTopButton'
 import { Breadcrumb } from '../common/Breadcrumb'
 import { EmptyState } from '../common/EmptyState'
@@ -466,8 +467,12 @@ export function StockDetailContent({
         setInterested(true)
         snackbar.show('종목이 저장되었습니다.')
       }
-    } catch {
-      snackbar.show(wasInterested ? '종목 저장 취소에 실패했습니다.' : '종목 저장에 실패했습니다.')
+    } catch (error) {
+      if (!wasInterested && isWatchlistLimitError(error)) {
+        snackbar.show(WATCHLIST_LIMIT_MESSAGE)
+      } else {
+        snackbar.show(wasInterested ? '종목 저장 취소에 실패했습니다.' : '종목 저장에 실패했습니다.')
+      }
     } finally {
       setWatchlistPending(false)
     }
