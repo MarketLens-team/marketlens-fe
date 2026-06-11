@@ -23,8 +23,8 @@
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
-  /* 상단 탭 높이(2rem) + main 내부 gap(space-4)만큼 내려서 메인 피드 시작선과 정렬 */
-  margin-top: calc(2rem + var(--space-4));
+  /* 언더라인 탭 높이 + main 내부 gap(space-4)만큼 내려서 메인 피드 시작선과 정렬 */
+  margin-top: calc(var(--space-3) * 2 + var(--font-size-lg) + var(--space-4));
   position: sticky;
   top: var(--space-4);
   max-height: calc(100vh - 4.5rem);
@@ -49,7 +49,7 @@
 }
 
 .tabs {
-  align-self: flex-start;
+  align-self: stretch;
 }
 
 .feed {

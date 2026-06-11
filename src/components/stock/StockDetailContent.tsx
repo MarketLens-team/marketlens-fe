@@ -2,7 +2,8 @@ import clsx from 'clsx'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isMockDataSource } from '../../config/dataSource'
-import { addWatchlistItem, removeWatchlistItem } from '../../data/clients/watchlistClient'
+import { useServerWatchlist } from '../../hooks/useServerWatchlist'
+import { WATCHLIST_LIMIT_MESSAGE } from '../../lib/watchlistError'
 import { BackToTopButton } from '../common/BackToTopButton'
 import { Breadcrumb } from '../common/Breadcrumb'
 import { EmptyState } from '../common/EmptyState'
@@ -107,7 +108,8 @@ export function StockDetailContent({
   const [loadingNewsFilter, setLoadingNewsFilter] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [interested, setInterested] = useState(watchlistInterested)
-  const [watchlistPending, setWatchlistPending] = useState(false)
+  const { toggle: toggleWatchlistServer, pendingCode: watchlistPendingCode } = useServerWatchlist()
+  const watchlistPending = watchlistPendingCode === stock.code
   const skipNewsFilterFetchRef = useRef(true)
   const didScrollToNewsFocusRef = useRef<string | null>(null)
   const [suppressAnchored, setSuppressAnchored] = useState(false)
@@ -406,72 +408,70 @@ export function StockDetailContent({
   const toggleWatchlist = useCallback(async () => {
     if (watchlistPending) return
     const wasInterested = interested
-    setWatchlistPending(true)
-    try {
-      if (isMockDataSource()) {
-        setInterested((prev) => !prev)
-        if (wasInterested) {
-          snackbar.show('종목 저장이 취소되었습니다.', {
-            action: {
-              label: '되돌리기',
-              onAction: () => {
-                void (async () => {
-                  setWatchlistPending(true)
-                  try {
-                    if (isMockDataSource()) {
-                      setInterested(true)
-                    } else {
-                      await addWatchlistItem(stock.code)
-                      setInterested(true)
-                    }
-                    snackbar.show('종목이 다시 저장되었습니다.')
-                  } finally {
-                    setWatchlistPending(false)
-                  }
-                })()
-              },
-            },
-          })
-        } else {
-          snackbar.show('종목이 저장되었습니다.')
-        }
-        return
-      }
-      if (interested) {
-        await removeWatchlistItem(stock.code)
-        setInterested(false)
-        snackbar.show('종목 저장이 취소되었습니다.', {
-          action: {
-            label: '되돌리기',
-            onAction: () => {
-              void (async () => {
-                setWatchlistPending(true)
-                try {
-                  if (isMockDataSource()) {
-                    setInterested(true)
-                  } else {
-                    await addWatchlistItem(stock.code)
-                    setInterested(true)
-                  }
-                  snackbar.show('종목이 다시 저장되었습니다.')
-                } finally {
-                  setWatchlistPending(false)
-                }
-              })()
-            },
-          },
-        })
-      } else {
-        await addWatchlistItem(stock.code)
-        setInterested(true)
-        snackbar.show('종목이 저장되었습니다.')
-      }
-    } catch {
-      snackbar.show(wasInterested ? '종목 저장 취소에 실패했습니다.' : '종목 저장에 실패했습니다.')
-    } finally {
-      setWatchlistPending(false)
+    const result = await toggleWatchlistServer({
+      code: stock.code,
+      name: stock.name,
+      imageUrl: stock.imageUrl,
+    })
+
+    if (result === 'auth' || result === 'pending') return
+
+    if (result === 'added') {
+      setInterested(true)
+      snackbar.show('종목이 저장되었습니다.')
+      return
     }
-  }, [interested, snackbar, stock.code, watchlistPending])
+
+    if (result === 'removed') {
+      setInterested(false)
+      snackbar.show('종목 저장이 취소되었습니다.', {
+        action: {
+          label: '되돌리기',
+          onAction: () => {
+            void (async () => {
+              let undoResult = await toggleWatchlistServer({
+                code: stock.code,
+                name: stock.name,
+                imageUrl: stock.imageUrl,
+              })
+              if (undoResult === 'pending') {
+                await new Promise<void>((resolve) => {
+                  window.setTimeout(resolve, 120)
+                })
+                undoResult = await toggleWatchlistServer({
+                  code: stock.code,
+                  name: stock.name,
+                  imageUrl: stock.imageUrl,
+                })
+              }
+              if (undoResult === 'added') {
+                setInterested(true)
+                snackbar.show('종목이 다시 저장되었습니다.')
+              }
+            })()
+          },
+        },
+      })
+      return
+    }
+
+    if (result === 'limit') {
+      snackbar.show(WATCHLIST_LIMIT_MESSAGE)
+      return
+    }
+
+    if (result === 'error') {
+      snackbar.show(wasInterested ? '종목 저장 취소에 실패했습니다.' : '종목 저장에 실패했습니다.')
+    }
+  }, [
+    interested,
+    snackbar,
+    stock.code,
+    stock.imageUrl,
+    stock.name,
+    toggleWatchlistServer,
+    watchlistPending,
+  ])
 
   const handleNewsBookmarkToggle = useCallback(
     async (newsId: string) => {

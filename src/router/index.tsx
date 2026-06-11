@@ -23,6 +23,7 @@ import DevSortButtonPage from '../pages/DevSortButtonPage'
 import DevWatchlistButtonPage from '../pages/DevWatchlistButtonPage'
 import DevSectorFilterPage from '../pages/DevSectorFilterPage'
 import DevNewsSentimentFilterPage from '../pages/DevNewsSentimentFilterPage'
+import DevStockDetailLayoutPage from '../pages/DevStockDetailLayoutPage'
 import LoginPage from '../pages/LoginPage'
 import OnboardingPage from '../pages/OnboardingPage'
 import MyPage from '../pages/MyPage'
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: '/dev/watchlist-button', element: <DevWatchlistButtonPage /> },
       { path: '/dev/sector-filter', element: <DevSectorFilterPage /> },
       { path: '/dev/news-sentiment-filter', element: <DevNewsSentimentFilterPage /> },
+      { path: '/dev/stock-detail-layout', element: <DevStockDetailLayoutPage /> },
       {
         path: '/admin',
         element: <PrivateRoute requiredRole="ADMIN" />,

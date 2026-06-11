@@ -13,7 +13,8 @@
   display: none;
 }
 
-.tabActive::after {
+.navUnderline .tabActive::after,
+.navText .tabActive::after {
   content: '';
   position: absolute;
   left: 0;
@@ -67,6 +68,15 @@
   color: var(--color-text-primary);
 }
 
-.tabActive {
+.navUnderline .tabActive {
   color: var(--color-primary);
+}
+
+.navText .tab {
+  font-weight: var(--font-weight-medium);
+}
+
+.navText .tabActive {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
 }

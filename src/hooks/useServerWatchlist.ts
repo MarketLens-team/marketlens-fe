@@ -9,6 +9,8 @@ import {
 } from '../data/clients/watchlistClient'
 import type { WatchlistResponse } from '../data/types/memberApi'
 import type { WatchlistItem } from '../data/types/watchlist'
+import { MY_PAGE_WATCHLIST_MAX } from '../data/types/myPage'
+import { isWatchlistLimitError, type WatchlistToggleResult } from '../lib/watchlistError'
 import { memberListQueryOptions, WATCHLIST_STALE_MS } from '../lib/queryCache'
 import { queryKeys } from '../lib/queryKeys'
 import { useAuthModalStore } from '../store/authModalStore'
@@ -94,7 +96,7 @@ export function useServerWatchlist() {
   )
 
   const toggle = useCallback(
-    async (item: WatchlistItem): Promise<'auth' | 'pending' | 'added' | 'removed' | 'error'> => {
+    async (item: WatchlistItem): Promise<WatchlistToggleResult> => {
       if (!useAuthStore.getState().isLoggedIn) {
         useAuthModalStore.getState().open('login')
         return 'auth'
@@ -102,6 +104,10 @@ export function useServerWatchlist() {
       if (pendingCode) return 'pending'
 
       const wasInterested = items.some((v) => v.code === item.code)
+      if (!wasInterested && items.length >= MY_PAGE_WATCHLIST_MAX) {
+        return 'limit'
+      }
+
       setPendingCode(item.code)
       const previous = queryClient.getQueryData<WatchlistResponse[]>(queryKeys.watchlist.rows)
 
@@ -124,9 +130,12 @@ export function useServerWatchlist() {
 
         await addWatchlistItem(item.code)
         return 'added'
-      } catch {
+      } catch (error) {
         if (previous) {
           queryClient.setQueryData(queryKeys.watchlist.rows, previous)
+        }
+        if (!wasInterested && isWatchlistLimitError(error)) {
+          return 'limit'
         }
         return 'error'
       } finally {

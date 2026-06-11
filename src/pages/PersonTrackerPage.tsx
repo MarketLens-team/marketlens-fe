@@ -118,7 +118,7 @@ export default function PersonTrackerPage() {
           </div>
         ) : null}
 
-        {pageReady ? <PageFabRail alwaysVisible /> : null}
+        {pageReady ? <PageFabRail /> : null}
       </div>
     </Layout>
   )

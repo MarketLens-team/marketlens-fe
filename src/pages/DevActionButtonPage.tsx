@@ -206,6 +206,18 @@ export default function DevActionButtonPage() {
           </div>
 
           <div className={styles.item}>
+            <h2 className={styles.label}>종목 상세 레이아웃 A/B</h2>
+            <div className={styles.linkRow}>
+              <Link className={styles.devLink} to="/dev/stock-detail-layout">
+                종목 상세 레이아웃 비교 (캔들 vs 히어로)
+              </Link>
+            </div>
+            <p className={styles.meta}>
+              삼성전자 더미 A~K 비교. I 토스 · J CMC · K DeFi · 라인 차트 고정.
+            </p>
+          </div>
+
+          <div className={styles.item}>
             <h2 className={styles.label}>Dev Sidebar 디자인 프리뷰</h2>
             <div className={styles.linkRow}>
               <Link className={styles.devLink} to="/dev/layout-home">
