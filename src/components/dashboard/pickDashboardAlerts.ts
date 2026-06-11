@@ -1,6 +1,6 @@
 import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
 import { formatStockScore, STOCK_SENTIMENT_NEUTRAL_BAND } from '../stock/stockScore'
-import type { DashboardWatchlistRow, SectorHeatmapCell } from '../../data/types/dashboard'
+import type { DashboardWatchlistRow } from '../../data/types/dashboard'
 
 export type DashboardSignalKind =
   | 'price_drop'
@@ -8,7 +8,6 @@ export type DashboardSignalKind =
   | 'price_rise'
   | 'sentiment_high'
   | 'news_peak'
-  | 'sector_sentiment_low'
 
 /** 호버 AI 모달·접근성용 한 줄 라벨 */
 export const DASHBOARD_SIGNAL_LABEL: Record<DashboardSignalKind, string> = {
@@ -17,7 +16,6 @@ export const DASHBOARD_SIGNAL_LABEL: Record<DashboardSignalKind, string> = {
   price_rise: '등락 주목',
   sentiment_high: '감성 긍정',
   news_peak: '뉴스 집중',
-  sector_sentiment_low: '섹터 감성',
 }
 
 export const DASHBOARD_ALERT_SCOPE_LABEL = {
@@ -27,7 +25,7 @@ export const DASHBOARD_ALERT_SCOPE_LABEL = {
 
 export type DashboardAlertScope = keyof typeof DASHBOARD_ALERT_SCOPE_LABEL
 
-export type DashboardAlertTargetKind = 'stock' | 'sector'
+export type DashboardAlertTargetKind = 'stock'
 
 /** 카드에 표시할 선정 기준 (큰 숫자와 분리) */
 export const DASHBOARD_ALERT_CRITERION: Record<DashboardSignalKind, string> = {
@@ -36,7 +34,6 @@ export const DASHBOARD_ALERT_CRITERION: Record<DashboardSignalKind, string> = {
   price_rise: '등락 최고',
   sentiment_high: '감성 최고',
   news_peak: '뉴스 최다',
-  sector_sentiment_low: '섹터 감성 최저',
 }
 
 export type DashboardHeadlineTone = 'up' | 'down' | 'neu'
@@ -97,7 +94,6 @@ function stockAlert(
 
 export function pickDashboardAlerts(
   watchlist: DashboardWatchlistRow[],
-  sectorHeatmap: SectorHeatmapCell[],
   limit = 3,
   stockScope: DashboardAlertScope = 'watchlist',
 ): DashboardAlertItem[] {
@@ -198,28 +194,20 @@ export function pickDashboardAlerts(
     )
   }
 
-  if (items.length < limit && sectorHeatmap.length > 0 && stockScope === 'watchlist') {
-    const weakestSector = [...sectorHeatmap].sort(
-      (a, b) => a.sentimentScore - b.sentimentScore,
-    )[0]
-    const sectorKey = weakestSector.sectorCode ?? weakestSector.name
-    if (!seen.has(sectorKey)) {
-      seen.add(sectorKey)
-      items.push({
-        signal: 'sector_sentiment_low',
-        scope: 'market',
-        targetKind: 'sector',
-        to: '/sector',
-        summaryEnabled: false,
-        code: sectorKey,
-        name: weakestSector.name,
-        imageUrl: null,
-        criterion: DASHBOARD_ALERT_CRITERION.sector_sentiment_low,
-        headline: formatStockScore(weakestSector.sentimentScore),
-        headlineTone: weakestSector.sentimentScore < 0 ? 'down' : 'neu',
-      })
-    }
-  }
-
   return items.slice(0, limit)
+}
+
+/** 관심 종목 우선 선정 후, 남는 슬롯을 시장 종목 풀로 채움 */
+export function pickDashboardAlertsWithMarketBackfill(
+  watchlist: DashboardWatchlistRow[],
+  marketRows: DashboardWatchlistRow[],
+  limit = 3,
+): DashboardAlertItem[] {
+  const primary = pickDashboardAlerts(watchlist, limit, 'watchlist')
+  if (primary.length >= limit) return primary
+
+  const seen = new Set(primary.map((alert) => alert.code))
+  const backfillPool = marketRows.filter((row) => !seen.has(row.code))
+  const backfill = pickDashboardAlerts(backfillPool, limit - primary.length, 'market')
+  return [...primary, ...backfill]
 }

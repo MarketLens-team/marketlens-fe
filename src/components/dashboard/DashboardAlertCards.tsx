@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { resolveStockImageUrl } from '../../lib/normalizeImageUrl'
 import { buildAlertSummaryTarget } from './buildDashboardSummaryTarget'
-import { DASHBOARD_ALERT_SCOPE_LABEL, pickDashboardAlerts } from './pickDashboardAlerts'
+import { DASHBOARD_ALERT_SCOPE_LABEL, pickDashboardAlerts, pickDashboardAlertsWithMarketBackfill } from './pickDashboardAlerts'
 import type { DashboardAlertItem, DashboardSignalKind } from './pickDashboardAlerts'
-import type { DashboardWatchlistRow, SectorHeatmapCell } from '../../data/types/dashboard'
+import type { DashboardWatchlistRow } from '../../data/types/dashboard'
 import { Card } from '../common/Card'
 import { CardSectionHeader } from '../common/CardSectionHeader'
 import { EntityAvatar } from '../ui/EntityAvatar'
@@ -14,7 +14,6 @@ import styles from './DashboardAlertCards.module.css'
 interface DashboardAlertCardsProps {
   watchlist: DashboardWatchlistRow[]
   marketOutlierRows: DashboardWatchlistRow[]
-  sectorHeatmap: SectorHeatmapCell[]
   isLoggedIn: boolean
   anomalySummary: DashboardAnomalySummaryController
 }
@@ -31,7 +30,6 @@ const CRITERION_TONE_CLASS: Record<DashboardSignalKind, string | undefined> = {
   price_rise: styles.criterionUp,
   sentiment_high: styles.criterionUp,
   news_peak: undefined,
-  sector_sentiment_low: styles.criterionDown,
 }
 
 function bindHoverSummary(
@@ -50,14 +48,13 @@ function bindHoverSummary(
 export function DashboardAlertCards({
   watchlist,
   marketOutlierRows,
-  sectorHeatmap,
   isLoggedIn,
   anomalySummary,
 }: DashboardAlertCardsProps) {
   const alerts =
     isLoggedIn && watchlist.length > 0
-      ? pickDashboardAlerts(watchlist, sectorHeatmap)
-      : pickDashboardAlerts(marketOutlierRows, sectorHeatmap, 3, 'market')
+      ? pickDashboardAlertsWithMarketBackfill(watchlist, marketOutlierRows)
+      : pickDashboardAlerts(marketOutlierRows, 3, 'market')
 
   return (
     <Card padding="md" className={styles.card}>
@@ -78,19 +75,13 @@ export function DashboardAlertCards({
                 aria-label={`${alert.name} ${DASHBOARD_ALERT_SCOPE_LABEL[alert.scope]} ${alert.criterion} ${alert.headline}`}
                 {...bindHoverSummary(alert, anomalySummary)}
               >
-                {alert.targetKind === 'stock' ? (
-                  <EntityAvatar
-                    variant="stock"
-                    size="md"
-                    name={alert.name}
-                    imageUrl={resolveStockImageUrl(alert.code, alert.imageUrl)}
-                    className={styles.lead}
-                  />
-                ) : (
-                  <span className={clsx(styles.sectorMark, styles.lead)} aria-hidden>
-                    {alert.name.slice(0, 1)}
-                  </span>
-                )}
+                <EntityAvatar
+                  variant="stock"
+                  size="md"
+                  name={alert.name}
+                  imageUrl={resolveStockImageUrl(alert.code, alert.imageUrl)}
+                  className={styles.lead}
+                />
                 <span className={styles.identity}>
                   <span className={styles.name}>{alert.name}</span>
                   <span className={styles.meta}>

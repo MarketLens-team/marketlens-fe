@@ -81,6 +81,17 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   })
 }
 
+async function fetchMarketOutlierRows(
+  buzzSurgeTop3: DashboardOverview['buzzSurgeTop3'],
+): Promise<DashboardOverview['marketOutlierRows']> {
+  try {
+    const rankings = await fetchStockRankings()
+    return buildMarketOutlierRows(buzzSurgeTop3, rankings)
+  } catch {
+    return buildMarketOutlierRows(buzzSurgeTop3, null)
+  }
+}
+
 async function fetchDashboardOverviewUncached(): Promise<DashboardOverview> {
   if (isMockDataSource()) {
     await mockDelay()
@@ -88,15 +99,8 @@ async function fetchDashboardOverviewUncached(): Promise<DashboardOverview> {
     const isLoggedIn = Boolean(useAuthStore.getState().token?.trim())
     if (!isLoggedIn) {
       overview.watchlist = []
-      try {
-        const rankings = await fetchStockRankings()
-        overview.marketOutlierRows = buildMarketOutlierRows(overview.buzzSurgeTop3, rankings)
-      } catch {
-        overview.marketOutlierRows = buildMarketOutlierRows(overview.buzzSurgeTop3, null)
-      }
-    } else {
-      overview.marketOutlierRows = []
     }
+    overview.marketOutlierRows = await fetchMarketOutlierRows(overview.buzzSurgeTop3)
     return overview
   }
 
@@ -118,16 +122,7 @@ async function fetchDashboardOverviewUncached(): Promise<DashboardOverview> {
   }
 
   const mapped = mapDashboardOverview(overview, watchlist)
-  let marketOutlierRows = mapped.marketOutlierRows
-
-  if (watchlist.length === 0) {
-    try {
-      const rankings = await fetchStockRankings()
-      marketOutlierRows = buildMarketOutlierRows(mapped.buzzSurgeTop3, rankings)
-    } catch {
-      marketOutlierRows = buildMarketOutlierRows(mapped.buzzSurgeTop3, null)
-    }
-  }
+  const marketOutlierRows = await fetchMarketOutlierRows(mapped.buzzSurgeTop3)
 
   return { ...mapped, marketOutlierRows }
 }
