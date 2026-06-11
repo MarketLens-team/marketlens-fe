@@ -19,6 +19,8 @@ interface UnderlineTabNavProps<T extends string> {
   value: T
   onChange: (key: T) => void
   ariaLabel?: string
+  /** `underline`(기본) — 활성·호버 언더라인 / `text` — 활성 탭 파란색·볼드·언더라인, 호버 인디케이터 없음 */
+  variant?: 'underline' | 'text'
   className?: string
 }
 
@@ -27,8 +29,10 @@ export function UnderlineTabNav<T extends string>({
   value,
   onChange,
   ariaLabel,
+  variant = 'underline',
   className,
 }: UnderlineTabNavProps<T>) {
+  const showHoverIndicator = variant === 'underline'
   const navRef = useRef<HTMLElement>(null)
   const itemRefs = useRef(new Map<T, HTMLButtonElement>())
   const [hoverKey, setHoverKey] = useState<T | null>(null)
@@ -47,7 +51,7 @@ export function UnderlineTabNav<T extends string>({
   }, [])
 
   const syncHoverIndicator = useCallback(() => {
-    if (!hoverKey || hoverKey === value) {
+    if (!showHoverIndicator || !hoverKey || hoverKey === value) {
       setHoverVisible(false)
       return
     }
@@ -58,7 +62,7 @@ export function UnderlineTabNav<T extends string>({
     }
     setHoverIndicator(pos)
     setHoverVisible(true)
-  }, [hoverKey, value, measureItem])
+  }, [hoverKey, value, measureItem, showHoverIndicator])
 
   useLayoutEffect(() => {
     syncHoverIndicator()
@@ -86,6 +90,7 @@ export function UnderlineTabNav<T extends string>({
   }
 
   const handleItemMouseEnter = (key: T) => {
+    if (!showHoverIndicator) return
     setHoverKey(key)
     if (key === value) {
       setHoverVisible(false)
@@ -101,19 +106,25 @@ export function UnderlineTabNav<T extends string>({
   return (
     <nav
       ref={navRef}
-      className={clsx(styles.nav, className)}
+      className={clsx(
+        styles.nav,
+        variant === 'text' ? styles.navText : styles.navUnderline,
+        className,
+      )}
       role="tablist"
       aria-label={ariaLabel}
-      onMouseLeave={handleNavMouseLeave}
+      onMouseLeave={showHoverIndicator ? handleNavMouseLeave : undefined}
     >
-      <span
-        className={clsx(styles.indicatorHover, hoverVisible && styles.indicatorHoverVisible)}
-        style={{
-          transform: `translateX(${hoverIndicator.left}px)`,
-          width: hoverIndicator.width,
-        }}
-        aria-hidden
-      />
+      {showHoverIndicator ? (
+        <span
+          className={clsx(styles.indicatorHover, hoverVisible && styles.indicatorHoverVisible)}
+          style={{
+            transform: `translateX(${hoverIndicator.left}px)`,
+            width: hoverIndicator.width,
+          }}
+          aria-hidden
+        />
+      ) : null}
       {options.map((opt) => {
         const active = value === opt.key
         return (
