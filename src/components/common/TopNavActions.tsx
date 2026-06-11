@@ -19,6 +19,20 @@ type SearchSeed =
   | { kind: 'success'; results: UnifiedSearchResult }
   | { kind: 'error'; message: string }
 
+function SearchIcon() {
+  return (
+    <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M16.5 16.5L20 20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function TopNavActions() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn)
   const openAuthModal = useAuthModalStore((s) => s.open)
@@ -79,12 +93,11 @@ export function TopNavActions() {
           disabled={isSearchOpening}
           aria-busy={isSearchOpening}
           aria-keyshortcuts="/"
+          aria-label="/ 키로 검색 열기"
           onClick={() => void openSearch()}
         >
-          <span className={styles.searchPlaceholder}>검색</span>
-          <kbd className={styles.searchShortcut} aria-hidden>
-            /
-          </kbd>
+          <SearchIcon />
+          <span className={styles.searchPlaceholder}>/ 를 눌러 검색하세요</span>
         </button>
         {isLoggedIn ? (
           <TopNavSettingsMenu
