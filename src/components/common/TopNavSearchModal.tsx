@@ -810,6 +810,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
   const inputRef = useRef<HTMLInputElement | null>(null)
   const scrollRegionRef = useRef<HTMLDivElement | null>(null)
   const skipNextEmptyFetch = useRef(seed.kind === 'success')
+  const scrollSelectedRowIntoViewRef = useRef(false)
   const [selectedRowIndex, setSelectedRowIndex] = useState(-1)
   const snackbar = useTransientSnackbar()
 
@@ -1069,7 +1070,8 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       element.setAttribute(SEARCH_NAV_SELECTED, index === selectedRowIndex ? 'true' : 'false')
     })
     const active = items[selectedRowIndex]
-    if (active) {
+    if (active && scrollSelectedRowIntoViewRef.current) {
+      scrollSelectedRowIntoViewRef.current = false
       active.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     }
   }, [selectedRowIndex, query, stockFilter, personFilter, fallbackFilter, domain, results, loading])
@@ -1078,14 +1080,8 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
     const region = scrollRegionRef.current
     if (!region || !isOpen) return
 
-    const syncSelectionFromPointer = (event: PointerEvent) => {
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const item = target.closest(`[${SEARCH_NAV_ITEM}]`)
-      if (!item || !region.contains(item)) return
-      const items = region.querySelectorAll(`[${SEARCH_NAV_ITEM}]`)
-      const index = Array.from(items).indexOf(item)
-      if (index >= 0) setSelectedRowIndex(index)
+    const dismissKeyboardSelectionOnPointer = () => {
+      setSelectedRowIndex((prev) => (prev >= 0 ? -1 : prev))
     }
 
     const syncSelectionFromScroll = () => {
@@ -1093,10 +1089,10 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
       if (edgeIndex != null) setSelectedRowIndex(edgeIndex)
     }
 
-    region.addEventListener('pointermove', syncSelectionFromPointer)
+    region.addEventListener('pointermove', dismissKeyboardSelectionOnPointer)
     region.addEventListener('scroll', syncSelectionFromScroll, { passive: true })
     return () => {
-      region.removeEventListener('pointermove', syncSelectionFromPointer)
+      region.removeEventListener('pointermove', dismissKeyboardSelectionOnPointer)
       region.removeEventListener('scroll', syncSelectionFromScroll)
     }
   }, [isOpen, results, stockFilter, personFilter, fallbackFilter, domain, effectiveDomain, showFallback, showSearchFilters])
@@ -1150,6 +1146,7 @@ export function TopNavSearchModal({ isOpen, seed, onClose }: TopNavSearchModalPr
         ) {
           activeEl.blur()
         }
+        scrollSelectedRowIntoViewRef.current = true
         setSelectedRowIndex((prev) => {
           if (event.key === 'ArrowDown') {
             if (prev < 0) return 0
