@@ -13,7 +13,8 @@
   gap: var(--space-3);
   margin: 0;
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
@@ -30,8 +31,21 @@
 }
 
 .helpNote {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--color-text-primary);
+}
+
+.helpDetail,
+.helpMeta {
   margin: var(--space-2) 0 0;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   line-height: var(--line-height-loose);
   color: var(--color-text-muted);
+}
+
+.helpMeta:first-child,
+.indexLine:first-child {
+  margin-top: 0;
 }

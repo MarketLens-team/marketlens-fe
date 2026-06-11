@@ -67,3 +67,20 @@
   opacity: 1;
   visibility: visible;
 }
+
+.sizeMd .trigger {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.sizeMd .icon {
+  font-size: var(--font-size-base);
+}
+
+.sizeMd .popover {
+  min-width: 15rem;
+  max-width: 22rem;
+  padding: var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+}
